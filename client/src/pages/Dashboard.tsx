@@ -9,6 +9,7 @@ import OccupancyChart from "@/components/Dashboard/OccupancyChart";
 import PropertiesTable from "@/components/Dashboard/PropertiesTable";
 import RiskInsights from "@/components/Dashboard/RiskInsights";
 import QuickActions from "@/components/Dashboard/QuickActions";
+import SubscriptionCard from "@/components/Dashboard/SubscriptionCard";
 
 export default function Dashboard() {
   const { toast } = useToast();
@@ -55,6 +56,11 @@ export default function Dashboard() {
           {/* Metrics Cards */}
           <div className="mb-8">
             <MetricsCards />
+          </div>
+
+          {/* Subscription Card */}
+          <div className="mb-8">
+            <SubscriptionCard />
           </div>
 
           {/* Dashboard Widgets */}

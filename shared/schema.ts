@@ -34,6 +34,13 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   role: varchar("role").default("staff"),
+  subscriptionTier: varchar("subscription_tier").default("trial"), // trial, starter, professional, enterprise
+  subscriptionStatus: varchar("subscription_status").default("active"), // active, cancelled, expired, past_due
+  maxResidents: integer("max_residents").default(25),
+  stripeCustomerId: varchar("stripe_customer_id"),
+  stripeSubscriptionId: varchar("stripe_subscription_id"),
+  subscriptionStartDate: timestamp("subscription_start_date"),
+  subscriptionEndDate: timestamp("subscription_end_date"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

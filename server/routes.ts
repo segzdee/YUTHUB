@@ -245,6 +245,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Subscription management endpoints
+  app.post('/api/subscriptions/create', isAuthenticated, async (req, res) => {
+    try {
+      const { tier } = req.body;
+      const userId = (req.user as any)?.claims?.sub;
+      
+      if (!tier || !['starter', 'professional', 'enterprise'].includes(tier)) {
+        return res.status(400).json({ message: 'Invalid subscription tier' });
+      }
+
+      // Define tier configurations
+      const tierConfigs = {
+        starter: { maxResidents: 25, price: 169 },
+        professional: { maxResidents: 100, price: 429 },
+        enterprise: { maxResidents: 999999, price: 1099 }
+      };
+
+      const config = tierConfigs[tier as keyof typeof tierConfigs];
+      
+      // Update user subscription
+      const user = await storage.updateUserSubscription(userId, {
+        tier,
+        status: 'active',
+        maxResidents: config.maxResidents,
+        startDate: new Date(),
+        endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
+      });
+
+      // Log subscription activity
+      await storage.createActivity({
+        userId,
+        activityType: 'subscription',
+        title: 'Subscription created',
+        description: `Subscribed to ${tier} plan`,
+        entityId: null,
+        entityType: 'subscription',
+      });
+
+      res.json({ 
+        success: true, 
+        message: 'Subscription created successfully',
+        subscription: {
+          tier: user.subscriptionTier,
+          status: user.subscriptionStatus,
+          maxResidents: user.maxResidents,
+          startDate: user.subscriptionStartDate,
+          endDate: user.subscriptionEndDate,
+        }
+      });
+    } catch (error) {
+      console.error("Error creating subscription:", error);
+      res.status(500).json({ message: "Failed to create subscription" });
+    }
+  });
+
+  app.get('/api/subscriptions/current', isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any)?.claims?.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      res.json({
+        tier: user.subscriptionTier || 'trial',
+        status: user.subscriptionStatus || 'active',
+        maxResidents: user.maxResidents || 25,
+        startDate: user.subscriptionStartDate,
+        endDate: user.subscriptionEndDate,
+      });
+    } catch (error) {
+      console.error("Error fetching subscription:", error);
+      res.status(500).json({ message: "Failed to fetch subscription" });
+    }
+  });
+
+  app.post('/api/subscriptions/cancel', isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any)?.claims?.sub;
+      
+      const user = await storage.updateUserSubscription(userId, {
+        tier: 'trial',
+        status: 'cancelled',
+        maxResidents: 25,
+      });
+
+      // Log cancellation activity
+      await storage.createActivity({
+        userId,
+        activityType: 'subscription',
+        title: 'Subscription cancelled',
+        description: 'Subscription has been cancelled',
+        entityId: null,
+        entityType: 'subscription',
+      });
+
+      res.json({ 
+        success: true, 
+        message: 'Subscription cancelled successfully' 
+      });
+    } catch (error) {
+      console.error("Error cancelling subscription:", error);
+      res.status(500).json({ message: "Failed to cancel subscription" });
+    }
+  });
+
   // Crisis Connect endpoint
   app.post('/api/crisis-connect', isAuthenticated, async (req, res) => {
     try {

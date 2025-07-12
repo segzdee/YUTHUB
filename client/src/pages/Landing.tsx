@@ -67,13 +67,23 @@ export default function Landing() {
               A comprehensive SaaS platform for youth housing organizations to manage services, 
               track outcomes, and guide young people toward independent living.
             </p>
-            <Button 
-              onClick={handleLogin}
-              size="lg"
-              className="bg-white text-primary hover:bg-gray-100 text-lg px-8 py-3"
-            >
-              Get Started
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                onClick={handleLogin}
+                size="lg"
+                className="bg-white text-primary hover:bg-gray-100 text-lg px-8 py-3"
+              >
+                Get Started
+              </Button>
+              <Button 
+                onClick={() => window.location.href = '/pricing'}
+                size="lg"
+                variant="outline"
+                className="border-white text-white hover:bg-white hover:text-primary text-lg px-8 py-3"
+              >
+                View Pricing
+              </Button>
+            </div>
           </div>
         </div>
       </section>
@@ -124,13 +134,131 @@ export default function Landing() {
             Join leading organizations already using YUTHUB to improve outcomes 
             for young people in housing support programs.
           </p>
-          <Button 
-            onClick={handleLogin}
-            size="lg"
-            className="bg-primary hover:bg-blue-700 text-lg px-8 py-3"
-          >
-            Sign In to Get Started
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              onClick={handleLogin}
+              size="lg"
+              className="bg-primary hover:bg-blue-700 text-lg px-8 py-3"
+            >
+              Sign In to Get Started
+            </Button>
+            <Button 
+              onClick={() => window.location.href = '/pricing'}
+              size="lg"
+              variant="outline"
+              className="border-primary text-primary hover:bg-primary hover:text-white text-lg px-8 py-3"
+            >
+              View Pricing Plans
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Preview Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h3 className="text-3xl md:text-4xl font-bold text-slate mb-4">
+              Simple, Transparent Pricing
+            </h3>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Choose the plan that fits your organization's needs. All plans include full access to our platform.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {/* Starter Plan */}
+            <Card className="border-2 border-gray-200 hover:border-primary transition-colors">
+              <CardHeader className="text-center">
+                <CardTitle className="text-2xl font-bold text-slate">Starter</CardTitle>
+                <div className="flex items-center justify-center mt-4">
+                  <span className="text-4xl font-bold text-primary">£199</span>
+                  <span className="text-gray-600 ml-2">/month</span>
+                </div>
+                <CardDescription className="text-gray-600 mt-2">
+                  Perfect for small organizations
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="text-center text-sm text-gray-600 mb-4">
+                  Up to 25 residents
+                </div>
+                <ul className="space-y-2 text-sm">
+                  <li>✓ Housing Management</li>
+                  <li>✓ Support Services</li>
+                  <li>✓ Basic Analytics</li>
+                  <li>✓ Crisis Connect</li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Professional Plan */}
+            <Card className="border-2 border-primary shadow-lg relative">
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                <span className="bg-primary text-white px-4 py-1 rounded-full text-sm font-medium">
+                  Most Popular
+                </span>
+              </div>
+              <CardHeader className="text-center">
+                <CardTitle className="text-2xl font-bold text-slate">Professional</CardTitle>
+                <div className="flex items-center justify-center mt-4">
+                  <span className="text-4xl font-bold text-primary">£499</span>
+                  <span className="text-gray-600 ml-2">/month</span>
+                </div>
+                <CardDescription className="text-gray-600 mt-2">
+                  Ideal for growing organizations
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="text-center text-sm text-gray-600 mb-4">
+                  Up to 100 residents
+                </div>
+                <ul className="space-y-2 text-sm">
+                  <li>✓ All Starter features</li>
+                  <li>✓ Advanced Analytics</li>
+                  <li>✓ AI-Powered Insights</li>
+                  <li>✓ Custom Reports</li>
+                  <li>✓ Priority Support</li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Enterprise Plan */}
+            <Card className="border-2 border-gray-200 hover:border-primary transition-colors">
+              <CardHeader className="text-center">
+                <CardTitle className="text-2xl font-bold text-slate">Enterprise</CardTitle>
+                <div className="flex items-center justify-center mt-4">
+                  <span className="text-4xl font-bold text-primary">£1,299</span>
+                  <span className="text-gray-600 ml-2">/month</span>
+                </div>
+                <CardDescription className="text-gray-600 mt-2">
+                  For large organizations
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="text-center text-sm text-gray-600 mb-4">
+                  Unlimited residents
+                </div>
+                <ul className="space-y-2 text-sm">
+                  <li>✓ All Professional features</li>
+                  <li>✓ Custom Integrations</li>
+                  <li>✓ Dedicated Support</li>
+                  <li>✓ Advanced Security</li>
+                  <li>✓ Custom Training</li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="text-center mt-12">
+            <Button 
+              onClick={() => window.location.href = '/pricing'}
+              size="lg"
+              className="bg-primary hover:bg-blue-700 text-lg px-8 py-3"
+            >
+              View All Features & Pricing
+            </Button>
+          </div>
         </div>
       </section>
 

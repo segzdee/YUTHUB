@@ -37,12 +37,13 @@ export default function UniversalHeader() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
+          <nav className="hidden md:flex space-x-8" role="navigation" aria-label="Main navigation">
             {navigation.map((item) => (
               <a
                 key={item.name}
                 href={item.href}
-                className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
+                className="text-medium-contrast hover:text-primary px-3 py-2 text-sm font-medium transition-colors interactive-element focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                aria-current={window.location.pathname === item.href ? 'page' : undefined}
               >
                 {item.name}
               </a>
@@ -81,11 +82,15 @@ export default function UniversalHeader() {
               variant="ghost"
               size="sm"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="interactive-element"
+              aria-expanded={isMenuOpen}
+              aria-controls="mobile-menu"
+              aria-label={isMenuOpen ? 'Close main menu' : 'Open main menu'}
             >
               {isMenuOpen ? (
-                <X className="h-6 w-6" />
+                <X className="h-6 w-6" aria-hidden="true" />
               ) : (
-                <Menu className="h-6 w-6" />
+                <Menu className="h-6 w-6" aria-hidden="true" />
               )}
             </Button>
           </div>
@@ -93,14 +98,15 @@ export default function UniversalHeader() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4">
-            <nav className="flex flex-col space-y-2">
+          <div className="md:hidden border-t border-gray-200 py-4" id="mobile-menu">
+            <nav className="flex flex-col space-y-2" role="navigation" aria-label="Mobile navigation">
               {navigation.map((item) => (
                 <a
                   key={item.name}
                   href={item.href}
-                  className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
+                  className="text-medium-contrast hover:text-primary px-3 py-2 text-sm font-medium transition-colors interactive-element focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                   onClick={() => setIsMenuOpen(false)}
+                  aria-current={window.location.pathname === item.href ? 'page' : undefined}
                 >
                   {item.name}
                 </a>
@@ -108,14 +114,15 @@ export default function UniversalHeader() {
               <div className="pt-4 border-t border-gray-200">
                 {isAuthenticated ? (
                   <div className="space-y-2">
-                    <div className="text-sm text-gray-700 px-3">
+                    <div className="text-sm text-medium-contrast px-3" role="status" aria-live="polite">
                       Welcome, {user?.email}
                     </div>
                     <Button 
                       onClick={handleLogout}
                       variant="outline"
                       size="sm"
-                      className="w-full"
+                      className="w-full interactive-element"
+                      aria-label="Sign out of your account"
                     >
                       Sign Out
                     </Button>
@@ -124,7 +131,8 @@ export default function UniversalHeader() {
                   <Button 
                     onClick={handleLogin}
                     size="sm"
-                    className="w-full bg-primary hover:bg-blue-700"
+                    className="w-full bg-primary hover:bg-blue-700 interactive-element"
+                    aria-label="Sign in to your account"
                   >
                     Sign In
                   </Button>

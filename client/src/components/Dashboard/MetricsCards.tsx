@@ -37,7 +37,8 @@ export default function MetricsCards() {
       color: "text-primary",
       bgColor: "bg-primary bg-opacity-10",
       change: "+8.2%",
-      changeColor: "text-success"
+      changeColor: "text-success",
+      ariaLabel: `Total properties: ${metrics?.totalProperties || 0}, increased by 8.2%`
     },
     {
       title: "Current Residents",
@@ -46,25 +47,28 @@ export default function MetricsCards() {
       color: "text-secondary",
       bgColor: "bg-secondary bg-opacity-10",
       change: "+12.1%",
-      changeColor: "text-success"
+      changeColor: "text-success",
+      ariaLabel: `Current residents: ${metrics?.currentResidents || 0}, increased by 12.1%`
     },
     {
       title: "Occupancy Rate",
       value: `${metrics?.occupancyRate || 0}%`,
       icon: Percent,
       color: "text-success",
-      bgColor: "bg-success bg-opacity-10",
+      bgColor: "status-success bg-opacity-10",
       change: "+2.3%",
-      changeColor: "text-success"
+      changeColor: "text-success",
+      ariaLabel: `Occupancy rate: ${metrics?.occupancyRate || 0}%, increased by 2.3%`
     },
     {
       title: "Active Incidents",
       value: metrics?.activeIncidents || 0,
       icon: AlertTriangle,
       color: "text-accent",
-      bgColor: "bg-accent bg-opacity-10",
+      bgColor: "status-error bg-opacity-10",
       change: "-15.2%",
-      changeColor: "text-accent"
+      changeColor: "text-success",
+      ariaLabel: `Active incidents: ${metrics?.activeIncidents || 0}, decreased by 15.2%`
     }
   ];
 

@@ -19,7 +19,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       const user = await storage.getUser(userId);
       res.json(user);
     } catch (error) {
@@ -57,7 +60,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Log activity
       await storage.createActivity({
-        userId: req.user.claims.sub,
+        userId: req.user?.claims?.sub,
         activityType: 'property_created',
         title: 'New property added',
         description: `Property "${property.name}" has been added to the system`,
@@ -104,7 +107,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Log activity
       await storage.createActivity({
-        userId: req.user.claims.sub,
+        userId: req.user?.claims?.sub,
         activityType: 'placement',
         title: 'New resident placement',
         description: `${resident.firstName} ${resident.lastName} has been placed in the system`,
@@ -147,7 +150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Log activity
       await storage.createActivity({
-        userId: req.user.claims.sub,
+        userId: req.user?.claims?.sub,
         activityType: 'support_plan',
         title: 'Support plan created',
         description: 'New support plan has been created',
@@ -178,12 +181,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const incidentData = insertIncidentSchema.parse(req.body);
       const incident = await storage.createIncident({
         ...incidentData,
-        reportedBy: req.user.claims.sub,
+        reportedBy: req.user?.claims?.sub,
       });
       
       // Log activity
       await storage.createActivity({
-        userId: req.user.claims.sub,
+        userId: req.user?.claims?.sub,
         activityType: 'incident',
         title: 'Incident reported',
         description: `${incident.title} - ${incident.severity} severity`,
@@ -254,13 +257,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         incidentType: 'safety',
         severity: 'critical',
         status: 'open',
-        reportedBy: req.user.claims.sub,
+        reportedBy: req.user?.claims?.sub,
         propertyId: location ? parseInt(location) : undefined,
       });
 
       // Log crisis activity
       await storage.createActivity({
-        userId: req.user.claims.sub,
+        userId: req.user?.claims?.sub,
         activityType: 'crisis',
         title: 'Crisis Connect activated',
         description: `Crisis response initiated: ${type}`,

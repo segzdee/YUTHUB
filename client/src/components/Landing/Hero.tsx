@@ -7,8 +7,8 @@ export default function Hero() {
       <div className="max-w-7xl mx-auto">
         <div className="text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-high-contrast mb-6">
-            Empower Youth Housing
-            <span className="block text-primary">Support & Independence</span>
+            Transform Young Lives Through
+            <span className="block text-primary">Smarter Housing Support</span>
           </h1>
           <p className="text-xl text-medium-contrast max-w-3xl mx-auto mb-8 leading-relaxed">
             YUTHUB is the comprehensive platform for youth housing organizations. 

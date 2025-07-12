@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '@/components/ui/badge';
 import { Check, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import UniversalHeader from '@/components/Layout/UniversalHeader';
+import UniversalFooter from '@/components/Layout/UniversalFooter';
 
 const pricingTiers = [
   {
@@ -99,8 +101,9 @@ export default function Pricing() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50">
+      <UniversalHeader />
+      <div className="max-w-7xl mx-auto py-12 px-4">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -205,7 +208,7 @@ export default function Pricing() {
             <div>
               <h4 className="font-semibold text-gray-900 mb-3">Setup & Support</h4>
               <ul className="space-y-2 text-gray-600">
-                <li>• £2,499 setup fee (all tiers)</li>
+                <li>• Free setup and onboarding</li>
                 <li>• Includes migration, training, configuration</li>
                 <li>• 30-day free trial</li>
                 <li>• Flexible tier upgrades/downgrades</li>
@@ -236,6 +239,7 @@ export default function Pricing() {
           </Button>
         </div>
       </div>
+      <UniversalFooter />
     </div>
   );
 }

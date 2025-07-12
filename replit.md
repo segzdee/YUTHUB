@@ -127,6 +127,11 @@ The application is fully functional with:
 
 ## Recent Changes
 
+- **July 12, 2025**: Added universal header and footer components across all pages
+- **July 12, 2025**: Created custom favicon with YUTHUB branding
+- **July 12, 2025**: Removed £2,499 setup fee from all pricing tiers
+- **July 12, 2025**: Added subscription management card to dashboard
+- **July 12, 2025**: Enhanced pricing integration throughout the application
 - **July 12, 2025**: Fixed all TypeScript errors in backend routes
 - **July 12, 2025**: Added sample data for residents, properties, incidents, and activities
 - **July 12, 2025**: Configured authentication system for both development and production

@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building, Users, Shield, TrendingUp, BarChart3, AlertTriangle } from "lucide-react";
+import UniversalHeader from "@/components/Layout/UniversalHeader";
+import UniversalFooter from "@/components/Layout/UniversalFooter";
 
 export default function Landing() {
   const handleLogin = () => {
@@ -42,19 +44,7 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-primary">YUTHUB</h1>
-            </div>
-            <Button onClick={handleLogin} className="bg-primary hover:bg-blue-700">
-              Sign In
-            </Button>
-          </div>
-        </div>
-      </header>
+      <UniversalHeader />
 
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-primary to-secondary text-white py-20">
@@ -262,17 +252,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-slate text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h4 className="text-2xl font-bold mb-4">YUTHUB</h4>
-            <p className="text-gray-300">
-              Comprehensive housing support management platform for youth organizations
-            </p>
-          </div>
-        </div>
-      </footer>
+      <UniversalFooter />
     </div>
   );
 }

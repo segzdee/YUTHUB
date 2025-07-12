@@ -8,6 +8,8 @@ import { Loader2, Check, Crown, Building2, Zap } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import UniversalHeader from '@/components/Layout/UniversalHeader';
+import UniversalFooter from '@/components/Layout/UniversalFooter';
 
 const tierIcons = {
   starter: Building2,
@@ -114,27 +116,32 @@ export default function Subscribe() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Login Required</CardTitle>
-            <CardDescription>
-              Please log in to subscribe to YUTHUB.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button onClick={() => window.location.href = '/api/login'} className="w-full">
-              Login to Continue
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-gray-50">
+        <UniversalHeader />
+        <div className="flex items-center justify-center py-20">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>Login Required</CardTitle>
+              <CardDescription>
+                Please log in to subscribe to YUTHUB.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={() => window.location.href = '/api/login'} className="w-full">
+                Login to Continue
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+        <UniversalFooter />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gray-50">
+      <UniversalHeader />
+      <div className="max-w-4xl mx-auto py-12 px-4">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -237,7 +244,7 @@ export default function Subscribe() {
                   £{tierFeatures[selectedTier as keyof typeof tierFeatures].price}/month billed annually
                 </p>
                 <p className="text-sm text-gray-500 mt-2">
-                  Includes £2,499 setup fee for migration, training, and configuration
+                  Includes free setup, migration, training, and configuration
                 </p>
               </div>
               <Button
@@ -271,6 +278,7 @@ export default function Subscribe() {
           </p>
         </div>
       </div>
+      <UniversalFooter />
     </div>
   );
 }

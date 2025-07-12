@@ -1,0 +1,62 @@
+YUTHUB SaaS Pricing & Features Summary
+💰 Pricing Overview
+TierMonthly PriceAnnual PriceMax ResidentsStarter£199/month£169/month25 residentsProfessional£499/month£429/month100 residentsEnterprise£1,299/month£1,099/monthUnlimited
+Setup Fee: £2,499 (all tiers) - includes migration, training, configuration
+🚀 Feature Comparison
+YUTHUB Starter (£169/month annual)
+Core Features:
+
+Basic resident management (25 residents max)
+Essential support worker tools
+Standard progress tracking
+Mobile app for residents
+Email support (business hours)
+Single property/location
+Basic reporting dashboard
+
+Best For: Small charities, pilot programs, single-site providers
+YUTHUB Professional (£429/month annual)
+Everything in Starter PLUS:
+
+Up to 100 residents
+Multi-property management (5 locations)
+Advanced analytics & outcome tracking
+Crisis intervention system
+Life skills progression with gamification
+Local authority system integration
+Custom branding/white-label
+Dedicated customer success manager
+API access
+Staff scheduling tools
+Financial management
+
+Best For: Medium housing associations, local authorities, established providers
+YUTHUB Enterprise (£1,099/month annual)
+Everything in Professional PLUS:
+
+Unlimited residents & properties
+AI-powered predictive analytics
+Custom feature development
+On-premise deployment options
+Advanced security (SSO)
+Multi-tenancy support
+Machine learning insights
+Custom integrations
+Dedicated technical support
+Quarterly business reviews
+Custom training programs
+
+Best For: Large national providers, local authorities, multi-program organizations
+🎯 Key Differentiators by Tier
+Starter: Basic digitization - Replace paper processes
+Professional: Advanced operations - Optimize workflows & outcomes
+Enterprise: Strategic transformation - AI insights & custom solutions
+💡 Value Proposition
+
+15% discount for annual contracts
+30-day free trial all tiers
+Flexible tier upgrades/downgrades
+ROI through improved outcomes & staff efficiency
+Purpose-built for vulnerable youth housing sector
+
+Target ROI: 200-400% through reduced admin time, better outcomes, compliance automation

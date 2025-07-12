@@ -38,7 +38,7 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       maxAge: sessionTtl,
     },
   });
@@ -84,14 +84,21 @@ export async function setupAuth(app: Express) {
     verified(null, user);
   };
 
-  for (const domain of process.env
-    .REPLIT_DOMAINS!.split(",")) {
+  // Register strategies for both production and development
+  const domains = process.env.REPLIT_DOMAINS!.split(",");
+  
+  // Add localhost for development if not already present
+  if (process.env.NODE_ENV === 'development' && !domains.includes('localhost')) {
+    domains.push('localhost');
+  }
+  
+  for (const domain of domains) {
     const strategy = new Strategy(
       {
         name: `replitauth:${domain}`,
         config,
         scope: "openid email profile offline_access",
-        callbackURL: `https://${domain}/api/callback`,
+        callbackURL: `${domain === 'localhost' ? 'http' : 'https'}://${domain}/api/callback`,
       },
       verify,
     );

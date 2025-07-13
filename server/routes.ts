@@ -13,7 +13,14 @@ import {
   insertTenancyAgreementSchema,
   insertAssessmentFormSchema,
   insertStaffMemberSchema,
-  insertPropertyRoomSchema
+  insertPropertyRoomSchema,
+  insertGovernmentClientSchema,
+  insertSupportLevelRateSchema,
+  insertBillingPeriodSchema,
+  insertInvoiceSchema,
+  insertInvoiceLineItemSchema,
+  insertPaymentReminderSchema,
+  insertAuditTrailSchema,
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -797,6 +804,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(room);
     } catch (error: any) {
       res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Billing routes - Government clients
+  app.get('/api/billing/government-clients', isAuthenticated, async (req: any, res: any) => {
+    try {
+      const clients = await storage.getGovernmentClients();
+      res.json(clients);
+    } catch (error) {
+      console.error("Error fetching government clients:", error);
+      res.status(500).json({ message: "Failed to fetch government clients" });
+    }
+  });
+
+  app.post('/api/billing/government-clients', isAuthenticated, async (req: any, res: any) => {
+    try {
+      const clientData = insertGovernmentClientSchema.parse(req.body);
+      const client = await storage.createGovernmentClient(clientData);
+      
+      // Log activity
+      await storage.createActivity({
+        userId: req.user?.claims?.sub,
+        activityType: 'government_client_created',
+        title: 'New government client added',
+        description: `Government client "${client.clientName}" has been added to the billing system`,
+        entityId: client.id,
+        entityType: 'government_client',
+      });
+      
+      res.json(client);
+    } catch (error) {
+      console.error("Error creating government client:", error);
+      res.status(500).json({ message: "Failed to create government client" });
+    }
+  });
+
+  app.put('/api/billing/government-clients/:id', isAuthenticated, async (req: any, res: any) => {
+    try {
+      const id = parseInt(req.params.id);
+      const clientData = insertGovernmentClientSchema.partial().parse(req.body);
+      const client = await storage.updateGovernmentClient(id, clientData);
+      res.json(client);
+    } catch (error) {
+      console.error("Error updating government client:", error);
+      res.status(500).json({ message: "Failed to update government client" });
+    }
+  });
+
+  app.delete('/api/billing/government-clients/:id', isAuthenticated, async (req: any, res: any) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteGovernmentClient(id);
+      res.json({ message: "Government client deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting government client:", error);
+      res.status(500).json({ message: "Failed to delete government client" });
+    }
+  });
+
+  // Billing analytics
+  app.get('/api/billing/analytics', isAuthenticated, async (req: any, res: any) => {
+    try {
+      const analytics = await storage.getBillingAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching billing analytics:", error);
+      res.status(500).json({ message: "Failed to fetch billing analytics" });
     }
   });
 

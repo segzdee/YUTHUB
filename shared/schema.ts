@@ -536,3 +536,215 @@ export type AssessmentForm = typeof assessmentForms.$inferSelect;
 export type InsertAssessmentForm = z.infer<typeof insertAssessmentFormSchema>;
 export type ProgressTracking = typeof progressTracking.$inferSelect;
 export type InsertProgressTracking = z.infer<typeof insertProgressTrackingSchema>;
+
+// Billing System Tables
+export const governmentClients = pgTable("government_clients", {
+  id: serial("id").primaryKey(),
+  clientName: text("client_name").notNull(),
+  clientType: text("client_type").notNull(), // 'council', 'local_authority', 'government_agency'
+  contactName: text("contact_name").notNull(),
+  contactEmail: text("contact_email").notNull(),
+  contactPhone: text("contact_phone"),
+  billingAddress: text("billing_address").notNull(),
+  paymentTerms: integer("payment_terms").default(30), // days
+  defaultRate: decimal("default_rate", { precision: 10, scale: 2 }),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const supportLevelRates = pgTable("support_level_rates", {
+  id: serial("id").primaryKey(),
+  supportLevel: text("support_level").notNull(), // 'low', 'medium', 'high', 'intensive'
+  rateType: text("rate_type").notNull(), // 'nightly', 'weekly', 'monthly'
+  baseRate: decimal("base_rate", { precision: 10, scale: 2 }).notNull(),
+  additionalServices: text("additional_services").array(),
+  serviceRate: decimal("service_rate", { precision: 10, scale: 2 }).default("0.00"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const billingPeriods = pgTable("billing_periods", {
+  id: serial("id").primaryKey(),
+  residentId: integer("resident_id").references(() => residents.id),
+  governmentClientId: integer("government_client_id").references(() => governmentClients.id),
+  propertyId: integer("property_id").references(() => properties.id),
+  startDate: date("start_date").notNull(),
+  endDate: date("end_date"),
+  supportLevel: text("support_level").notNull(),
+  rateType: text("rate_type").notNull(),
+  dailyRate: decimal("daily_rate", { precision: 10, scale: 2 }).notNull(),
+  additionalServices: text("additional_services").array(),
+  serviceCharges: decimal("service_charges", { precision: 10, scale: 2 }).default("0.00"),
+  totalDays: integer("total_days"),
+  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }),
+  status: text("status").default("active"), // 'active', 'ended', 'suspended'
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const invoices = pgTable("invoices", {
+  id: serial("id").primaryKey(),
+  invoiceNumber: text("invoice_number").notNull().unique(),
+  governmentClientId: integer("government_client_id").references(() => governmentClients.id),
+  billingPeriodStart: date("billing_period_start").notNull(),
+  billingPeriodEnd: date("billing_period_end").notNull(),
+  issueDate: date("issue_date").notNull(),
+  dueDate: date("due_date").notNull(),
+  subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
+  vatAmount: decimal("vat_amount", { precision: 10, scale: 2 }).default("0.00"),
+  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
+  status: text("status").default("pending"), // 'pending', 'sent', 'paid', 'overdue', 'cancelled'
+  paidDate: date("paid_date"),
+  paidAmount: decimal("paid_amount", { precision: 10, scale: 2 }),
+  paymentMethod: text("payment_method"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const invoiceLineItems = pgTable("invoice_line_items", {
+  id: serial("id").primaryKey(),
+  invoiceId: integer("invoice_id").references(() => invoices.id),
+  billingPeriodId: integer("billing_period_id").references(() => billingPeriods.id),
+  residentAnonymizedId: text("resident_anonymized_id").notNull(),
+  description: text("description").notNull(),
+  serviceType: text("service_type").notNull(),
+  quantity: integer("quantity").notNull(),
+  unitRate: decimal("unit_rate", { precision: 10, scale: 2 }).notNull(),
+  lineTotal: decimal("line_total", { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const paymentReminders = pgTable("payment_reminders", {
+  id: serial("id").primaryKey(),
+  invoiceId: integer("invoice_id").references(() => invoices.id),
+  reminderType: text("reminder_type").notNull(), // 'first', 'second', 'final'
+  sentDate: date("sent_date").notNull(),
+  sentTo: text("sent_to").notNull(),
+  status: text("status").default("sent"), // 'sent', 'bounced', 'responded'
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const auditTrail = pgTable("audit_trail", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  action: text("action").notNull(),
+  entityType: text("entity_type").notNull(),
+  entityId: text("entity_id").notNull(),
+  oldValues: text("old_values"),
+  newValues: text("new_values"),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
+// Billing relations
+export const governmentClientsRelations = relations(governmentClients, ({ many }) => ({
+  billingPeriods: many(billingPeriods),
+  invoices: many(invoices),
+}));
+
+export const supportLevelRatesRelations = relations(supportLevelRates, ({ many }) => ({
+  billingPeriods: many(billingPeriods),
+}));
+
+export const billingPeriodsRelations = relations(billingPeriods, ({ one, many }) => ({
+  resident: one(residents, {
+    fields: [billingPeriods.residentId],
+    references: [residents.id],
+  }),
+  governmentClient: one(governmentClients, {
+    fields: [billingPeriods.governmentClientId],
+    references: [governmentClients.id],
+  }),
+  property: one(properties, {
+    fields: [billingPeriods.propertyId],
+    references: [properties.id],
+  }),
+  invoiceLineItems: many(invoiceLineItems),
+}));
+
+export const invoicesRelations = relations(invoices, ({ one, many }) => ({
+  governmentClient: one(governmentClients, {
+    fields: [invoices.governmentClientId],
+    references: [governmentClients.id],
+  }),
+  lineItems: many(invoiceLineItems),
+  paymentReminders: many(paymentReminders),
+}));
+
+export const invoiceLineItemsRelations = relations(invoiceLineItems, ({ one }) => ({
+  invoice: one(invoices, {
+    fields: [invoiceLineItems.invoiceId],
+    references: [invoices.id],
+  }),
+  billingPeriod: one(billingPeriods, {
+    fields: [invoiceLineItems.billingPeriodId],
+    references: [billingPeriods.id],
+  }),
+}));
+
+export const paymentRemindersRelations = relations(paymentReminders, ({ one }) => ({
+  invoice: one(invoices, {
+    fields: [paymentReminders.invoiceId],
+    references: [invoices.id],
+  }),
+}));
+
+// Billing insert schemas
+export const insertGovernmentClientSchema = createInsertSchema(governmentClients).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSupportLevelRateSchema = createInsertSchema(supportLevelRates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertBillingPeriodSchema = createInsertSchema(billingPeriods).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertInvoiceSchema = createInsertSchema(invoices).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertInvoiceLineItemSchema = createInsertSchema(invoiceLineItems).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPaymentReminderSchema = createInsertSchema(paymentReminders).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAuditTrailSchema = createInsertSchema(auditTrail).omit({
+  id: true,
+  timestamp: true,
+});
+
+// Billing types
+export type GovernmentClient = typeof governmentClients.$inferSelect;
+export type InsertGovernmentClient = z.infer<typeof insertGovernmentClientSchema>;
+export type SupportLevelRate = typeof supportLevelRates.$inferSelect;
+export type InsertSupportLevelRate = z.infer<typeof insertSupportLevelRateSchema>;
+export type BillingPeriod = typeof billingPeriods.$inferSelect;
+export type InsertBillingPeriod = z.infer<typeof insertBillingPeriodSchema>;
+export type Invoice = typeof invoices.$inferSelect;
+export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
+export type InvoiceLineItem = typeof invoiceLineItems.$inferSelect;
+export type InsertInvoiceLineItem = z.infer<typeof insertInvoiceLineItemSchema>;
+export type PaymentReminder = typeof paymentReminders.$inferSelect;
+export type InsertPaymentReminder = z.infer<typeof insertPaymentReminderSchema>;
+export type AuditTrail = typeof auditTrail.$inferSelect;
+export type InsertAuditTrail = z.infer<typeof insertAuditTrailSchema>;

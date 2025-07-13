@@ -10,7 +10,10 @@ import {
   AlertTriangle, 
   DollarSign,
   Settings,
-  HelpCircle
+  HelpCircle,
+  Receipt,
+  FileText,
+  ClipboardList
 } from "lucide-react";
 
 const navigation = [
@@ -22,6 +25,9 @@ const navigation = [
   { name: "Safeguarding", href: "/safeguarding", icon: Shield },
   { name: "Crisis Connect", href: "/crisis", icon: AlertTriangle },
   { name: "Financials", href: "/financials", icon: DollarSign },
+  { name: "Government Billing", href: "/billing", icon: Receipt },
+  { name: "Forms", href: "/forms", icon: ClipboardList },
+  { name: "Reports", href: "/reports", icon: FileText },
 ];
 
 const secondaryNavigation = [

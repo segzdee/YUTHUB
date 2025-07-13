@@ -56,9 +56,9 @@ export default function PropertiesTable() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>Properties Overview</CardTitle>
-          <Button variant="ghost" size="sm" className="text-primary hover:text-blue-800">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <CardTitle className="text-lg sm:text-xl">Properties Overview</CardTitle>
+          <Button variant="ghost" size="sm" className="text-primary hover:text-blue-800 text-sm">
             View All
           </Button>
         </div>
@@ -68,25 +68,26 @@ export default function PropertiesTable() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50">
               <tr>
-                <th className="text-left p-3 text-gray-700 font-medium">Property</th>
-                <th className="text-left p-3 text-gray-700 font-medium">Type</th>
-                <th className="text-left p-3 text-gray-700 font-medium">Occupancy</th>
-                <th className="text-left p-3 text-gray-700 font-medium">Status</th>
+                <th className="text-left p-2 sm:p-3 text-gray-700 font-medium text-xs sm:text-sm">Property</th>
+                <th className="text-left p-2 sm:p-3 text-gray-700 font-medium text-xs sm:text-sm hidden sm:table-cell">Type</th>
+                <th className="text-left p-2 sm:p-3 text-gray-700 font-medium text-xs sm:text-sm">Occupancy</th>
+                <th className="text-left p-2 sm:p-3 text-gray-700 font-medium text-xs sm:text-sm">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {properties?.slice(0, 3).map((property) => (
                 <tr key={property.id}>
-                  <td className="p-3">
+                  <td className="p-2 sm:p-3">
                     <div>
-                      <p className="font-medium text-slate">{property.name}</p>
-                      <p className="text-xs text-gray-500">{property.address}</p>
+                      <p className="font-medium text-slate text-xs sm:text-sm">{property.name}</p>
+                      <p className="text-xs text-gray-500 sm:hidden">{formatPropertyType(property.propertyType)}</p>
+                      <p className="text-xs text-gray-500 truncate max-w-[120px] sm:max-w-none">{property.address}</p>
                     </div>
                   </td>
-                  <td className="p-3 text-gray-600">{formatPropertyType(property.propertyType)}</td>
-                  <td className="p-3 text-gray-600">{property.occupiedUnits}/{property.totalUnits}</td>
-                  <td className="p-3">
-                    <Badge className={getStatusColor(property.status)}>
+                  <td className="p-2 sm:p-3 text-gray-600 text-xs sm:text-sm hidden sm:table-cell">{formatPropertyType(property.propertyType)}</td>
+                  <td className="p-2 sm:p-3 text-gray-600 text-xs sm:text-sm">{property.occupiedUnits}/{property.totalUnits}</td>
+                  <td className="p-2 sm:p-3">
+                    <Badge className={`${getStatusColor(property.status)} text-xs`}>
                       {property.status}
                     </Badge>
                   </td>

@@ -82,36 +82,36 @@ export default function PricingSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {pricingTiers.map((tier, index) => (
             <Card key={index} className={`interactive-element hover:shadow-lg transition-all duration-300 relative ${tier.color}`}>
               {tier.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-primary text-white px-4 py-1">
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-primary text-white px-3 py-1 text-sm">
                     Most Popular
                   </Badge>
                 </div>
               )}
               
-              <CardHeader className="text-center pb-6">
-                <CardTitle className="text-2xl font-bold text-high-contrast">
+              <CardHeader className="text-center pb-4 sm:pb-6">
+                <CardTitle className="text-xl sm:text-2xl font-bold text-high-contrast">
                   {tier.name}
                 </CardTitle>
-                <CardDescription className="text-medium-contrast">
+                <CardDescription className="text-medium-contrast text-sm sm:text-base">
                   {tier.description}
                 </CardDescription>
                 
                 <div className="mt-4">
                   <div className="flex items-baseline justify-center gap-2">
-                    <span className="text-4xl font-bold text-high-contrast">
+                    <span className="text-3xl sm:text-4xl font-bold text-high-contrast">
                       £{tier.annualPrice}
                     </span>
-                    <span className="text-medium-contrast">/month</span>
+                    <span className="text-medium-contrast text-sm sm:text-base">/month</span>
                   </div>
-                  <div className="text-sm text-medium-contrast mt-1">
+                  <div className="text-xs sm:text-sm text-medium-contrast mt-1">
                     Annual billing (save 15%)
                   </div>
-                  <div className="text-sm text-medium-contrast">
+                  <div className="text-xs sm:text-sm text-medium-contrast">
                     £{tier.monthlyPrice}/month if billed monthly
                   </div>
                 </div>

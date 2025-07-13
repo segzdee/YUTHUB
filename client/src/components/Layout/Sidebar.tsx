@@ -29,42 +29,36 @@ const secondaryNavigation = [
   { name: "Help & Support", href: "/help", icon: HelpCircle },
 ];
 
-export default function Sidebar() {
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   const [location] = useLocation();
 
   return (
-    <div className="w-64 bg-white border-r border-gray-200 fixed h-full z-10">
-      <div className="flex items-center justify-center h-16 border-b border-gray-200">
-        <h1 className="text-xl font-bold text-primary">YUTHUB</h1>
-      </div>
+    <>
+      {/* Mobile backdrop */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
+          onClick={onClose}
+        />
+      )}
       
-      <nav className="mt-8">
-        <div className="px-4 space-y-2">
-          {navigation.map((item) => {
-            const Icon = item.icon;
-            const isActive = location === item.href;
-            
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={cn(
-                  "group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
-                  isActive
-                    ? "bg-blue-50 text-primary border-r-2 border-primary"
-                    : "text-gray-700 hover:bg-gray-50"
-                )}
-              >
-                <Icon className="mr-3 h-4 w-4" />
-                {item.name}
-              </Link>
-            );
-          })}
+      <div className={cn(
+        "fixed left-0 top-0 h-full bg-white border-r border-gray-200 z-30 transition-transform duration-300 ease-in-out",
+        "w-64 lg:w-64",
+        isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+      )}>
+        <div className="flex items-center justify-center h-16 border-b border-gray-200">
+          <h1 className="text-lg sm:text-xl font-bold text-primary">YUTHUB</h1>
         </div>
         
-        <div className="mt-8 pt-8 border-t border-gray-200">
-          <div className="px-4 space-y-2">
-            {secondaryNavigation.map((item) => {
+        <nav className="mt-6 sm:mt-8 pb-4 overflow-y-auto h-[calc(100vh-4rem)]">
+          <div className="px-3 sm:px-4 space-y-1 sm:space-y-2">
+            {navigation.map((item) => {
               const Icon = item.icon;
               const isActive = location === item.href;
               
@@ -78,15 +72,42 @@ export default function Sidebar() {
                       ? "bg-blue-50 text-primary border-r-2 border-primary"
                       : "text-gray-700 hover:bg-gray-50"
                   )}
+                  onClick={onClose}
                 >
-                  <Icon className="mr-3 h-4 w-4" />
-                  {item.name}
+                  <Icon className="mr-3 h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">{item.name}</span>
                 </Link>
               );
             })}
           </div>
-        </div>
-      </nav>
-    </div>
+          
+          <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-200">
+            <div className="px-3 sm:px-4 space-y-1 sm:space-y-2">
+              {secondaryNavigation.map((item) => {
+                const Icon = item.icon;
+                const isActive = location === item.href;
+                
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={cn(
+                      "group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                      isActive
+                        ? "bg-blue-50 text-primary border-r-2 border-primary"
+                        : "text-gray-700 hover:bg-gray-50"
+                    )}
+                    onClick={onClose}
+                  >
+                    <Icon className="mr-3 h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">{item.name}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </nav>
+      </div>
+    </>
   );
 }

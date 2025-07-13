@@ -101,13 +101,13 @@ export default function Testimonials() {
           ))}
         </div>
 
-        <div className="mt-16 text-center">
-          <div className="inline-flex flex-col items-center gap-4 px-8 py-6 bg-blue-50 rounded-xl">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-primary">500+</span>
-              <span className="text-medium-contrast">Organizations trust YUTHUB</span>
+        <div className="mt-12 sm:mt-16 text-center">
+          <div className="inline-flex flex-col items-center gap-4 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 bg-blue-50 rounded-xl mx-4 sm:mx-0">
+            <div className="flex flex-col sm:flex-row items-center gap-2 text-center sm:text-left">
+              <span className="text-xl sm:text-2xl font-bold text-primary">500+</span>
+              <span className="text-medium-contrast text-sm sm:text-base">Organizations trust YUTHUB</span>
             </div>
-            <div className="flex items-center gap-8 text-sm text-medium-contrast">
+            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 lg:gap-8 text-xs sm:text-sm text-medium-contrast text-center">
               <span>📊 98% Customer Satisfaction</span>
               <span>⚡ 45% Faster Case Management</span>
               <span>🎯 35% Better Outcomes</span>

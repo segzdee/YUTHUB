@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import Sidebar from "@/components/Layout/Sidebar";
@@ -14,6 +14,7 @@ import SubscriptionCard from "@/components/Dashboard/SubscriptionCard";
 export default function Dashboard() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -34,8 +35,8 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-slate">Loading dashboard...</p>
+          <div className="animate-spin rounded-full h-24 sm:h-32 w-24 sm:w-32 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-slate text-sm sm:text-base">Loading dashboard...</p>
         </div>
       </div>
     );
@@ -47,30 +48,34 @@ export default function Dashboard() {
 
   return (
     <div className="flex h-screen bg-background">
-      <Sidebar />
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
-      <div className="flex-1 ml-64 flex flex-col">
-        <Header />
+      <div className="flex-1 lg:ml-64 flex flex-col">
+        <Header onMenuClick={() => setSidebarOpen(true)} />
         
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
           {/* Metrics Cards */}
-          <div className="mb-8">
+          <div className="mb-6 sm:mb-8">
             <MetricsCards />
           </div>
 
           {/* Subscription Card */}
-          <div className="mb-8">
+          <div className="mb-6 sm:mb-8">
             <SubscriptionCard />
           </div>
 
           {/* Dashboard Widgets */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <OccupancyChart />
-            <ActivityFeed />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            <div className="lg:col-span-2">
+              <OccupancyChart />
+            </div>
+            <div className="lg:col-span-1">
+              <ActivityFeed />
+            </div>
           </div>
 
           {/* Data Tables */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <PropertiesTable />
             <RiskInsights />
           </div>

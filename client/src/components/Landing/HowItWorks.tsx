@@ -75,10 +75,10 @@ export default function HowItWorks() {
           })}
         </div>
 
-        <div className="mt-16 text-center">
-          <div className="inline-flex items-center gap-2 px-6 py-3 bg-blue-50 rounded-full">
-            <span className="text-primary font-semibold">Ready to get started?</span>
-            <span className="text-medium-contrast">Setup takes less than 10 minutes</span>
+        <div className="mt-12 sm:mt-16 text-center">
+          <div className="inline-flex flex-col sm:flex-row items-center gap-2 px-4 sm:px-6 py-3 bg-blue-50 rounded-full mx-4 sm:mx-0">
+            <span className="text-primary font-semibold text-sm sm:text-base">Ready to get started?</span>
+            <span className="text-medium-contrast text-sm sm:text-base">Setup takes less than 10 minutes</span>
           </div>
         </div>
       </div>

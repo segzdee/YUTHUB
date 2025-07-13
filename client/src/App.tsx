@@ -22,6 +22,8 @@ import ResidentIntake from "@/pages/forms/ResidentIntake";
 import IncidentReport from "@/pages/forms/IncidentReport";
 import ProgressTracking from "@/pages/forms/ProgressTracking";
 import SupportPlan from "@/pages/forms/SupportPlan";
+import Forms from "@/pages/Forms";
+import Reports from "@/pages/Reports";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -49,6 +51,8 @@ function Router() {
           <Route path="/financials" component={Financials} />
           <Route path="/settings" component={Settings} />
           <Route path="/help" component={Help} />
+          <Route path="/forms" component={Forms} />
+          <Route path="/reports" component={Reports} />
           <Route path="/forms/property-registration" component={PropertyRegistration} />
           <Route path="/forms/resident-intake" component={ResidentIntake} />
           <Route path="/forms/incident-report" component={IncidentReport} />

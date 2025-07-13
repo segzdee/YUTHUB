@@ -8,7 +8,12 @@ import {
   insertSupportPlanSchema, 
   insertIncidentSchema,
   insertActivitySchema,
-  insertFinancialRecordSchema
+  insertFinancialRecordSchema,
+  insertMaintenanceRequestSchema,
+  insertTenancyAgreementSchema,
+  insertAssessmentFormSchema,
+  insertStaffMemberSchema,
+  insertPropertyRoomSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -566,6 +571,360 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Report generation endpoints
+  app.post("/api/reports/generate", isAuthenticated, async (req, res) => {
+    try {
+      const { type, dateRange, properties, filters } = req.body;
+      
+      let reportData;
+      
+      switch (type) {
+        case 'occupancy':
+          reportData = await generateOccupancyReport(dateRange, properties, filters);
+          break;
+        case 'financial':
+          reportData = await generateFinancialReport(dateRange, properties, filters);
+          break;
+        case 'incident':
+          reportData = await generateIncidentReport(dateRange, properties, filters);
+          break;
+        case 'progress':
+          reportData = await generateProgressReport(dateRange, properties, filters);
+          break;
+        case 'compliance':
+          reportData = await generateComplianceReport(dateRange, properties, filters);
+          break;
+        case 'risk':
+          reportData = await generateRiskReport(dateRange, properties, filters);
+          break;
+        case 'maintenance':
+          reportData = await generateMaintenanceReport(dateRange, properties, filters);
+          break;
+        case 'staff':
+          reportData = await generateStaffReport(dateRange, properties, filters);
+          break;
+        default:
+          throw new Error('Invalid report type');
+      }
+      
+      res.json(reportData);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Individual report endpoints
+  app.get("/api/reports/occupancy", isAuthenticated, async (req, res) => {
+    try {
+      const { dateRange, properties } = req.query;
+      const reportData = await generateOccupancyReport(dateRange, properties);
+      res.json(reportData);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/reports/financial", isAuthenticated, async (req, res) => {
+    try {
+      const { dateRange, properties } = req.query;
+      const reportData = await generateFinancialReport(dateRange, properties);
+      res.json(reportData);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Get all maintenance requests
+  app.get("/api/maintenance-requests", isAuthenticated, async (req, res) => {
+    try {
+      const requests = await storage.getMaintenanceRequests();
+      res.json(requests);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Create maintenance request
+  app.post("/api/maintenance-requests", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertMaintenanceRequestSchema.parse(req.body);
+      const request = await storage.createMaintenanceRequest(validatedData);
+      res.status(201).json(request);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Update maintenance request
+  app.put("/api/maintenance-requests/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertMaintenanceRequestSchema.partial().parse(req.body);
+      const request = await storage.updateMaintenanceRequest(id, validatedData);
+      res.json(request);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Get all tenancy agreements
+  app.get("/api/tenancy-agreements", isAuthenticated, async (req, res) => {
+    try {
+      const agreements = await storage.getTenancyAgreements();
+      res.json(agreements);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Create tenancy agreement
+  app.post("/api/tenancy-agreements", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertTenancyAgreementSchema.parse(req.body);
+      const agreement = await storage.createTenancyAgreement(validatedData);
+      res.status(201).json(agreement);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Update tenancy agreement
+  app.put("/api/tenancy-agreements/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertTenancyAgreementSchema.partial().parse(req.body);
+      const agreement = await storage.updateTenancyAgreement(id, validatedData);
+      res.json(agreement);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Get all assessment forms
+  app.get("/api/assessment-forms", isAuthenticated, async (req, res) => {
+    try {
+      const forms = await storage.getAssessmentForms();
+      res.json(forms);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Create assessment form
+  app.post("/api/assessment-forms", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertAssessmentFormSchema.parse(req.body);
+      const form = await storage.createAssessmentForm(validatedData);
+      res.status(201).json(form);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Update assessment form
+  app.put("/api/assessment-forms/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertAssessmentFormSchema.partial().parse(req.body);
+      const form = await storage.updateAssessmentForm(id, validatedData);
+      res.json(form);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Get all staff members
+  app.get("/api/staff-members", isAuthenticated, async (req, res) => {
+    try {
+      const members = await storage.getStaffMembers();
+      res.json(members);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Create staff member
+  app.post("/api/staff-members", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertStaffMemberSchema.parse(req.body);
+      const member = await storage.createStaffMember(validatedData);
+      res.status(201).json(member);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Update staff member
+  app.put("/api/staff-members/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertStaffMemberSchema.partial().parse(req.body);
+      const member = await storage.updateStaffMember(id, validatedData);
+      res.json(member);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Get all property rooms
+  app.get("/api/property-rooms", isAuthenticated, async (req, res) => {
+    try {
+      const propertyId = req.query.propertyId ? parseInt(req.query.propertyId as string) : undefined;
+      const rooms = propertyId ? await storage.getPropertyRooms(propertyId) : await storage.getPropertyRooms(0);
+      res.json(rooms);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Create property room
+  app.post("/api/property-rooms", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertPropertyRoomSchema.parse(req.body);
+      const room = await storage.createPropertyRoom(validatedData);
+      res.status(201).json(room);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Update property room
+  app.put("/api/property-rooms/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertPropertyRoomSchema.partial().parse(req.body);
+      const room = await storage.updatePropertyRoom(id, validatedData);
+      res.json(room);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
+}
+
+// Report generation helper functions
+async function generateOccupancyReport(dateRange: any, properties: any, filters?: any) {
+  // Mock implementation - in a real application, this would query the database
+  return {
+    title: "Occupancy Report",
+    generatedAt: new Date().toISOString(),
+    dateRange,
+    properties,
+    filters,
+    data: {
+      totalUnits: 50,
+      occupiedUnits: 42,
+      occupancyRate: 84,
+      trends: { occupancy: 2.5 }
+    }
+  };
+}
+
+async function generateFinancialReport(dateRange: any, properties: any, filters?: any) {
+  return {
+    title: "Financial Report",
+    generatedAt: new Date().toISOString(),
+    dateRange,
+    properties,
+    filters,
+    data: {
+      totalIncome: 125000,
+      totalExpenses: 98000,
+      netProfit: 27000,
+      profitMargin: 21.6
+    }
+  };
+}
+
+async function generateIncidentReport(dateRange: any, properties: any, filters?: any) {
+  return {
+    title: "Incident Report",
+    generatedAt: new Date().toISOString(),
+    dateRange,
+    properties,
+    filters,
+    data: {
+      totalIncidents: 43,
+      openIncidents: 12,
+      resolvedIncidents: 31,
+      averageResolutionTime: 3.2
+    }
+  };
+}
+
+async function generateProgressReport(dateRange: any, properties: any, filters?: any) {
+  return {
+    title: "Progress Report",
+    generatedAt: new Date().toISOString(),
+    dateRange,
+    properties,
+    filters,
+    data: {
+      totalResidents: 42,
+      activeGoals: 45,
+      completedGoals: 32,
+      averageProgress: 72
+    }
+  };
+}
+
+async function generateComplianceReport(dateRange: any, properties: any, filters?: any) {
+  return {
+    title: "Compliance Report",
+    generatedAt: new Date().toISOString(),
+    dateRange,
+    properties,
+    filters,
+    data: {
+      complianceScore: 92,
+      areasToImprove: ["Staff Training", "Documentation"]
+    }
+  };
+}
+
+async function generateRiskReport(dateRange: any, properties: any, filters?: any) {
+  return {
+    title: "Risk Assessment Report",
+    generatedAt: new Date().toISOString(),
+    dateRange,
+    properties,
+    filters,
+    data: {
+      highRiskResidents: 3,
+      mediumRiskResidents: 8,
+      lowRiskResidents: 31
+    }
+  };
+}
+
+async function generateMaintenanceReport(dateRange: any, properties: any, filters?: any) {
+  return {
+    title: "Maintenance Report",
+    generatedAt: new Date().toISOString(),
+    dateRange,
+    properties,
+    filters,
+    data: {
+      openRequests: 8,
+      completedRequests: 15,
+      averageCompletionTime: 2.5
+    }
+  };
+}
+
+async function generateStaffReport(dateRange: any, properties: any, filters?: any) {
+  return {
+    title: "Staff Performance Report",
+    generatedAt: new Date().toISOString(),
+    dateRange,
+    properties,
+    filters,
+    data: {
+      totalStaff: 12,
+      averageWorkload: 3.2,
+      trainingCompletion: 85
+    }
+  };
 }

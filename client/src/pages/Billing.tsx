@@ -115,7 +115,7 @@ export default function Billing() {
         </div>
 
         {/* Analytics Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
@@ -187,12 +187,12 @@ export default function Billing() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="clients">Clients</TabsTrigger>
-            <TabsTrigger value="invoices">Invoices</TabsTrigger>
-            <TabsTrigger value="periods">Billing Periods</TabsTrigger>
-            <TabsTrigger value="rates">Support Rates</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1">
+            <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
+            <TabsTrigger value="clients" className="text-xs sm:text-sm">Clients</TabsTrigger>
+            <TabsTrigger value="invoices" className="text-xs sm:text-sm">Invoices</TabsTrigger>
+            <TabsTrigger value="periods" className="text-xs sm:text-sm">Periods</TabsTrigger>
+            <TabsTrigger value="rates" className="text-xs sm:text-sm">Rates</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">

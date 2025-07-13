@@ -235,14 +235,14 @@ export function GovernmentClientsTab() {
               Add Client
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingClient ? 'Edit Government Client' : 'Add Government Client'}
               </DialogTitle>
             </DialogHeader>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="clientName">Client Name</Label>
                   <Input
@@ -273,7 +273,7 @@ export function GovernmentClientsTab() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="contactPersonName">Contact Person</Label>
                   <Input
@@ -299,7 +299,7 @@ export function GovernmentClientsTab() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="contactPersonPhone">Phone</Label>
                   <Input
@@ -330,14 +330,14 @@ export function GovernmentClientsTab() {
                   id="address"
                   {...form.register('address')}
                   placeholder="Enter full address"
-                  rows={2}
+                  rows={3}
                 />
                 {form.formState.errors.address && (
                   <p className="text-sm text-red-600">{form.formState.errors.address.message}</p>
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="invoiceFrequency">Invoice Frequency</Label>
                   <Select 
@@ -382,7 +382,7 @@ export function GovernmentClientsTab() {
                 />
               </div>
 
-              <div className="flex justify-end gap-2">
+              <div className="flex flex-col sm:flex-row justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancel
                 </Button>
@@ -396,76 +396,83 @@ export function GovernmentClientsTab() {
       </CardHeader>
       <CardContent>
         {clients && clients.length > 0 ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Client Name</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Contact Person</TableHead>
-                <TableHead>Contact Details</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {clients.map((client) => (
-                <TableRow key={client.id}>
-                  <TableCell>
-                    <div className="font-medium">{client.clientName}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {client.invoiceFrequency} invoicing
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">
-                      {getClientTypeLabel(client.clientType)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="font-medium">{client.contactPersonName}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {client.paymentTerms}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-1 text-sm">
-                        <Mail className="h-3 w-3" />
-                        {client.contactPersonEmail}
-                      </div>
-                      <div className="flex items-center gap-1 text-sm">
-                        <Phone className="h-3 w-3" />
-                        {client.contactPersonPhone}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={getStatusColor(client.status)}>
-                      {client.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => handleEdit(client)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => handleDelete(client.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[200px]">Client Name</TableHead>
+                  <TableHead className="min-w-[150px]">Type</TableHead>
+                  <TableHead className="min-w-[150px] hidden md:table-cell">Contact Person</TableHead>
+                  <TableHead className="min-w-[200px] hidden lg:table-cell">Contact Details</TableHead>
+                  <TableHead className="min-w-[100px]">Status</TableHead>
+                  <TableHead className="min-w-[120px]">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {clients.map((client) => (
+                  <TableRow key={client.id}>
+                    <TableCell>
+                      <div className="font-medium">{client.clientName}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {client.invoiceFrequency} invoicing
+                      </div>
+                      <div className="md:hidden text-sm text-muted-foreground mt-1">
+                        {client.contactPersonName}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="whitespace-nowrap">
+                        {getClientTypeLabel(client.clientType)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <div className="font-medium">{client.contactPersonName}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {client.paymentTerms}
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-1 text-sm">
+                          <Mail className="h-3 w-3 flex-shrink-0" />
+                          <span className="truncate">{client.contactPersonEmail}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-sm">
+                          <Phone className="h-3 w-3 flex-shrink-0" />
+                          <span className="truncate">{client.contactPersonPhone}</span>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={getStatusColor(client.status)}>
+                        {client.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          onClick={() => handleEdit(client)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          onClick={() => handleDelete(client.id)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         ) : (
           <div className="text-center py-8">
             <Building className="h-16 w-16 text-muted-foreground mx-auto mb-4" />

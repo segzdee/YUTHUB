@@ -55,21 +55,23 @@ export function BillingAnalytics({ analytics }: BillingAnalyticsProps) {
   const topClients = analytics.topClients.slice(0, 5);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
       <Card>
         <CardHeader>
           <CardTitle>Monthly Revenue Trend</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={monthlyData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip formatter={(value) => formatCurrency(value as number)} />
-              <Line type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={monthlyData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                <Line type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </CardContent>
       </Card>
 
@@ -79,19 +81,25 @@ export function BillingAnalytics({ analytics }: BillingAnalyticsProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {topClients.map((client) => (
-              <div key={client.clientId} className="flex items-center justify-between">
-                <div>
-                  <div className="font-medium">{client.clientName}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {client.invoiceCount} invoices
+            {topClients.length > 0 ? (
+              topClients.map((client) => (
+                <div key={client.clientId} className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium truncate">{client.clientName}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {client.invoiceCount} invoices
+                    </div>
+                  </div>
+                  <div className="text-right ml-4">
+                    <div className="font-semibold">{formatCurrency(client.totalAmount)}</div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="font-semibold">{formatCurrency(client.totalAmount)}</div>
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                No client data available
               </div>
-            ))}
+            )}
           </div>
         </CardContent>
       </Card>
@@ -101,19 +109,21 @@ export function BillingAnalytics({ analytics }: BillingAnalyticsProps) {
           <CardTitle>Invoice Status Distribution</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={[
-              { status: 'Paid', count: analytics.paidInvoices },
-              { status: 'Pending', count: analytics.pendingInvoices },
-              { status: 'Overdue', count: analytics.overdueInvoices },
-            ]}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="status" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="count" fill="#3b82f6" />
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={[
+                { status: 'Paid', count: analytics.paidInvoices },
+                { status: 'Pending', count: analytics.pendingInvoices },
+                { status: 'Overdue', count: analytics.overdueInvoices },
+              ]}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="status" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="count" fill="#3b82f6" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </CardContent>
       </Card>
 
@@ -139,7 +149,9 @@ export function BillingAnalytics({ analytics }: BillingAnalyticsProps) {
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Collection Rate</span>
                 <span className="font-semibold">
-                  {((analytics.paidInvoices / (analytics.paidInvoices + analytics.pendingInvoices + analytics.overdueInvoices)) * 100).toFixed(1)}%
+                  {analytics.paidInvoices + analytics.pendingInvoices + analytics.overdueInvoices > 0 
+                    ? ((analytics.paidInvoices / (analytics.paidInvoices + analytics.pendingInvoices + analytics.overdueInvoices)) * 100).toFixed(1)
+                    : 0}%
                 </span>
               </div>
             </div>

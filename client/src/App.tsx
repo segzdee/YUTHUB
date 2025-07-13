@@ -8,6 +8,15 @@ import Dashboard from "@/pages/Dashboard";
 import Landing from "@/pages/Landing";
 import Pricing from "@/pages/Pricing";
 import Subscribe from "@/pages/Subscribe";
+import Housing from "@/pages/Housing";
+import Support from "@/pages/Support";
+import Independence from "@/pages/Independence";
+import Analytics from "@/pages/Analytics";
+import Safeguarding from "@/pages/Safeguarding";
+import Crisis from "@/pages/Crisis";
+import Financials from "@/pages/Financials";
+import Settings from "@/pages/Settings";
+import Help from "@/pages/Help";
 import PropertyRegistration from "@/pages/forms/PropertyRegistration";
 import ResidentIntake from "@/pages/forms/ResidentIntake";
 import IncidentReport from "@/pages/forms/IncidentReport";
@@ -31,6 +40,15 @@ function Router() {
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/pricing" component={Pricing} />
           <Route path="/subscribe" component={Subscribe} />
+          <Route path="/housing" component={Housing} />
+          <Route path="/support" component={Support} />
+          <Route path="/independence" component={Independence} />
+          <Route path="/analytics" component={Analytics} />
+          <Route path="/safeguarding" component={Safeguarding} />
+          <Route path="/crisis" component={Crisis} />
+          <Route path="/financials" component={Financials} />
+          <Route path="/settings" component={Settings} />
+          <Route path="/help" component={Help} />
           <Route path="/forms/property-registration" component={PropertyRegistration} />
           <Route path="/forms/resident-intake" component={ResidentIntake} />
           <Route path="/forms/incident-report" component={IncidentReport} />

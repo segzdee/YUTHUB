@@ -6,6 +6,13 @@ import {
   incidents,
   activities,
   financialRecords,
+  formDrafts,
+  propertyRooms,
+  staffMembers,
+  maintenanceRequests,
+  tenancyAgreements,
+  assessmentForms,
+  progressTracking,
   type User,
   type UpsertUser,
   type Property,
@@ -20,6 +27,20 @@ import {
   type InsertActivity,
   type FinancialRecord,
   type InsertFinancialRecord,
+  type FormDraft,
+  type InsertFormDraft,
+  type PropertyRoom,
+  type InsertPropertyRoom,
+  type StaffMember,
+  type InsertStaffMember,
+  type MaintenanceRequest,
+  type InsertMaintenanceRequest,
+  type TenancyAgreement,
+  type InsertTenancyAgreement,
+  type AssessmentForm,
+  type InsertAssessmentForm,
+  type ProgressTracking,
+  type InsertProgressTracking,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, count, avg, sum } from "drizzle-orm";
@@ -81,6 +102,41 @@ export interface IStorage {
     occupancyRate: number;
     activeIncidents: number;
   }>;
+
+  // Form drafts operations
+  getFormDraft(userId: string, formType: string): Promise<FormDraft | undefined>;
+  createFormDraft(draft: InsertFormDraft): Promise<FormDraft>;
+  updateFormDraft(id: number, draft: Partial<InsertFormDraft>): Promise<FormDraft>;
+
+  // Property rooms operations
+  getPropertyRooms(propertyId: number): Promise<PropertyRoom[]>;
+  createPropertyRoom(room: InsertPropertyRoom): Promise<PropertyRoom>;
+  updatePropertyRoom(id: number, room: Partial<InsertPropertyRoom>): Promise<PropertyRoom>;
+
+  // Staff members operations
+  getStaffMembers(): Promise<StaffMember[]>;
+  createStaffMember(staff: InsertStaffMember): Promise<StaffMember>;
+  updateStaffMember(id: number, staff: Partial<InsertStaffMember>): Promise<StaffMember>;
+
+  // Maintenance requests operations
+  getMaintenanceRequests(): Promise<MaintenanceRequest[]>;
+  createMaintenanceRequest(request: InsertMaintenanceRequest): Promise<MaintenanceRequest>;
+  updateMaintenanceRequest(id: number, request: Partial<InsertMaintenanceRequest>): Promise<MaintenanceRequest>;
+
+  // Tenancy agreements operations
+  getTenancyAgreements(): Promise<TenancyAgreement[]>;
+  createTenancyAgreement(agreement: InsertTenancyAgreement): Promise<TenancyAgreement>;
+  updateTenancyAgreement(id: number, agreement: Partial<InsertTenancyAgreement>): Promise<TenancyAgreement>;
+
+  // Assessment forms operations
+  getAssessmentForms(): Promise<AssessmentForm[]>;
+  createAssessmentForm(form: InsertAssessmentForm): Promise<AssessmentForm>;
+  updateAssessmentForm(id: number, form: Partial<InsertAssessmentForm>): Promise<AssessmentForm>;
+
+  // Progress tracking operations
+  getProgressTracking(residentId?: number): Promise<ProgressTracking[]>;
+  createProgressTracking(tracking: InsertProgressTracking): Promise<ProgressTracking>;
+  updateProgressTracking(id: number, tracking: Partial<InsertProgressTracking>): Promise<ProgressTracking>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -315,6 +371,147 @@ export class DatabaseStorage implements IStorage {
       occupancyRate,
       activeIncidents: activeIncidentCount.count,
     };
+  }
+
+  // Form drafts operations
+  async getFormDraft(userId: string, formType: string): Promise<FormDraft | undefined> {
+    const [draft] = await db.select().from(formDrafts)
+      .where(and(eq(formDrafts.userId, userId), eq(formDrafts.formType, formType)))
+      .orderBy(desc(formDrafts.updatedAt))
+      .limit(1);
+    return draft || undefined;
+  }
+
+  async createFormDraft(draft: InsertFormDraft): Promise<FormDraft> {
+    const [newDraft] = await db.insert(formDrafts).values(draft).returning();
+    return newDraft;
+  }
+
+  async updateFormDraft(id: number, draft: Partial<InsertFormDraft>): Promise<FormDraft> {
+    const [updatedDraft] = await db.update(formDrafts)
+      .set({ ...draft, updatedAt: new Date() })
+      .where(eq(formDrafts.id, id))
+      .returning();
+    return updatedDraft;
+  }
+
+  // Property rooms operations
+  async getPropertyRooms(propertyId: number): Promise<PropertyRoom[]> {
+    return await db.select().from(propertyRooms)
+      .where(eq(propertyRooms.propertyId, propertyId));
+  }
+
+  async createPropertyRoom(room: InsertPropertyRoom): Promise<PropertyRoom> {
+    const [newRoom] = await db.insert(propertyRooms).values(room).returning();
+    return newRoom;
+  }
+
+  async updatePropertyRoom(id: number, room: Partial<InsertPropertyRoom>): Promise<PropertyRoom> {
+    const [updatedRoom] = await db.update(propertyRooms)
+      .set({ ...room, updatedAt: new Date() })
+      .where(eq(propertyRooms.id, id))
+      .returning();
+    return updatedRoom;
+  }
+
+  // Staff members operations
+  async getStaffMembers(): Promise<StaffMember[]> {
+    return await db.select().from(staffMembers)
+      .where(eq(staffMembers.isActive, true));
+  }
+
+  async createStaffMember(staff: InsertStaffMember): Promise<StaffMember> {
+    const [newStaff] = await db.insert(staffMembers).values(staff).returning();
+    return newStaff;
+  }
+
+  async updateStaffMember(id: number, staff: Partial<InsertStaffMember>): Promise<StaffMember> {
+    const [updatedStaff] = await db.update(staffMembers)
+      .set({ ...staff, updatedAt: new Date() })
+      .where(eq(staffMembers.id, id))
+      .returning();
+    return updatedStaff;
+  }
+
+  // Maintenance requests operations
+  async getMaintenanceRequests(): Promise<MaintenanceRequest[]> {
+    return await db.select().from(maintenanceRequests)
+      .orderBy(desc(maintenanceRequests.createdAt));
+  }
+
+  async createMaintenanceRequest(request: InsertMaintenanceRequest): Promise<MaintenanceRequest> {
+    const [newRequest] = await db.insert(maintenanceRequests).values(request).returning();
+    return newRequest;
+  }
+
+  async updateMaintenanceRequest(id: number, request: Partial<InsertMaintenanceRequest>): Promise<MaintenanceRequest> {
+    const [updatedRequest] = await db.update(maintenanceRequests)
+      .set({ ...request, updatedAt: new Date() })
+      .where(eq(maintenanceRequests.id, id))
+      .returning();
+    return updatedRequest;
+  }
+
+  // Tenancy agreements operations
+  async getTenancyAgreements(): Promise<TenancyAgreement[]> {
+    return await db.select().from(tenancyAgreements)
+      .orderBy(desc(tenancyAgreements.createdAt));
+  }
+
+  async createTenancyAgreement(agreement: InsertTenancyAgreement): Promise<TenancyAgreement> {
+    const [newAgreement] = await db.insert(tenancyAgreements).values(agreement).returning();
+    return newAgreement;
+  }
+
+  async updateTenancyAgreement(id: number, agreement: Partial<InsertTenancyAgreement>): Promise<TenancyAgreement> {
+    const [updatedAgreement] = await db.update(tenancyAgreements)
+      .set({ ...agreement, updatedAt: new Date() })
+      .where(eq(tenancyAgreements.id, id))
+      .returning();
+    return updatedAgreement;
+  }
+
+  // Assessment forms operations
+  async getAssessmentForms(): Promise<AssessmentForm[]> {
+    return await db.select().from(assessmentForms)
+      .orderBy(desc(assessmentForms.createdAt));
+  }
+
+  async createAssessmentForm(form: InsertAssessmentForm): Promise<AssessmentForm> {
+    const [newForm] = await db.insert(assessmentForms).values(form).returning();
+    return newForm;
+  }
+
+  async updateAssessmentForm(id: number, form: Partial<InsertAssessmentForm>): Promise<AssessmentForm> {
+    const [updatedForm] = await db.update(assessmentForms)
+      .set({ ...form, updatedAt: new Date() })
+      .where(eq(assessmentForms.id, id))
+      .returning();
+    return updatedForm;
+  }
+
+  // Progress tracking operations
+  async getProgressTracking(residentId?: number): Promise<ProgressTracking[]> {
+    const query = db.select().from(progressTracking);
+    
+    if (residentId) {
+      query.where(eq(progressTracking.residentId, residentId));
+    }
+    
+    return await query.orderBy(desc(progressTracking.lastUpdated));
+  }
+
+  async createProgressTracking(tracking: InsertProgressTracking): Promise<ProgressTracking> {
+    const [newTracking] = await db.insert(progressTracking).values(tracking).returning();
+    return newTracking;
+  }
+
+  async updateProgressTracking(id: number, tracking: Partial<InsertProgressTracking>): Promise<ProgressTracking> {
+    const [updatedTracking] = await db.update(progressTracking)
+      .set({ ...tracking, lastUpdated: new Date() })
+      .where(eq(progressTracking.id, id))
+      .returning();
+    return updatedTracking;
   }
 }
 

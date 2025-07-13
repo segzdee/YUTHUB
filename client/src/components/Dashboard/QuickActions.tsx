@@ -6,30 +6,48 @@ import {
   TrendingUp, 
   Wrench, 
   DollarSign, 
-  Download 
+  Download,
+  Home,
+  UserPlus,
+  AlertTriangle,
+  BarChart3
 } from "lucide-react";
 
 const quickActions = [
   {
-    name: "New Placement",
-    icon: Plus,
-    color: "bg-primary bg-opacity-5 hover:bg-opacity-10",
-    iconColor: "text-primary",
-    action: "placement"
+    name: "Register Property",
+    icon: Home,
+    color: "bg-blue-50 hover:bg-blue-100",
+    iconColor: "text-blue-600",
+    path: "/forms/property-registration"
+  },
+  {
+    name: "Resident Intake",
+    icon: UserPlus,
+    color: "bg-green-50 hover:bg-green-100",
+    iconColor: "text-green-600",
+    path: "/forms/resident-intake"
+  },
+  {
+    name: "Incident Report",
+    icon: AlertTriangle,
+    color: "bg-red-50 hover:bg-red-100",
+    iconColor: "text-red-600",
+    path: "/forms/incident-report"
+  },
+  {
+    name: "Progress Tracking",
+    icon: BarChart3,
+    color: "bg-purple-50 hover:bg-purple-100",
+    iconColor: "text-purple-600",
+    path: "/forms/progress-tracking"
   },
   {
     name: "Support Plan",
     icon: FileText,
     color: "bg-secondary bg-opacity-5 hover:bg-opacity-10",
     iconColor: "text-secondary",
-    action: "support-plan"
-  },
-  {
-    name: "Assessment",
-    icon: TrendingUp,
-    color: "bg-purple-50 hover:bg-purple-100",
-    iconColor: "text-purple-600",
-    action: "assessment"
+    path: "/forms/support-plan"
   },
   {
     name: "Maintenance",
@@ -37,27 +55,17 @@ const quickActions = [
     color: "bg-orange-50 hover:bg-orange-100",
     iconColor: "text-orange-600",
     action: "maintenance"
-  },
-  {
-    name: "Financial Review",
-    icon: DollarSign,
-    color: "bg-green-50 hover:bg-green-100",
-    iconColor: "text-green-600",
-    action: "financial"
-  },
-  {
-    name: "Export Data",
-    icon: Download,
-    color: "bg-gray-50 hover:bg-gray-100",
-    iconColor: "text-gray-600",
-    action: "export"
   }
 ];
 
 export default function QuickActions() {
-  const handleAction = (action: string) => {
-    // TODO: Implement navigation to respective modules
-    console.log(`Navigating to ${action}`);
+  const handleAction = (action: any) => {
+    if (action.path) {
+      window.location.href = action.path;
+    } else {
+      // Handle other actions that aren't forms
+      console.log(`Handling action: ${action.name}`);
+    }
   };
 
   return (
@@ -74,7 +82,7 @@ export default function QuickActions() {
                 key={action.name}
                 variant="ghost"
                 className={`flex flex-col items-center p-4 h-auto ${action.color} transition-colors`}
-                onClick={() => handleAction(action.action)}
+                onClick={() => handleAction(action)}
               >
                 <Icon className={`${action.iconColor} h-6 w-6 mb-2`} />
                 <span className="text-sm font-medium text-slate">{action.name}</span>

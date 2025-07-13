@@ -389,6 +389,183 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Form drafts endpoints
+  app.get('/api/forms/draft/:formType', isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any)?.claims?.sub;
+      const draft = await storage.getFormDraft(userId, req.params.formType);
+      if (!draft) {
+        return res.status(404).json({ message: "Draft not found" });
+      }
+      res.json(draft);
+    } catch (error) {
+      console.error("Error fetching form draft:", error);
+      res.status(500).json({ message: "Failed to fetch form draft" });
+    }
+  });
+
+  app.post('/api/forms/draft', isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any)?.claims?.sub;
+      const draft = await storage.createFormDraft({
+        ...req.body,
+        userId,
+      });
+      res.status(201).json(draft);
+    } catch (error) {
+      console.error("Error creating form draft:", error);
+      res.status(500).json({ message: "Failed to create form draft" });
+    }
+  });
+
+  app.patch('/api/forms/draft/:id', isAuthenticated, async (req, res) => {
+    try {
+      const draft = await storage.updateFormDraft(parseInt(req.params.id), req.body);
+      res.json(draft);
+    } catch (error) {
+      console.error("Error updating form draft:", error);
+      res.status(500).json({ message: "Failed to update form draft" });
+    }
+  });
+
+  // Assessment forms endpoints
+  app.get('/api/assessment-forms', isAuthenticated, async (req, res) => {
+    try {
+      const forms = await storage.getAssessmentForms();
+      res.json(forms);
+    } catch (error) {
+      console.error("Error fetching assessment forms:", error);
+      res.status(500).json({ message: "Failed to fetch assessment forms" });
+    }
+  });
+
+  app.post('/api/assessment-forms', isAuthenticated, async (req, res) => {
+    try {
+      const form = await storage.createAssessmentForm(req.body);
+      res.status(201).json(form);
+    } catch (error) {
+      console.error("Error creating assessment form:", error);
+      res.status(500).json({ message: "Failed to create assessment form" });
+    }
+  });
+
+  // Progress tracking endpoints
+  app.get('/api/progress-tracking', isAuthenticated, async (req, res) => {
+    try {
+      const residentId = req.query.residentId ? parseInt(req.query.residentId as string) : undefined;
+      const tracking = await storage.getProgressTracking(residentId);
+      res.json(tracking);
+    } catch (error) {
+      console.error("Error fetching progress tracking:", error);
+      res.status(500).json({ message: "Failed to fetch progress tracking" });
+    }
+  });
+
+  app.post('/api/progress-tracking', isAuthenticated, async (req, res) => {
+    try {
+      const tracking = await storage.createProgressTracking(req.body);
+      res.status(201).json(tracking);
+    } catch (error) {
+      console.error("Error creating progress tracking:", error);
+      res.status(500).json({ message: "Failed to create progress tracking" });
+    }
+  });
+
+  // Staff members endpoints
+  app.get('/api/staff-members', isAuthenticated, async (req, res) => {
+    try {
+      const staff = await storage.getStaffMembers();
+      res.json(staff);
+    } catch (error) {
+      console.error("Error fetching staff members:", error);
+      res.status(500).json({ message: "Failed to fetch staff members" });
+    }
+  });
+
+  app.post('/api/staff-members', isAuthenticated, async (req, res) => {
+    try {
+      const staff = await storage.createStaffMember(req.body);
+      res.status(201).json(staff);
+    } catch (error) {
+      console.error("Error creating staff member:", error);
+      res.status(500).json({ message: "Failed to create staff member" });
+    }
+  });
+
+  // Maintenance requests endpoints
+  app.get('/api/maintenance-requests', isAuthenticated, async (req, res) => {
+    try {
+      const requests = await storage.getMaintenanceRequests();
+      res.json(requests);
+    } catch (error) {
+      console.error("Error fetching maintenance requests:", error);
+      res.status(500).json({ message: "Failed to fetch maintenance requests" });
+    }
+  });
+
+  app.post('/api/maintenance-requests', isAuthenticated, async (req, res) => {
+    try {
+      const request = await storage.createMaintenanceRequest(req.body);
+      res.status(201).json(request);
+    } catch (error) {
+      console.error("Error creating maintenance request:", error);
+      res.status(500).json({ message: "Failed to create maintenance request" });
+    }
+  });
+
+  // Tenancy agreements endpoints
+  app.get('/api/tenancy-agreements', isAuthenticated, async (req, res) => {
+    try {
+      const agreements = await storage.getTenancyAgreements();
+      res.json(agreements);
+    } catch (error) {
+      console.error("Error fetching tenancy agreements:", error);
+      res.status(500).json({ message: "Failed to fetch tenancy agreements" });
+    }
+  });
+
+  app.post('/api/tenancy-agreements', isAuthenticated, async (req, res) => {
+    try {
+      const agreement = await storage.createTenancyAgreement(req.body);
+      res.status(201).json(agreement);
+    } catch (error) {
+      console.error("Error creating tenancy agreement:", error);
+      res.status(500).json({ message: "Failed to create tenancy agreement" });
+    }
+  });
+
+  // Property rooms endpoints
+  app.get('/api/property-rooms/:propertyId', isAuthenticated, async (req, res) => {
+    try {
+      const rooms = await storage.getPropertyRooms(parseInt(req.params.propertyId));
+      res.json(rooms);
+    } catch (error) {
+      console.error("Error fetching property rooms:", error);
+      res.status(500).json({ message: "Failed to fetch property rooms" });
+    }
+  });
+
+  app.post('/api/property-rooms', isAuthenticated, async (req, res) => {
+    try {
+      const room = await storage.createPropertyRoom(req.body);
+      res.status(201).json(room);
+    } catch (error) {
+      console.error("Error creating property room:", error);
+      res.status(500).json({ message: "Failed to create property room" });
+    }
+  });
+
+  // Dashboard metrics endpoint
+  app.get('/api/dashboard/metrics', isAuthenticated, async (req, res) => {
+    try {
+      const metrics = await storage.getDashboardMetrics();
+      res.json(metrics);
+    } catch (error) {
+      console.error("Error fetching dashboard metrics:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard metrics" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

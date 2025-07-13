@@ -1,5 +1,6 @@
 import { useState } from "react";
-import Layout from "@/components/Layout";
+import Sidebar from "@/components/Layout/Sidebar";
+import Header from "@/components/Layout/Header";
 import ReportGenerator from "@/components/Reports/ReportGenerator";
 import OccupancyReport from "@/components/Reports/OccupancyReport";
 import FinancialReport from "@/components/Reports/FinancialReport";
@@ -23,6 +24,7 @@ import {
 export default function Reports() {
   const [selectedReport, setSelectedReport] = useState<string | null>(null);
   const [reportData, setReportData] = useState<any>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const reportTypes = [
     {
@@ -98,42 +100,49 @@ export default function Reports() {
   const selectedReportType = reportTypes.find(r => r.id === selectedReport);
 
   return (
-    <Layout>
-      <div className="space-y-6">
-        {selectedReport ? (
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                onClick={handleBackToReports}
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Reports
-              </Button>
-              <h1 className="text-2xl font-bold">{selectedReportType?.title}</h1>
+    <div className="flex h-screen bg-background">
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      
+      <div className="flex-1 lg:ml-64 flex flex-col">
+        <Header onMenuClick={() => setSidebarOpen(true)} />
+        
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+          {selectedReport ? (
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="outline"
+                  onClick={handleBackToReports}
+                  className="flex items-center gap-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to Reports
+                </Button>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{selectedReportType?.title}</h1>
+              </div>
+              
+              {selectedReportType && (
+                <selectedReportType.component />
+              )}
             </div>
-            
-            {selectedReportType && (
-              <selectedReportType.component />
-            )}
-          </div>
-        ) : (
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">Reports & Analytics</h1>
-              <p className="text-muted-foreground">
-                Generate comprehensive reports to track performance, analyze trends, and make data-driven decisions.
-              </p>
-            </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="mb-6 sm:mb-8">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Reports & Analytics</h1>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Generate comprehensive reports to track performance, analyze trends, and make data-driven decisions.
+                </p>
+              </div>
 
-            {/* Report Generator */}
-            <ReportGenerator onGenerate={handleReportGenerate} />
+              {/* Report Generator */}
+              <div className="mb-6 sm:mb-8">
+                <ReportGenerator onGenerate={handleReportGenerate} />
+              </div>
 
-            {/* Quick Report Access */}
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Quick Report Access</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Quick Report Access */}
+              <div>
+                <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Quick Report Access</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {reportTypes.map((report) => {
                   const Icon = report.icon;
                   return (
@@ -240,7 +249,8 @@ export default function Reports() {
             </div>
           </div>
         )}
+        </main>
       </div>
-    </Layout>
+    </div>
   );
 }

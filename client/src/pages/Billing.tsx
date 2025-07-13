@@ -17,7 +17,8 @@ import {
   Download
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import Layout from '@/components/Layout';
+import Sidebar from '@/components/Layout/Sidebar';
+import Header from '@/components/Layout/Header';
 import { GovernmentClientsTab } from '@/components/Billing/GovernmentClientsTab';
 import { InvoicesTab } from '@/components/Billing/InvoicesTab';
 import { BillingPeriodsTab } from '@/components/Billing/BillingPeriodsTab';
@@ -41,6 +42,7 @@ interface BillingAnalyticsData {
 
 export default function Billing() {
   const [activeTab, setActiveTab] = useState('overview');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const { data: analytics, isLoading: analyticsLoading } = useQuery<BillingAnalyticsData>({
     queryKey: ['/api/billing/analytics'],
@@ -70,52 +72,66 @@ export default function Billing() {
 
   if (analyticsLoading) {
     return (
-      <Layout>
-        <div className="p-6 space-y-6">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-24 bg-gray-200 rounded"></div>
-              ))}
+      <div className="flex h-screen bg-background">
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        
+        <div className="flex-1 lg:ml-64 flex flex-col">
+          <Header onMenuClick={() => setSidebarOpen(true)} />
+          
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="h-24 bg-gray-200 rounded"></div>
+                ))}
+              </div>
             </div>
-          </div>
+          </main>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <div className="p-6 space-y-6">
+    <div className="flex h-screen bg-background">
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      
+      <div className="flex-1 lg:ml-64 flex flex-col">
+        <Header onMenuClick={() => setSidebarOpen(true)} />
+        
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Government Billing
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Manage invoicing and billing for government clients
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm">
-              <Filter className="h-4 w-4 mr-2" />
-              Filter
-            </Button>
-            <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
-            <Button size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Create Invoice
-            </Button>
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Government Billing
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
+                Manage invoicing and billing for government clients
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm">
+                <Filter className="h-4 w-4 mr-2" />
+                Filter
+              </Button>
+              <Button variant="outline" size="sm">
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+              <Button size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                Create Invoice
+              </Button>
+            </div>
           </div>
         </div>
 
         {/* Analytics Overview */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="mb-6 sm:mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
@@ -183,6 +199,7 @@ export default function Billing() {
               </div>
             </CardContent>
           </Card>
+          </div>
         </div>
 
         {/* Main Content Tabs */}
@@ -215,7 +232,8 @@ export default function Billing() {
             <SupportLevelRatesTab />
           </TabsContent>
         </Tabs>
+        </main>
       </div>
-    </Layout>
+    </div>
   );
 }

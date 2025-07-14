@@ -16,6 +16,8 @@ export default function UniversalFooter() {
     legal: [
       { name: 'Privacy', href: '/privacy' },
       { name: 'Terms', href: '/terms' },
+    ],
+    legalSecondary: [
       { name: 'Cookies', href: '/cookies' },
       { name: 'Accessibility', href: '/accessibility' },
     ],
@@ -24,38 +26,6 @@ export default function UniversalFooter() {
   return (
     <footer className="bg-neutral-800 text-white" role="contentinfo">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        {/* Emergency Contacts Banner */}
-        <div className="bg-error/10 border border-error/20 rounded p-1 mb-4">
-          <div className="flex items-center justify-center space-x-4 flex-wrap">
-            <div className="flex items-center space-x-1">
-              <AlertTriangle className="h-3 w-3 text-error" aria-hidden="true" />
-              <span className="text-xs font-medium text-error">Crisis:</span>
-              <a 
-                href="tel:08001234567" 
-                className="text-white font-semibold hover:text-error transition-colors text-xs"
-                aria-label="24/7 Crisis helpline"
-              >
-                0800 123 4567
-              </a>
-            </div>
-            <div className="flex items-center space-x-1">
-              <Phone className="h-3 w-3 text-warning" aria-hidden="true" />
-              <span className="text-xs font-medium text-warning">Support:</span>
-              <a 
-                href="tel:+441611234568" 
-                className="text-white font-semibold hover:text-warning transition-colors text-xs"
-                aria-label="Technical support line"
-              >
-                +44 161 123 4568
-              </a>
-            </div>
-            <div className="flex items-center space-x-1">
-              <Clock className="h-3 w-3 text-info" aria-hidden="true" />
-              <span className="text-xs text-info">24/7</span>
-            </div>
-          </div>
-        </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Company Info */}
           <div className="space-y-2">
@@ -143,6 +113,18 @@ export default function UniversalFooter() {
                   </li>
                 ))}
               </ul>
+              <ul className="flex space-x-2 mt-1">
+                {footerLinks.legalSecondary.map((link) => (
+                  <li key={link.name}>
+                    <a 
+                      href={link.href}
+                      className="text-neutral-300 hover:text-white text-xs transition-colors"
+                    >
+                      {link.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </nav>
             <div className="flex space-x-2 mt-2">
               <a href="https://twitter.com/yuthub" className="text-neutral-400 hover:text-white transition-colors" aria-label="Twitter">
@@ -159,7 +141,7 @@ export default function UniversalFooter() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-neutral-600 mt-3 pt-2">
+        <div className="border-t border-neutral-600 mt-2 pt-2">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-1 md:space-y-0">
             <div className="flex items-center space-x-3 text-xs text-neutral-400">
               <span>© {currentYear} YUTHUB</span>

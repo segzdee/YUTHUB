@@ -1,0 +1,305 @@
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Link } from 'wouter';
+import { 
+  TrendingUp, 
+  TrendingDown, 
+  Users, 
+  Building, 
+  AlertTriangle, 
+  DollarSign,
+  Clock,
+  CheckCircle,
+  Target,
+  Shield
+} from 'lucide-react';
+import { useCrossModuleIntegration } from '@/lib/dataIntegration';
+import type { Resident, Property, Incident, SupportPlan, FinancialRecord, Invoice } from '@shared/schema';
+
+interface CrossModuleWidgetProps {
+  title: string;
+  type: 'overview' | 'risk-assessment' | 'financial-summary' | 'occupancy-status' | 'incident-alerts' | 'support-progress';
+  className?: string;
+}
+
+export default function CrossModuleWidget({ title, type, className = '' }: CrossModuleWidgetProps) {
+  const { calculateMetrics } = useCrossModuleIntegration();
+
+  // Fetch data from all relevant modules
+  const { data: residents = [] } = useQuery<Resident[]>({ queryKey: ['/api/residents'] });
+  const { data: properties = [] } = useQuery<Property[]>({ queryKey: ['/api/properties'] });
+  const { data: incidents = [] } = useQuery<Incident[]>({ queryKey: ['/api/incidents'] });
+  const { data: supportPlans = [] } = useQuery<SupportPlan[]>({ queryKey: ['/api/support-plans'] });
+  const { data: financialRecords = [] } = useQuery<FinancialRecord[]>({ queryKey: ['/api/financial-records'] });
+  const { data: invoices = [] } = useQuery<Invoice[]>({ queryKey: ['/api/invoices'] });
+
+  // Calculate cross-module metrics
+  const metrics = calculateMetrics();
+
+  const renderContent = () => {
+    switch (type) {
+      case 'overview':
+        return (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">{residents.length}</div>
+                <div className="text-sm text-gray-600">Total Residents</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">{properties.length}</div>
+                <div className="text-sm text-gray-600">Properties</div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Occupancy Rate</span>
+                <span className="text-sm font-semibold">{metrics.occupancyRate.toFixed(1)}%</span>
+              </div>
+              <Progress value={metrics.occupancyRate} className="h-2" />
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Active Support Plans</span>
+              <Badge variant="outline">{metrics.activeSupportPlans}</Badge>
+            </div>
+          </div>
+        );
+
+      case 'risk-assessment':
+        const riskResidents = residents.filter(r => r.riskLevel === 'high');
+        const recentIncidents = incidents.filter(i => 
+          new Date(i.createdAt).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000
+        );
+        
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-500" />
+              <span className="font-medium">Risk Assessment</span>
+            </div>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm">High Risk Residents</span>
+                <Badge variant="destructive">{riskResidents.length}</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Recent Incidents (7 days)</span>
+                <Badge variant="outline">{recentIncidents.length}</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Incident Rate</span>
+                <span className="text-sm font-semibold">{metrics.incidentRate.toFixed(2)}</span>
+              </div>
+            </div>
+            <Link href="/safeguarding">
+              <Button variant="outline" size="sm" className="w-full">
+                View Safeguarding
+              </Button>
+            </Link>
+          </div>
+        );
+
+      case 'financial-summary':
+        const monthlyExpenses = financialRecords
+          .filter(r => r.type === 'expense' && 
+            new Date(r.date).getMonth() === new Date().getMonth())
+          .reduce((sum, r) => sum + r.amount, 0);
+        
+        const pendingAmount = invoices
+          .filter(i => i.status === 'pending')
+          .reduce((sum, i) => sum + i.totalAmount, 0);
+
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-green-500" />
+              <span className="font-medium">Financial Summary</span>
+            </div>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Monthly Revenue</span>
+                <span className="text-sm font-semibold text-green-600">
+                  £{metrics.monthlyRevenue.toLocaleString()}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Monthly Expenses</span>
+                <span className="text-sm font-semibold text-red-600">
+                  £{monthlyExpenses.toLocaleString()}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Pending Invoices</span>
+                <Badge variant="outline">{metrics.pendingInvoices}</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Pending Amount</span>
+                <span className="text-sm font-semibold">
+                  £{pendingAmount.toLocaleString()}
+                </span>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Link href="/financials">
+                <Button variant="outline" size="sm" className="w-full">
+                  Financials
+                </Button>
+              </Link>
+              <Link href="/billing">
+                <Button variant="outline" size="sm" className="w-full">
+                  Billing
+                </Button>
+              </Link>
+            </div>
+          </div>
+        );
+
+      case 'occupancy-status':
+        const totalCapacity = properties.reduce((sum, p) => sum + p.capacity, 0);
+        const currentOccupancy = residents.length;
+        const availableSpaces = totalCapacity - currentOccupancy;
+        
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Building className="h-5 w-5 text-blue-500" />
+              <span className="font-medium">Occupancy Status</span>
+            </div>
+            <div className="space-y-3">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-blue-600">{currentOccupancy}</div>
+                <div className="text-sm text-gray-600">of {totalCapacity} occupied</div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Occupancy Rate</span>
+                  <span className="text-sm font-semibold">{metrics.occupancyRate.toFixed(1)}%</span>
+                </div>
+                <Progress value={metrics.occupancyRate} className="h-2" />
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Available Spaces</span>
+                <Badge variant={availableSpaces > 0 ? "default" : "destructive"}>
+                  {availableSpaces}
+                </Badge>
+              </div>
+            </div>
+            <Link href="/housing">
+              <Button variant="outline" size="sm" className="w-full">
+                View Housing
+              </Button>
+            </Link>
+          </div>
+        );
+
+      case 'incident-alerts':
+        const openIncidents = incidents.filter(i => i.status === 'open');
+        const criticalIncidents = incidents.filter(i => i.severity === 'critical');
+        const recentIncidents24h = incidents.filter(i => 
+          new Date(i.createdAt).getTime() > Date.now() - 24 * 60 * 60 * 1000
+        );
+        
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-red-500" />
+              <span className="font-medium">Incident Alerts</span>
+            </div>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Open Incidents</span>
+                <Badge variant="destructive">{openIncidents.length}</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Critical Incidents</span>
+                <Badge variant="destructive">{criticalIncidents.length}</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Last 24 Hours</span>
+                <Badge variant="outline">{recentIncidents24h.length}</Badge>
+              </div>
+              {openIncidents.length > 0 && (
+                <div className="bg-red-50 p-3 rounded-lg">
+                  <div className="flex items-center gap-2 text-red-700 text-sm">
+                    <AlertTriangle className="h-4 w-4" />
+                    <span>Immediate attention required</span>
+                  </div>
+                </div>
+              )}
+            </div>
+            <Link href="/safeguarding">
+              <Button variant="outline" size="sm" className="w-full">
+                View Incidents
+              </Button>
+            </Link>
+          </div>
+        );
+
+      case 'support-progress':
+        const completedPlans = supportPlans.filter(sp => sp.status === 'completed');
+        const activePlans = supportPlans.filter(sp => sp.status === 'active');
+        const pausedPlans = supportPlans.filter(sp => sp.status === 'paused');
+        
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-green-500" />
+              <span className="font-medium">Support Progress</span>
+            </div>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Active Plans</span>
+                <Badge variant="default">{activePlans.length}</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Completed Plans</span>
+                <Badge variant="outline">{completedPlans.length}</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Paused Plans</span>
+                <Badge variant="secondary">{pausedPlans.length}</Badge>
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Avg Independence Level</span>
+                  <span className="text-sm font-semibold">
+                    {metrics.independenceProgressAverage.toFixed(1)}/5
+                  </span>
+                </div>
+                <Progress value={metrics.independenceProgressAverage * 20} className="h-2" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Link href="/support">
+                <Button variant="outline" size="sm" className="w-full">
+                  Support
+                </Button>
+              </Link>
+              <Link href="/independence">
+                <Button variant="outline" size="sm" className="w-full">
+                  Independence
+                </Button>
+              </Link>
+            </div>
+          </div>
+        );
+
+      default:
+        return <div>Unknown widget type</div>;
+    }
+  };
+
+  return (
+    <Card className={className}>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {renderContent()}
+      </CardContent>
+    </Card>
+  );
+}

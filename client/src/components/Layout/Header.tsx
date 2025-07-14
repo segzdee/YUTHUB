@@ -3,6 +3,7 @@ import { AlertTriangle, Bell, Menu } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import CrisisModal from "@/components/CrisisConnect/CrisisModal";
+import CrossModuleSearch from "@/components/CrossModule/CrossModuleSearch";
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -42,6 +43,11 @@ export default function Header({ onMenuClick }: HeaderProps) {
           </div>
           
           <div className="flex items-center space-x-2 sm:space-x-4">
+            {/* Cross-Module Search */}
+            <div className="hidden md:block w-64">
+              <CrossModuleSearch />
+            </div>
+            
             {/* Crisis Connect Button */}
             <Button
               onClick={() => setShowCrisisModal(true)}

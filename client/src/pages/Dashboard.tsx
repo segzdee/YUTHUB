@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useRealTimeUpdates } from "@/hooks/useRealTimeUpdates";
 import Sidebar from "@/components/Layout/Sidebar";
 import Header from "@/components/Layout/Header";
 import MetricsCards from "@/components/Dashboard/MetricsCards";
@@ -10,11 +11,15 @@ import PropertiesTable from "@/components/Dashboard/PropertiesTable";
 import RiskInsights from "@/components/Dashboard/RiskInsights";
 import QuickActions from "@/components/Dashboard/QuickActions";
 import SubscriptionCard from "@/components/Dashboard/SubscriptionCard";
+import CrossModuleWidget from "@/components/CrossModule/CrossModuleWidget";
 
 export default function Dashboard() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  
+  // Initialize real-time updates for cross-module data integration
+  useRealTimeUpdates();
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -72,6 +77,34 @@ export default function Dashboard() {
             <div className="lg:col-span-1">
               <ActivityFeed />
             </div>
+          </div>
+
+          {/* Cross-Module Integration Widgets */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            <CrossModuleWidget 
+              title="System Overview" 
+              type="overview" 
+            />
+            <CrossModuleWidget 
+              title="Risk Assessment" 
+              type="risk-assessment" 
+            />
+            <CrossModuleWidget 
+              title="Financial Summary" 
+              type="financial-summary" 
+            />
+            <CrossModuleWidget 
+              title="Occupancy Status" 
+              type="occupancy-status" 
+            />
+            <CrossModuleWidget 
+              title="Incident Alerts" 
+              type="incident-alerts" 
+            />
+            <CrossModuleWidget 
+              title="Support Progress" 
+              type="support-progress" 
+            />
           </div>
 
           {/* Data Tables */}

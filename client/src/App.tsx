@@ -22,6 +22,7 @@ import Crisis from "@/pages/Crisis";
 import Financials from "@/pages/Financials";
 import Settings from "@/pages/Settings";
 import Help from "@/pages/Help";
+import Login from "@/pages/Login";
 import PropertyRegistration from "@/pages/forms/PropertyRegistration";
 import ResidentIntake from "@/pages/forms/ResidentIntake";
 import IncidentReport from "@/pages/forms/IncidentReport";
@@ -45,6 +46,7 @@ function Router() {
         <>
           <Route path="/" component={Landing} />
           <Route path="/pricing" component={Pricing} />
+          <Route path="/login" component={Login} />
         </>
       ) : (
         <>

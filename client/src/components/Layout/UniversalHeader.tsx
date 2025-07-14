@@ -8,7 +8,7 @@ export default function UniversalHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleLogin = () => {
-    window.location.href = '/api/login';
+    window.location.href = '/login';
   };
 
   const handleLogout = () => {

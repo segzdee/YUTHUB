@@ -48,6 +48,222 @@
   }
 }
 
+/* Login page specific styles */
+.login-container {
+  background: linear-gradient(135deg, hsl(var(--primary-50)) 0%, hsl(var(--secondary-50)) 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.login-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.security-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: hsl(var(--success));
+  font-size: 0.875rem;
+}
+
+.security-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.trust-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  color: hsl(var(--medium-contrast));
+  font-size: 0.875rem;
+}
+
+.trust-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.password-strength-indicator {
+  height: 0.5rem;
+  background: hsl(var(--neutral-200));
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.password-strength-bar {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.form-error {
+  color: hsl(var(--error));
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.login-button {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.login-button:hover:not(:disabled) {
+  background: hsl(var(--primary-600));
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.login-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.login-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.login-input:focus {
+  outline: none;
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.login-input.error {
+  border-color: hsl(var(--error));
+}
+
+.login-input.error:focus {
+  border-color: hsl(var(--error));
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  background: hsl(var(--primary));
+  border-radius: 50%;
+  margin-bottom: 1rem;
+}
+
+.brand-logo svg {
+  width: 2rem;
+  height: 2rem;
+  color: hsl(var(--primary-foreground));
+}
+
+/* Professional form validation styles */
+.form-field {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: hsl(var(--high-contrast));
+}
+
+.form-group {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: hsl(var(--medium-contrast));
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: color 0.2s ease;
+}
+
+.password-toggle:hover {
+  color: hsl(var(--high-contrast));
+}
+
+.forgot-password {
+  color: hsl(var(--primary));
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: color 0.2s ease;
+}
+
+.forgot-password:hover {
+  color: hsl(var(--primary-600));
+}
+
+.sso-button {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background: white;
+  color: hsl(var(--high-contrast));
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.sso-button:hover:not(:disabled) {
+  background: hsl(var(--neutral-50));
+  border-color: hsl(var(--primary));
+}
+
 /* YUTHUB Design System */
 @layer base {
   :root {

@@ -96,7 +96,7 @@ export default function Pricing() {
       window.location.href = `/subscribe?tier=${tier.name.toLowerCase()}`;
     } else {
       // Redirect to login first
-      window.location.href = '/api/login';
+      window.location.href = '/login';
     }
   };
 

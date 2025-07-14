@@ -1,103 +1,229 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Sidebar from "@/components/Layout/Sidebar";
 import Header from "@/components/Layout/Header";
-import ReportGenerator from "@/components/Reports/ReportGenerator";
-import OccupancyReport from "@/components/Reports/OccupancyReport";
-import FinancialReport from "@/components/Reports/FinancialReport";
-import IncidentReport from "@/components/Reports/IncidentReport";
-import ProgressReport from "@/components/Reports/ProgressReport";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { 
+  FileText, 
+  Download, 
+  Calendar as CalendarIcon, 
+  Filter, 
+  Plus, 
   BarChart3, 
-  DollarSign, 
-  AlertTriangle, 
-  TrendingUp, 
-  Shield, 
-  Wrench, 
   Users, 
+  Building, 
+  AlertTriangle,
+  TrendingUp,
+  DollarSign,
   FileCheck,
-  ArrowLeft 
+  Clock
 } from "lucide-react";
+import type { Property } from "@shared/schema";
 
 export default function Reports() {
-  const [selectedReport, setSelectedReport] = useState<string | null>(null);
-  const [reportData, setReportData] = useState<any>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedDateRange, setSelectedDateRange] = useState<{
+    from: Date;
+    to: Date;
+  }>({
+    from: new Date(new Date().setDate(new Date().getDate() - 30)),
+    to: new Date(),
+  });
+  const [selectedProperty, setSelectedProperty] = useState<string>("all");
+  const [reportType, setReportType] = useState<string>("all");
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const reportTypes = [
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { data: properties = [] } = useQuery<Property[]>({
+    queryKey: ["/api/properties"],
+  });
+
+  const generateReportMutation = useMutation({
+    mutationFn: async (reportData: {
+      type: string;
+      dateRange: { from: Date; to: Date };
+      propertyId?: string;
+      filters?: any;
+    }) => {
+      const response = await apiRequest("POST", "/api/reports/generate", reportData);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Report Generated",
+        description: "Your report has been generated successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/reports"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to generate report. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const reportTemplates = [
     {
       id: "occupancy",
       title: "Occupancy Report",
-      description: "Property occupancy rates, trends, and vacancy analysis",
-      icon: BarChart3,
-      component: OccupancyReport,
-      category: "Housing",
-      complexity: "Medium",
+      description: "Track property occupancy rates and trends",
+      icon: Building,
+      category: "housing",
+      frequency: "Monthly",
+      estimatedTime: "5 minutes",
     },
     {
       id: "financial",
-      title: "Financial Report", 
-      description: "Income, expenses, profit analysis, and budget tracking",
+      title: "Financial Report",
+      description: "Revenue, expenses, and budget analysis",
       icon: DollarSign,
-      component: FinancialReport,
-      category: "Finance",
-      complexity: "High",
+      category: "financial",
+      frequency: "Monthly",
+      estimatedTime: "8 minutes",
     },
     {
       id: "incident",
       title: "Incident Report",
-      description: "Safety incidents, risk analysis, and resolution tracking",
+      description: "Safety incidents and resolution tracking",
       icon: AlertTriangle,
-      component: IncidentReport,
-      category: "Safety",
-      complexity: "Medium",
+      category: "safeguarding",
+      frequency: "Weekly",
+      estimatedTime: "3 minutes",
     },
     {
       id: "progress",
       title: "Progress Report",
-      description: "Resident progress, goal achievements, and outcomes",
+      description: "Resident progress and goal achievements",
       icon: TrendingUp,
-      component: ProgressReport,
-      category: "Residents",
-      complexity: "High",
+      category: "outcomes",
+      frequency: "Monthly",
+      estimatedTime: "10 minutes",
+    },
+    {
+      id: "compliance",
+      title: "Compliance Report",
+      description: "Regulatory compliance and audit trail",
+      icon: FileCheck,
+      category: "compliance",
+      frequency: "Quarterly",
+      estimatedTime: "15 minutes",
+    },
+    {
+      id: "risk",
+      title: "Risk Assessment Report",
+      description: "Risk levels and mitigation strategies",
+      icon: AlertTriangle,
+      category: "safeguarding",
+      frequency: "Monthly",
+      estimatedTime: "12 minutes",
+    },
+    {
+      id: "maintenance",
+      title: "Maintenance Report",
+      description: "Property maintenance and repair tracking",
+      icon: Building,
+      category: "maintenance",
+      frequency: "Monthly",
+      estimatedTime: "6 minutes",
+    },
+    {
+      id: "staff",
+      title: "Staff Performance Report",
+      description: "Staff productivity and performance metrics",
+      icon: Users,
+      category: "staff",
+      frequency: "Monthly",
+      estimatedTime: "8 minutes",
     },
   ];
 
-  const handleReportSelect = (reportId: string) => {
-    setSelectedReport(reportId);
-  };
-
-  const handleBackToReports = () => {
-    setSelectedReport(null);
-    setReportData(null);
-  };
-
-  const handleReportGenerate = (data: any) => {
-    setReportData(data);
-  };
-
-  const getComplexityColor = (complexity: string) => {
-    switch (complexity) {
-      case "Low": return "bg-green-100 text-green-800";
-      case "Medium": return "bg-yellow-100 text-yellow-800";
-      case "High": return "bg-red-100 text-red-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
+  const recentReports = [
+    {
+      id: 1,
+      title: "Monthly Occupancy Report - December 2023",
+      type: "Occupancy",
+      generatedAt: "2024-01-15 10:30",
+      generatedBy: "Sarah Johnson",
+      status: "Completed",
+      size: "2.4 MB",
+      format: "PDF",
+    },
+    {
+      id: 2,
+      title: "Q4 2023 Financial Report",
+      type: "Financial",
+      generatedAt: "2024-01-14 15:45",
+      generatedBy: "David Lee",
+      status: "Completed",
+      size: "3.1 MB",
+      format: "Excel",
+    },
+    {
+      id: 3,
+      title: "Weekly Incident Report - Week 2",
+      type: "Incident",
+      generatedAt: "2024-01-12 09:15",
+      generatedBy: "Emma Wilson",
+      status: "Completed",
+      size: "1.8 MB",
+      format: "PDF",
+    },
+  ];
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case "Housing": return "bg-blue-100 text-blue-800";
-      case "Finance": return "bg-green-100 text-green-800";
-      case "Safety": return "bg-red-100 text-red-800";
-      case "Residents": return "bg-purple-100 text-purple-800";
+      case "housing": return "bg-blue-100 text-blue-800";
+      case "financial": return "bg-green-100 text-green-800";
+      case "safeguarding": return "bg-red-100 text-red-800";
+      case "outcomes": return "bg-purple-100 text-purple-800";
+      case "compliance": return "bg-yellow-100 text-yellow-800";
+      case "maintenance": return "bg-gray-100 text-gray-800";
+      case "staff": return "bg-indigo-100 text-indigo-800";
       default: return "bg-gray-100 text-gray-800";
     }
   };
 
-  const selectedReportType = reportTypes.find(r => r.id === selectedReport);
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "Completed": return "bg-green-100 text-green-800";
+      case "Generating": return "bg-yellow-100 text-yellow-800";
+      case "Failed": return "bg-red-100 text-red-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const handleGenerateReport = async (reportId: string) => {
+    setIsGenerating(true);
+    try {
+      await generateReportMutation.mutateAsync({
+        type: reportId,
+        dateRange: selectedDateRange,
+        propertyId: selectedProperty !== "all" ? selectedProperty : undefined,
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const filteredTemplates = reportTemplates.filter(template => {
+    if (reportType === "all") return true;
+    return template.category === reportType;
+  });
 
   return (
     <div className="flex h-screen bg-background">
@@ -107,46 +233,107 @@ export default function Reports() {
         <Header onMenuClick={() => setSidebarOpen(true)} />
         
         <main className="flex-1 overflow-y-auto p-4 sm:p-6">
-          {selectedReport ? (
-            <div className="space-y-6">
-              <div className="flex items-center gap-4">
-                <Button
-                  variant="outline"
-                  onClick={handleBackToReports}
-                  className="flex items-center gap-2"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Back to Reports
-                </Button>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{selectedReportType?.title}</h1>
-              </div>
-              
-              {selectedReportType && (
-                <selectedReportType.component />
-              )}
-            </div>
-          ) : (
-            <div className="space-y-6">
-              <div className="mb-6 sm:mb-8">
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Reports & Analytics</h1>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Generate comprehensive reports to track performance, analyze trends, and make data-driven decisions.
-                </p>
-              </div>
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Reports</h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Generate comprehensive reports and analytics for your organization
+            </p>
+          </div>
 
-              {/* Report Generator */}
-              <div className="mb-6 sm:mb-8">
-                <ReportGenerator onGenerate={handleReportGenerate} />
-              </div>
+          <Tabs defaultValue="generate" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="generate">Generate Reports</TabsTrigger>
+              <TabsTrigger value="scheduled">Scheduled</TabsTrigger>
+              <TabsTrigger value="recent">Recent</TabsTrigger>
+            </TabsList>
 
-              {/* Quick Report Access */}
-              <div>
-                <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Quick Report Access</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {reportTypes.map((report) => {
-                  const Icon = report.icon;
+            <TabsContent value="generate" className="space-y-6">
+              {/* Filters */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Filter className="h-5 w-5" />
+                    Report Filters
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Date Range</label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className="w-full justify-start">
+                            <CalendarIcon className="h-4 w-4 mr-2" />
+                            {selectedDateRange.from && selectedDateRange.to ? (
+                              `${format(selectedDateRange.from, "PPP")} - ${format(selectedDateRange.to, "PPP")}`
+                            ) : (
+                              "Select date range"
+                            )}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            initialFocus
+                            mode="range"
+                            defaultMonth={selectedDateRange.from}
+                            selected={selectedDateRange}
+                            onSelect={(range) => {
+                              if (range?.from && range?.to) {
+                                setSelectedDateRange({ from: range.from, to: range.to });
+                              }
+                            }}
+                            numberOfMonths={2}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Property</label>
+                      <Select value={selectedProperty} onValueChange={setSelectedProperty}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select property" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Properties</SelectItem>
+                          {properties.map((property) => (
+                            <SelectItem key={property.id} value={property.id.toString()}>
+                              {property.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Category</label>
+                      <Select value={reportType} onValueChange={setReportType}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Categories</SelectItem>
+                          <SelectItem value="housing">Housing</SelectItem>
+                          <SelectItem value="financial">Financial</SelectItem>
+                          <SelectItem value="safeguarding">Safeguarding</SelectItem>
+                          <SelectItem value="outcomes">Outcomes</SelectItem>
+                          <SelectItem value="compliance">Compliance</SelectItem>
+                          <SelectItem value="maintenance">Maintenance</SelectItem>
+                          <SelectItem value="staff">Staff</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Report Templates */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredTemplates.map((template) => {
+                  const Icon = template.icon;
+                  
                   return (
-                    <Card key={report.id} className="cursor-pointer hover:shadow-md transition-shadow">
+                    <Card key={template.id} className="hover:shadow-md transition-shadow">
                       <CardHeader>
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-3">
@@ -154,29 +341,43 @@ export default function Reports() {
                               <Icon className="h-5 w-5 text-primary" />
                             </div>
                             <div>
-                              <CardTitle className="text-lg">{report.title}</CardTitle>
+                              <CardTitle className="text-lg">{template.title}</CardTitle>
+                              <CardDescription>{template.description}</CardDescription>
                             </div>
                           </div>
-                          <div className="flex gap-2">
-                            <Badge className={getCategoryColor(report.category)}>
-                              {report.category}
-                            </Badge>
-                            <Badge className={getComplexityColor(report.complexity)}>
-                              {report.complexity}
-                            </Badge>
-                          </div>
+                          <Badge className={getCategoryColor(template.category)}>
+                            {template.category}
+                          </Badge>
                         </div>
-                        <CardDescription>
-                          {report.description}
-                        </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="flex justify-end">
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <span className="text-gray-600 dark:text-gray-400">Frequency</span>
+                              <div className="font-medium">{template.frequency}</div>
+                            </div>
+                            <div>
+                              <span className="text-gray-600 dark:text-gray-400">Est. Time</span>
+                              <div className="font-medium">{template.estimatedTime}</div>
+                            </div>
+                          </div>
                           <Button 
-                            onClick={() => handleReportSelect(report.id)}
-                            size="sm"
+                            className="w-full" 
+                            onClick={() => handleGenerateReport(template.id)}
+                            disabled={isGenerating}
                           >
-                            View Report
+                            {isGenerating ? (
+                              <>
+                                <Clock className="h-4 w-4 mr-2 animate-spin" />
+                                Generating...
+                              </>
+                            ) : (
+                              <>
+                                <BarChart3 className="h-4 w-4 mr-2" />
+                                Generate Report
+                              </>
+                            )}
                           </Button>
                         </div>
                       </CardContent>
@@ -184,71 +385,84 @@ export default function Reports() {
                   );
                 })}
               </div>
-            </div>
+            </TabsContent>
 
-            {/* Report Categories */}
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Report Categories</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center gap-2">
-                      <BarChart3 className="h-5 w-5 text-blue-600" />
-                      <CardTitle className="text-base">Housing Analytics</CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      Occupancy rates, property performance, and housing trends
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center gap-2">
-                      <DollarSign className="h-5 w-5 text-green-600" />
-                      <CardTitle className="text-base">Financial Analysis</CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      Revenue, expenses, budgets, and financial health metrics
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center gap-2">
-                      <Users className="h-5 w-5 text-purple-600" />
-                      <CardTitle className="text-base">Resident Progress</CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      Goal tracking, outcomes, and independence development
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center gap-2">
-                      <Shield className="h-5 w-5 text-red-600" />
-                      <CardTitle className="text-base">Safety & Compliance</CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      Incidents, risk assessments, and regulatory compliance
-                    </p>
-                  </CardContent>
-                </Card>
+            <TabsContent value="scheduled" className="space-y-6">
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Scheduled Reports</h2>
+                <Button className="flex items-center gap-2">
+                  <Plus className="h-4 w-4" />
+                  Schedule Report
+                </Button>
               </div>
-            </div>
-          </div>
-        )}
+
+              <Card>
+                <CardContent className="flex items-center justify-center py-8">
+                  <div className="text-center">
+                    <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500">No scheduled reports</p>
+                    <p className="text-sm text-gray-400 mt-1">Schedule reports to run automatically</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="recent" className="space-y-6">
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Reports</h2>
+                <Button variant="outline" className="flex items-center gap-2">
+                  <Download className="h-4 w-4" />
+                  Export All
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                {recentReports.map((report) => (
+                  <Card key={report.id} className="hover:shadow-md transition-shadow">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-primary/10 rounded-lg">
+                            <FileText className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-lg">{report.title}</CardTitle>
+                            <CardDescription className="flex items-center gap-2">
+                              <span>{report.type}</span>
+                              <span>•</span>
+                              <span>{report.generatedAt}</span>
+                              <span>•</span>
+                              <span>{report.generatedBy}</span>
+                            </CardDescription>
+                          </div>
+                        </div>
+                        <Badge className={getStatusColor(report.status)}>
+                          {report.status}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                          <span>Size: {report.size}</span>
+                          <span>Format: {report.format}</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="outline">
+                            <Download className="h-3 w-3 mr-1" />
+                            Download
+                          </Button>
+                          <Button size="sm" variant="outline">
+                            Share
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
         </main>
       </div>
     </div>

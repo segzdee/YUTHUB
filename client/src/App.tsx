@@ -23,6 +23,10 @@ import Financials from "@/pages/Financials";
 import Settings from "@/pages/Settings";
 import Help from "@/pages/Help";
 import Login from "@/pages/Login";
+import Privacy from "@/pages/Privacy";
+import Terms from "@/pages/Terms";
+import Cookies from "@/pages/Cookies";
+import Accessibility from "@/pages/Accessibility";
 import PropertyRegistration from "@/pages/forms/PropertyRegistration";
 import ResidentIntake from "@/pages/forms/ResidentIntake";
 import IncidentReport from "@/pages/forms/IncidentReport";
@@ -47,6 +51,10 @@ function Router() {
           <Route path="/" component={Landing} />
           <Route path="/pricing" component={Pricing} />
           <Route path="/login" component={Login} />
+          <Route path="/privacy" component={Privacy} />
+          <Route path="/terms" component={Terms} />
+          <Route path="/cookies" component={Cookies} />
+          <Route path="/accessibility" component={Accessibility} />
         </>
       ) : (
         <>
@@ -71,6 +79,10 @@ function Router() {
           <Route path="/forms/incident-report" component={IncidentReport} />
           <Route path="/forms/progress-tracking" component={ProgressTracking} />
           <Route path="/forms/support-plan" component={SupportPlan} />
+          <Route path="/privacy" component={Privacy} />
+          <Route path="/terms" component={Terms} />
+          <Route path="/cookies" component={Cookies} />
+          <Route path="/accessibility" component={Accessibility} />
         </>
       )}
       <Route component={NotFound} />

@@ -1762,3 +1762,672 @@ export type SurveyResponse = typeof surveyResponses.$inferSelect;
 export type InsertSurveyResponse = z.infer<typeof insertSurveyResponseSchema>;
 export type IntegrationLog = typeof integrationLogs.$inferSelect;
 export type InsertIntegrationLog = z.infer<typeof insertIntegrationLogSchema>;
+
+// =================== SUBSCRIPTION MANAGEMENT SYSTEM ===================
+
+// Subscription plans defining tiers with pricing, features, and limits
+export const subscriptionPlans = pgTable("subscription_plans", {
+  id: serial("id").primaryKey(),
+  planName: varchar("plan_name").notNull(), // 'starter', 'professional', 'enterprise', 'trial'
+  displayName: varchar("display_name").notNull(), // 'Starter Plan', 'Professional Plan', etc.
+  description: text("description"),
+  monthlyPrice: decimal("monthly_price", { precision: 10, scale: 2 }).notNull(),
+  annualPrice: decimal("annual_price", { precision: 10, scale: 2 }).notNull(),
+  annualDiscountPercent: integer("annual_discount_percent").default(15),
+  maxResidents: integer("max_residents"), // 25 for Starter, 100 for Professional, null for unlimited
+  maxProperties: integer("max_properties"), // Property limits per tier
+  maxUsers: integer("max_users"), // Staff user limits
+  maxApiCalls: integer("max_api_calls"), // API rate limits
+  maxStorage: integer("max_storage"), // Storage limits in GB
+  features: jsonb("features").notNull(), // Available features for this tier
+  isActive: boolean("is_active").default(true),
+  sortOrder: integer("sort_order").default(0),
+  trialDays: integer("trial_days").default(14),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_subscription_plans_plan_name").on(table.planName),
+  index("idx_subscription_plans_is_active").on(table.isActive),
+  index("idx_subscription_plans_sort_order").on(table.sortOrder),
+]);
+
+// Organization subscriptions tracking which councils have which plans
+export const organizationSubscriptions = pgTable("organization_subscriptions", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").references(() => organizations.id).notNull(),
+  planId: integer("plan_id").references(() => subscriptionPlans.id).notNull(),
+  status: varchar("status").default("active"), // 'active', 'cancelled', 'expired', 'past_due', 'trialing'
+  currentPeriodStart: timestamp("current_period_start").notNull(),
+  currentPeriodEnd: timestamp("current_period_end").notNull(),
+  billingCycle: varchar("billing_cycle").default("monthly"), // 'monthly', 'annual'
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency").default("GBP"),
+  trialStart: timestamp("trial_start"),
+  trialEnd: timestamp("trial_end"),
+  cancelAt: timestamp("cancel_at"),
+  canceledAt: timestamp("canceled_at"),
+  cancelReason: text("cancel_reason"),
+  stripeSubscriptionId: varchar("stripe_subscription_id"),
+  stripeCustomerId: varchar("stripe_customer_id"),
+  nextBillingDate: timestamp("next_billing_date"),
+  autoRenew: boolean("auto_renew").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_organization_subscriptions_organization_id").on(table.organizationId),
+  index("idx_organization_subscriptions_plan_id").on(table.planId),
+  index("idx_organization_subscriptions_status").on(table.status),
+  index("idx_organization_subscriptions_current_period_end").on(table.currentPeriodEnd),
+  index("idx_organization_subscriptions_stripe_subscription_id").on(table.stripeSubscriptionId),
+]);
+
+// Feature mapping for each subscription tier
+export const subscriptionFeatures = pgTable("subscription_features", {
+  id: serial("id").primaryKey(),
+  planId: integer("plan_id").references(() => subscriptionPlans.id).notNull(),
+  featureKey: varchar("feature_key").notNull(), // 'advanced_reporting', 'api_access', 'multi_property'
+  featureName: varchar("feature_name").notNull(),
+  isEnabled: boolean("is_enabled").default(true),
+  limit: integer("limit"), // Numeric limits for features
+  metadata: jsonb("metadata"), // Additional feature configuration
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_subscription_features_plan_id").on(table.planId),
+  index("idx_subscription_features_feature_key").on(table.featureKey),
+  index("idx_subscription_features_is_enabled").on(table.isEnabled),
+]);
+
+// Usage tracking for monitoring against plan limits
+export const usageTracking = pgTable("usage_tracking", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").references(() => organizations.id).notNull(),
+  usageType: varchar("usage_type").notNull(), // 'residents', 'properties', 'users', 'api_calls', 'storage'
+  currentUsage: integer("current_usage").default(0),
+  limit: integer("limit"), // Current plan limit
+  period: varchar("period").default("monthly"), // 'daily', 'monthly', 'annual'
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  overageAmount: integer("overage_amount").default(0),
+  lastReset: timestamp("last_reset"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_usage_tracking_organization_id").on(table.organizationId),
+  index("idx_usage_tracking_usage_type").on(table.usageType),
+  index("idx_usage_tracking_period_end").on(table.periodEnd),
+  index("idx_usage_tracking_organization_usage_type").on(table.organizationId, table.usageType),
+]);
+
+// Billing cycles for managing payment schedules
+export const billingCycles = pgTable("billing_cycles", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").references(() => organizations.id).notNull(),
+  subscriptionId: integer("subscription_id").references(() => organizationSubscriptions.id).notNull(),
+  cycleType: varchar("cycle_type").notNull(), // 'monthly', 'annual'
+  cycleStart: timestamp("cycle_start").notNull(),
+  cycleEnd: timestamp("cycle_end").notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  discountPercent: integer("discount_percent").default(0),
+  discountAmount: decimal("discount_amount", { precision: 10, scale: 2 }).default("0.00"),
+  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
+  status: varchar("status").default("active"), // 'active', 'completed', 'cancelled'
+  dueDate: timestamp("due_date").notNull(),
+  paidDate: timestamp("paid_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_billing_cycles_organization_id").on(table.organizationId),
+  index("idx_billing_cycles_subscription_id").on(table.subscriptionId),
+  index("idx_billing_cycles_due_date").on(table.dueDate),
+  index("idx_billing_cycles_status").on(table.status),
+]);
+
+// Payment methods for storing customer payment information
+export const paymentMethods = pgTable("payment_methods", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").references(() => organizations.id).notNull(),
+  methodType: varchar("method_type").notNull(), // 'card', 'bank_transfer', 'paypal'
+  isDefault: boolean("is_default").default(false),
+  isActive: boolean("is_active").default(true),
+  stripePaymentMethodId: varchar("stripe_payment_method_id"),
+  cardLast4: varchar("card_last_4"),
+  cardBrand: varchar("card_brand"),
+  cardExpMonth: integer("card_exp_month"),
+  cardExpYear: integer("card_exp_year"),
+  billingName: varchar("billing_name"),
+  billingEmail: varchar("billing_email"),
+  billingAddress: jsonb("billing_address"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_payment_methods_organization_id").on(table.organizationId),
+  index("idx_payment_methods_is_default").on(table.isDefault),
+  index("idx_payment_methods_is_active").on(table.isActive),
+  index("idx_payment_methods_stripe_payment_method_id").on(table.stripePaymentMethodId),
+]);
+
+// Subscription invoices for SaaS billing (separate from government billing)
+export const subscriptionInvoices = pgTable("subscription_invoices", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").references(() => organizations.id).notNull(),
+  subscriptionId: integer("subscription_id").references(() => organizationSubscriptions.id).notNull(),
+  invoiceNumber: varchar("invoice_number").notNull().unique(),
+  invoiceDate: timestamp("invoice_date").notNull(),
+  dueDate: timestamp("due_date").notNull(),
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
+  discountAmount: decimal("discount_amount", { precision: 10, scale: 2 }).default("0.00"),
+  taxAmount: decimal("tax_amount", { precision: 10, scale: 2 }).default("0.00"),
+  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
+  status: varchar("status").default("pending"), // 'pending', 'paid', 'overdue', 'cancelled', 'refunded'
+  paidDate: timestamp("paid_date"),
+  paymentMethodId: integer("payment_method_id").references(() => paymentMethods.id),
+  stripeInvoiceId: varchar("stripe_invoice_id"),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_subscription_invoices_organization_id").on(table.organizationId),
+  index("idx_subscription_invoices_subscription_id").on(table.subscriptionId),
+  index("idx_subscription_invoices_invoice_number").on(table.invoiceNumber),
+  index("idx_subscription_invoices_status").on(table.status),
+  index("idx_subscription_invoices_due_date").on(table.dueDate),
+  index("idx_subscription_invoices_stripe_invoice_id").on(table.stripeInvoiceId),
+]);
+
+// Feature toggles for enabling/disabling functionality based on subscription tier
+export const featureToggles = pgTable("feature_toggles", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").references(() => organizations.id).notNull(),
+  featureKey: varchar("feature_key").notNull(),
+  isEnabled: boolean("is_enabled").default(false),
+  enabledBy: varchar("enabled_by").references(() => users.id),
+  enabledAt: timestamp("enabled_at"),
+  disabledAt: timestamp("disabled_at"),
+  reason: text("reason"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_feature_toggles_organization_id").on(table.organizationId),
+  index("idx_feature_toggles_feature_key").on(table.featureKey),
+  index("idx_feature_toggles_is_enabled").on(table.isEnabled),
+  index("idx_feature_toggles_organization_feature").on(table.organizationId, table.featureKey),
+]);
+
+// Trial periods for managing free trials and conversions
+export const trialPeriods = pgTable("trial_periods", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").references(() => organizations.id).notNull(),
+  planId: integer("plan_id").references(() => subscriptionPlans.id).notNull(),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  status: varchar("status").default("active"), // 'active', 'expired', 'converted', 'cancelled'
+  convertedAt: timestamp("converted_at"),
+  convertedToSubscriptionId: integer("converted_to_subscription_id").references(() => organizationSubscriptions.id),
+  extensionDays: integer("extension_days").default(0),
+  extensionReason: text("extension_reason"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_trial_periods_organization_id").on(table.organizationId),
+  index("idx_trial_periods_plan_id").on(table.planId),
+  index("idx_trial_periods_status").on(table.status),
+  index("idx_trial_periods_end_date").on(table.endDate),
+]);
+
+// Subscription changes for tracking upgrades/downgrades
+export const subscriptionChanges = pgTable("subscription_changes", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").references(() => organizations.id).notNull(),
+  subscriptionId: integer("subscription_id").references(() => organizationSubscriptions.id).notNull(),
+  changeType: varchar("change_type").notNull(), // 'upgrade', 'downgrade', 'plan_change', 'billing_change'
+  fromPlanId: integer("from_plan_id").references(() => subscriptionPlans.id),
+  toPlanId: integer("to_plan_id").references(() => subscriptionPlans.id),
+  fromAmount: decimal("from_amount", { precision: 10, scale: 2 }),
+  toAmount: decimal("to_amount", { precision: 10, scale: 2 }),
+  effectiveDate: timestamp("effective_date").notNull(),
+  prorationAmount: decimal("proration_amount", { precision: 10, scale: 2 }),
+  reason: text("reason"),
+  initiatedBy: varchar("initiated_by").references(() => users.id),
+  status: varchar("status").default("pending"), // 'pending', 'completed', 'failed', 'cancelled'
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_subscription_changes_organization_id").on(table.organizationId),
+  index("idx_subscription_changes_subscription_id").on(table.subscriptionId),
+  index("idx_subscription_changes_change_type").on(table.changeType),
+  index("idx_subscription_changes_effective_date").on(table.effectiveDate),
+  index("idx_subscription_changes_status").on(table.status),
+]);
+
+// Usage limits for enforcing tier restrictions
+export const usageLimits = pgTable("usage_limits", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").references(() => organizations.id).notNull(),
+  limitType: varchar("limit_type").notNull(), // 'properties', 'users', 'residents', 'api_calls', 'storage'
+  currentValue: integer("current_value").default(0),
+  limitValue: integer("limit_value").notNull(),
+  softLimit: integer("soft_limit"), // Warning threshold
+  hardLimit: integer("hard_limit"), // Absolute limit
+  period: varchar("period").default("monthly"), // 'daily', 'monthly', 'annual'
+  resetDate: timestamp("reset_date"),
+  isBlocked: boolean("is_blocked").default(false),
+  lastWarningDate: timestamp("last_warning_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_usage_limits_organization_id").on(table.organizationId),
+  index("idx_usage_limits_limit_type").on(table.limitType),
+  index("idx_usage_limits_is_blocked").on(table.isBlocked),
+  index("idx_usage_limits_organization_limit_type").on(table.organizationId, table.limitType),
+]);
+
+// Overage charges for usage beyond plan limits
+export const overageCharges = pgTable("overage_charges", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").references(() => organizations.id).notNull(),
+  subscriptionId: integer("subscription_id").references(() => organizationSubscriptions.id).notNull(),
+  usageType: varchar("usage_type").notNull(), // 'residents', 'properties', 'api_calls', 'storage'
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  allowedUsage: integer("allowed_usage").notNull(),
+  actualUsage: integer("actual_usage").notNull(),
+  overageAmount: integer("overage_amount").notNull(),
+  ratePerUnit: decimal("rate_per_unit", { precision: 10, scale: 2 }).notNull(),
+  totalCharge: decimal("total_charge", { precision: 10, scale: 2 }).notNull(),
+  status: varchar("status").default("pending"), // 'pending', 'billed', 'waived'
+  billedDate: timestamp("billed_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_overage_charges_organization_id").on(table.organizationId),
+  index("idx_overage_charges_subscription_id").on(table.subscriptionId),
+  index("idx_overage_charges_usage_type").on(table.usageType),
+  index("idx_overage_charges_period_end").on(table.periodEnd),
+  index("idx_overage_charges_status").on(table.status),
+]);
+
+// Subscription discounts for promotional pricing
+export const subscriptionDiscounts = pgTable("subscription_discounts", {
+  id: serial("id").primaryKey(),
+  code: varchar("code").notNull().unique(),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  discountType: varchar("discount_type").notNull(), // 'percentage', 'fixed_amount', 'free_months'
+  discountValue: decimal("discount_value", { precision: 10, scale: 2 }).notNull(),
+  appliesTo: varchar("applies_to").notNull(), // 'all_plans', 'specific_plans', 'first_payment', 'recurring'
+  applicablePlans: text("applicable_plans").array(),
+  maxUses: integer("max_uses"),
+  currentUses: integer("current_uses").default(0),
+  validFrom: timestamp("valid_from").notNull(),
+  validUntil: timestamp("valid_until"),
+  isActive: boolean("is_active").default(true),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_subscription_discounts_code").on(table.code),
+  index("idx_subscription_discounts_is_active").on(table.isActive),
+  index("idx_subscription_discounts_valid_from").on(table.validFrom),
+  index("idx_subscription_discounts_valid_until").on(table.validUntil),
+]);
+
+// Payment transactions for tracking successful/failed payments
+export const paymentTransactions = pgTable("payment_transactions", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").references(() => organizations.id).notNull(),
+  subscriptionId: integer("subscription_id").references(() => organizationSubscriptions.id),
+  invoiceId: integer("invoice_id").references(() => subscriptionInvoices.id),
+  paymentMethodId: integer("payment_method_id").references(() => paymentMethods.id),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency").default("GBP"),
+  status: varchar("status").notNull(), // 'pending', 'succeeded', 'failed', 'cancelled', 'refunded'
+  transactionType: varchar("transaction_type").notNull(), // 'payment', 'refund', 'chargeback'
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  stripeChargeId: varchar("stripe_charge_id"),
+  failureReason: text("failure_reason"),
+  processedAt: timestamp("processed_at"),
+  refundedAt: timestamp("refunded_at"),
+  refundAmount: decimal("refund_amount", { precision: 10, scale: 2 }),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_payment_transactions_organization_id").on(table.organizationId),
+  index("idx_payment_transactions_subscription_id").on(table.subscriptionId),
+  index("idx_payment_transactions_invoice_id").on(table.invoiceId),
+  index("idx_payment_transactions_status").on(table.status),
+  index("idx_payment_transactions_transaction_type").on(table.transactionType),
+  index("idx_payment_transactions_stripe_payment_intent_id").on(table.stripePaymentIntentId),
+  index("idx_payment_transactions_processed_at").on(table.processedAt),
+]);
+
+// Subscription renewals for automatic billing management
+export const subscriptionRenewals = pgTable("subscription_renewals", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").references(() => organizations.id).notNull(),
+  subscriptionId: integer("subscription_id").references(() => organizationSubscriptions.id).notNull(),
+  renewalDate: timestamp("renewal_date").notNull(),
+  previousPeriodEnd: timestamp("previous_period_end").notNull(),
+  newPeriodStart: timestamp("new_period_start").notNull(),
+  newPeriodEnd: timestamp("new_period_end").notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  status: varchar("status").default("scheduled"), // 'scheduled', 'processing', 'completed', 'failed', 'cancelled'
+  attemptCount: integer("attempt_count").default(0),
+  lastAttemptDate: timestamp("last_attempt_date"),
+  nextRetryDate: timestamp("next_retry_date"),
+  failureReason: text("failure_reason"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_subscription_renewals_organization_id").on(table.organizationId),
+  index("idx_subscription_renewals_subscription_id").on(table.subscriptionId),
+  index("idx_subscription_renewals_renewal_date").on(table.renewalDate),
+  index("idx_subscription_renewals_status").on(table.status),
+  index("idx_subscription_renewals_next_retry_date").on(table.nextRetryDate),
+]);
+
+// Cancellation requests for managing subscription terminations
+export const cancellationRequests = pgTable("cancellation_requests", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").references(() => organizations.id).notNull(),
+  subscriptionId: integer("subscription_id").references(() => organizationSubscriptions.id).notNull(),
+  requestedBy: varchar("requested_by").references(() => users.id).notNull(),
+  requestDate: timestamp("request_date").notNull(),
+  cancellationType: varchar("cancellation_type").notNull(), // 'immediate', 'end_of_period', 'scheduled'
+  scheduledDate: timestamp("scheduled_date"),
+  reason: text("reason"),
+  feedback: text("feedback"),
+  status: varchar("status").default("pending"), // 'pending', 'approved', 'cancelled', 'completed'
+  processedBy: varchar("processed_by").references(() => users.id),
+  processedAt: timestamp("processed_at"),
+  refundAmount: decimal("refund_amount", { precision: 10, scale: 2 }),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_cancellation_requests_organization_id").on(table.organizationId),
+  index("idx_cancellation_requests_subscription_id").on(table.subscriptionId),
+  index("idx_cancellation_requests_requested_by").on(table.requestedBy),
+  index("idx_cancellation_requests_status").on(table.status),
+  index("idx_cancellation_requests_scheduled_date").on(table.scheduledDate),
+]);
+
+// Multi-tenant settings for organization isolation
+export const multiTenantSettings = pgTable("multi_tenant_settings", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").references(() => organizations.id).notNull(),
+  settingKey: varchar("setting_key").notNull(),
+  settingValue: jsonb("setting_value"),
+  dataType: varchar("data_type").notNull(), // 'string', 'number', 'boolean', 'json'
+  isInherited: boolean("is_inherited").default(false),
+  parentSettingId: integer("parent_setting_id").references(() => multiTenantSettings.id),
+  lastModifiedBy: varchar("last_modified_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_multi_tenant_settings_organization_id").on(table.organizationId),
+  index("idx_multi_tenant_settings_setting_key").on(table.settingKey),
+  index("idx_multi_tenant_settings_organization_key").on(table.organizationId, table.settingKey),
+]);
+
+// Feature entitlements for granular permission control per tier
+export const featureEntitlements = pgTable("feature_entitlements", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").references(() => organizations.id).notNull(),
+  subscriptionId: integer("subscription_id").references(() => organizationSubscriptions.id).notNull(),
+  featureKey: varchar("feature_key").notNull(),
+  isEntitled: boolean("is_entitled").default(false),
+  usageLimit: integer("usage_limit"),
+  currentUsage: integer("current_usage").default(0),
+  lastUsedAt: timestamp("last_used_at"),
+  expiresAt: timestamp("expires_at"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_feature_entitlements_organization_id").on(table.organizationId),
+  index("idx_feature_entitlements_subscription_id").on(table.subscriptionId),
+  index("idx_feature_entitlements_feature_key").on(table.featureKey),
+  index("idx_feature_entitlements_is_entitled").on(table.isEntitled),
+  index("idx_feature_entitlements_organization_feature").on(table.organizationId, table.featureKey),
+]);
+
+// Subscription analytics for tracking revenue, churn, and upgrade patterns
+export const subscriptionAnalytics = pgTable("subscription_analytics", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").references(() => organizations.id),
+  metricType: varchar("metric_type").notNull(), // 'mrr', 'churn', 'ltv', 'conversion', 'usage'
+  metricValue: decimal("metric_value", { precision: 15, scale: 2 }).notNull(),
+  period: varchar("period").notNull(), // 'daily', 'weekly', 'monthly', 'quarterly', 'annual'
+  periodDate: date("period_date").notNull(),
+  dimensions: jsonb("dimensions"), // Additional metric dimensions
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_subscription_analytics_organization_id").on(table.organizationId),
+  index("idx_subscription_analytics_metric_type").on(table.metricType),
+  index("idx_subscription_analytics_period").on(table.period),
+  index("idx_subscription_analytics_period_date").on(table.periodDate),
+  index("idx_subscription_analytics_metric_period_date").on(table.metricType, table.periodDate),
+]);
+
+// =================== SUBSCRIPTION MANAGEMENT RELATIONS ===================
+
+// Subscription plans relations
+export const subscriptionPlansRelations = relations(subscriptionPlans, ({ many }) => ({
+  subscriptions: many(organizationSubscriptions),
+  features: many(subscriptionFeatures),
+  trialPeriods: many(trialPeriods),
+}));
+
+// Organization subscriptions relations
+export const organizationSubscriptionsRelations = relations(organizationSubscriptions, ({ one, many }) => ({
+  organization: one(organizations, {
+    fields: [organizationSubscriptions.organizationId],
+    references: [organizations.id],
+  }),
+  plan: one(subscriptionPlans, {
+    fields: [organizationSubscriptions.planId],
+    references: [subscriptionPlans.id],
+  }),
+  invoices: many(subscriptionInvoices),
+  transactions: many(paymentTransactions),
+  renewals: many(subscriptionRenewals),
+  changes: many(subscriptionChanges),
+  entitlements: many(featureEntitlements),
+  billingCycles: many(billingCycles),
+  overageCharges: many(overageCharges),
+  cancellationRequests: many(cancellationRequests),
+}));
+
+// Payment methods relations
+export const paymentMethodsRelations = relations(paymentMethods, ({ one, many }) => ({
+  organization: one(organizations, {
+    fields: [paymentMethods.organizationId],
+    references: [organizations.id],
+  }),
+  invoices: many(subscriptionInvoices),
+  transactions: many(paymentTransactions),
+}));
+
+// Subscription invoices relations
+export const subscriptionInvoicesRelations = relations(subscriptionInvoices, ({ one, many }) => ({
+  organization: one(organizations, {
+    fields: [subscriptionInvoices.organizationId],
+    references: [organizations.id],
+  }),
+  subscription: one(organizationSubscriptions, {
+    fields: [subscriptionInvoices.subscriptionId],
+    references: [organizationSubscriptions.id],
+  }),
+  paymentMethod: one(paymentMethods, {
+    fields: [subscriptionInvoices.paymentMethodId],
+    references: [paymentMethods.id],
+  }),
+  transactions: many(paymentTransactions),
+}));
+
+// =================== SUBSCRIPTION MANAGEMENT INSERT SCHEMAS ===================
+
+export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertOrganizationSubscriptionSchema = createInsertSchema(organizationSubscriptions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSubscriptionFeatureSchema = createInsertSchema(subscriptionFeatures).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUsageTrackingSchema = createInsertSchema(usageTracking).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertBillingCycleSchema = createInsertSchema(billingCycles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPaymentMethodSchema = createInsertSchema(paymentMethods).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSubscriptionInvoiceSchema = createInsertSchema(subscriptionInvoices).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertFeatureToggleSchema = createInsertSchema(featureToggles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertTrialPeriodSchema = createInsertSchema(trialPeriods).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSubscriptionChangeSchema = createInsertSchema(subscriptionChanges).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUsageLimitSchema = createInsertSchema(usageLimits).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertOverageChargeSchema = createInsertSchema(overageCharges).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSubscriptionDiscountSchema = createInsertSchema(subscriptionDiscounts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPaymentTransactionSchema = createInsertSchema(paymentTransactions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSubscriptionRenewalSchema = createInsertSchema(subscriptionRenewals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCancellationRequestSchema = createInsertSchema(cancellationRequests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMultiTenantSettingSchema = createInsertSchema(multiTenantSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertFeatureEntitlementSchema = createInsertSchema(featureEntitlements).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSubscriptionAnalyticsSchema = createInsertSchema(subscriptionAnalytics).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// =================== SUBSCRIPTION MANAGEMENT TYPES ===================
+
+export type SubscriptionPlan = typeof subscriptionPlans.$inferSelect;
+export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema>;
+export type OrganizationSubscription = typeof organizationSubscriptions.$inferSelect;
+export type InsertOrganizationSubscription = z.infer<typeof insertOrganizationSubscriptionSchema>;
+export type SubscriptionFeature = typeof subscriptionFeatures.$inferSelect;
+export type InsertSubscriptionFeature = z.infer<typeof insertSubscriptionFeatureSchema>;
+export type UsageTracking = typeof usageTracking.$inferSelect;
+export type InsertUsageTracking = z.infer<typeof insertUsageTrackingSchema>;
+export type BillingCycle = typeof billingCycles.$inferSelect;
+export type InsertBillingCycle = z.infer<typeof insertBillingCycleSchema>;
+export type PaymentMethod = typeof paymentMethods.$inferSelect;
+export type InsertPaymentMethod = z.infer<typeof insertPaymentMethodSchema>;
+export type SubscriptionInvoice = typeof subscriptionInvoices.$inferSelect;
+export type InsertSubscriptionInvoice = z.infer<typeof insertSubscriptionInvoiceSchema>;
+export type FeatureToggle = typeof featureToggles.$inferSelect;
+export type InsertFeatureToggle = z.infer<typeof insertFeatureToggleSchema>;
+export type TrialPeriod = typeof trialPeriods.$inferSelect;
+export type InsertTrialPeriod = z.infer<typeof insertTrialPeriodSchema>;
+export type SubscriptionChange = typeof subscriptionChanges.$inferSelect;
+export type InsertSubscriptionChange = z.infer<typeof insertSubscriptionChangeSchema>;
+export type UsageLimit = typeof usageLimits.$inferSelect;
+export type InsertUsageLimit = z.infer<typeof insertUsageLimitSchema>;
+export type OverageCharge = typeof overageCharges.$inferSelect;
+export type InsertOverageCharge = z.infer<typeof insertOverageChargeSchema>;
+export type SubscriptionDiscount = typeof subscriptionDiscounts.$inferSelect;
+export type InsertSubscriptionDiscount = z.infer<typeof insertSubscriptionDiscountSchema>;
+export type PaymentTransaction = typeof paymentTransactions.$inferSelect;
+export type InsertPaymentTransaction = z.infer<typeof insertPaymentTransactionSchema>;
+export type SubscriptionRenewal = typeof subscriptionRenewals.$inferSelect;
+export type InsertSubscriptionRenewal = z.infer<typeof insertSubscriptionRenewalSchema>;
+export type CancellationRequest = typeof cancellationRequests.$inferSelect;
+export type InsertCancellationRequest = z.infer<typeof insertCancellationRequestSchema>;
+export type MultiTenantSetting = typeof multiTenantSettings.$inferSelect;
+export type InsertMultiTenantSetting = z.infer<typeof insertMultiTenantSettingSchema>;
+export type FeatureEntitlement = typeof featureEntitlements.$inferSelect;
+export type InsertFeatureEntitlement = z.infer<typeof insertFeatureEntitlementSchema>;
+export type SubscriptionAnalytics = typeof subscriptionAnalytics.$inferSelect;
+export type InsertSubscriptionAnalytics = z.infer<typeof insertSubscriptionAnalyticsSchema>;

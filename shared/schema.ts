@@ -34,6 +34,22 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   role: varchar("role").default("staff"),
+  department: varchar("department"),
+  employeeId: varchar("employee_id"),
+  authMethod: varchar("auth_method").default("OIDC"), // 'OIDC', 'SAML_SSO', 'LDAP_SSO', 'LOCAL'
+  passwordHash: varchar("password_hash"), // For local auth
+  passwordLastChanged: timestamp("password_last_changed"),
+  mfaEnabled: boolean("mfa_enabled").default(false),
+  mfaSecret: varchar("mfa_secret"), // TOTP secret
+  accountLocked: boolean("account_locked").default(false),
+  lastLogin: timestamp("last_login"),
+  failedLoginAttempts: integer("failed_login_attempts").default(0),
+  lockedUntil: timestamp("locked_until"),
+  emailVerified: boolean("email_verified").default(false),
+  emailVerificationToken: varchar("email_verification_token"),
+  passwordResetToken: varchar("password_reset_token"),
+  passwordResetExpires: timestamp("password_reset_expires"),
+  isActive: boolean("is_active").default(true),
   subscriptionTier: varchar("subscription_tier").default("trial"), // trial, starter, professional, enterprise
   subscriptionStatus: varchar("subscription_status").default("active"), // active, cancelled, expired, past_due
   maxResidents: integer("max_residents").default(25),
@@ -510,6 +526,72 @@ export const insertProgressTrackingSchema = createInsertSchema(progressTracking)
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+
+// Security and audit tables
+
+// User sessions table for concurrent session management
+export const userSessions = pgTable("user_sessions", {
+  id: varchar("id").primaryKey().notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  deviceInfo: jsonb("device_info"), // browser, OS, device fingerprint
+  ipAddress: varchar("ip_address"),
+  userAgent: varchar("user_agent"),
+  isActive: boolean("is_active").default(true),
+  lastActivity: timestamp("last_activity").defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Audit trail table
+export const auditLogs = pgTable("audit_logs", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id),
+  action: varchar("action").notNull(), // LOGIN_SUCCESS, LOGIN_FAILED, PERMISSION_CHANGED, etc.
+  resource: varchar("resource").notNull(), // AUTH, RBAC, PROPERTY, RESIDENT, etc.
+  resourceId: varchar("resource_id"), // ID of the affected resource
+  details: jsonb("details"), // Additional context
+  ipAddress: varchar("ip_address"),
+  userAgent: varchar("user_agent"),
+  success: boolean("success").notNull(),
+  riskLevel: varchar("risk_level").default("low"), // low, medium, high, critical
+  timestamp: timestamp("timestamp").defaultNow(),
+});
+
+// Account lockout tracking
+export const accountLockouts = pgTable("account_lockouts", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  failedAttempts: integer("failed_attempts").default(0),
+  lockedUntil: timestamp("locked_until"),
+  lastAttempt: timestamp("last_attempt"),
+  lastAttemptIp: varchar("last_attempt_ip"),
+  resetAt: timestamp("reset_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// API tokens for programmatic access
+export const apiTokens = pgTable("api_tokens", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  tokenHash: varchar("token_hash").notNull(),
+  name: varchar("name").notNull(), // Human readable name for the token
+  permissions: text("permissions").array(), // Array of permissions
+  lastUsed: timestamp("last_used"),
+  expiresAt: timestamp("expires_at"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Permission cache for performance
+export const permissionCache = pgTable("permission_cache", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  permissions: jsonb("permissions").notNull(), // Cached permissions object
+  role: varchar("role").notNull(),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(),
+});
 export type Property = typeof properties.$inferSelect;
 export type InsertProperty = z.infer<typeof insertPropertySchema>;
 export type Resident = typeof residents.$inferSelect;

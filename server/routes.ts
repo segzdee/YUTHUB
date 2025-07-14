@@ -2,6 +2,10 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { db } from "./db";
+import { createAuthLimiter, createPasswordResetLimiter, PasswordValidator, MFAManager, AccountLockoutManager, SessionManager, AuditLogger, JWTManager } from "./security/authSecurity";
+import { requirePermission, requireRole, requireResourceAccess, filterDataByRole, PermissionChecker, PERMISSIONS, ROLES } from "./security/rbacMiddleware";
+import { SSOIntegration } from "./security/ssoIntegration";
 import { 
   insertPropertySchema, 
   insertResidentSchema, 
@@ -21,12 +25,19 @@ import {
   insertInvoiceLineItemSchema,
   insertPaymentReminderSchema,
   insertAuditTrailSchema,
+  auditLogs,
 } from "@shared/schema";
 import { z } from "zod";
+import { eq, desc, sql, and } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
+  
+  // Apply security middleware
+  app.use('/api/auth/login', createAuthLimiter());
+  app.use('/api/auth/password-reset', createPasswordResetLimiter());
+  app.use(filterDataByRole);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
@@ -36,10 +47,318 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized" });
       }
       const user = await storage.getUser(userId);
+      
+      // Log successful user data access
+      await AuditLogger.logAuthAttempt(userId, true, {
+        action: 'USER_DATA_ACCESS',
+        ip: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+      
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Security endpoints
+  app.post('/api/auth/setup-mfa', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const { secret, qrCodeUrl } = MFAManager.generateSecret(user.email || '');
+      const qrCode = await MFAManager.generateQRCode(qrCodeUrl);
+      
+      // Update user with MFA secret (not yet enabled)
+      await storage.upsertUser({
+        ...user,
+        mfaSecret: secret,
+      });
+      
+      await AuditLogger.logMFASetup(userId, false); // Setup initiated, not enabled
+      
+      res.json({
+        secret,
+        qrCode,
+        message: 'MFA setup initiated. Please verify with a token to complete setup.'
+      });
+    } catch (error) {
+      console.error("Error setting up MFA:", error);
+      res.status(500).json({ message: "Failed to setup MFA" });
+    }
+  });
+
+  app.post('/api/auth/verify-mfa', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const { token } = req.body;
+      
+      if (!token) {
+        return res.status(400).json({ message: "Token required" });
+      }
+      
+      const user = await storage.getUser(userId);
+      if (!user || !user.mfaSecret) {
+        return res.status(400).json({ message: "MFA not setup" });
+      }
+      
+      const isValid = MFAManager.verifyToken(token, user.mfaSecret);
+      
+      if (!isValid) {
+        await AuditLogger.logAuthAttempt(userId, false, {
+          action: 'MFA_VERIFICATION_FAILED',
+          ip: req.ip,
+          userAgent: req.get('User-Agent'),
+        });
+        
+        return res.status(400).json({ message: "Invalid token" });
+      }
+      
+      // Enable MFA for user
+      await storage.upsertUser({
+        ...user,
+        mfaEnabled: true,
+      });
+      
+      await AuditLogger.logMFASetup(userId, true);
+      
+      res.json({ message: "MFA enabled successfully" });
+    } catch (error) {
+      console.error("Error verifying MFA:", error);
+      res.status(500).json({ message: "Failed to verify MFA" });
+    }
+  });
+
+  app.post('/api/auth/disable-mfa', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      await storage.upsertUser({
+        ...user,
+        mfaEnabled: false,
+        mfaSecret: null,
+      });
+      
+      await AuditLogger.logMFASetup(userId, false);
+      
+      res.json({ message: "MFA disabled successfully" });
+    } catch (error) {
+      console.error("Error disabling MFA:", error);
+      res.status(500).json({ message: "Failed to disable MFA" });
+    }
+  });
+
+  // Audit log endpoint (admin only)
+  app.get('/api/audit-logs', isAuthenticated, requirePermission(PERMISSIONS.AUDIT_READ), async (req: any, res) => {
+    try {
+      const { page = 1, limit = 50, userId, action, resource } = req.query;
+      
+      // This would need to be implemented in storage
+      const logs = await db.select()
+        .from(auditLogs)
+        .where(
+          and(
+            userId ? eq(auditLogs.userId, userId) : sql`TRUE`,
+            action ? eq(auditLogs.action, action) : sql`TRUE`,
+            resource ? eq(auditLogs.resource, resource) : sql`TRUE`
+          )
+        )
+        .orderBy(desc(auditLogs.timestamp))
+        .limit(parseInt(limit))
+        .offset((parseInt(page) - 1) * parseInt(limit));
+      
+      res.json(logs);
+    } catch (error) {
+      console.error("Error fetching audit logs:", error);
+      res.status(500).json({ message: "Failed to fetch audit logs" });
+    }
+  });
+
+  // Security metrics endpoint
+  app.get('/api/security/metrics', isAuthenticated, requirePermission(PERMISSIONS.SECURITY_READ), async (req: any, res) => {
+    try {
+      const { timeRange = '24h' } = req.query;
+      const timeRangeMs = timeRange === '1h' ? 3600000 : 
+                          timeRange === '24h' ? 86400000 : 
+                          timeRange === '7d' ? 604800000 : 
+                          2592000000; // 30d
+      
+      const since = new Date(Date.now() - timeRangeMs);
+      
+      // Get security metrics from audit logs
+      const totalLogins = await db.select({ count: sql<number>`count(*)` })
+        .from(auditLogs)
+        .where(and(
+          eq(auditLogs.action, 'LOGIN'),
+          sql`${auditLogs.timestamp} >= ${since}`
+        ));
+      
+      const failedLogins = await db.select({ count: sql<number>`count(*)` })
+        .from(auditLogs)
+        .where(and(
+          eq(auditLogs.action, 'LOGIN'),
+          eq(auditLogs.success, false),
+          sql`${auditLogs.timestamp} >= ${since}`
+        ));
+      
+      const highRiskEvents = await db.select({ count: sql<number>`count(*)` })
+        .from(auditLogs)
+        .where(and(
+          eq(auditLogs.riskLevel, 'high'),
+          sql`${auditLogs.timestamp} >= ${since}`
+        ));
+      
+      const metrics = {
+        totalLogins: totalLogins[0]?.count || 0,
+        failedLogins: failedLogins[0]?.count || 0,
+        mfaEnabled: 0, // This would need to be calculated from users table
+        activeSessions: 0, // This would need to be calculated from sessions table
+        highRiskEvents: highRiskEvents[0]?.count || 0,
+        lastIncident: 'None',
+        passwordStrength: 85,
+        accountLockouts: 0,
+      };
+      
+      res.json(metrics);
+    } catch (error) {
+      console.error("Error fetching security metrics:", error);
+      res.status(500).json({ message: "Failed to fetch security metrics" });
+    }
+  });
+
+  // Security events endpoint
+  app.get('/api/security/events', isAuthenticated, requirePermission(PERMISSIONS.SECURITY_READ), async (req: any, res) => {
+    try {
+      const { timeRange = '24h' } = req.query;
+      const timeRangeMs = timeRange === '1h' ? 3600000 : 
+                          timeRange === '24h' ? 86400000 : 
+                          timeRange === '7d' ? 604800000 : 
+                          2592000000; // 30d
+      
+      const since = new Date(Date.now() - timeRangeMs);
+      
+      const events = await db.select()
+        .from(auditLogs)
+        .where(sql`${auditLogs.timestamp} >= ${since}`)
+        .orderBy(desc(auditLogs.timestamp))
+        .limit(50);
+      
+      const formattedEvents = events.map(event => ({
+        id: event.id,
+        timestamp: event.timestamp,
+        type: event.action,
+        description: `${event.action} on ${event.resource}`,
+        riskLevel: event.riskLevel,
+        status: event.success ? 'resolved' : 'open',
+        userId: event.userId,
+        ipAddress: event.ipAddress || 'Unknown',
+      }));
+      
+      res.json(formattedEvents);
+    } catch (error) {
+      console.error("Error fetching security events:", error);
+      res.status(500).json({ message: "Failed to fetch security events" });
+    }
+  });
+
+  // Security alerts endpoint
+  app.get('/api/security/alerts', isAuthenticated, requirePermission(PERMISSIONS.SECURITY_READ), async (req: any, res) => {
+    try {
+      // Mock security alerts - in a real implementation, this would come from a monitoring system
+      const alerts = [
+        {
+          id: '1',
+          title: 'Multiple Failed Login Attempts',
+          description: 'Detected 5 failed login attempts from IP 192.168.1.100',
+          severity: 'warning',
+          timestamp: new Date().toISOString(),
+          actions: ['Block IP', 'Notify User', 'Review Logs'],
+        },
+        {
+          id: '2',
+          title: 'High Risk Activity Detected',
+          description: 'Unusual access pattern detected for financial records',
+          severity: 'error',
+          timestamp: new Date(Date.now() - 3600000).toISOString(),
+          actions: ['Investigate', 'Lock Account', 'Contact Admin'],
+        },
+      ];
+      
+      res.json(alerts);
+    } catch (error) {
+      console.error("Error fetching security alerts:", error);
+      res.status(500).json({ message: "Failed to fetch security alerts" });
+    }
+  });
+
+  // Security settings endpoint
+  app.get('/api/security/settings', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const settings = {
+        mfaEnabled: user.mfaEnabled || false,
+        role: user.role || 'user',
+        permissions: ['property_read', 'support_read', 'incident_read'], // This would be calculated based on role
+        passwordLastChanged: user.updatedAt,
+        lastLogin: user.lastLogin,
+      };
+      
+      res.json(settings);
+    } catch (error) {
+      console.error("Error fetching security settings:", error);
+      res.status(500).json({ message: "Failed to fetch security settings" });
+    }
+  });
+
+  // Active sessions endpoint
+  app.get('/api/security/sessions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const sessions = await storage.getUserActiveSessions(userId);
+      
+      res.json(sessions);
+    } catch (error) {
+      console.error("Error fetching active sessions:", error);
+      res.status(500).json({ message: "Failed to fetch active sessions" });
+    }
+  });
+
+  // Revoke session endpoint
+  app.delete('/api/security/sessions/:sessionId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { sessionId } = req.params;
+      const userId = req.user?.claims?.sub;
+      
+      await storage.deleteSession(sessionId);
+      
+      await AuditLogger.logResourceAccess(userId, 'session', 'revoke', true, {
+        ip: req.ip,
+        userAgent: req.get('User-Agent'),
+        resourceId: sessionId,
+        riskLevel: 'medium',
+      });
+      
+      res.json({ message: "Session revoked successfully" });
+    } catch (error) {
+      console.error("Error revoking session:", error);
+      res.status(500).json({ message: "Failed to revoke session" });
     }
   });
 
@@ -55,9 +374,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Properties routes
-  app.get('/api/properties', isAuthenticated, async (req, res) => {
+  app.get('/api/properties', isAuthenticated, requirePermission(PERMISSIONS.PROPERTY_READ), async (req: any, res) => {
     try {
       const properties = await storage.getProperties();
+      
+      // Log property access
+      await AuditLogger.logResourceAccess(req.user?.claims?.sub, 'properties', 'read', true, {
+        ip: req.ip,
+        userAgent: req.get('User-Agent'),
+        resultCount: properties.length,
+      });
+      
       res.json(properties);
     } catch (error) {
       console.error("Error fetching properties:", error);
@@ -236,9 +563,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Financial records routes
-  app.get('/api/financial-records', isAuthenticated, async (req, res) => {
+  app.get('/api/financial-records', isAuthenticated, requirePermission(PERMISSIONS.FINANCIAL_READ), async (req: any, res) => {
     try {
       const records = await storage.getFinancialRecords();
+      
+      // High risk audit log for financial data access
+      await AuditLogger.logResourceAccess(req.user?.claims?.sub, 'financial-records', 'read', true, {
+        ip: req.ip,
+        userAgent: req.get('User-Agent'),
+        resultCount: records.length,
+        riskLevel: 'high',
+      });
+      
       res.json(records);
     } catch (error) {
       console.error("Error fetching financial records:", error);

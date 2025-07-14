@@ -20,6 +20,9 @@ import {
   invoiceLineItems,
   paymentReminders,
   auditTrail,
+  userSessions,
+  auditLogs,
+  accountLockouts,
   type User,
   type UpsertUser,
   type Property,
@@ -906,6 +909,145 @@ export class DatabaseStorage implements IStorage {
         invoiceCount: Number(client.invoiceCount || 0),
       })),
     };
+  }
+
+  // Security operations
+  async getUserLockoutData(userId: string): Promise<{
+    failedAttempts: number;
+    lockedUntil: number | null;
+    lastAttempt: number | null;
+  }> {
+    const [lockout] = await db
+      .select()
+      .from(accountLockouts)
+      .where(eq(accountLockouts.userId, userId));
+    
+    return {
+      failedAttempts: lockout?.failedAttempts || 0,
+      lockedUntil: lockout?.lockedUntil?.getTime() || null,
+      lastAttempt: lockout?.lastAttempt?.getTime() || null,
+    };
+  }
+
+  async updateUserLockout(userId: string, data: {
+    failedAttempts: number;
+    lockedUntil: number | null;
+    lastAttempt: number;
+  }): Promise<void> {
+    await db
+      .insert(accountLockouts)
+      .values({
+        userId,
+        failedAttempts: data.failedAttempts,
+        lockedUntil: data.lockedUntil ? new Date(data.lockedUntil) : null,
+        lastAttempt: new Date(data.lastAttempt),
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: accountLockouts.userId,
+        set: {
+          failedAttempts: data.failedAttempts,
+          lockedUntil: data.lockedUntil ? new Date(data.lockedUntil) : null,
+          lastAttempt: new Date(data.lastAttempt),
+          updatedAt: new Date(),
+        },
+      });
+  }
+
+  async resetUserLockout(userId: string): Promise<void> {
+    await db
+      .update(accountLockouts)
+      .set({
+        failedAttempts: 0,
+        lockedUntil: null,
+        resetAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(accountLockouts.userId, userId));
+  }
+
+  // Session management
+  async getSession(sessionId: string): Promise<any> {
+    const [session] = await db
+      .select()
+      .from(userSessions)
+      .where(eq(userSessions.id, sessionId));
+    
+    return session;
+  }
+
+  async createSession(session: {
+    userId: string;
+    deviceInfo: any;
+    createdAt: number;
+    lastActivity: number;
+  }): Promise<string> {
+    const sessionId = `sess_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    await db.insert(userSessions).values({
+      id: sessionId,
+      userId: session.userId,
+      deviceInfo: session.deviceInfo,
+      lastActivity: new Date(session.lastActivity),
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+      createdAt: new Date(session.createdAt),
+    });
+    
+    return sessionId;
+  }
+
+  async updateSessionActivity(sessionId: string): Promise<void> {
+    await db
+      .update(userSessions)
+      .set({
+        lastActivity: new Date(),
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Extend expiry
+      })
+      .where(eq(userSessions.id, sessionId));
+  }
+
+  async deleteSession(sessionId: string): Promise<void> {
+    await db.delete(userSessions).where(eq(userSessions.id, sessionId));
+  }
+
+  async getUserActiveSessions(userId: string): Promise<any[]> {
+    return await db
+      .select()
+      .from(userSessions)
+      .where(and(
+        eq(userSessions.userId, userId),
+        eq(userSessions.isActive, true)
+      ));
+  }
+
+  async deleteAllUserSessions(userId: string): Promise<void> {
+    await db.delete(userSessions).where(eq(userSessions.userId, userId));
+  }
+
+  // Audit logging
+  async createAuditLog(log: {
+    userId: string;
+    action: string;
+    resource: string;
+    resourceId?: string;
+    details: any;
+    ipAddress?: string;
+    userAgent?: string;
+    success: boolean;
+    riskLevel: string;
+  }): Promise<void> {
+    await db.insert(auditLogs).values({
+      userId: log.userId,
+      action: log.action,
+      resource: log.resource,
+      resourceId: log.resourceId,
+      details: log.details,
+      ipAddress: log.ipAddress,
+      userAgent: log.userAgent,
+      success: log.success,
+      riskLevel: log.riskLevel,
+      timestamp: new Date(),
+    });
   }
 }
 

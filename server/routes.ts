@@ -42,7 +42,12 @@ import {
   getPlatformAnalytics,
   getBillingOversight,
   getFeatureFlags,
-  handleEmergencyAction
+  handleEmergencyAction,
+  getOrganizationBreakdowns,
+  getHistoricalTrends,
+  getRealTimeDashboardMetrics,
+  exportAggregatedData,
+  validateDataConsistency
 } from './platformAdmin';
 import { enhancedPlatformAdminAuth } from './platformAdminValidation';
 
@@ -1212,6 +1217,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/platform-admin/billing', isAuthenticated, enhancedPlatformAdminAuth, getBillingOversight);
   app.get('/api/platform-admin/features', isAuthenticated, enhancedPlatformAdminAuth, getFeatureFlags);
   app.post('/api/platform-admin/emergency', isAuthenticated, enhancedPlatformAdminAuth, handleEmergencyAction);
+  
+  // New data aggregation endpoints
+  app.get('/api/platform-admin/organization-breakdowns', isAuthenticated, enhancedPlatformAdminAuth, getOrganizationBreakdowns);
+  app.get('/api/platform-admin/historical-trends', isAuthenticated, enhancedPlatformAdminAuth, getHistoricalTrends);
+  app.get('/api/platform-admin/real-time-metrics', isAuthenticated, enhancedPlatformAdminAuth, getRealTimeDashboardMetrics);
+  app.get('/api/platform-admin/export-data', isAuthenticated, enhancedPlatformAdminAuth, exportAggregatedData);
+  app.get('/api/platform-admin/validate-data', isAuthenticated, enhancedPlatformAdminAuth, validateDataConsistency);
 
   // Billing routes - Government clients
   app.get('/api/billing/government-clients', isAuthenticated, async (req: any, res: any) => {

@@ -1,233 +1,292 @@
+import { WebSocketServer, WebSocket } from 'ws';
 import { Server } from 'http';
-import { WebSocket, WebSocketServer } from 'ws';
-import { parse } from 'url';
-import { storage } from './storage';
+import { PlatformDataAggregator } from './platformAdminAggregation';
 
-interface ConnectedClient {
-  ws: WebSocket;
-  userId?: string;
-  role?: string;
-  lastActivity: Date;
-}
+export class WebSocketManager {
+  private static instance: WebSocketManager;
+  private wss: WebSocketServer | null = null;
+  private clients: Map<string, WebSocket> = new Map();
+  private dataRefreshInterval: NodeJS.Timeout | null = null;
 
-class WebSocketManager {
-  private wss: WebSocketServer;
-  private clients: Map<string, ConnectedClient> = new Map();
-  private userConnections: Map<string, string> = new Map(); // userId -> clientId
-  private heartbeatInterval: NodeJS.Timeout;
+  private constructor() {}
 
-  constructor(server: Server) {
-    this.wss = new WebSocketServer({ server, path: '/ws' });
-    this.setupEventHandlers();
-    this.startHeartbeat();
+  static getInstance(): WebSocketManager {
+    if (!WebSocketManager.instance) {
+      WebSocketManager.instance = new WebSocketManager();
+    }
+    return WebSocketManager.instance;
   }
 
-  private setupEventHandlers() {
-    this.wss.on('connection', (ws: WebSocket, request) => {
-      const clientId = this.generateClientId();
-      const client: ConnectedClient = {
-        ws,
-        lastActivity: new Date(),
-      };
+  initialize(server: Server) {
+    this.wss = new WebSocketServer({ 
+      server,
+      path: '/platform-ws' 
+    });
 
-      this.clients.set(clientId, client);
+    this.wss.on('connection', (ws: WebSocket, req: any) => {
+      const clientId = this.generateClientId();
+      this.clients.set(clientId, ws);
+
       console.log(`WebSocket client connected: ${clientId}`);
 
-      ws.on('message', (data) => {
+      // Send initial data
+      this.sendInitialData(ws);
+
+      // Handle client messages
+      ws.on('message', async (message: string) => {
         try {
-          const message = JSON.parse(data.toString());
-          this.handleMessage(clientId, message);
+          const data = JSON.parse(message);
+          await this.handleClientMessage(clientId, data);
         } catch (error) {
-          console.error('Error parsing WebSocket message:', error);
+          console.error('WebSocket message error:', error);
         }
       });
 
+      // Handle client disconnect
       ws.on('close', () => {
-        const client = this.clients.get(clientId);
-        if (client && client.userId) {
-          this.userConnections.delete(client.userId);
-        }
         this.clients.delete(clientId);
         console.log(`WebSocket client disconnected: ${clientId}`);
       });
 
+      // Handle errors
       ws.on('error', (error) => {
-        console.error('WebSocket error:', error);
-        const client = this.clients.get(clientId);
-        if (client && client.userId) {
-          this.userConnections.delete(client.userId);
-        }
+        console.error(`WebSocket error for client ${clientId}:`, error);
         this.clients.delete(clientId);
       });
-
-      // Send connection confirmation
-      ws.send(JSON.stringify({
-        type: 'connection_established',
-        clientId,
-        timestamp: new Date().toISOString(),
-      }));
     });
-  }
 
-  private handleMessage(clientId: string, message: any) {
-    const client = this.clients.get(clientId);
-    if (!client) return;
-
-    client.lastActivity = new Date();
-
-    switch (message.type) {
-      case 'auth':
-        // Check if user already has a connection
-        const existingClientId = this.userConnections.get(message.userId);
-        if (existingClientId && existingClientId !== clientId) {
-          // Close existing connection
-          const existingClient = this.clients.get(existingClientId);
-          if (existingClient) {
-            console.log(`Closing existing connection for user ${message.userId}: ${existingClientId}`);
-            existingClient.ws.close(1000, 'New connection established');
-            this.clients.delete(existingClientId);
-          }
-        }
-        
-        client.userId = message.userId;
-        client.role = message.role;
-        this.userConnections.set(message.userId, clientId);
-        console.log(`Client ${clientId} authenticated as ${message.userId} with role ${message.role}`);
-        break;
-
-      case 'subscribe':
-        // Handle subscription to specific data types
-        this.handleSubscription(clientId, message.data);
-        break;
-
-      case 'ping':
-        // Respond to ping with pong
-        client.ws.send(JSON.stringify({ type: 'pong', timestamp: new Date().toISOString() }));
-        break;
-    }
-  }
-
-  private handleSubscription(clientId: string, subscriptionData: any) {
-    // This could be used for selective notifications based on user preferences
-    console.log(`Client ${clientId} subscribed to:`, subscriptionData);
+    // Start periodic data refresh
+    this.startDataRefresh();
   }
 
   private generateClientId(): string {
-    return Math.random().toString(36).substr(2, 9);
+    return 'client_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
   }
 
-  private startHeartbeat() {
-    this.heartbeatInterval = setInterval(() => {
-      const now = new Date();
-      
-      this.clients.forEach((client, clientId) => {
-        // Check if client is still responsive (last activity within 60 seconds)
-        if (now.getTime() - client.lastActivity.getTime() > 60000) {
-          console.log(`Removing inactive client: ${clientId}`);
-          if (client.userId) {
-            this.userConnections.delete(client.userId);
-          }
-          client.ws.terminate();
-          this.clients.delete(clientId);
-        } else {
-          // Send ping to check if client is still alive
-          if (client.ws.readyState === WebSocket.OPEN) {
-            client.ws.send(JSON.stringify({ type: 'ping', timestamp: now.toISOString() }));
-          }
+  private async sendInitialData(ws: WebSocket) {
+    try {
+      const [overview, realTimeMetrics] = await Promise.all([
+        PlatformDataAggregator.getPlatformOverview(),
+        PlatformDataAggregator.getRealTimeMetrics()
+      ]);
+
+      const initialData = {
+        type: 'initial_data',
+        data: {
+          overview,
+          realTimeMetrics,
+          timestamp: new Date().toISOString()
         }
-      });
-    }, 30000); // Check every 30 seconds
+      };
+
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(initialData));
+      }
+    } catch (error) {
+      console.error('Error sending initial WebSocket data:', error);
+    }
   }
 
-  // Public methods for broadcasting updates
-  public broadcastUpdate(entityType: string, action: string, data: any) {
+  private async handleClientMessage(clientId: string, message: any) {
+    const ws = this.clients.get(clientId);
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      return;
+    }
+
+    switch (message.type) {
+      case 'ping':
+        ws.send(JSON.stringify({ type: 'pong', timestamp: new Date().toISOString() }));
+        break;
+
+      case 'request_data':
+        await this.sendRequestedData(ws, message.dataType, message.params);
+        break;
+
+      case 'subscribe_updates':
+        // Subscribe to specific data updates
+        await this.subscribeToUpdates(clientId, message.subscriptions);
+        break;
+
+      default:
+        console.warn('Unknown WebSocket message type:', message.type);
+    }
+  }
+
+  private async sendRequestedData(ws: WebSocket, dataType: string, params: any = {}) {
+    try {
+      let data;
+
+      switch (dataType) {
+        case 'overview':
+          data = await PlatformDataAggregator.getPlatformOverview();
+          break;
+
+        case 'organization_breakdowns':
+          data = await PlatformDataAggregator.getOrganizationBreakdowns(params.timeRange);
+          break;
+
+        case 'historical_trends':
+          data = await PlatformDataAggregator.getHistoricalTrends(params.months);
+          break;
+
+        case 'real_time_metrics':
+          data = await PlatformDataAggregator.getRealTimeMetrics();
+          break;
+
+        default:
+          throw new Error(`Unknown data type: ${dataType}`);
+      }
+
+      const response = {
+        type: 'data_response',
+        dataType,
+        data,
+        timestamp: new Date().toISOString()
+      };
+
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(response));
+      }
+    } catch (error) {
+      console.error('Error sending requested data:', error);
+      
+      const errorResponse = {
+        type: 'error',
+        message: 'Failed to fetch requested data',
+        timestamp: new Date().toISOString()
+      };
+
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(errorResponse));
+      }
+    }
+  }
+
+  private async subscribeToUpdates(clientId: string, subscriptions: string[]) {
+    // Store subscription preferences for this client
+    // This would be implemented with a client subscription tracking system
+    console.log(`Client ${clientId} subscribed to:`, subscriptions);
+  }
+
+  private startDataRefresh() {
+    // Refresh data every 30 seconds
+    this.dataRefreshInterval = setInterval(async () => {
+      await this.broadcastUpdates();
+    }, 30000);
+  }
+
+  private async broadcastUpdates() {
+    if (this.clients.size === 0) {
+      return;
+    }
+
+    try {
+      const [overview, realTimeMetrics] = await Promise.all([
+        PlatformDataAggregator.getPlatformOverview(),
+        PlatformDataAggregator.getRealTimeMetrics()
+      ]);
+
+      const updateData = {
+        type: 'data_update',
+        data: {
+          overview,
+          realTimeMetrics,
+          timestamp: new Date().toISOString()
+        }
+      };
+
+      this.broadcast(updateData);
+    } catch (error) {
+      console.error('Error broadcasting updates:', error);
+    }
+  }
+
+  broadcast(data: any) {
+    const message = JSON.stringify(data);
+    
+    this.clients.forEach((ws, clientId) => {
+      if (ws.readyState === WebSocket.OPEN) {
+        try {
+          ws.send(message);
+        } catch (error) {
+          console.error(`Error sending to client ${clientId}:`, error);
+          this.clients.delete(clientId);
+        }
+      } else {
+        // Remove dead connections
+        this.clients.delete(clientId);
+      }
+    });
+  }
+
+  // Platform admin specific methods
+  async broadcastPlatformUpdate(updateType: string, data: any) {
     const message = {
-      type: 'update',
-      data: { entityType, action, data },
-      timestamp: new Date().toISOString(),
+      type: 'platform_update',
+      updateType,
+      data,
+      timestamp: new Date().toISOString()
     };
 
     this.broadcast(message);
   }
 
-  public broadcastMetricChange(metrics: any) {
+  async broadcastOrganizationUpdate(organizationId: number, updateType: string, data: any) {
     const message = {
-      type: 'metric_change',
-      data: metrics,
-      timestamp: new Date().toISOString(),
+      type: 'organization_update',
+      organizationId,
+      updateType,
+      data,
+      timestamp: new Date().toISOString()
     };
 
     this.broadcast(message);
   }
 
-  public broadcastIncidentAlert(incident: any) {
-    const message = {
-      type: 'incident_alert',
-      data: {
-        message: `New ${incident.priority} priority incident: ${incident.title}`,
-        incident,
-      },
-      timestamp: new Date().toISOString(),
+  async broadcastSystemAlert(severity: 'low' | 'medium' | 'high' | 'critical', message: string, data?: any) {
+    const alert = {
+      type: 'system_alert',
+      severity,
+      message,
+      data,
+      timestamp: new Date().toISOString()
     };
 
-    // Only send to users with appropriate permissions
-    this.broadcastToRoles(message, ['admin', 'manager', 'support_coordinator', 'safeguarding_officer']);
+    this.broadcast(alert);
   }
 
-  public broadcastNotification(notification: any, targetRoles?: string[]) {
-    const message = {
-      type: 'notification',
-      data: notification,
-      timestamp: new Date().toISOString(),
-    };
+  // Manual data refresh trigger
+  async triggerDataRefresh() {
+    await this.broadcastUpdates();
+  }
 
-    if (targetRoles) {
-      this.broadcastToRoles(message, targetRoles);
-    } else {
-      this.broadcast(message);
+  // Cleanup method
+  shutdown() {
+    if (this.dataRefreshInterval) {
+      clearInterval(this.dataRefreshInterval);
     }
-  }
 
-  private broadcast(message: any) {
-    this.clients.forEach((client) => {
-      if (client.ws.readyState === WebSocket.OPEN) {
-        client.ws.send(JSON.stringify(message));
+    this.clients.forEach((ws) => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.close();
       }
     });
-  }
 
-  private broadcastToRoles(message: any, roles: string[]) {
-    this.clients.forEach((client) => {
-      if (client.ws.readyState === WebSocket.OPEN && client.role && roles.includes(client.role)) {
-        client.ws.send(JSON.stringify(message));
-      }
-    });
-  }
-
-  public getConnectedClients(): number {
-    return this.clients.size;
-  }
-
-  public getClientsByRole(role: string): number {
-    return Array.from(this.clients.values()).filter(client => client.role === role).length;
-  }
-
-  public cleanup() {
-    if (this.heartbeatInterval) {
-      clearInterval(this.heartbeatInterval);
-    }
     this.clients.clear();
-    this.userConnections.clear();
-    this.wss.close();
+
+    if (this.wss) {
+      this.wss.close();
+    }
+  }
+
+  // Get connection statistics
+  getStats() {
+    return {
+      connectedClients: this.clients.size,
+      serverRunning: this.wss !== null,
+      dataRefreshActive: this.dataRefreshInterval !== null
+    };
   }
 }
 
-export let wsManager: WebSocketManager;
-
-export function setupWebSocket(server: Server) {
-  wsManager = new WebSocketManager(server);
-  return wsManager;
-}
-
-// Export WebSocketManager class for use in other modules
-export { WebSocketManager };
+export default WebSocketManager;

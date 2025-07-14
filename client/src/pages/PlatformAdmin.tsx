@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useRoute } from 'wouter';
-import { Shield, Database, Users, BarChart3, Settings, AlertTriangle, CreditCard, Bell, Lock, Eye, Search } from 'lucide-react';
+import { Shield, Database, Users, BarChart3, Settings, AlertTriangle, CreditCard, Bell, Lock, Eye, Search, TrendingUp, RefreshCw, Download } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -477,52 +477,175 @@ function SystemMonitoring() {
 
 // Platform Analytics Component
 function PlatformAnalytics() {
+  const [timeRange, setTimeRange] = useState('30d');
   const { data: analytics } = useQuery({
-    queryKey: ['/api/platform-admin/analytics'],
-    staleTime: 5 * 60 * 1000,
+    queryKey: ['/api/platform-admin/analytics', timeRange],
+    staleTime: 60 * 1000,
   });
+
+  const { data: organizationBreakdowns } = useQuery({
+    queryKey: ['/api/platform-admin/organization-breakdowns', timeRange],
+    staleTime: 60 * 1000,
+  });
+
+  const { data: realTimeMetrics } = useQuery({
+    queryKey: ['/api/platform-admin/real-time-metrics'],
+    staleTime: 10 * 1000,
+    refetchInterval: 30 * 1000,
+  });
+
+  const handleDataExport = async (format: 'csv' | 'json') => {
+    try {
+      const response = await fetch(`/api/platform-admin/export-data?format=${format}`);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `platform-analytics-${new Date().toISOString().split('T')[0]}.${format}`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Export failed:', error);
+    }
+  };
+
+  const metrics = [
+    {
+      title: "Total Revenue",
+      value: `£${analytics?.revenue?.total?.toLocaleString() || 0}`,
+      change: `From ${organizationBreakdowns?.organizations?.length || 0} organizations`,
+      icon: BarChart3,
+      trend: "up"
+    },
+    {
+      title: "Average Occupancy",
+      value: `${analytics?.occupancy?.average || 0}%`,
+      change: `Across ${organizationBreakdowns?.summary?.totalProperties || 0} properties`,
+      icon: Users,
+      trend: "up"
+    },
+    {
+      title: "Total Incidents",
+      value: `${analytics?.incidents?.total || 0}`,
+      change: `Avg response: ${analytics?.incidents?.averageResponseTime || 0}min`,
+      icon: AlertTriangle,
+      trend: "down"
+    },
+    {
+      title: "Total Residents",
+      value: `${analytics?.residents?.total || 0}`,
+      change: `${realTimeMetrics?.metrics?.activeResidents || 0} active`,
+      icon: Users,
+      trend: "up"
+    }
+  ];
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Platform Analytics</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-semibold">Platform Analytics</h2>
+        <div className="flex items-center gap-4">
+          <select 
+            value={timeRange} 
+            onChange={(e) => setTimeRange(e.target.value)}
+            className="px-3 py-2 border rounded-md"
+          >
+            <option value="7d">Last 7 days</option>
+            <option value="30d">Last 30 days</option>
+            <option value="90d">Last 90 days</option>
+            <option value="365d">Last year</option>
+          </select>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => handleDataExport('csv')}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export CSV
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => handleDataExport('json')}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export JSON
+          </Button>
+        </div>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {metrics.map((metric) => (
+          <Card key={metric.title}>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-medium-contrast">{metric.title}</p>
+                  <p className="text-2xl font-semibold">{metric.value}</p>
+                  <p className="text-sm text-success">
+                    {metric.change}
+                  </p>
+                </div>
+                <metric.icon className="h-8 w-8 text-primary" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
-          <CardContent className="p-6">
-            <div className="text-center">
-              <p className="text-sm text-medium-contrast">Total Revenue</p>
-              <p className="text-2xl font-semibold">£{analytics?.revenue?.total?.toLocaleString() || 0}</p>
-              <p className="text-sm text-success">+{analytics?.revenue?.growth || 0}%</p>
+          <CardHeader>
+            <CardTitle>Organization Breakdown</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {organizationBreakdowns?.organizations?.slice(0, 10).map((org: any, index: number) => (
+                <div key={index} className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">{org.organizationName}</p>
+                    <p className="text-sm text-medium-contrast">
+                      {org.residents} residents • {org.properties} properties
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium">£{org.revenue?.toLocaleString()}</p>
+                    <p className="text-sm text-medium-contrast">{org.occupancyRate}% occupied</p>
+                  </div>
+                </div>
+              )) || []}
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
-          <CardContent className="p-6">
-            <div className="text-center">
-              <p className="text-sm text-medium-contrast">Conversion Rate</p>
-              <p className="text-2xl font-semibold">{analytics?.conversion?.rate || 0}%</p>
-              <p className="text-sm text-success">+{analytics?.conversion?.change || 0}%</p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center">
-              <p className="text-sm text-medium-contrast">Churn Rate</p>
-              <p className="text-2xl font-semibold">{analytics?.churn?.rate || 0}%</p>
-              <p className="text-sm text-error">-{analytics?.churn?.change || 0}%</p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center">
-              <p className="text-sm text-medium-contrast">Growth Rate</p>
-              <p className="text-2xl font-semibold">{analytics?.growth?.rate || 0}%</p>
-              <p className="text-sm text-success">+{analytics?.growth?.change || 0}%</p>
+          <CardHeader>
+            <CardTitle>Real-Time Metrics</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-medium-contrast">Active Residents</span>
+                <span className="font-medium">{realTimeMetrics?.metrics?.activeResidents || 0}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-medium-contrast">Properties</span>
+                <span className="font-medium">{realTimeMetrics?.metrics?.totalProperties || 0}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-medium-contrast">Incidents (24h)</span>
+                <span className="font-medium">{realTimeMetrics?.metrics?.recentIncidents || 0}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-medium-contrast">Maintenance Requests</span>
+                <span className="font-medium">{realTimeMetrics?.metrics?.pendingMaintenance || 0}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-medium-contrast">Last Updated</span>
+                <span className="text-sm text-medium-contrast">
+                  {realTimeMetrics?.lastUpdated ? new Date(realTimeMetrics.lastUpdated).toLocaleTimeString() : 'Never'}
+                </span>
+              </div>
             </div>
           </CardContent>
         </Card>

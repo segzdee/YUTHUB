@@ -1,7 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { setupWebSocket } from "./websocket";
+import { WebSocketManager } from "./websocket";
 import { apiRateLimit } from "./middleware/rateLimiter";
 import { sanitizeInput } from "./middleware/inputSanitization";
 import { backgroundJobScheduler } from "./jobs/backgroundJobs";
@@ -50,7 +50,9 @@ app.use((req, res, next) => {
   const server = await registerRoutes(app);
   
   // Setup WebSocket for real-time updates
-  setupWebSocket(server);
+  // Initialize WebSocket manager
+  const wsManager = WebSocketManager.getInstance();
+  wsManager.initialize(server);
 
   // Start background job scheduler
   backgroundJobScheduler.start();

@@ -3,6 +3,8 @@ import { db } from './db';
 import { users, organizations, auditLogs, organizationSubscriptions } from '../shared/schema';
 import { eq, desc, count, sql } from 'drizzle-orm';
 import { PlatformAdminValidator, DataIntegrityValidator, PerformanceMonitor } from './platformAdminValidation';
+import { PlatformDataAggregator, AggregatedDataValidator, SecureDataExporter } from './platformAdminAggregation';
+import { PlatformDataAggregator, AggregatedDataValidator, SecureDataExporter } from './platformAdminAggregation';
 
 // Platform Admin Authentication Middleware
 export async function verifyPlatformAdmin(req: Request, res: Response, next: any) {
@@ -71,41 +73,39 @@ export async function checkPlatformAdminAuth(req: Request, res: Response) {
 // Platform Overview
 export async function getPlatformOverview(req: Request, res: Response) {
   try {
-    // Get total organizations
-    const totalOrgs = await db.select({ count: count() }).from(organizations);
+    // Get comprehensive aggregated platform data
+    const platformData = await PlatformDataAggregator.getPlatformOverview();
     
-    // Get active subscriptions
-    const activeSubscriptions = await db.select({ count: count() })
-      .from(organizationSubscriptions)
-      .where(eq(organizationSubscriptions.status, 'active'));
-
-    // Calculate monthly revenue (sample calculation)
-    const monthlyRevenue = 125000; // This would be calculated from actual billing data
-
-    // System health (sample data)
-    const systemHealth = 99.5;
-
-    // Recent activity (sample data)
-    const recentActivity = [
-      { action: 'New Organization Created', organization: 'Camden Council', timestamp: '2 hours ago' },
-      { action: 'Subscription Upgraded', organization: 'Westminster Council', timestamp: '4 hours ago' },
-      { action: 'Payment Failed', organization: 'Hackney Council', timestamp: '6 hours ago' }
-    ];
-
-    // System alerts (sample data)
-    const systemAlerts = [
-      { severity: 'medium', message: 'Database connection pool at 80% capacity' },
-      { severity: 'low', message: 'API response time increased by 5%' }
-    ];
-
-    res.json({
-      totalOrganizations: totalOrgs[0]?.count || 0,
-      activeSubscriptions: activeSubscriptions[0]?.count || 0,
-      monthlyRevenue,
-      systemHealth,
-      recentActivity,
-      systemAlerts
+    // Get real-time metrics
+    const realTimeMetrics = await PlatformDataAggregator.getRealTimeMetrics();
+    
+    // Validate data consistency
+    const dataConsistency = await AggregatedDataValidator.validateDataConsistency();
+    
+    // Get recent activity from audit logs
+    const recentActivity = await db.query.auditLogs.findMany({
+      limit: 5,
+      orderBy: [desc(auditLogs.timestamp)],
+      where: sql`${auditLogs.action} NOT LIKE '%login%'`
     });
+
+    const platformOverview = {
+      ...platformData,
+      realTimeMetrics,
+      dataConsistency: {
+        valid: dataConsistency.valid,
+        issues: dataConsistency.issues
+      },
+      recentActivity: recentActivity.map(activity => ({
+        action: activity.action,
+        timestamp: activity.timestamp?.toISOString() || new Date().toISOString(),
+        userId: activity.userId,
+        riskLevel: activity.riskLevel
+      })),
+      lastUpdated: new Date().toISOString()
+    };
+
+    res.json(platformOverview);
   } catch (error) {
     console.error('Platform overview error:', error);
     res.status(500).json({ message: 'Internal server error' });
@@ -208,24 +208,67 @@ export async function getSystemMonitoring(req: Request, res: Response) {
 // Platform Analytics
 export async function getPlatformAnalytics(req: Request, res: Response) {
   try {
-    // Sample analytics data - in production, this would be calculated from actual data
+    const timeRange = req.query.timeRange as string || '30d';
+    
+    // Get comprehensive analytics data
+    const [
+      organizationBreakdowns,
+      historicalTrends,
+      realTimeMetrics,
+      performanceCheck
+    ] = await Promise.all([
+      PlatformDataAggregator.getOrganizationBreakdowns(timeRange),
+      PlatformDataAggregator.getHistoricalTrends(12),
+      PlatformDataAggregator.getRealTimeMetrics(),
+      AggregatedDataValidator.checkAggregationPerformance()
+    ]);
+
+    // Calculate analytics metrics
+    const totalRevenue = organizationBreakdowns.reduce((sum, org) => sum + org.revenue, 0);
+    const averageOccupancy = organizationBreakdowns.reduce((sum, org) => sum + org.occupancyRate, 0) / organizationBreakdowns.length;
+    const averageResponseTime = organizationBreakdowns.reduce((sum, org) => sum + org.responseTime, 0) / organizationBreakdowns.length;
+
     const analyticsData = {
       revenue: {
-        total: 2500000,
-        growth: 18
+        total: totalRevenue,
+        byOrganization: organizationBreakdowns.map(org => ({
+          name: org.organizationName,
+          revenue: org.revenue
+        })),
+        trends: historicalTrends.revenueTrends
       },
-      conversion: {
-        rate: 12.5,
-        change: 2.3
+      occupancy: {
+        average: Math.round(averageOccupancy * 100) / 100,
+        byOrganization: organizationBreakdowns.map(org => ({
+          name: org.organizationName,
+          occupancy: org.occupancyRate
+        })),
+        trends: historicalTrends.occupancyTrends
       },
-      churn: {
-        rate: 3.2,
-        change: 0.8
+      incidents: {
+        total: organizationBreakdowns.reduce((sum, org) => sum + org.incidents, 0),
+        averageResponseTime: Math.round(averageResponseTime),
+        byOrganization: organizationBreakdowns.map(org => ({
+          name: org.organizationName,
+          incidents: org.incidents,
+          responseTime: org.responseTime
+        })),
+        trends: historicalTrends.incidentTrends
       },
-      growth: {
-        rate: 15.7,
-        change: 4.2
-      }
+      residents: {
+        total: organizationBreakdowns.reduce((sum, org) => sum + org.residents, 0),
+        byOrganization: organizationBreakdowns.map(org => ({
+          name: org.organizationName,
+          residents: org.residents
+        })),
+        trends: historicalTrends.residentTrends
+      },
+      performance: {
+        aggregationPerformance: performanceCheck.performant,
+        slowQueries: performanceCheck.slowQueries,
+        realTimeMetrics
+      },
+      lastUpdated: new Date().toISOString()
     };
 
     res.json(analyticsData);
@@ -393,4 +436,143 @@ export async function handleEmergencyAction(req: Request, res: Response) {
     console.error('Emergency action error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
+}
+
+// Organization Breakdown Analytics
+export async function getOrganizationBreakdowns(req: Request, res: Response) {
+  try {
+    const timeRange = req.query.timeRange as string || '30d';
+    
+    const breakdowns = await PlatformDataAggregator.getOrganizationBreakdowns(timeRange);
+    
+    res.json({
+      timeRange,
+      organizations: breakdowns,
+      summary: {
+        totalOrganizations: breakdowns.length,
+        totalResidents: breakdowns.reduce((sum, org) => sum + org.residents, 0),
+        totalProperties: breakdowns.reduce((sum, org) => sum + org.properties, 0),
+        averageOccupancy: breakdowns.reduce((sum, org) => sum + org.occupancyRate, 0) / breakdowns.length,
+        totalIncidents: breakdowns.reduce((sum, org) => sum + org.incidents, 0)
+      },
+      lastUpdated: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Organization breakdowns error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
+// Historical Trends Analytics
+export async function getHistoricalTrends(req: Request, res: Response) {
+  try {
+    const months = parseInt(req.query.months as string) || 12;
+    
+    const trends = await PlatformDataAggregator.getHistoricalTrends(months);
+    
+    res.json({
+      months,
+      trends,
+      lastUpdated: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Historical trends error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
+// Real-time Dashboard Metrics
+export async function getRealTimeDashboardMetrics(req: Request, res: Response) {
+  try {
+    const metrics = await PlatformDataAggregator.getRealTimeMetrics();
+    
+    res.json({
+      metrics,
+      lastUpdated: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Real-time dashboard metrics error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
+// Export Aggregated Data
+export async function exportAggregatedData(req: Request, res: Response) {
+  try {
+    const format = req.query.format as 'csv' | 'json' || 'json';
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    // Log the export action
+    await logPlatformAdminAction(userId, 'data_export', {
+      format,
+      timestamp: new Date()
+    });
+
+    const exportData = await SecureDataExporter.exportAggregatedReport(format);
+    
+    res.setHeader('Content-Type', format === 'csv' ? 'text/csv' : 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename="${exportData.filename}"`);
+    
+    if (format === 'csv') {
+      // Convert JSON to CSV format
+      const csvData = convertJSONToCSV(exportData.data);
+      res.send(csvData);
+    } else {
+      res.json(exportData.data);
+    }
+  } catch (error) {
+    console.error('Data export error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
+// Data Consistency Validation
+export async function validateDataConsistency(req: Request, res: Response) {
+  try {
+    const validation = await AggregatedDataValidator.validateDataConsistency();
+    const performanceCheck = await AggregatedDataValidator.checkAggregationPerformance();
+    
+    res.json({
+      dataConsistency: validation,
+      performanceCheck,
+      lastChecked: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Data consistency validation error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
+// Helper function to convert JSON to CSV
+function convertJSONToCSV(data: any): string {
+  const organizations = data.organizationBreakdowns || [];
+  
+  const headers = [
+    'Organization Name',
+    'Residents',
+    'Properties',
+    'Incidents',
+    'Occupancy Rate',
+    'Response Time',
+    'Satisfaction Score'
+  ];
+  
+  const csvRows = [
+    headers.join(','),
+    ...organizations.map((org: any) => [
+      org.organizationName,
+      org.residents,
+      org.properties,
+      org.incidents,
+      org.occupancyRate,
+      org.responseTime,
+      org.satisfactionScore
+    ].join(','))
+  ];
+  
+  return csvRows.join('\n');
 }

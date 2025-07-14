@@ -46,7 +46,7 @@ export default function RiskInsights() {
       case "low":
         return "border-green-200 bg-green-50";
       default:
-        return "border-gray-200 bg-gray-50";
+        return "border-neutral-200 bg-neutral-50";
     }
   };
 
@@ -59,7 +59,7 @@ export default function RiskInsights() {
       case "low":
         return "text-green-700";
       default:
-        return "text-gray-700";
+        return "text-neutral-700";
     }
   };
 
@@ -97,7 +97,7 @@ export default function RiskInsights() {
                   <p className="font-medium text-slate">
                     {resident.firstName} {resident.lastName}
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-neutral-600">
                     Property ID: {resident.propertyId} • Key Worker: {resident.keyWorkerId}
                   </p>
                   <p className={`text-xs mt-2 ${getRiskBadgeColor(resident.riskLevel)}`}>
@@ -109,7 +109,7 @@ export default function RiskInsights() {
                 </Button>
               </div>
               <div className="mt-3">
-                <p className="text-sm text-gray-700 flex items-start">
+                <p className="text-sm text-neutral-700 flex items-start">
                   <Lightbulb className="h-4 w-4 text-yellow-600 mr-2 mt-0.5 flex-shrink-0" />
                   AI Recommendation: {getAIRecommendation(resident.riskLevel)}
                 </p>
@@ -118,7 +118,7 @@ export default function RiskInsights() {
           ))}
           
           {(!riskyResidents || riskyResidents.length === 0) && (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-neutral-500">
               <Bot className="h-12 w-12 mx-auto mb-4 text-gray-400" />
               <p>No residents at risk detected</p>
               <p className="text-sm">AI monitoring is active and all residents are in good standing</p>

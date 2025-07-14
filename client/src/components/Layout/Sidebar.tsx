@@ -75,8 +75,8 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                   className={cn(
                     "group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
                     isActive
-                      ? "bg-blue-50 text-primary border-r-2 border-primary"
-                      : "text-gray-700 hover:bg-gray-50"
+                      ? "bg-primary-50 text-primary border-r-2 border-primary"
+                      : "text-neutral-700 hover:bg-neutral-50"
                   )}
                   onClick={onClose}
                 >
@@ -100,8 +100,8 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                     className={cn(
                       "group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
                       isActive
-                        ? "bg-blue-50 text-primary border-r-2 border-primary"
-                        : "text-gray-700 hover:bg-gray-50"
+                        ? "bg-primary-50 text-primary border-r-2 border-primary"
+                        : "text-neutral-700 hover:bg-neutral-50"
                     )}
                     onClick={onClose}
                   >

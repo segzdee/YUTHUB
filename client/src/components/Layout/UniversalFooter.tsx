@@ -1,4 +1,5 @@
-import { Building2, Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
+import BrandLogo from '@/components/design-system/BrandLogo';
 
 export default function UniversalFooter() {
   const currentYear = new Date().getFullYear();
@@ -8,51 +9,53 @@ export default function UniversalFooter() {
       { name: 'Features', href: '/' },
       { name: 'Pricing', href: '/pricing' },
       { name: 'Dashboard', href: '/dashboard' },
-      { name: 'Support', href: '#' },
+      { name: 'Support', href: '/support' },
     ],
     company: [
-      { name: 'About Us', href: '#' },
-      { name: 'Contact', href: '#' },
-      { name: 'Privacy Policy', href: '#' },
-      { name: 'Terms of Service', href: '#' },
+      { name: 'About Us', href: '/about' },
+      { name: 'Contact', href: '/contact' },
+      { name: 'Privacy Policy', href: '/privacy' },
+      { name: 'Terms of Service', href: '/terms' },
     ],
     resources: [
-      { name: 'Documentation', href: '#' },
-      { name: 'Help Center', href: '#' },
-      { name: 'Training', href: '#' },
-      { name: 'Community', href: '#' },
+      { name: 'Documentation', href: '/docs' },
+      { name: 'Help Center', href: '/help' },
+      { name: 'Training', href: '/training' },
+      { name: 'Community', href: '/community' },
     ],
   };
 
   return (
-    <footer className="bg-gray-900 text-white" role="contentinfo">
+    <footer className="bg-neutral-900 text-white" role="contentinfo">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <Building2 className="h-8 w-8 text-blue-400" aria-hidden="true" />
-              <span className="text-2xl font-bold text-white">YUTHUB</span>
-            </div>
-            <p className="text-gray-200 text-sm leading-relaxed">
+            <BrandLogo 
+              size="lg" 
+              variant="light" 
+              className="mb-4"
+              aria-label="YUTHUB - Youth Housing Management System"
+            />
+            <p className="text-neutral-200 text-sm leading-relaxed">
               Comprehensive housing support management platform for youth organizations. 
               Empowering young lives through better housing support.
             </p>
             <div className="space-y-2">
-              <div className="flex items-center space-x-2 text-sm text-gray-200">
-                <Mail className="h-4 w-4 text-blue-400" aria-hidden="true" />
-                <a href="mailto:support@yuthub.com" className="hover:text-white transition-colors interactive-element">
+              <div className="flex items-center space-x-2 text-sm text-neutral-200">
+                <Mail className="h-4 w-4 text-primary" aria-hidden="true" />
+                <a href="mailto:support@yuthub.com" className="hover:text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-neutral-900 rounded">
                   support@yuthub.com
                 </a>
               </div>
-              <div className="flex items-center space-x-2 text-sm text-gray-200">
-                <Phone className="h-4 w-4 text-blue-400" aria-hidden="true" />
-                <a href="tel:+442071234567" className="hover:text-white transition-colors interactive-element">
+              <div className="flex items-center space-x-2 text-sm text-neutral-200">
+                <Phone className="h-4 w-4 text-primary" aria-hidden="true" />
+                <a href="tel:+442071234567" className="hover:text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-neutral-900 rounded">
                   +44 20 7123 4567
                 </a>
               </div>
-              <div className="flex items-center space-x-2 text-sm text-gray-200">
-                <MapPin className="h-4 w-4 text-blue-400" aria-hidden="true" />
+              <div className="flex items-center space-x-2 text-sm text-neutral-200">
+                <MapPin className="h-4 w-4 text-primary" aria-hidden="true" />
                 <span>London, United Kingdom</span>
               </div>
             </div>
@@ -67,7 +70,7 @@ export default function UniversalFooter() {
                   <li key={link.name}>
                     <a 
                       href={link.href}
-                      className="text-gray-200 hover:text-white text-sm transition-colors interactive-element focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400"
+                      className="text-neutral-200 hover:text-white text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-neutral-900 rounded"
                     >
                       {link.name}
                     </a>
@@ -86,7 +89,7 @@ export default function UniversalFooter() {
                   <li key={link.name}>
                     <a 
                       href={link.href}
-                      className="text-gray-200 hover:text-white text-sm transition-colors interactive-element focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400"
+                      className="text-neutral-200 hover:text-white text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-neutral-900 rounded"
                     >
                       {link.name}
                     </a>
@@ -105,7 +108,7 @@ export default function UniversalFooter() {
                   <li key={link.name}>
                     <a 
                       href={link.href}
-                      className="text-gray-200 hover:text-white text-sm transition-colors interactive-element focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400"
+                      className="text-neutral-200 hover:text-white text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-neutral-900 rounded"
                     >
                       {link.name}
                     </a>
@@ -117,27 +120,27 @@ export default function UniversalFooter() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-600 mt-12 pt-8">
+        <div className="border-t border-neutral-600 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-200 text-sm">
+            <p className="text-neutral-200 text-sm">
               © {currentYear} YUTHUB. All rights reserved.
             </p>
             <nav role="navigation" aria-label="Legal links" className="flex space-x-6 mt-4 md:mt-0">
               <a 
-                href="#" 
-                className="text-gray-200 hover:text-white text-sm transition-colors interactive-element focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400"
+                href="/privacy" 
+                className="text-neutral-200 hover:text-white text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-neutral-900 rounded"
               >
                 Privacy Policy
               </a>
               <a 
-                href="#" 
-                className="text-gray-200 hover:text-white text-sm transition-colors interactive-element focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400"
+                href="/terms" 
+                className="text-neutral-200 hover:text-white text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-neutral-900 rounded"
               >
                 Terms of Service
               </a>
               <a 
-                href="#" 
-                className="text-gray-200 hover:text-white text-sm transition-colors interactive-element focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400"
+                href="/cookies" 
+                className="text-neutral-200 hover:text-white text-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-neutral-900 rounded"
               >
                 Cookie Policy
               </a>

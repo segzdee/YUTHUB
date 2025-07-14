@@ -9,28 +9,28 @@ export default function HowItWorks() {
       icon: UserPlus,
       title: 'Quick Setup',
       description: 'Sign up and configure your organization settings in minutes. Import existing resident data or start fresh with our guided setup wizard.',
-      color: 'bg-blue-100 text-blue-600'
+      color: 'bg-primary-100 text-primary-600'
     },
     {
       number: 2,
       icon: Settings,
       title: 'Customize & Configure',
       description: 'Tailor the platform to your organization\'s specific needs. Set up workflows, configure alerts, and integrate with existing systems.',
-      color: 'bg-green-100 text-green-600'
+      color: 'bg-success/20 text-success'
     },
     {
       number: 3,
       icon: BarChart3,
       title: 'Track & Monitor',
       description: 'Monitor resident progress, track outcomes, and manage support services. Use real-time dashboards to stay informed about your properties.',
-      color: 'bg-purple-100 text-purple-600'
+      color: 'bg-accent-100 text-accent-600'
     },
     {
       number: 4,
       icon: TrendingUp,
       title: 'Analyze & Improve',
       description: 'Generate comprehensive reports, analyze trends, and make data-driven decisions to improve your support services and outcomes.',
-      color: 'bg-orange-100 text-orange-600'
+      color: 'bg-warning/20 text-warning'
     }
   ];
 

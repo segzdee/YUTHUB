@@ -17,43 +17,43 @@ const quickActions = [
   {
     name: "Register Property",
     icon: Home,
-    color: "bg-blue-50 hover:bg-blue-100",
-    iconColor: "text-blue-600",
+    color: "bg-primary-50 hover:bg-primary-100",
+    iconColor: "text-primary-600",
     path: "/forms/property-registration"
   },
   {
     name: "Resident Intake",
     icon: UserPlus,
-    color: "bg-green-50 hover:bg-green-100",
-    iconColor: "text-green-600",
+    color: "bg-success/10 hover:bg-success/20",
+    iconColor: "text-success",
     path: "/forms/resident-intake"
   },
   {
     name: "Incident Report",
     icon: AlertTriangle,
-    color: "bg-red-50 hover:bg-red-100",
-    iconColor: "text-red-600",
+    color: "bg-error/10 hover:bg-error/20",
+    iconColor: "text-error",
     path: "/forms/incident-report"
   },
   {
     name: "Progress Tracking",
     icon: BarChart3,
-    color: "bg-purple-50 hover:bg-purple-100",
-    iconColor: "text-purple-600",
+    color: "bg-accent-50 hover:bg-accent-100",
+    iconColor: "text-accent-600",
     path: "/forms/progress-tracking"
   },
   {
     name: "Support Plan",
     icon: FileText,
-    color: "bg-secondary bg-opacity-5 hover:bg-opacity-10",
-    iconColor: "text-secondary",
+    color: "bg-secondary-50 hover:bg-secondary-100",
+    iconColor: "text-secondary-600",
     path: "/forms/support-plan"
   },
   {
     name: "Maintenance",
     icon: Wrench,
-    color: "bg-orange-50 hover:bg-orange-100",
-    iconColor: "text-orange-600",
+    color: "bg-warning/10 hover:bg-warning/20",
+    iconColor: "text-warning",
     action: "maintenance"
   }
 ];

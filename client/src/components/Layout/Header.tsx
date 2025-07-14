@@ -18,6 +18,7 @@ import { useLanguage } from "@/components/providers/LanguageProvider";
 import { useLocation } from "wouter";
 import { useWebSocketConnection } from '@/hooks/useWebSocketConnection';
 import NotificationCenter from '@/components/Dashboard/NotificationCenter';
+import BrandLogo from '@/components/design-system/BrandLogo';
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -53,9 +54,11 @@ export default function Header({ onMenuClick }: HeaderProps) {
             
             <div className="min-w-0 flex-1">
               <div className="flex items-center space-x-2 mb-1">
-                <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold text-foreground truncate">
-                  YUTHUB
-                </h1>
+                <BrandLogo 
+                  size="md" 
+                  className="flex-shrink-0" 
+                  aria-label="YUTHUB - Youth Housing Management System"
+                />
                 <ContextualHelp context={location.split('/')[1] || 'dashboard'} />
               </div>
               <Breadcrumbs className="mb-1" />

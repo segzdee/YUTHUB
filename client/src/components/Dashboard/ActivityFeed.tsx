@@ -38,7 +38,7 @@ const getActivityColor = (type: string) => {
     case "assessment":
       return "text-success bg-success bg-opacity-10";
     default:
-      return "text-gray-500 bg-gray-100";
+      return "text-neutral-500 bg-neutral-100";
   }
 };
 
@@ -88,8 +88,8 @@ export default function ActivityFeed() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-slate font-medium">{activity.title}</p>
-                  <p className="text-xs text-gray-500 truncate">{activity.description}</p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-neutral-500 truncate">{activity.description}</p>
+                  <p className="text-xs text-neutral-400">
                     {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}
                   </p>
                 </div>

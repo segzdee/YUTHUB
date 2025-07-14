@@ -2219,6 +2219,198 @@ export const subscriptionAnalytics = pgTable("subscription_analytics", {
   index("idx_subscription_analytics_metric_period_date").on(table.metricType, table.periodDate),
 ]);
 
+// Platform admin users table (separate from regular users)
+export const platformUsers = pgTable("platform_users", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  accessLevel: varchar("access_level").default("admin"), // 'admin', 'super_admin', 'read_only'
+  permissions: jsonb("permissions").notNull(), // Platform-specific permissions
+  mfaEnabled: boolean("mfa_enabled").default(true),
+  mfaSecret: varchar("mfa_secret"),
+  ipWhitelist: text("ip_whitelist").array(), // Allowed IP addresses
+  lastLoginAt: timestamp("last_login_at"),
+  loginCount: integer("login_count").default(0),
+  isActive: boolean("is_active").default(true),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_platform_users_user_id").on(table.userId),
+  index("idx_platform_users_access_level").on(table.accessLevel),
+  index("idx_platform_users_is_active").on(table.isActive),
+]);
+
+// Platform audit logs (separate from regular audit logs)
+export const platformAuditLogs = pgTable("platform_audit_logs", {
+  id: serial("id").primaryKey(),
+  adminUserId: varchar("admin_user_id").references(() => users.id).notNull(),
+  action: varchar("action").notNull(), // 'ORGANIZATION_CREATED', 'SUBSCRIPTION_CHANGED', 'FEATURE_TOGGLED', etc.
+  targetType: varchar("target_type").notNull(), // 'organization', 'subscription', 'user', 'system'
+  targetId: varchar("target_id"), // ID of the affected resource
+  organizationId: integer("organization_id").references(() => organizations.id), // If action affects specific org
+  details: jsonb("details").notNull(), // Detailed action information
+  ipAddress: varchar("ip_address"),
+  userAgent: varchar("user_agent"),
+  success: boolean("success").notNull(),
+  riskLevel: varchar("risk_level").default("medium"), // 'low', 'medium', 'high', 'critical'
+  timestamp: timestamp("timestamp").defaultNow(),
+}, (table) => [
+  index("idx_platform_audit_logs_admin_user_id").on(table.adminUserId),
+  index("idx_platform_audit_logs_action").on(table.action),
+  index("idx_platform_audit_logs_target_type").on(table.targetType),
+  index("idx_platform_audit_logs_organization_id").on(table.organizationId),
+  index("idx_platform_audit_logs_timestamp").on(table.timestamp),
+  index("idx_platform_audit_logs_risk_level").on(table.riskLevel),
+]);
+
+// System metrics for platform performance monitoring
+export const systemMetrics = pgTable("system_metrics", {
+  id: serial("id").primaryKey(),
+  metricName: varchar("metric_name").notNull(), // 'db_connections', 'api_response_time', 'memory_usage', etc.
+  metricValue: decimal("metric_value", { precision: 15, scale: 4 }).notNull(),
+  unit: varchar("unit"), // 'ms', 'bytes', 'percent', 'count'
+  organizationId: integer("organization_id").references(() => organizations.id), // null for system-wide metrics
+  metadata: jsonb("metadata"), // Additional metric context
+  recordedAt: timestamp("recorded_at").defaultNow(),
+}, (table) => [
+  index("idx_system_metrics_metric_name").on(table.metricName),
+  index("idx_system_metrics_organization_id").on(table.organizationId),
+  index("idx_system_metrics_recorded_at").on(table.recordedAt),
+  index("idx_system_metrics_name_recorded_at").on(table.metricName, table.recordedAt),
+]);
+
+// Platform notifications for system-wide announcements
+export const platformNotifications = pgTable("platform_notifications", {
+  id: serial("id").primaryKey(),
+  title: varchar("title").notNull(),
+  message: text("message").notNull(),
+  notificationType: varchar("notification_type").notNull(), // 'maintenance', 'feature', 'security', 'billing'
+  priority: varchar("priority").default("medium"), // 'low', 'medium', 'high', 'urgent'
+  targetAudience: varchar("target_audience").default("all"), // 'all', 'admins', 'specific_orgs'
+  targetOrganizations: integer("target_organizations").array(), // Specific org IDs if targeted
+  isActive: boolean("is_active").default(true),
+  scheduledFor: timestamp("scheduled_for"),
+  expiresAt: timestamp("expires_at"),
+  createdBy: varchar("created_by").references(() => users.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_platform_notifications_notification_type").on(table.notificationType),
+  index("idx_platform_notifications_priority").on(table.priority),
+  index("idx_platform_notifications_target_audience").on(table.targetAudience),
+  index("idx_platform_notifications_is_active").on(table.isActive),
+  index("idx_platform_notifications_scheduled_for").on(table.scheduledFor),
+]);
+
+// Organization analytics cache for platform admin dashboard
+export const organizationAnalytics = pgTable("organization_analytics", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").references(() => organizations.id).notNull(),
+  metricType: varchar("metric_type").notNull(), // 'total_residents', 'occupancy_rate', 'revenue', 'incidents'
+  metricValue: decimal("metric_value", { precision: 15, scale: 2 }).notNull(),
+  period: varchar("period").notNull(), // 'current', 'daily', 'weekly', 'monthly'
+  periodDate: date("period_date").notNull(),
+  calculatedAt: timestamp("calculated_at").defaultNow(),
+  metadata: jsonb("metadata"), // Additional calculation context
+}, (table) => [
+  index("idx_organization_analytics_organization_id").on(table.organizationId),
+  index("idx_organization_analytics_metric_type").on(table.metricType),
+  index("idx_organization_analytics_period").on(table.period),
+  index("idx_organization_analytics_period_date").on(table.periodDate),
+  index("idx_organization_analytics_org_metric_period").on(table.organizationId, table.metricType, table.periodDate),
+]);
+
+// Platform sessions for admin access tracking
+export const platformSessions = pgTable("platform_sessions", {
+  id: varchar("id").primaryKey().notNull(),
+  adminUserId: varchar("admin_user_id").references(() => users.id).notNull(),
+  deviceInfo: jsonb("device_info"), // browser, OS, device fingerprint
+  ipAddress: varchar("ip_address"),
+  userAgent: varchar("user_agent"),
+  mfaVerified: boolean("mfa_verified").default(false),
+  lastActivity: timestamp("last_activity").defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_platform_sessions_admin_user_id").on(table.adminUserId),
+  index("idx_platform_sessions_expires_at").on(table.expiresAt),
+  index("idx_platform_sessions_last_activity").on(table.lastActivity),
+]);
+
+// Maintenance windows for scheduled system maintenance
+export const maintenanceWindows = pgTable("maintenance_windows", {
+  id: serial("id").primaryKey(),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  maintenanceType: varchar("maintenance_type").notNull(), // 'database', 'system', 'deployment', 'security'
+  status: varchar("status").default("scheduled"), // 'scheduled', 'in_progress', 'completed', 'cancelled'
+  scheduledStart: timestamp("scheduled_start").notNull(),
+  scheduledEnd: timestamp("scheduled_end").notNull(),
+  actualStart: timestamp("actual_start"),
+  actualEnd: timestamp("actual_end"),
+  affectedServices: text("affected_services").array(), // Services that will be affected
+  notificationsSent: boolean("notifications_sent").default(false),
+  createdBy: varchar("created_by").references(() => users.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_maintenance_windows_status").on(table.status),
+  index("idx_maintenance_windows_scheduled_start").on(table.scheduledStart),
+  index("idx_maintenance_windows_maintenance_type").on(table.maintenanceType),
+]);
+
+// Support tickets for cross-organization issue tracking
+export const supportTickets = pgTable("support_tickets", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").references(() => organizations.id),
+  reportedBy: varchar("reported_by").references(() => users.id).notNull(),
+  assignedTo: varchar("assigned_to").references(() => users.id),
+  title: varchar("title").notNull(),
+  description: text("description").notNull(),
+  category: varchar("category").notNull(), // 'technical', 'billing', 'feature_request', 'bug', 'account'
+  priority: varchar("priority").default("medium"), // 'low', 'medium', 'high', 'urgent'
+  status: varchar("status").default("open"), // 'open', 'in_progress', 'resolved', 'closed'
+  resolution: text("resolution"),
+  metadata: jsonb("metadata"), // Additional ticket context
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  resolvedAt: timestamp("resolved_at"),
+}, (table) => [
+  index("idx_support_tickets_organization_id").on(table.organizationId),
+  index("idx_support_tickets_reported_by").on(table.reportedBy),
+  index("idx_support_tickets_assigned_to").on(table.assignedTo),
+  index("idx_support_tickets_category").on(table.category),
+  index("idx_support_tickets_priority").on(table.priority),
+  index("idx_support_tickets_status").on(table.status),
+  index("idx_support_tickets_created_at").on(table.createdAt),
+]);
+
+// Revenue reports for financial analytics
+export const revenueReports = pgTable("revenue_reports", {
+  id: serial("id").primaryKey(),
+  reportName: varchar("report_name").notNull(),
+  reportType: varchar("report_type").notNull(), // 'monthly', 'quarterly', 'annual', 'custom'
+  periodStart: date("period_start").notNull(),
+  periodEnd: date("period_end").notNull(),
+  totalRevenue: decimal("total_revenue", { precision: 15, scale: 2 }).notNull(),
+  subscriptionRevenue: decimal("subscription_revenue", { precision: 15, scale: 2 }).notNull(),
+  onetimeRevenue: decimal("onetime_revenue", { precision: 15, scale: 2 }).default("0.00"),
+  refundAmount: decimal("refund_amount", { precision: 15, scale: 2 }).default("0.00"),
+  netRevenue: decimal("net_revenue", { precision: 15, scale: 2 }).notNull(),
+  organizationCount: integer("organization_count").notNull(),
+  newSubscriptions: integer("new_subscriptions").default(0),
+  canceledSubscriptions: integer("canceled_subscriptions").default(0),
+  churnRate: decimal("churn_rate", { precision: 5, scale: 2 }), // Percentage
+  data: jsonb("data").notNull(), // Detailed report data
+  generatedBy: varchar("generated_by").references(() => users.id).notNull(),
+  generatedAt: timestamp("generated_at").defaultNow(),
+}, (table) => [
+  index("idx_revenue_reports_report_type").on(table.reportType),
+  index("idx_revenue_reports_period_start").on(table.periodStart),
+  index("idx_revenue_reports_period_end").on(table.periodEnd),
+  index("idx_revenue_reports_generated_at").on(table.generatedAt),
+]);
+
 // =================== SUBSCRIPTION MANAGEMENT RELATIONS ===================
 
 // Subscription plans relations

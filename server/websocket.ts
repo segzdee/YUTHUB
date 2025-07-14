@@ -243,6 +243,23 @@ export class WebSocketManager {
     this.broadcast(message);
   }
 
+  broadcastToRoles(roles: string[], message: any) {
+    this.clients.forEach((ws, clientId) => {
+      if (ws.readyState === WebSocket.OPEN) {
+        // For now, broadcast to all connected clients
+        // In a full implementation, you'd check user roles from session
+        try {
+          ws.send(JSON.stringify(message));
+        } catch (error) {
+          console.error(`Error sending to client ${clientId}:`, error);
+          this.clients.delete(clientId);
+        }
+      } else {
+        this.clients.delete(clientId);
+      }
+    });
+  }
+
   async broadcastSystemAlert(severity: 'low' | 'medium' | 'high' | 'critical', message: string, data?: any) {
     const alert = {
       type: 'system_alert',

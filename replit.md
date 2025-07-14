@@ -151,6 +151,7 @@ The application is fully functional with:
 
 ## Recent Changes
 
+- **July 14, 2025**: CRITICAL FIX - Resolved SSO authentication issue where users were being logged out after signing in by fixing session cookie configuration and passport serialization/deserialization for proper session persistence
 - **July 14, 2025**: Implemented comprehensive real-time data aggregation system for platform admin with cross-organization analytics
 - **July 14, 2025**: Added WebSocket-based real-time data synchronization with 30-second refresh intervals for platform admin dashboard
 - **July 14, 2025**: Created PlatformDataAggregator class with organization breakdowns, historical trends, and real-time metrics aggregation

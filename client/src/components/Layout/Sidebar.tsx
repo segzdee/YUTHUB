@@ -13,7 +13,8 @@ import {
   HelpCircle,
   Receipt,
   FileText,
-  ClipboardList
+  ClipboardList,
+  MapPin
 } from "lucide-react";
 
 const navigation = [
@@ -26,6 +27,7 @@ const navigation = [
   { name: "Crisis Connect", href: "/crisis", icon: AlertTriangle },
   { name: "Financials", href: "/financials", icon: DollarSign },
   { name: "Government Billing", href: "/billing", icon: Receipt },
+  { name: "UK Councils", href: "/uk-councils", icon: MapPin },
   { name: "Forms", href: "/forms", icon: ClipboardList },
   { name: "Reports", href: "/reports", icon: FileText },
 ];

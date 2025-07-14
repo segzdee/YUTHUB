@@ -19,7 +19,6 @@ export default function UniversalFooter() {
     ],
     legalSecondary: [
       { name: 'Cookies', href: '/cookies' },
-      { name: 'Accessibility', href: '/accessibility' },
     ],
   };
 

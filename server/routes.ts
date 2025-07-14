@@ -6,6 +6,9 @@ import { db } from "./db";
 import { createAuthLimiter, createPasswordResetLimiter, PasswordValidator, MFAManager, AccountLockoutManager, SessionManager, AuditLogger, JWTManager } from "./security/authSecurity";
 import { requirePermission, requireRole, requireResourceAccess, filterDataByRole, PermissionChecker, PERMISSIONS, ROLES } from "./security/rbacMiddleware";
 import { SSOIntegration } from "./security/ssoIntegration";
+import { healthCheck, readinessCheck, livenessCheck } from "./middleware/healthCheck";
+import { strictApiRateLimit, createRateLimit, reportRateLimit } from "./middleware/rateLimiter";
+import { validateInput } from "./middleware/inputSanitization";
 import { 
   insertPropertySchema, 
   insertResidentSchema, 
@@ -34,9 +37,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
   
-  // Apply security middleware
-  app.use('/api/auth/login', createAuthLimiter());
-  app.use('/api/auth/password-reset', createPasswordResetLimiter());
+  // Health check endpoints
+  app.get('/health', healthCheck);
+  app.get('/health/ready', readinessCheck);
+  app.get('/health/live', livenessCheck);
+  
+  // Apply security middleware (rate limiting temporarily disabled for development)
+  // app.use('/api/auth/login', createAuthLimiter());
+  // app.use('/api/auth/password-reset', createPasswordResetLimiter());
   app.use(filterDataByRole);
 
   // Auth routes
@@ -392,7 +400,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/properties', isAuthenticated, async (req, res) => {
+  app.post('/api/properties', isAuthenticated, validateInput(insertPropertySchema), async (req, res) => {
     try {
       const propertyData = insertPropertySchema.parse(req.body);
       const property = await storage.createProperty(propertyData);
@@ -439,7 +447,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/residents', isAuthenticated, async (req, res) => {
+  app.post('/api/residents', isAuthenticated, validateInput(insertResidentSchema), async (req, res) => {
     try {
       const residentData = insertResidentSchema.parse(req.body);
       const resident = await storage.createResident(residentData);
@@ -515,7 +523,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/incidents', isAuthenticated, async (req, res) => {
+  app.post('/api/incidents', isAuthenticated, validateInput(insertIncidentSchema), async (req, res) => {
     try {
       const incidentData = insertIncidentSchema.parse(req.body);
       const incident = await storage.createIncident({

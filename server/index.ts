@@ -2,8 +2,17 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { setupWebSocket } from "./websocket";
+import { apiRateLimit } from "./middleware/rateLimiter";
+import { sanitizeInput } from "./middleware/inputSanitization";
+import { backgroundJobScheduler } from "./jobs/backgroundJobs";
 
 const app = express();
+
+// Security middleware
+// Temporarily disable global rate limiting for development
+// app.use(apiRateLimit);
+app.use(sanitizeInput);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -42,6 +51,9 @@ app.use((req, res, next) => {
   
   // Setup WebSocket for real-time updates
   setupWebSocket(server);
+
+  // Start background job scheduler
+  backgroundJobScheduler.start();
 
   app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

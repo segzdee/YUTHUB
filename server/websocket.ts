@@ -228,3 +228,6 @@ export function setupWebSocket(server: Server) {
   wsManager = new WebSocketManager(server);
   return wsManager;
 }
+
+// Export WebSocketManager class for use in other modules
+export { WebSocketManager };

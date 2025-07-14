@@ -72,7 +72,11 @@ export const properties = pgTable("properties", {
   status: varchar("status").default("active"), // 'active', 'maintenance', 'inactive'
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  index("idx_properties_status").on(table.status),
+  index("idx_properties_property_type").on(table.propertyType),
+  index("idx_properties_created_at").on(table.createdAt),
+]);
 
 // Residents table
 export const residents = pgTable("residents", {
@@ -92,7 +96,14 @@ export const residents = pgTable("residents", {
   status: varchar("status").default("active"), // 'active', 'moved_out', 'at_risk'
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  index("idx_residents_property_id").on(table.propertyId),
+  index("idx_residents_key_worker_id").on(table.keyWorkerId),
+  index("idx_residents_status").on(table.status),
+  index("idx_residents_risk_level").on(table.riskLevel),
+  index("idx_residents_move_in_date").on(table.moveInDate),
+  index("idx_residents_name").on(table.firstName, table.lastName),
+]);
 
 // Support Plans table
 export const supportPlans = pgTable("support_plans", {
@@ -121,7 +132,16 @@ export const incidents = pgTable("incidents", {
   resolvedAt: timestamp("resolved_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  index("idx_incidents_property_id").on(table.propertyId),
+  index("idx_incidents_resident_id").on(table.residentId),
+  index("idx_incidents_reported_by").on(table.reportedBy),
+  index("idx_incidents_status").on(table.status),
+  index("idx_incidents_severity").on(table.severity),
+  index("idx_incidents_incident_type").on(table.incidentType),
+  index("idx_incidents_created_at").on(table.createdAt),
+  index("idx_incidents_status_severity").on(table.status, table.severity),
+]);
 
 // Activities table for tracking system activities
 export const activities = pgTable("activities", {
@@ -133,7 +153,12 @@ export const activities = pgTable("activities", {
   entityId: integer("entity_id"), // ID of the related entity
   entityType: varchar("entity_type"), // 'resident', 'property', 'incident', etc.
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => [
+  index("idx_activities_user_id").on(table.userId),
+  index("idx_activities_activity_type").on(table.activityType),
+  index("idx_activities_entity").on(table.entityType, table.entityId),
+  index("idx_activities_created_at").on(table.createdAt),
+]);
 
 // Financial Records table
 export const financialRecords = pgTable("financial_records", {
@@ -150,7 +175,14 @@ export const financialRecords = pgTable("financial_records", {
   status: varchar("status").default("pending"), // 'pending', 'paid', 'overdue'
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  index("idx_financial_records_property_id").on(table.propertyId),
+  index("idx_financial_records_resident_id").on(table.residentId),
+  index("idx_financial_records_record_type").on(table.recordType),
+  index("idx_financial_records_status").on(table.status),
+  index("idx_financial_records_date").on(table.date),
+  index("idx_financial_records_due_date").on(table.dueDate),
+]);
 
 // Form drafts table for save-and-continue functionality
 export const formDrafts = pgTable("form_drafts", {

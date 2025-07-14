@@ -44,6 +44,7 @@ import {
   getFeatureFlags,
   handleEmergencyAction
 } from './platformAdmin';
+import { enhancedPlatformAdminAuth } from './platformAdminValidation';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -1203,14 +1204,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Platform Admin Routes - Protected with enhanced security
   app.get('/api/platform-admin/auth', isAuthenticated, checkPlatformAdminAuth);
-  app.get('/api/platform-admin/overview', isAuthenticated, verifyPlatformAdmin, getPlatformOverview);
-  app.get('/api/platform-admin/subscriptions', isAuthenticated, verifyPlatformAdmin, getPlatformSubscriptions);
-  app.get('/api/platform-admin/organizations', isAuthenticated, verifyPlatformAdmin, getPlatformOrganizations);
-  app.get('/api/platform-admin/monitoring', isAuthenticated, verifyPlatformAdmin, getSystemMonitoring);
-  app.get('/api/platform-admin/analytics', isAuthenticated, verifyPlatformAdmin, getPlatformAnalytics);
-  app.get('/api/platform-admin/billing', isAuthenticated, verifyPlatformAdmin, getBillingOversight);
-  app.get('/api/platform-admin/features', isAuthenticated, verifyPlatformAdmin, getFeatureFlags);
-  app.post('/api/platform-admin/emergency', isAuthenticated, verifyPlatformAdmin, handleEmergencyAction);
+  app.get('/api/platform-admin/overview', isAuthenticated, enhancedPlatformAdminAuth, getPlatformOverview);
+  app.get('/api/platform-admin/subscriptions', isAuthenticated, enhancedPlatformAdminAuth, getPlatformSubscriptions);
+  app.get('/api/platform-admin/organizations', isAuthenticated, enhancedPlatformAdminAuth, getPlatformOrganizations);
+  app.get('/api/platform-admin/monitoring', isAuthenticated, enhancedPlatformAdminAuth, getSystemMonitoring);
+  app.get('/api/platform-admin/analytics', isAuthenticated, enhancedPlatformAdminAuth, getPlatformAnalytics);
+  app.get('/api/platform-admin/billing', isAuthenticated, enhancedPlatformAdminAuth, getBillingOversight);
+  app.get('/api/platform-admin/features', isAuthenticated, enhancedPlatformAdminAuth, getFeatureFlags);
+  app.post('/api/platform-admin/emergency', isAuthenticated, enhancedPlatformAdminAuth, handleEmergencyAction);
 
   // Billing routes - Government clients
   app.get('/api/billing/government-clients', isAuthenticated, async (req: any, res: any) => {

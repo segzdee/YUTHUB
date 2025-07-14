@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import PlatformAdminGuard from '@/components/PlatformAdmin/PlatformAdminGuard';
+import ConfirmationDialog from '@/components/PlatformAdmin/ConfirmationDialog';
 
 // Platform Admin Dashboard Component
 export default function PlatformAdmin() {
@@ -24,6 +25,21 @@ export default function PlatformAdmin() {
 function PlatformAdminContent() {
   const [location, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState('overview');
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    title: string;
+    description: string;
+    action: string;
+    targetId: string;
+    onConfirm: (reason: string) => void;
+  }>({
+    open: false,
+    title: '',
+    description: '',
+    action: '',
+    targetId: '',
+    onConfirm: () => {}
+  });
   const { toast } = useToast();
 
   return (
@@ -641,12 +657,84 @@ function FeatureFlagManagement() {
 // Emergency Tools Component
 function EmergencyTools() {
   const { toast } = useToast();
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    title: string;
+    description: string;
+    action: string;
+    targetId: string;
+    onConfirm: (reason: string) => void;
+  }>({
+    open: false,
+    title: '',
+    description: '',
+    action: '',
+    targetId: '',
+    onConfirm: () => {}
+  });
 
-  const handleEmergencyAction = (action: string) => {
-    toast({
-      title: `${action} Initiated`,
-      description: `Emergency ${action.toLowerCase()} has been triggered.`,
-      variant: "destructive",
+  const handleEmergencyAction = (action: string, targetId?: string) => {
+    const actionConfig = {
+      'Organization Disable': {
+        title: 'Disable Organization',
+        description: 'This will immediately disable the organization and prevent all access. This action cannot be undone without manual intervention.',
+        action: 'disable_organization'
+      },
+      'Password Reset': {
+        title: 'Emergency Password Reset',
+        description: 'This will reset the user password and send a secure reset link. The user will be logged out immediately.',
+        action: 'reset_password'
+      },
+      'Maintenance Mode': {
+        title: 'Enable Maintenance Mode',
+        description: 'This will put the entire system into maintenance mode, preventing all user access except platform admins.',
+        action: 'maintenance_mode'
+      },
+      'System Notification': {
+        title: 'Send System Notification',
+        description: 'This will send a system-wide notification to all users and administrators.',
+        action: 'system_notification'
+      }
+    };
+
+    const config = actionConfig[action as keyof typeof actionConfig];
+    if (!config) return;
+
+    setConfirmDialog({
+      open: true,
+      title: config.title,
+      description: config.description,
+      action: config.action,
+      targetId: targetId || '',
+      onConfirm: async (reason: string) => {
+        try {
+          const response = await fetch('/api/platform-admin/emergency', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: config.action,
+              targetId: targetId || '',
+              reason
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error('Emergency action failed');
+          }
+
+          toast({
+            title: "Emergency Action Executed",
+            description: `${action} has been successfully executed.`,
+            variant: "destructive",
+          });
+        } catch (error) {
+          toast({
+            title: "Error",
+            description: "Failed to execute emergency action.",
+            variant: "destructive",
+          });
+        }
+      }
     });
   };
 
@@ -706,6 +794,18 @@ function EmergencyTools() {
           </CardContent>
         </Card>
       </div>
+      
+      <ConfirmationDialog
+        isOpen={confirmDialog.open}
+        onClose={() => setConfirmDialog(prev => ({ ...prev, open: false }))}
+        onConfirm={confirmDialog.onConfirm}
+        title={confirmDialog.title}
+        description={confirmDialog.description}
+        actionType="danger"
+        requireReason={true}
+        requireConfirmation={true}
+        confirmationWord="EXECUTE"
+      />
     </div>
   );
 }

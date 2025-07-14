@@ -31,6 +31,33 @@ export async function apiRequest(
     credentials: "include",
   });
 
+  // If we get a 401, try to refresh the session by making a simple request
+  if (res.status === 401) {
+    console.log('Received 401, attempting to refresh session...');
+    try {
+      const refreshRes = await fetch('/api/auth/user', {
+        credentials: 'include',
+      });
+      
+      if (refreshRes.ok) {
+        // Session refreshed, retry the original request
+        console.log('Session refreshed, retrying original request...');
+        const retryRes = await fetch(url, {
+          method,
+          headers: data ? { "Content-Type": "application/json" } : {},
+          body: data ? JSON.stringify(data) : undefined,
+          credentials: "include",
+        });
+        
+        if (retryRes.ok) {
+          return retryRes;
+        }
+      }
+    } catch (refreshError) {
+      console.error('Session refresh failed:', refreshError);
+    }
+  }
+
   await throwIfResNotOk(res);
   return res;
 }
@@ -41,12 +68,36 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey.join("/") as string, {
+    const url = queryKey.join("/") as string;
+    const res = await fetch(url, {
       credentials: "include",
     });
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
+    // Handle 401 with potential token refresh
+    if (res.status === 401) {
+      if (unauthorizedBehavior === "returnNull") {
+        return null;
+      }
+
+      // Try to refresh the session
+      try {
+        const refreshRes = await fetch('/api/auth/user', {
+          credentials: 'include',
+        });
+        
+        if (refreshRes.ok) {
+          // Session refreshed, retry the original request
+          const retryRes = await fetch(url, {
+            credentials: "include",
+          });
+          
+          if (retryRes.ok) {
+            return await retryRes.json();
+          }
+        }
+      } catch (refreshError) {
+        console.error('Session refresh failed during query:', refreshError);
+      }
     }
 
     await throwIfResNotOk(res);

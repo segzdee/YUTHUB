@@ -82,6 +82,26 @@ class WebSocketConnectionManager {
     // If already connecting or connected, don't create new connection
     const existing = this.connections.get(userId);
     if (existing && (existing.status === 'connecting' || existing.status === 'connected')) {
+      console.log(`WebSocket connection already exists for user ${userId}, skipping...`);
+      return;
+    }
+
+    // Close any existing connection gracefully before creating new one
+    if (existing) {
+      console.log(`Closing existing WebSocket connection for user ${userId}`);
+      this.disconnect(userId);
+    }
+
+    // Add a small delay to prevent rapid reconnection attempts
+    setTimeout(() => {
+      this.establishConnection(userId, userRole);
+    }, 100);
+  }
+
+  private establishConnection(userId: string, userRole: string): void {
+    // Double check we still need this connection
+    const existing = this.connections.get(userId);
+    if (existing && (existing.status === 'connecting' || existing.status === 'connected')) {
       return;
     }
 
@@ -111,12 +131,16 @@ class WebSocketConnectionManager {
         connection.reconnectAttempts = 0; // Reset on successful connection
         console.log(`WebSocket connected for user ${userId}`);
         
-        // Send authentication info
-        ws.send(JSON.stringify({
-          type: 'auth',
-          userId,
-          role: userRole,
-        }));
+        // Send authentication info immediately
+        try {
+          ws.send(JSON.stringify({
+            type: 'auth',
+            userId,
+            role: userRole,
+          }));
+        } catch (error) {
+          console.error('Failed to send authentication message:', error);
+        }
 
         // Start heartbeat
         this.startHeartbeat(userId);
@@ -132,9 +156,19 @@ class WebSocketConnectionManager {
           const message: WebSocketMessage = JSON.parse(event.data);
           connection.lastActivity = Date.now();
           
+          // Handle different message types
+          if (message.type === 'pong' || message.type === 'connection_established') {
+            // Keep connection alive or acknowledge connection
+            return;
+          }
+          
           // Broadcast to all listeners
           connection.listeners.forEach(listener => {
-            listener(message);
+            try {
+              listener(message);
+            } catch (listenerError) {
+              console.error('Error in WebSocket message listener:', listenerError);
+            }
           });
         } catch (error) {
           console.error('WebSocket message parsing error:', {
@@ -326,7 +360,7 @@ export function useOptimizedWebSocket() {
         manager.current.removeListener(userId, handleMessage);
       }
     };
-  }, [isAuthenticated, user, handleMessage]);
+  }, [isAuthenticated, user?.id, user?.role]); // Remove handleMessage from dependencies
 
   const sendMessage = useCallback((message: any) => {
     if (user?.id) {

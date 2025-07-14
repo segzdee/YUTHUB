@@ -13,6 +13,7 @@ interface ConnectedClient {
 class WebSocketManager {
   private wss: WebSocketServer;
   private clients: Map<string, ConnectedClient> = new Map();
+  private userConnections: Map<string, string> = new Map(); // userId -> clientId
   private heartbeatInterval: NodeJS.Timeout;
 
   constructor(server: Server) {
@@ -42,12 +43,20 @@ class WebSocketManager {
       });
 
       ws.on('close', () => {
+        const client = this.clients.get(clientId);
+        if (client && client.userId) {
+          this.userConnections.delete(client.userId);
+        }
         this.clients.delete(clientId);
         console.log(`WebSocket client disconnected: ${clientId}`);
       });
 
       ws.on('error', (error) => {
         console.error('WebSocket error:', error);
+        const client = this.clients.get(clientId);
+        if (client && client.userId) {
+          this.userConnections.delete(client.userId);
+        }
         this.clients.delete(clientId);
       });
 
@@ -68,8 +77,21 @@ class WebSocketManager {
 
     switch (message.type) {
       case 'auth':
+        // Check if user already has a connection
+        const existingClientId = this.userConnections.get(message.userId);
+        if (existingClientId && existingClientId !== clientId) {
+          // Close existing connection
+          const existingClient = this.clients.get(existingClientId);
+          if (existingClient) {
+            console.log(`Closing existing connection for user ${message.userId}: ${existingClientId}`);
+            existingClient.ws.close(1000, 'New connection established');
+            this.clients.delete(existingClientId);
+          }
+        }
+        
         client.userId = message.userId;
         client.role = message.role;
+        this.userConnections.set(message.userId, clientId);
         console.log(`Client ${clientId} authenticated as ${message.userId} with role ${message.role}`);
         break;
 
@@ -102,6 +124,9 @@ class WebSocketManager {
         // Check if client is still responsive (last activity within 60 seconds)
         if (now.getTime() - client.lastActivity.getTime() > 60000) {
           console.log(`Removing inactive client: ${clientId}`);
+          if (client.userId) {
+            this.userConnections.delete(client.userId);
+          }
           client.ws.terminate();
           this.clients.delete(clientId);
         } else {
@@ -192,6 +217,7 @@ class WebSocketManager {
       clearInterval(this.heartbeatInterval);
     }
     this.clients.clear();
+    this.userConnections.clear();
     this.wss.close();
   }
 }

@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import { useLocation } from "wouter";
+import { useWebSocketConnection } from '@/hooks/useWebSocketConnection';
+import NotificationCenter from '@/components/Dashboard/NotificationCenter';
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -24,8 +26,10 @@ interface HeaderProps {
 export default function Header({ onMenuClick }: HeaderProps) {
   const { user } = useAuth();
   const [showCrisisModal, setShowCrisisModal] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const { t } = useLanguage();
   const [location] = useLocation();
+  const { connectionStatus, isConnected } = useWebSocketConnection();
 
   const handleLogout = () => {
     window.location.href = "/api/logout";
@@ -93,13 +97,22 @@ export default function Header({ onMenuClick }: HeaderProps) {
                 variant="ghost" 
                 size="sm" 
                 className="text-muted-foreground hover:text-foreground"
+                onClick={() => setShowNotifications(!showNotifications)}
                 aria-label="Notifications (3 unread)"
               >
                 <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center">
                   3
                 </span>
+                {isConnected && (
+                  <span className="absolute -bottom-1 -left-1 bg-green-500 rounded-full h-2 w-2"></span>
+                )}
               </Button>
+              
+              <NotificationCenter 
+                isOpen={showNotifications} 
+                onClose={() => setShowNotifications(false)} 
+              />
             </div>
             
             {/* User Profile Dropdown */}

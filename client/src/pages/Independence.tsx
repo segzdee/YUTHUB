@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Sidebar from "@/components/Layout/Sidebar";
 import Header from "@/components/Layout/Header";
+import PageLoader from "@/components/common/PageLoader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +29,31 @@ export default function Independence() {
   const { data: supportPlans = [], isLoading: plansLoading } = useQuery<SupportPlan[]>({
     queryKey: ["/api/support-plans"],
   });
+
+  const isLoading = progressLoading || residentsLoading || plansLoading;
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen bg-background">
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        
+        <div className="flex-1 lg:ml-64 flex flex-col">
+          <Header onMenuClick={() => setSidebarOpen(true)} />
+          
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+            <PageLoader 
+              title="Independence Pathway"
+              description="Loading resident progress and goals..."
+              showTabs={true}
+              tabCount={3}
+              cardCount={8}
+              showMetrics={true}
+            />
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   // Filter residents based on search term
   const filteredResidents = residents.filter(resident =>

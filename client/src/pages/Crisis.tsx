@@ -179,7 +179,7 @@ export default function Crisis() {
     }, 3000);
     
     // In a real app, this would initiate the call
-    console.log(`Calling ${number}`);
+    // Initiating call to ${number}
   };
 
   return (

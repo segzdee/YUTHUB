@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Sidebar from "@/components/Layout/Sidebar";
 import Header from "@/components/Layout/Header";
+import PageLoader from "@/components/common/PageLoader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,13 +33,38 @@ export default function Financials() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
 
-  const { data: financialRecords = [] } = useQuery<FinancialRecord[]>({
+  const { data: financialRecords = [], isLoading: financialLoading } = useQuery<FinancialRecord[]>({
     queryKey: ["/api/financial-records"],
   });
 
-  const { data: properties = [] } = useQuery<Property[]>({
+  const { data: properties = [], isLoading: propertiesLoading } = useQuery<Property[]>({
     queryKey: ["/api/properties"],
   });
+
+  const isLoading = financialLoading || propertiesLoading;
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen bg-background">
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        
+        <div className="flex-1 lg:ml-64 flex flex-col">
+          <Header onMenuClick={() => setSidebarOpen(true)} />
+          
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+            <PageLoader 
+              title="Financial Management"
+              description="Loading financial data and analytics..."
+              showTabs={true}
+              tabCount={4}
+              cardCount={6}
+              showMetrics={true}
+            />
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   // Filter financial records
   const filteredRecords = financialRecords.filter(record => {

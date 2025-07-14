@@ -22,6 +22,10 @@ export function useAuth() {
           setAuthStatus('unauthenticated');
         }
       } catch (error) {
+        console.error('Authentication check failed:', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          timestamp: new Date().toISOString(),
+        });
         setUser(null);
         setAuthStatus('unauthenticated');
       }

@@ -28,7 +28,7 @@ const progressUpdateSchema = z.object({
   targetDate: z.string().optional(),
 });
 
-export default function ProgressTrackingForm() {
+export default function SupportPlanForm() {
   const { toast } = useToast();
   const [selectedResident, setSelectedResident] = useState<any>(null);
   const [selectedGoal, setSelectedGoal] = useState<any>(null);

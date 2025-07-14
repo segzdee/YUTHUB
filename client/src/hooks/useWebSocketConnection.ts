@@ -81,12 +81,16 @@ export function useWebSocketConnection() {
                 // Standard notification
                 if (notifications.enabled) {
                   // Could trigger a toast notification or update notification center
-                  console.log('New notification:', message.data);
+                  // New notification received: ${message.data}
                 }
                 break;
             }
           } catch (error) {
-            console.error('Error parsing WebSocket message:', error);
+            console.error('WebSocket message parsing error:', {
+              error: error instanceof Error ? error.message : 'Unknown error',
+              rawMessage: event.data,
+              timestamp: new Date().toISOString(),
+            });
           }
         };
 
@@ -100,11 +104,19 @@ export function useWebSocketConnection() {
 
         ws.current.onerror = (error) => {
           setConnectionStatus('error');
-          console.error('WebSocket error:', error);
+          console.error('WebSocket connection error:', {
+            error: error instanceof Error ? error.message : 'Connection failed',
+            url: url,
+            timestamp: new Date().toISOString(),
+          });
         };
       } catch (error) {
         setConnectionStatus('error');
-        console.error('Failed to create WebSocket connection:', error);
+        console.error('WebSocket connection creation failed:', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          url: url,
+          timestamp: new Date().toISOString(),
+        });
       }
     };
 

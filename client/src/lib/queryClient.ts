@@ -3,7 +3,19 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+    const error = new Error(`${res.status}: ${text}`);
+    error.name = `HttpError${res.status}`;
+    
+    // Log structured error information
+    console.error('API Error:', {
+      url: res.url,
+      status: res.status,
+      statusText: res.statusText,
+      message: text,
+      timestamp: new Date().toISOString(),
+    });
+    
+    throw error;
   }
 }
 

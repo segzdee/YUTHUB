@@ -64,7 +64,7 @@ export default function QuickActions() {
       window.location.href = action.path;
     } else {
       // Handle other actions that aren't forms
-      console.log(`Handling action: ${action.name}`);
+      // Handle action: ${action.name}
     }
   };
 

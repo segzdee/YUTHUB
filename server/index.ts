@@ -43,12 +43,33 @@ app.use((req, res, next) => {
   // Setup WebSocket for real-time updates
   setupWebSocket(server);
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
-    res.status(status).json({ message });
-    throw err;
+    // Structured error logging
+    console.error('Server Error:', {
+      error: {
+        message: err.message,
+        stack: err.stack,
+        name: err.name,
+      },
+      request: {
+        method: req.method,
+        url: req.url,
+        headers: req.headers,
+        body: req.body,
+      },
+      timestamp: new Date().toISOString(),
+      status,
+    });
+
+    // Send user-friendly error response
+    res.status(status).json({ 
+      message: status === 500 ? "Internal Server Error" : message,
+      status,
+      timestamp: new Date().toISOString(),
+    });
   });
 
   // importantly only setup vite in development and after

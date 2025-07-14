@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Sidebar from "@/components/Layout/Sidebar";
 import Header from "@/components/Layout/Header";
+import PageLoader from "@/components/common/PageLoader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,25 +14,50 @@ import type { Property, Resident, SupportPlan, ProgressTracking, Incident } from
 export default function Analytics() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const { data: properties = [] } = useQuery<Property[]>({
+  const { data: properties = [], isLoading: propertiesLoading } = useQuery<Property[]>({
     queryKey: ["/api/properties"],
   });
 
-  const { data: residents = [] } = useQuery<Resident[]>({
+  const { data: residents = [], isLoading: residentsLoading } = useQuery<Resident[]>({
     queryKey: ["/api/residents"],
   });
 
-  const { data: supportPlans = [] } = useQuery<SupportPlan[]>({
+  const { data: supportPlans = [], isLoading: supportPlansLoading } = useQuery<SupportPlan[]>({
     queryKey: ["/api/support-plans"],
   });
 
-  const { data: progressTracking = [] } = useQuery<ProgressTracking[]>({
+  const { data: progressTracking = [], isLoading: progressLoading } = useQuery<ProgressTracking[]>({
     queryKey: ["/api/progress-tracking"],
   });
 
-  const { data: incidents = [] } = useQuery<Incident[]>({
+  const { data: incidents = [], isLoading: incidentsLoading } = useQuery<Incident[]>({
     queryKey: ["/api/incidents"],
   });
+
+  const isLoading = propertiesLoading || residentsLoading || supportPlansLoading || progressLoading || incidentsLoading;
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen bg-background">
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        
+        <div className="flex-1 lg:ml-64 flex flex-col">
+          <Header onMenuClick={() => setSidebarOpen(true)} />
+          
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+            <PageLoader 
+              title="Analytics Dashboard"
+              description="Loading analytics data..."
+              showTabs={true}
+              tabCount={4}
+              cardCount={6}
+              showMetrics={true}
+            />
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   // Calculate metrics
   const totalProperties = properties.length;

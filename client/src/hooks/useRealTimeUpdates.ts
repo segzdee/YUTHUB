@@ -22,7 +22,7 @@ export function useRealTimeUpdates() {
       DataIntegration.updateDashboardMetrics();
 
       // Log the update for debugging
-      console.log(`Real-time update: ${action} ${entityType}`, { entityId, timestamp });
+      // Real-time update: ${action} ${entityType} - ${entityId} at ${timestamp}
     };
 
     window.addEventListener('dataIntegrationUpdate', handleDataUpdate as EventListener);

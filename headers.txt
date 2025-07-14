@@ -1,0 +1,9 @@
+HTTP/1.1 302 Found
+X-Powered-By: Express
+Location: https://replit.com/oidc/auth?scope=openid+email+profile+offline_access&prompt=login+consent&client_id=27891fa9-b276-4e4e-a11a-60ce998c53b2&response_type=code&code_challenge=ztqkMHGMr6RtJ6oABDg5wLaEGFwBWrMfke2SgX9MJq4&code_challenge_method=S256&redirect_uri=http%3A%2F%2Flocalhost%2Fapi%2Fcallback
+Content-Length: 0
+Set-Cookie: connect.sid=s%3ApZLOXwZZZ8gkeUO1ngp0YELoaMUCldQL.lWQDzJ9Vf157cgVUuKH%2BcIpg82ryfxJZzt66zfz2piU; Path=/; Expires=Mon, 21 Jul 2025 21:52:26 GMT; HttpOnly
+Date: Mon, 14 Jul 2025 21:52:26 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+

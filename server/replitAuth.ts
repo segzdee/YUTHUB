@@ -38,8 +38,9 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false, // Disable HTTPS requirement for development
       maxAge: sessionTtl,
+      sameSite: 'lax', // Add sameSite policy for better cookie handling
     },
   });
 }
@@ -105,8 +106,15 @@ export async function setupAuth(app: Express) {
     passport.use(strategy);
   }
 
-  passport.serializeUser((user: Express.User, cb) => cb(null, user));
-  passport.deserializeUser((user: Express.User, cb) => cb(null, user));
+  passport.serializeUser((user: Express.User, cb) => {
+    console.log('Serializing user:', user);
+    cb(null, user);
+  });
+  
+  passport.deserializeUser((user: Express.User, cb) => {
+    console.log('Deserializing user:', user);
+    cb(null, user);
+  });
 
   app.get("/api/login", (req, res, next) => {
     passport.authenticate(`replitauth:${req.hostname}`, {
@@ -135,24 +143,35 @@ export async function setupAuth(app: Express) {
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
+  console.log('=== Authentication Check ===');
+  console.log('Session ID:', req.sessionID);
+  console.log('Session exists:', !!req.session);
+  console.log('isAuthenticated():', req.isAuthenticated());
+  console.log('User object:', !!req.user);
+  console.log('Cookies:', req.headers.cookie);
+
   const user = req.user as any;
 
+  // Check if user is authenticated via Passport
   if (!req.isAuthenticated() || !user) {
+    console.log('Authentication failed: User not authenticated or user object missing');
     return res.status(401).json({ message: "Unauthorized" });
   }
 
   // If no expires_at, assume token is valid (fresh authentication)
   if (!user.expires_at) {
+    console.log('No expires_at found, assuming fresh authentication');
     return next();
   }
 
   const now = Math.floor(Date.now() / 1000);
   
-  // Add buffer time (60 seconds) to prevent edge cases
-  if (now < (user.expires_at - 60)) {
+  // Add buffer time (5 minutes) to prevent edge cases and allow for clock drift
+  if (now < (user.expires_at - 300)) {
     return next();
   }
 
+  // Token is close to expiry or expired, attempt refresh
   const refreshToken = user.refresh_token;
   if (!refreshToken) {
     console.log('No refresh token available for user, forcing re-authentication');
@@ -160,11 +179,11 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   }
 
   try {
-    console.log('Attempting to refresh token for user');
+    console.log('Attempting to refresh token for user (expires_at:', user.expires_at, 'now:', now, ')');
     const config = await getOidcConfig();
     const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
     updateUserSession(user, tokenResponse);
-    console.log('Token refreshed successfully');
+    console.log('Token refreshed successfully, new expires_at:', user.expires_at);
     return next();
   } catch (error) {
     console.error('Token refresh failed:', error);

@@ -32,6 +32,18 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import { eq, desc, sql, and } from "drizzle-orm";
+import {
+  verifyPlatformAdmin,
+  checkPlatformAdminAuth,
+  getPlatformOverview,
+  getPlatformSubscriptions,
+  getPlatformOrganizations,
+  getSystemMonitoring,
+  getPlatformAnalytics,
+  getBillingOversight,
+  getFeatureFlags,
+  handleEmergencyAction
+} from './platformAdmin';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -1188,6 +1200,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({ message: error.message });
     }
   });
+
+  // Platform Admin Routes - Protected with enhanced security
+  app.get('/api/platform-admin/auth', isAuthenticated, checkPlatformAdminAuth);
+  app.get('/api/platform-admin/overview', isAuthenticated, verifyPlatformAdmin, getPlatformOverview);
+  app.get('/api/platform-admin/subscriptions', isAuthenticated, verifyPlatformAdmin, getPlatformSubscriptions);
+  app.get('/api/platform-admin/organizations', isAuthenticated, verifyPlatformAdmin, getPlatformOrganizations);
+  app.get('/api/platform-admin/monitoring', isAuthenticated, verifyPlatformAdmin, getSystemMonitoring);
+  app.get('/api/platform-admin/analytics', isAuthenticated, verifyPlatformAdmin, getPlatformAnalytics);
+  app.get('/api/platform-admin/billing', isAuthenticated, verifyPlatformAdmin, getBillingOversight);
+  app.get('/api/platform-admin/features', isAuthenticated, verifyPlatformAdmin, getFeatureFlags);
+  app.post('/api/platform-admin/emergency', isAuthenticated, verifyPlatformAdmin, handleEmergencyAction);
 
   // Billing routes - Government clients
   app.get('/api/billing/government-clients', isAuthenticated, async (req: any, res: any) => {

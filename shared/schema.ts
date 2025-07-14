@@ -33,7 +33,7 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
-  role: varchar("role").default("staff"),
+  role: varchar("role").default("staff"), // staff, admin, platform_admin
   department: varchar("department"),
   employeeId: varchar("employee_id"),
   authMethod: varchar("auth_method").default("OIDC"), // 'OIDC', 'SAML_SSO', 'LDAP_SSO', 'LOCAL'

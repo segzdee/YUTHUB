@@ -36,6 +36,7 @@ import Forms from "@/pages/Forms";
 import Reports from "@/pages/Reports";
 import Billing from "@/pages/Billing";
 import UKCouncils from "@/pages/UKCouncils";
+import PlatformAdmin from "@/pages/PlatformAdmin";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -76,6 +77,8 @@ function Router() {
           <Route path="/reports" component={Reports} />
           <Route path="/billing" component={Billing} />
           <Route path="/uk-councils" component={UKCouncils} />
+          <Route path="/platform-admin" component={PlatformAdmin} />
+          <Route path="/platform-admin/:tab" component={PlatformAdmin} />
           <Route path="/forms/property-registration" component={PropertyRegistration} />
           <Route path="/forms/resident-intake" component={ResidentIntake} />
           <Route path="/forms/incident-report" component={IncidentReport} />

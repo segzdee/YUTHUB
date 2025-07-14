@@ -1,14 +1,49 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 
 export function useAuth() {
-  const { data: user, isLoading } = useQuery({
-    queryKey: ["/api/auth/user"],
-    retry: false,
-  });
+  const [authStatus, setAuthStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading');
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/user', {
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData);
+          setAuthStatus('authenticated');
+        } else {
+          setUser(null);
+          setAuthStatus('unauthenticated');
+        }
+      } catch (error) {
+        setUser(null);
+        setAuthStatus('unauthenticated');
+      }
+    };
+
+    // Set a timeout to prevent infinite loading
+    timeoutId = setTimeout(() => {
+      if (authStatus === 'loading') {
+        setAuthStatus('unauthenticated');
+      }
+    }, 3000); // 3 seconds timeout
+
+    checkAuth();
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, []);
 
   return {
     user,
-    isLoading,
-    isAuthenticated: !!user,
+    isLoading: authStatus === 'loading',
+    isAuthenticated: authStatus === 'authenticated',
   };
 }

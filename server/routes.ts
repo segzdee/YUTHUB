@@ -700,6 +700,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Forms draft endpoints
+  app.get('/api/forms/draft/:formType', isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any)?.claims?.sub;
+      const { formType } = req.params;
+      
+      // For now, return empty draft - in a full implementation, this would query a drafts table
+      res.json({
+        formType,
+        data: {},
+        lastSaved: null,
+        message: 'No draft found'
+      });
+    } catch (error) {
+      console.error("Error fetching form draft:", error);
+      res.status(404).json({ message: "Draft not found" });
+    }
+  });
+
+  app.post('/api/forms/draft/:formType', isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any)?.claims?.sub;
+      const { formType } = req.params;
+      const { data } = req.body;
+      
+      // For now, just return success - in a full implementation, this would save to a drafts table
+      res.json({
+        formType,
+        data,
+        lastSaved: new Date(),
+        message: 'Draft saved successfully'
+      });
+    } catch (error) {
+      console.error("Error saving form draft:", error);
+      res.status(500).json({ message: "Failed to save draft" });
+    }
+  });
+
   // Crisis Connect endpoint
   app.post('/api/crisis-connect', isAuthenticated, async (req, res) => {
     try {

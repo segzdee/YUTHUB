@@ -4,6 +4,11 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { AccessibilityProvider } from "@/components/providers/AccessibilityProvider";
+import { LanguageProvider } from "@/components/providers/LanguageProvider";
+import { ErrorBoundary } from "@/components/design-system/ErrorHandling";
+import { LoadingWrapper } from "@/components/design-system/LoadingStates";
 import Dashboard from "@/pages/Dashboard";
 import Landing from "@/pages/Landing";
 import Pricing from "@/pages/Pricing";
@@ -31,50 +36,65 @@ function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
   return (
-    <Switch>
-      {isLoading || !isAuthenticated ? (
-        <>
-          <Route path="/" component={Landing} />
-          <Route path="/pricing" component={Pricing} />
-        </>
-      ) : (
-        <>
-          <Route path="/" component={Dashboard} />
-          <Route path="/dashboard" component={Dashboard} />
-          <Route path="/pricing" component={Pricing} />
-          <Route path="/subscribe" component={Subscribe} />
-          <Route path="/housing" component={Housing} />
-          <Route path="/support" component={Support} />
-          <Route path="/independence" component={Independence} />
-          <Route path="/analytics" component={Analytics} />
-          <Route path="/safeguarding" component={Safeguarding} />
-          <Route path="/crisis" component={Crisis} />
-          <Route path="/financials" component={Financials} />
-          <Route path="/settings" component={Settings} />
-          <Route path="/help" component={Help} />
-          <Route path="/forms" component={Forms} />
-          <Route path="/reports" component={Reports} />
-          <Route path="/billing" component={Billing} />
-          <Route path="/forms/property-registration" component={PropertyRegistration} />
-          <Route path="/forms/resident-intake" component={ResidentIntake} />
-          <Route path="/forms/incident-report" component={IncidentReport} />
-          <Route path="/forms/progress-tracking" component={ProgressTracking} />
-          <Route path="/forms/support-plan" component={SupportPlan} />
-        </>
-      )}
-      <Route component={NotFound} />
-    </Switch>
+    <LoadingWrapper loading={isLoading}>
+      <Switch>
+        {!isAuthenticated ? (
+          <>
+            <Route path="/" component={Landing} />
+            <Route path="/pricing" component={Pricing} />
+          </>
+        ) : (
+          <>
+            <Route path="/" component={Dashboard} />
+            <Route path="/dashboard" component={Dashboard} />
+            <Route path="/pricing" component={Pricing} />
+            <Route path="/subscribe" component={Subscribe} />
+            <Route path="/housing" component={Housing} />
+            <Route path="/support" component={Support} />
+            <Route path="/independence" component={Independence} />
+            <Route path="/analytics" component={Analytics} />
+            <Route path="/safeguarding" component={Safeguarding} />
+            <Route path="/crisis" component={Crisis} />
+            <Route path="/financials" component={Financials} />
+            <Route path="/settings" component={Settings} />
+            <Route path="/help" component={Help} />
+            <Route path="/forms" component={Forms} />
+            <Route path="/reports" component={Reports} />
+            <Route path="/billing" component={Billing} />
+            <Route path="/forms/property-registration" component={PropertyRegistration} />
+            <Route path="/forms/resident-intake" component={ResidentIntake} />
+            <Route path="/forms/incident-report" component={IncidentReport} />
+            <Route path="/forms/progress-tracking" component={ProgressTracking} />
+            <Route path="/forms/support-plan" component={SupportPlan} />
+          </>
+        )}
+        <Route component={NotFound} />
+      </Switch>
+    </LoadingWrapper>
   );
 }
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <LanguageProvider>
+        <ThemeProvider>
+          <AccessibilityProvider>
+            <QueryClientProvider client={queryClient}>
+              <TooltipProvider>
+                <a href="#main-content" className="skip-link">
+                  Skip to main content
+                </a>
+                <Toaster />
+                <div id="main-content" tabIndex={-1}>
+                  <Router />
+                </div>
+              </TooltipProvider>
+            </QueryClientProvider>
+          </AccessibilityProvider>
+        </ThemeProvider>
+      </LanguageProvider>
+    </ErrorBoundary>
   );
 }
 

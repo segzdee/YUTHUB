@@ -265,6 +265,17 @@ export class AuditLogger {
       riskLevel: success ? 'low' : 'medium',
     });
   }
+
+  static async logResourceAccess(userId: string, resource: string, action: string, success: boolean, details: any): Promise<void> {
+    await storage.createAuditLog({
+      userId,
+      action: `${resource.toUpperCase()}_${action.toUpperCase()}`,
+      resource: resource.toUpperCase(),
+      details,
+      success,
+      riskLevel: details.riskLevel || 'low',
+    });
+  }
   
   static async logPasswordChange(userId: string, details: any): Promise<void> {
     await storage.createAuditLog({

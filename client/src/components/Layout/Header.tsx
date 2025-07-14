@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import { useLocation } from "wouter";
-import { useOptimizedWebSocket } from '@/hooks/useOptimizedWebSocket';
+import { useWebSocketConnection } from '@/hooks/useOptimizedWebSocket';
 import NotificationCenter from '@/components/Dashboard/NotificationCenter';
 import BrandLogo from '@/components/design-system/BrandLogo';
 
@@ -30,7 +30,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const { t } = useLanguage();
   const [location] = useLocation();
-  const { connectionStatus, isConnected } = useOptimizedWebSocket();
+  const { connectionStatus, isConnected } = useWebSocketConnection();
 
   const handleLogout = () => {
     window.location.href = "/api/logout";

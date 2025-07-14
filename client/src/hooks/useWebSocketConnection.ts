@@ -9,6 +9,7 @@ interface WebSocketMessage {
   timestamp: string;
 }
 
+// Legacy hook - deprecated, use useOptimizedWebSocket instead
 export function useWebSocketConnection() {
   const { user, isAuthenticated } = useAuth();
   const { notifications } = useDashboardStore();

@@ -236,6 +236,7 @@ class WebSocketConnectionManager {
   }
 }
 
+// Export as both names for backward compatibility
 export function useOptimizedWebSocket() {
   const { user, isAuthenticated } = useAuth();
   const { notifications } = useDashboardStore();
@@ -340,3 +341,6 @@ export function useOptimizedWebSocket() {
     isConnected: connectionStatus === 'connected',
   };
 }
+
+// Export as useWebSocketConnection for backward compatibility
+export { useOptimizedWebSocket as useWebSocketConnection };

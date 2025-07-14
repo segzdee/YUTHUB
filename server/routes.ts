@@ -374,7 +374,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Properties routes
-  app.get('/api/properties', isAuthenticated, requirePermission(PERMISSIONS.PROPERTY_READ), async (req: any, res) => {
+  app.get('/api/properties', isAuthenticated, requirePermission(PERMISSIONS.PROPERTIES_READ), async (req: any, res) => {
     try {
       const properties = await storage.getProperties();
       

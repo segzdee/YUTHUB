@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useRealTimeUpdates } from "@/hooks/useRealTimeUpdates";
-import { useOptimizedWebSocket } from "@/hooks/useOptimizedWebSocket";
+import { useWebSocketConnection } from "@/hooks/useOptimizedWebSocket";
 import Sidebar from "@/components/Layout/Sidebar";
 import Header from "@/components/Layout/Header";
 import MetricsCards from "@/components/Dashboard/MetricsCards";
@@ -30,7 +30,7 @@ export default function Dashboard() {
   useRealTimeUpdates();
   
   // Initialize WebSocket connection for real-time KPI updates
-  const { connectionStatus, isConnected } = useOptimizedWebSocket();
+  const { connectionStatus, isConnected } = useWebSocketConnection();
 
   // Redirect to login if not authenticated
   useEffect(() => {

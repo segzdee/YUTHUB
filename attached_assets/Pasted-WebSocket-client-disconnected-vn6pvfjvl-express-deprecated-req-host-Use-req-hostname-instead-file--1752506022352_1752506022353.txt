@@ -1,0 +1,36 @@
+WebSocket client disconnected: vn6pvfjvl
+express deprecated req.host: Use req.hostname instead file:/home/runner/workspace/node_modules/openid-client/build/passport.js:224:49
+3:13:06 PM [express] GET /api/login 302 in 179ms
+3:13:11 PM [express] GET /api/callback 302 in 1002ms
+Removing inactive client: g0hl6nl5s
+Removing inactive client: nkeveq8qz
+Removing inactive client: krm69ktc1
+Removing inactive client: kenhzpfcx
+WebSocket client disconnected: kenhzpfcx
+WebSocket client disconnected: krm69ktc1
+WebSocket client disconnected: nkeveq8qz
+WebSocket client disconnected: g0hl6nl5s
+3:13:15 PM [express] GET /api/auth/user 200 in 90ms :: {"id":"38954862","email":"segzdeee@gmail.com"…
+WebSocket client connected: gq5iq9u0a
+3:13:15 PM [express] GET /api/invoices 200 in 52ms
+3:13:15 PM [express] GET /api/properties 403 in 93ms :: {"message":"Insufficient permissions","userR…
+Client gq5iq9u0a authenticated as 38954862 with role staff
+Error fetching financial records: TypeError: AuditLogger.logResourceAccess is not a function
+    at <anonymous> (/home/runner/workspace/server/routes.ts:571:25)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+3:13:15 PM [express] GET /api/residents 304 in 149ms :: [{"id":9,"firstName":"Emma","lastName":"John…
+3:13:15 PM [express] GET /api/support-plans 304 in 149ms :: [{"id":1,"residentId":9,"keyWorkerId":"s…
+3:13:15 PM [express] GET /api/incidents 304 in 155ms :: [{"id":12,"propertyId":null,"residentId":nul…
+3:13:15 PM [express] GET /api/financial-records 500 in 167ms :: {"message":"Failed to fetch financia…
+3:13:15 PM [express] GET /api/maintenance-requests 304 in 65ms :: []
+3:13:15 PM [express] GET /api/activities 304 in 65ms :: [{"id":12,"userId":"38954862","activityType"…
+3:13:15 PM [express] GET /api/dashboard/metrics 304 in 132ms :: {"totalProperties":5,"currentResiden…
+WebSocket client connected: f74o5gu0z
+WebSocket client connected: 1bq168wdy
+WebSocket client connected: e5eotfozb
+WebSocket client connected: xmy6kxkfw
+Client f74o5gu0z authenticated as 38954862 with role staff
+Client 1bq168wdy authenticated as 38954862 with role staff
+Client e5eotfozb authenticated as 38954862 with role staff
+Client xmy6kxkfw authenticated as 38954862 with role staff
+WebSocket client disconnected: gq5iq9u0a

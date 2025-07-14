@@ -164,10 +164,12 @@ export default function LoginPage({ onLogin, redirectTo }: LoginPageProps) {
                 <Input
                   id="email"
                   type="email"
+                  inputMode="email"
+                  autoComplete="email"
                   placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={`transition-all duration-200 ${
+                  className={`transition-all duration-200 touch-target ${
                     validationErrors.email ? 'border-error focus:border-error' : 'focus:border-primary'
                   }`}
                   disabled={isLoading}
@@ -189,10 +191,11 @@ export default function LoginPage({ onLogin, redirectTo }: LoginPageProps) {
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className={`pr-10 transition-all duration-200 ${
+                    className={`pr-10 transition-all duration-200 touch-target ${
                       validationErrors.password ? 'border-error focus:border-error' : 'focus:border-primary'
                     }`}
                     disabled={isLoading}
@@ -201,7 +204,7 @@ export default function LoginPage({ onLogin, redirectTo }: LoginPageProps) {
                   />
                   <button
                     type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-medium-contrast hover:text-high-contrast transition-colors"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-medium-contrast hover:text-high-contrast transition-colors touch-target min-w-[44px]"
                     onClick={handlePasswordVisibility}
                     aria-label={showPassword ? "Hide password" : "Show password"}
                   >

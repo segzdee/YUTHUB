@@ -155,10 +155,13 @@ export default function Forms() {
               <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                 <div className="flex-1 max-w-md">
                   <Input
+                    type="search"
+                    inputMode="search"
+                    autoComplete="off"
                     placeholder="Search forms..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full"
+                    className="w-full touch-target"
                   />
                 </div>
                 <Button className="flex items-center gap-2">

@@ -4,6 +4,15 @@ export default {
   darkMode: ["class"],
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
+    screens: {
+      // Mobile-first breakpoints using min-width
+      'xs': '320px',
+      'sm': '375px',
+      'md': '768px',
+      'lg': '1024px',
+      'xl': '1280px',
+      '2xl': '1536px',
+    },
     extend: {
       fontFamily: {
         sans: "var(--font-family-sans)",
@@ -48,6 +57,10 @@ export default {
         16: "var(--spacing-16)",
         20: "var(--spacing-20)",
         24: "var(--spacing-24)",
+        // Touch target sizes
+        'touch-sm': '44px',
+        'touch-md': '48px',
+        'touch-lg': '56px',
       },
       borderRadius: {
         sm: "var(--radius-sm)",

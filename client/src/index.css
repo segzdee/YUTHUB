@@ -2,6 +2,73 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile-First CSS Variables */
+:root {
+  /* Touch targets - minimum 44px as per Apple/Google guidelines */
+  --touch-target-min: 44px;
+  --touch-target-md: 48px;
+  --touch-target-lg: 56px;
+  
+  /* Mobile-first breakpoints */
+  --mobile-sm: 320px;
+  --mobile-md: 375px;
+  --mobile-lg: 425px;
+  --tablet: 768px;
+  --desktop: 1024px;
+  
+  /* Mobile-optimized spacing */
+  --mobile-padding: 16px;
+  --mobile-margin: 12px;
+  --mobile-gap: 8px;
+}
+
+/* Mobile-First Base Styles */
+* {
+  /* Improve touch precision */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Mobile-optimized touch targets */
+.touch-target {
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.touch-target-md {
+  min-height: var(--touch-target-md);
+  min-width: var(--touch-target-md);
+}
+
+.touch-target-lg {
+  min-height: var(--touch-target-lg);
+  min-width: var(--touch-target-lg);
+}
+
+/* Mobile-first responsive utility classes */
+.mobile-hidden {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .mobile-hidden {
+    display: block;
+  }
+  
+  .tablet-hidden {
+    display: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .desktop-hidden {
+    display: none;
+  }
+}
+
 /* Widget specific styles */
 .widget-container {
   height: 100%;

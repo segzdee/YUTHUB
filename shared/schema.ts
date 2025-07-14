@@ -847,6 +847,848 @@ export const insertAuditTrailSchema = createInsertSchema(auditTrail).omit({
   timestamp: true,
 });
 
+// Additional Critical Tables for Comprehensive Housing Management
+
+// Document storage for file attachments and records
+export const documentStorage = pgTable("document_storage", {
+  id: serial("id").primaryKey(),
+  filename: varchar("filename").notNull(),
+  originalName: varchar("original_name").notNull(),
+  mimeType: varchar("mime_type").notNull(),
+  fileSize: integer("file_size").notNull(),
+  filePath: text("file_path").notNull(),
+  uploadedBy: varchar("uploaded_by").references(() => users.id).notNull(),
+  entityType: varchar("entity_type").notNull(), // 'resident', 'property', 'incident', 'maintenance'
+  entityId: integer("entity_id").notNull(),
+  documentType: varchar("document_type").notNull(), // 'photo', 'pdf', 'form', 'contract', 'certificate'
+  tags: text("tags").array(),
+  description: text("description"),
+  isConfidential: boolean("is_confidential").default(false),
+  retentionDate: date("retention_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_document_storage_entity").on(table.entityType, table.entityId),
+  index("idx_document_storage_uploaded_by").on(table.uploadedBy),
+  index("idx_document_storage_document_type").on(table.documentType),
+]);
+
+// Communication logs for tracking emails/calls/messages with residents
+export const communicationLogs = pgTable("communication_logs", {
+  id: serial("id").primaryKey(),
+  residentId: integer("resident_id").references(() => residents.id).notNull(),
+  staffId: varchar("staff_id").references(() => users.id).notNull(),
+  communicationType: varchar("communication_type").notNull(), // 'email', 'phone', 'sms', 'in_person', 'video_call'
+  direction: varchar("direction").notNull(), // 'inbound', 'outbound'
+  subject: varchar("subject"),
+  content: text("content").notNull(),
+  outcome: varchar("outcome"), // 'successful', 'no_response', 'voicemail', 'busy'
+  followUpRequired: boolean("follow_up_required").default(false),
+  followUpDate: date("follow_up_date"),
+  isConfidential: boolean("is_confidential").default(false),
+  attachments: text("attachments").array(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_communication_logs_resident_id").on(table.residentId),
+  index("idx_communication_logs_staff_id").on(table.staffId),
+  index("idx_communication_logs_type").on(table.communicationType),
+  index("idx_communication_logs_created_at").on(table.createdAt),
+]);
+
+// Calendar events for appointments and scheduling
+export const calendarEvents = pgTable("calendar_events", {
+  id: serial("id").primaryKey(),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
+  eventType: varchar("event_type").notNull(), // 'appointment', 'meeting', 'inspection', 'review', 'training'
+  location: varchar("location"),
+  organizer: varchar("organizer").references(() => users.id).notNull(),
+  attendees: text("attendees").array(), // Array of user IDs
+  residentId: integer("resident_id").references(() => residents.id),
+  propertyId: integer("property_id").references(() => properties.id),
+  status: varchar("status").default("scheduled"), // 'scheduled', 'in_progress', 'completed', 'cancelled', 'rescheduled'
+  isRecurring: boolean("is_recurring").default(false),
+  recurrenceRule: jsonb("recurrence_rule"),
+  reminderSet: boolean("reminder_set").default(false),
+  reminderTime: integer("reminder_time").default(15), // minutes before
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_calendar_events_start_time").on(table.startTime),
+  index("idx_calendar_events_organizer").on(table.organizer),
+  index("idx_calendar_events_resident_id").on(table.residentId),
+  index("idx_calendar_events_property_id").on(table.propertyId),
+  index("idx_calendar_events_status").on(table.status),
+]);
+
+// Risk assessments for safeguarding protocols
+export const riskAssessments = pgTable("risk_assessments", {
+  id: serial("id").primaryKey(),
+  residentId: integer("resident_id").references(() => residents.id).notNull(),
+  assessorId: varchar("assessor_id").references(() => users.id).notNull(),
+  assessmentType: varchar("assessment_type").notNull(), // 'initial', 'review', 'emergency', 'moving_on'
+  riskCategories: jsonb("risk_categories").notNull(), // {self_harm: 'high', substance_abuse: 'medium', etc.}
+  overallRiskLevel: varchar("overall_risk_level").notNull(), // 'low', 'medium', 'high', 'critical'
+  riskFactors: text("risk_factors").array(),
+  protectiveFactors: text("protective_factors").array(),
+  recommendations: text("recommendations").notNull(),
+  actionPlan: text("action_plan").notNull(),
+  reviewDate: date("review_date").notNull(),
+  escalationRequired: boolean("escalation_required").default(false),
+  escalatedTo: varchar("escalated_to").references(() => users.id),
+  status: varchar("status").default("active"), // 'active', 'completed', 'superseded'
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_risk_assessments_resident_id").on(table.residentId),
+  index("idx_risk_assessments_assessor_id").on(table.assessorId),
+  index("idx_risk_assessments_overall_risk_level").on(table.overallRiskLevel),
+  index("idx_risk_assessments_review_date").on(table.reviewDate),
+]);
+
+// Emergency contacts for crisis management
+export const emergencyContacts = pgTable("emergency_contacts", {
+  id: serial("id").primaryKey(),
+  residentId: integer("resident_id").references(() => residents.id).notNull(),
+  contactType: varchar("contact_type").notNull(), // 'family', 'friend', 'professional', 'social_worker', 'gp'
+  name: varchar("name").notNull(),
+  relationship: varchar("relationship").notNull(),
+  phone: varchar("phone").notNull(),
+  email: varchar("email"),
+  address: text("address"),
+  isPrimary: boolean("is_primary").default(false),
+  canContact: boolean("can_contact").default(true),
+  consentDate: date("consent_date"),
+  notes: text("notes"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_emergency_contacts_resident_id").on(table.residentId),
+  index("idx_emergency_contacts_contact_type").on(table.contactType),
+  index("idx_emergency_contacts_is_primary").on(table.isPrimary),
+]);
+
+// Move records for tracking move-ins/move-outs
+export const moveRecords = pgTable("move_records", {
+  id: serial("id").primaryKey(),
+  residentId: integer("resident_id").references(() => residents.id).notNull(),
+  fromPropertyId: integer("from_property_id").references(() => properties.id),
+  toPropertyId: integer("to_property_id").references(() => properties.id),
+  fromRoomId: integer("from_room_id").references(() => propertyRooms.id),
+  toRoomId: integer("to_room_id").references(() => propertyRooms.id),
+  moveType: varchar("move_type").notNull(), // 'move_in', 'move_out', 'internal_transfer', 'emergency_move'
+  moveDate: date("move_date").notNull(),
+  reason: text("reason").notNull(),
+  plannedDate: date("planned_date"),
+  isEmergencyMove: boolean("is_emergency_move").default(false),
+  handoverBy: varchar("handover_by").references(() => users.id),
+  handoverTo: varchar("handover_to").references(() => users.id),
+  inventoryChecked: boolean("inventory_checked").default(false),
+  depositReturned: boolean("deposit_returned").default(false),
+  cleaningRequired: boolean("cleaning_required").default(false),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_move_records_resident_id").on(table.residentId),
+  index("idx_move_records_move_date").on(table.moveDate),
+  index("idx_move_records_move_type").on(table.moveType),
+  index("idx_move_records_from_property_id").on(table.fromPropertyId),
+  index("idx_move_records_to_property_id").on(table.toPropertyId),
+]);
+
+// Rent payments for detailed payment history
+export const rentPayments = pgTable("rent_payments", {
+  id: serial("id").primaryKey(),
+  residentId: integer("resident_id").references(() => residents.id).notNull(),
+  propertyId: integer("property_id").references(() => properties.id).notNull(),
+  roomId: integer("room_id").references(() => propertyRooms.id),
+  paymentDate: date("payment_date").notNull(),
+  dueDate: date("due_date").notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  paymentMethod: varchar("payment_method").notNull(), // 'cash', 'card', 'bank_transfer', 'housing_benefit', 'universal_credit'
+  paymentReference: varchar("payment_reference"),
+  paymentStatus: varchar("payment_status").default("pending"), // 'pending', 'paid', 'partial', 'overdue', 'cancelled'
+  isPartialPayment: boolean("is_partial_payment").default(false),
+  outstandingBalance: decimal("outstanding_balance", { precision: 10, scale: 2 }).default("0.00"),
+  latePaymentFee: decimal("late_payment_fee", { precision: 10, scale: 2 }).default("0.00"),
+  paymentPeriod: varchar("payment_period").notNull(), // 'weekly', 'monthly', 'quarterly'
+  notes: text("notes"),
+  processedBy: varchar("processed_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_rent_payments_resident_id").on(table.residentId),
+  index("idx_rent_payments_property_id").on(table.propertyId),
+  index("idx_rent_payments_payment_date").on(table.paymentDate),
+  index("idx_rent_payments_due_date").on(table.dueDate),
+  index("idx_rent_payments_payment_status").on(table.paymentStatus),
+]);
+
+// Contractors for maintenance provider management
+export const contractors = pgTable("contractors", {
+  id: serial("id").primaryKey(),
+  companyName: varchar("company_name").notNull(),
+  contactName: varchar("contact_name").notNull(),
+  email: varchar("email").notNull(),
+  phone: varchar("phone").notNull(),
+  address: text("address"),
+  specializations: text("specializations").array(), // ['plumbing', 'electrical', 'heating', 'general']
+  certifications: text("certifications").array(),
+  insuranceDetails: jsonb("insurance_details"),
+  emergencyContact: boolean("emergency_contact").default(false),
+  preferredContractor: boolean("preferred_contractor").default(false),
+  paymentTerms: integer("payment_terms").default(30), // days
+  hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }),
+  callOutFee: decimal("call_out_fee", { precision: 10, scale: 2 }),
+  rating: integer("rating").default(5), // 1-5 stars
+  notes: text("notes"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_contractors_company_name").on(table.companyName),
+  index("idx_contractors_specializations").on(table.specializations),
+  index("idx_contractors_emergency_contact").on(table.emergencyContact),
+  index("idx_contractors_preferred_contractor").on(table.preferredContractor),
+]);
+
+// Inspections for property compliance checks
+export const inspections = pgTable("inspections", {
+  id: serial("id").primaryKey(),
+  propertyId: integer("property_id").references(() => properties.id).notNull(),
+  roomId: integer("room_id").references(() => propertyRooms.id),
+  inspectionType: varchar("inspection_type").notNull(), // 'health_safety', 'fire_safety', 'electrical', 'gas', 'routine', 'complaint'
+  inspectorId: varchar("inspector_id").references(() => users.id),
+  contractorId: integer("contractor_id").references(() => contractors.id),
+  scheduledDate: date("scheduled_date").notNull(),
+  completedDate: date("completed_date"),
+  status: varchar("status").default("scheduled"), // 'scheduled', 'in_progress', 'completed', 'failed', 'rescheduled'
+  passStatus: varchar("pass_status"), // 'pass', 'fail', 'conditional_pass'
+  checklist: jsonb("checklist"), // Inspection checklist items with pass/fail status
+  findings: text("findings"),
+  recommendations: text("recommendations"),
+  followUpRequired: boolean("follow_up_required").default(false),
+  followUpDate: date("follow_up_date"),
+  certificate: varchar("certificate"), // Path to certificate file
+  images: text("images").array(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_inspections_property_id").on(table.propertyId),
+  index("idx_inspections_inspection_type").on(table.inspectionType),
+  index("idx_inspections_scheduled_date").on(table.scheduledDate),
+  index("idx_inspections_status").on(table.status),
+  index("idx_inspections_pass_status").on(table.passStatus),
+]);
+
+// Notifications for system alerts and messaging
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  notificationType: varchar("notification_type").notNull(), // 'alert', 'reminder', 'message', 'system', 'emergency'
+  title: varchar("title").notNull(),
+  message: text("message").notNull(),
+  priority: varchar("priority").default("medium"), // 'low', 'medium', 'high', 'urgent'
+  category: varchar("category"), // 'maintenance', 'resident', 'financial', 'system', 'compliance'
+  entityType: varchar("entity_type"), // 'resident', 'property', 'incident', 'maintenance'
+  entityId: integer("entity_id"),
+  isRead: boolean("is_read").default(false),
+  readAt: timestamp("read_at"),
+  actionRequired: boolean("action_required").default(false),
+  actionUrl: varchar("action_url"),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_notifications_user_id").on(table.userId),
+  index("idx_notifications_notification_type").on(table.notificationType),
+  index("idx_notifications_priority").on(table.priority),
+  index("idx_notifications_is_read").on(table.isRead),
+  index("idx_notifications_created_at").on(table.createdAt),
+]);
+
+// Report templates for custom reporting
+export const reportTemplates = pgTable("report_templates", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  reportType: varchar("report_type").notNull(), // 'occupancy', 'financial', 'incident', 'progress', 'compliance'
+  createdBy: varchar("created_by").references(() => users.id).notNull(),
+  isDefault: boolean("is_default").default(false),
+  isShared: boolean("is_shared").default(false),
+  parameters: jsonb("parameters"), // Report parameters and filters
+  columns: jsonb("columns"), // Column definitions
+  formatting: jsonb("formatting"), // Styling and formatting options
+  schedule: jsonb("schedule"), // Automated report schedule
+  recipients: text("recipients").array(), // Email recipients for scheduled reports
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_report_templates_created_by").on(table.createdBy),
+  index("idx_report_templates_report_type").on(table.reportType),
+  index("idx_report_templates_is_default").on(table.isDefault),
+]);
+
+// Dashboard widgets for user customization
+export const dashboardWidgets = pgTable("dashboard_widgets", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  widgetType: varchar("widget_type").notNull(), // 'metrics', 'chart', 'table', 'alert', 'calendar'
+  widgetName: varchar("widget_name").notNull(),
+  configuration: jsonb("configuration").notNull(), // Widget-specific configuration
+  position: jsonb("position"), // {x: 0, y: 0, width: 4, height: 2}
+  isVisible: boolean("is_visible").default(true),
+  refreshInterval: integer("refresh_interval").default(300), // seconds
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_dashboard_widgets_user_id").on(table.userId),
+  index("idx_dashboard_widgets_widget_type").on(table.widgetType),
+]);
+
+// Crisis teams for emergency response coordination
+export const crisisTeams = pgTable("crisis_teams", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  teamLeader: varchar("team_leader").references(() => users.id).notNull(),
+  members: text("members").array(), // Array of user IDs
+  specializations: text("specializations").array(), // ['mental_health', 'substance_abuse', 'domestic_violence']
+  availability: jsonb("availability"), // When team is available
+  contactDetails: jsonb("contact_details"), // Emergency contact info
+  escalationLevel: integer("escalation_level").default(1), // 1-5 escalation levels
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_crisis_teams_team_leader").on(table.teamLeader),
+  index("idx_crisis_teams_specializations").on(table.specializations),
+  index("idx_crisis_teams_escalation_level").on(table.escalationLevel),
+]);
+
+// Referrals for external service connections
+export const referrals = pgTable("referrals", {
+  id: serial("id").primaryKey(),
+  residentId: integer("resident_id").references(() => residents.id).notNull(),
+  referredBy: varchar("referred_by").references(() => users.id).notNull(),
+  referralType: varchar("referral_type").notNull(), // 'health', 'education', 'employment', 'legal', 'housing'
+  serviceProvider: varchar("service_provider").notNull(),
+  contactDetails: jsonb("contact_details"),
+  reason: text("reason").notNull(),
+  urgency: varchar("urgency").default("routine"), // 'routine', 'urgent', 'emergency'
+  referralDate: date("referral_date").notNull(),
+  expectedDate: date("expected_date"),
+  status: varchar("status").default("pending"), // 'pending', 'accepted', 'declined', 'completed', 'cancelled'
+  outcome: text("outcome"),
+  followUpRequired: boolean("follow_up_required").default(false),
+  followUpDate: date("follow_up_date"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_referrals_resident_id").on(table.residentId),
+  index("idx_referrals_referred_by").on(table.referredBy),
+  index("idx_referrals_referral_type").on(table.referralType),
+  index("idx_referrals_status").on(table.status),
+  index("idx_referrals_referral_date").on(table.referralDate),
+]);
+
+// Outcomes tracking for measuring success metrics
+export const outcomesTracking = pgTable("outcomes_tracking", {
+  id: serial("id").primaryKey(),
+  residentId: integer("resident_id").references(() => residents.id).notNull(),
+  outcomeCategory: varchar("outcome_category").notNull(), // 'housing', 'education', 'employment', 'health', 'independence'
+  outcomeType: varchar("outcome_type").notNull(), // 'positive', 'negative', 'neutral'
+  description: text("description").notNull(),
+  measurableOutcome: varchar("measurable_outcome"), // Specific measurable result
+  baselineValue: decimal("baseline_value", { precision: 10, scale: 2 }),
+  currentValue: decimal("current_value", { precision: 10, scale: 2 }),
+  targetValue: decimal("target_value", { precision: 10, scale: 2 }),
+  achievementDate: date("achievement_date"),
+  recordedBy: varchar("recorded_by").references(() => users.id).notNull(),
+  verificationMethod: varchar("verification_method"), // How outcome was verified
+  isVerified: boolean("is_verified").default(false),
+  verifiedBy: varchar("verified_by").references(() => users.id),
+  verificationDate: date("verification_date"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_outcomes_tracking_resident_id").on(table.residentId),
+  index("idx_outcomes_tracking_outcome_category").on(table.outcomeCategory),
+  index("idx_outcomes_tracking_outcome_type").on(table.outcomeType),
+  index("idx_outcomes_tracking_achievement_date").on(table.achievementDate),
+]);
+
+// System configurations for platform settings
+export const systemConfigurations = pgTable("system_configurations", {
+  id: serial("id").primaryKey(),
+  configKey: varchar("config_key").notNull().unique(),
+  configValue: jsonb("config_value").notNull(),
+  description: text("description"),
+  category: varchar("category").notNull(), // 'general', 'security', 'notifications', 'billing', 'reporting'
+  dataType: varchar("data_type").notNull(), // 'string', 'number', 'boolean', 'json', 'array'
+  isEditable: boolean("is_editable").default(true),
+  requiresRestart: boolean("requires_restart").default(false),
+  lastModifiedBy: varchar("last_modified_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_system_configurations_config_key").on(table.configKey),
+  index("idx_system_configurations_category").on(table.category),
+]);
+
+// Organizations for multi-tenancy support
+export const organizations = pgTable("organizations", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  displayName: varchar("display_name"),
+  description: text("description"),
+  organizationType: varchar("organization_type").notNull(), // 'housing_provider', 'local_authority', 'charity', 'private'
+  registrationNumber: varchar("registration_number"),
+  taxNumber: varchar("tax_number"),
+  address: text("address"),
+  phone: varchar("phone"),
+  email: varchar("email"),
+  website: varchar("website"),
+  logo: varchar("logo"),
+  branding: jsonb("branding"), // Colors, fonts, styling
+  settings: jsonb("settings"), // Organization-specific settings
+  subscription: jsonb("subscription"), // Subscription details
+  parentOrganizationId: integer("parent_organization_id").references(() => organizations.id),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_organizations_name").on(table.name),
+  index("idx_organizations_organization_type").on(table.organizationType),
+  index("idx_organizations_parent_organization_id").on(table.parentOrganizationId),
+]);
+
+// Roles and permissions for granular access control
+export const rolesPermissions = pgTable("roles_permissions", {
+  id: serial("id").primaryKey(),
+  roleName: varchar("role_name").notNull(),
+  organizationId: integer("organization_id").references(() => organizations.id),
+  permissions: jsonb("permissions").notNull(), // Detailed permissions object
+  isSystemRole: boolean("is_system_role").default(false),
+  description: text("description"),
+  createdBy: varchar("created_by").references(() => users.id),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_roles_permissions_role_name").on(table.roleName),
+  index("idx_roles_permissions_organization_id").on(table.organizationId),
+]);
+
+// Workflows for process automation
+export const workflows = pgTable("workflows", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  workflowType: varchar("workflow_type").notNull(), // 'approval', 'notification', 'task', 'escalation'
+  triggerEvents: text("trigger_events").array(), // Events that trigger the workflow
+  conditions: jsonb("conditions"), // Conditions for workflow execution
+  actions: jsonb("actions"), // Actions to perform
+  createdBy: varchar("created_by").references(() => users.id).notNull(),
+  organizationId: integer("organization_id").references(() => organizations.id),
+  isActive: boolean("is_active").default(true),
+  version: integer("version").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_workflows_workflow_type").on(table.workflowType),
+  index("idx_workflows_created_by").on(table.createdBy),
+  index("idx_workflows_organization_id").on(table.organizationId),
+]);
+
+// Communication templates for standardized messaging
+export const communicationTemplates = pgTable("communication_templates", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  templateType: varchar("template_type").notNull(), // 'email', 'sms', 'letter', 'notification'
+  purpose: varchar("purpose").notNull(), // 'welcome', 'reminder', 'incident', 'maintenance', 'review'
+  subject: varchar("subject"),
+  content: text("content").notNull(),
+  variables: text("variables").array(), // Available template variables
+  organizationId: integer("organization_id").references(() => organizations.id),
+  createdBy: varchar("created_by").references(() => users.id).notNull(),
+  isDefault: boolean("is_default").default(false),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_communication_templates_template_type").on(table.templateType),
+  index("idx_communication_templates_purpose").on(table.purpose),
+  index("idx_communication_templates_organization_id").on(table.organizationId),
+]);
+
+// Assets for property equipment tracking
+export const assets = pgTable("assets", {
+  id: serial("id").primaryKey(),
+  assetTag: varchar("asset_tag").notNull().unique(),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  category: varchar("category").notNull(), // 'appliance', 'furniture', 'safety', 'technology', 'vehicle'
+  manufacturer: varchar("manufacturer"),
+  model: varchar("model"),
+  serialNumber: varchar("serial_number"),
+  purchaseDate: date("purchase_date"),
+  purchasePrice: decimal("purchase_price", { precision: 10, scale: 2 }),
+  warrantyExpiry: date("warranty_expiry"),
+  propertyId: integer("property_id").references(() => properties.id),
+  roomId: integer("room_id").references(() => propertyRooms.id),
+  condition: varchar("condition").default("good"), // 'excellent', 'good', 'fair', 'poor', 'damaged'
+  lastInspection: date("last_inspection"),
+  nextInspection: date("next_inspection"),
+  maintenanceSchedule: jsonb("maintenance_schedule"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_assets_asset_tag").on(table.assetTag),
+  index("idx_assets_property_id").on(table.propertyId),
+  index("idx_assets_category").on(table.category),
+  index("idx_assets_condition").on(table.condition),
+]);
+
+// Utilities for service management
+export const utilities = pgTable("utilities", {
+  id: serial("id").primaryKey(),
+  propertyId: integer("property_id").references(() => properties.id).notNull(),
+  utilityType: varchar("utility_type").notNull(), // 'gas', 'electricity', 'water', 'internet', 'tv'
+  provider: varchar("provider").notNull(),
+  accountNumber: varchar("account_number"),
+  meterNumber: varchar("meter_number"),
+  supply: varchar("supply"), // 'mains', 'prepaid', 'smart_meter'
+  tariff: varchar("tariff"),
+  monthlyEstimate: decimal("monthly_estimate", { precision: 10, scale: 2 }),
+  lastReading: decimal("last_reading", { precision: 10, scale: 2 }),
+  lastReadingDate: date("last_reading_date"),
+  contractStartDate: date("contract_start_date"),
+  contractEndDate: date("contract_end_date"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_utilities_property_id").on(table.propertyId),
+  index("idx_utilities_utility_type").on(table.utilityType),
+  index("idx_utilities_provider").on(table.provider),
+]);
+
+// Insurance records for coverage tracking
+export const insuranceRecords = pgTable("insurance_records", {
+  id: serial("id").primaryKey(),
+  policyNumber: varchar("policy_number").notNull().unique(),
+  propertyId: integer("property_id").references(() => properties.id),
+  organizationId: integer("organization_id").references(() => organizations.id),
+  insuranceType: varchar("insurance_type").notNull(), // 'building', 'contents', 'liability', 'professional'
+  provider: varchar("provider").notNull(),
+  coverage: jsonb("coverage"), // Coverage details
+  premium: decimal("premium", { precision: 10, scale: 2 }).notNull(),
+  excess: decimal("excess", { precision: 10, scale: 2 }),
+  startDate: date("start_date").notNull(),
+  endDate: date("end_date").notNull(),
+  renewalDate: date("renewal_date"),
+  claims: jsonb("claims"), // Claims history
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_insurance_records_policy_number").on(table.policyNumber),
+  index("idx_insurance_records_property_id").on(table.propertyId),
+  index("idx_insurance_records_insurance_type").on(table.insuranceType),
+  index("idx_insurance_records_renewal_date").on(table.renewalDate),
+]);
+
+// Training records for staff development
+export const trainingRecords = pgTable("training_records", {
+  id: serial("id").primaryKey(),
+  staffId: varchar("staff_id").references(() => users.id).notNull(),
+  trainingType: varchar("training_type").notNull(), // 'safeguarding', 'health_safety', 'mandatory', 'professional'
+  trainingName: varchar("training_name").notNull(),
+  provider: varchar("provider"),
+  startDate: date("start_date").notNull(),
+  endDate: date("end_date"),
+  completionDate: date("completion_date"),
+  status: varchar("status").default("enrolled"), // 'enrolled', 'in_progress', 'completed', 'failed', 'expired'
+  certificateNumber: varchar("certificate_number"),
+  expiryDate: date("expiry_date"),
+  renewalRequired: boolean("renewal_required").default(false),
+  cost: decimal("cost", { precision: 10, scale: 2 }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_training_records_staff_id").on(table.staffId),
+  index("idx_training_records_training_type").on(table.trainingType),
+  index("idx_training_records_status").on(table.status),
+  index("idx_training_records_expiry_date").on(table.expiryDate),
+]);
+
+// Complaints for issue resolution
+export const complaints = pgTable("complaints", {
+  id: serial("id").primaryKey(),
+  complaintNumber: varchar("complaint_number").notNull().unique(),
+  complainantType: varchar("complainant_type").notNull(), // 'resident', 'staff', 'external', 'anonymous'
+  complainantId: integer("complainant_id").references(() => residents.id),
+  complainantDetails: jsonb("complainant_details"), // For external/anonymous complaints
+  complaintCategory: varchar("complaint_category").notNull(), // 'service', 'staff', 'property', 'policy', 'discrimination'
+  description: text("description").notNull(),
+  severity: varchar("severity").default("medium"), // 'low', 'medium', 'high', 'critical'
+  assignedTo: varchar("assigned_to").references(() => users.id),
+  status: varchar("status").default("received"), // 'received', 'investigating', 'resolved', 'closed', 'escalated'
+  resolution: text("resolution"),
+  actionsTaken: text("actions_taken"),
+  resolutionDate: date("resolution_date"),
+  isUpheld: boolean("is_upheld"),
+  appealDeadline: date("appeal_deadline"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_complaints_complaint_number").on(table.complaintNumber),
+  index("idx_complaints_complainant_id").on(table.complainantId),
+  index("idx_complaints_complaint_category").on(table.complaintCategory),
+  index("idx_complaints_severity").on(table.severity),
+  index("idx_complaints_status").on(table.status),
+]);
+
+// Surveys for feedback collection
+export const surveys = pgTable("surveys", {
+  id: serial("id").primaryKey(),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  surveyType: varchar("survey_type").notNull(), // 'satisfaction', 'feedback', 'evaluation', 'needs_assessment'
+  targetAudience: varchar("target_audience").notNull(), // 'residents', 'staff', 'all', 'external'
+  questions: jsonb("questions").notNull(), // Survey questions and structure
+  isAnonymous: boolean("is_anonymous").default(false),
+  isActive: boolean("is_active").default(true),
+  startDate: date("start_date").notNull(),
+  endDate: date("end_date"),
+  createdBy: varchar("created_by").references(() => users.id).notNull(),
+  organizationId: integer("organization_id").references(() => organizations.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_surveys_survey_type").on(table.surveyType),
+  index("idx_surveys_target_audience").on(table.targetAudience),
+  index("idx_surveys_created_by").on(table.createdBy),
+  index("idx_surveys_is_active").on(table.isActive),
+]);
+
+// Survey responses
+export const surveyResponses = pgTable("survey_responses", {
+  id: serial("id").primaryKey(),
+  surveyId: integer("survey_id").references(() => surveys.id).notNull(),
+  respondentId: varchar("respondent_id").references(() => users.id),
+  respondentType: varchar("respondent_type").notNull(), // 'resident', 'staff', 'external'
+  responses: jsonb("responses").notNull(), // Response data
+  isComplete: boolean("is_complete").default(false),
+  submittedAt: timestamp("submitted_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_survey_responses_survey_id").on(table.surveyId),
+  index("idx_survey_responses_respondent_id").on(table.respondentId),
+  index("idx_survey_responses_respondent_type").on(table.respondentType),
+]);
+
+// Integration logs for external system connectivity
+export const integrationLogs = pgTable("integration_logs", {
+  id: serial("id").primaryKey(),
+  integration: varchar("integration").notNull(), // 'local_authority', 'housing_benefit', 'universal_credit', 'nhs'
+  operation: varchar("operation").notNull(), // 'sync', 'create', 'update', 'delete', 'query'
+  entityType: varchar("entity_type"), // 'resident', 'property', 'payment'
+  entityId: integer("entity_id"),
+  requestData: jsonb("request_data"),
+  responseData: jsonb("response_data"),
+  status: varchar("status").notNull(), // 'success', 'failure', 'partial'
+  errorCode: varchar("error_code"),
+  errorMessage: text("error_message"),
+  processingTime: integer("processing_time"), // milliseconds
+  retryCount: integer("retry_count").default(0),
+  nextRetryAt: timestamp("next_retry_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_integration_logs_integration").on(table.integration),
+  index("idx_integration_logs_operation").on(table.operation),
+  index("idx_integration_logs_status").on(table.status),
+  index("idx_integration_logs_created_at").on(table.createdAt),
+]);
+
+// Insert schemas for all new tables
+export const insertDocumentStorageSchema = createInsertSchema(documentStorage).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCommunicationLogSchema = createInsertSchema(communicationLogs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCalendarEventSchema = createInsertSchema(calendarEvents).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertRiskAssessmentSchema = createInsertSchema(riskAssessments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertEmergencyContactSchema = createInsertSchema(emergencyContacts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMoveRecordSchema = createInsertSchema(moveRecords).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertRentPaymentSchema = createInsertSchema(rentPayments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertContractorSchema = createInsertSchema(contractors).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertInspectionSchema = createInsertSchema(inspections).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertReportTemplateSchema = createInsertSchema(reportTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertDashboardWidgetSchema = createInsertSchema(dashboardWidgets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCrisisTeamSchema = createInsertSchema(crisisTeams).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertReferralSchema = createInsertSchema(referrals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertOutcomesTrackingSchema = createInsertSchema(outcomesTracking).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSystemConfigurationSchema = createInsertSchema(systemConfigurations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertOrganizationSchema = createInsertSchema(organizations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertRolesPermissionSchema = createInsertSchema(rolesPermissions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertWorkflowSchema = createInsertSchema(workflows).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCommunicationTemplateSchema = createInsertSchema(communicationTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAssetSchema = createInsertSchema(assets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUtilitySchema = createInsertSchema(utilities).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertInsuranceRecordSchema = createInsertSchema(insuranceRecords).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertTrainingRecordSchema = createInsertSchema(trainingRecords).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertComplaintSchema = createInsertSchema(complaints).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSurveySchema = createInsertSchema(surveys).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSurveyResponseSchema = createInsertSchema(surveyResponses).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertIntegrationLogSchema = createInsertSchema(integrationLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Billing types
 export type GovernmentClient = typeof governmentClients.$inferSelect;
 export type InsertGovernmentClient = z.infer<typeof insertGovernmentClientSchema>;
@@ -862,3 +1704,61 @@ export type PaymentReminder = typeof paymentReminders.$inferSelect;
 export type InsertPaymentReminder = z.infer<typeof insertPaymentReminderSchema>;
 export type AuditTrail = typeof auditTrail.$inferSelect;
 export type InsertAuditTrail = z.infer<typeof insertAuditTrailSchema>;
+
+// Additional comprehensive housing management types
+export type DocumentStorage = typeof documentStorage.$inferSelect;
+export type InsertDocumentStorage = z.infer<typeof insertDocumentStorageSchema>;
+export type CommunicationLog = typeof communicationLogs.$inferSelect;
+export type InsertCommunicationLog = z.infer<typeof insertCommunicationLogSchema>;
+export type CalendarEvent = typeof calendarEvents.$inferSelect;
+export type InsertCalendarEvent = z.infer<typeof insertCalendarEventSchema>;
+export type RiskAssessment = typeof riskAssessments.$inferSelect;
+export type InsertRiskAssessment = z.infer<typeof insertRiskAssessmentSchema>;
+export type EmergencyContact = typeof emergencyContacts.$inferSelect;
+export type InsertEmergencyContact = z.infer<typeof insertEmergencyContactSchema>;
+export type MoveRecord = typeof moveRecords.$inferSelect;
+export type InsertMoveRecord = z.infer<typeof insertMoveRecordSchema>;
+export type RentPayment = typeof rentPayments.$inferSelect;
+export type InsertRentPayment = z.infer<typeof insertRentPaymentSchema>;
+export type Contractor = typeof contractors.$inferSelect;
+export type InsertContractor = z.infer<typeof insertContractorSchema>;
+export type Inspection = typeof inspections.$inferSelect;
+export type InsertInspection = z.infer<typeof insertInspectionSchema>;
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type ReportTemplate = typeof reportTemplates.$inferSelect;
+export type InsertReportTemplate = z.infer<typeof insertReportTemplateSchema>;
+export type DashboardWidget = typeof dashboardWidgets.$inferSelect;
+export type InsertDashboardWidget = z.infer<typeof insertDashboardWidgetSchema>;
+export type CrisisTeam = typeof crisisTeams.$inferSelect;
+export type InsertCrisisTeam = z.infer<typeof insertCrisisTeamSchema>;
+export type Referral = typeof referrals.$inferSelect;
+export type InsertReferral = z.infer<typeof insertReferralSchema>;
+export type OutcomesTracking = typeof outcomesTracking.$inferSelect;
+export type InsertOutcomesTracking = z.infer<typeof insertOutcomesTrackingSchema>;
+export type SystemConfiguration = typeof systemConfigurations.$inferSelect;
+export type InsertSystemConfiguration = z.infer<typeof insertSystemConfigurationSchema>;
+export type Organization = typeof organizations.$inferSelect;
+export type InsertOrganization = z.infer<typeof insertOrganizationSchema>;
+export type RolesPermission = typeof rolesPermissions.$inferSelect;
+export type InsertRolesPermission = z.infer<typeof insertRolesPermissionSchema>;
+export type Workflow = typeof workflows.$inferSelect;
+export type InsertWorkflow = z.infer<typeof insertWorkflowSchema>;
+export type CommunicationTemplate = typeof communicationTemplates.$inferSelect;
+export type InsertCommunicationTemplate = z.infer<typeof insertCommunicationTemplateSchema>;
+export type Asset = typeof assets.$inferSelect;
+export type InsertAsset = z.infer<typeof insertAssetSchema>;
+export type Utility = typeof utilities.$inferSelect;
+export type InsertUtility = z.infer<typeof insertUtilitySchema>;
+export type InsuranceRecord = typeof insuranceRecords.$inferSelect;
+export type InsertInsuranceRecord = z.infer<typeof insertInsuranceRecordSchema>;
+export type TrainingRecord = typeof trainingRecords.$inferSelect;
+export type InsertTrainingRecord = z.infer<typeof insertTrainingRecordSchema>;
+export type Complaint = typeof complaints.$inferSelect;
+export type InsertComplaint = z.infer<typeof insertComplaintSchema>;
+export type Survey = typeof surveys.$inferSelect;
+export type InsertSurvey = z.infer<typeof insertSurveySchema>;
+export type SurveyResponse = typeof surveyResponses.$inferSelect;
+export type InsertSurveyResponse = z.infer<typeof insertSurveyResponseSchema>;
+export type IntegrationLog = typeof integrationLogs.$inferSelect;
+export type InsertIntegrationLog = z.infer<typeof insertIntegrationLogSchema>;

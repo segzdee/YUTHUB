@@ -29,7 +29,8 @@ import {
   AlertTriangle,
   CheckCircle,
   Eye,
-  EyeOff
+  EyeOff,
+  Plus
 } from "lucide-react";
 
 export default function Settings() {

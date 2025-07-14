@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Play } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export default function Hero() {
   return (
@@ -16,7 +16,7 @@ export default function Hero() {
             safeguarding compliance - all in one powerful system.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-8 sm:mb-12 px-4 sm:px-0">
+          <div className="flex justify-center items-center mb-8 sm:mb-12 px-4 sm:px-0">
             <Button
               size="lg"
               className="interactive-element w-full sm:w-auto px-6 sm:px-8 py-3 text-base sm:text-lg bg-primary hover:bg-blue-700"
@@ -24,15 +24,6 @@ export default function Hero() {
             >
               Start Free Trial
               <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="interactive-element w-full sm:w-auto px-6 sm:px-8 py-3 text-base sm:text-lg"
-              onClick={() => window.location.href = '#demo'}
-            >
-              <Play className="mr-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
-              Watch Demo
             </Button>
           </div>
 

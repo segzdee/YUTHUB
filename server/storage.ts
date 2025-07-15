@@ -23,6 +23,10 @@ import {
   userSessions,
   auditLogs,
   accountLockouts,
+  documentStorage,
+  fileSharing,
+  fileAccessLogs,
+  fileBackupRecords,
   type User,
   type UpsertUser,
   type Property,
@@ -65,6 +69,14 @@ import {
   type InsertPaymentReminder,
   type AuditTrail,
   type InsertAuditTrail,
+  type DocumentStorage,
+  type InsertDocumentStorage,
+  type FileSharing,
+  type InsertFileSharing,
+  type FileAccessLog,
+  type InsertFileAccessLog,
+  type FileBackupRecord,
+  type InsertFileBackupRecord,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, count, avg, sum } from "drizzle-orm";
@@ -207,7 +219,7 @@ export interface IStorage {
   createPaymentReminder(reminder: InsertPaymentReminder): Promise<PaymentReminder>;
   updatePaymentReminder(id: number, reminder: Partial<InsertPaymentReminder>): Promise<PaymentReminder>;
 
-  // Audit trail
+  // Audit trail operations
   createAuditTrail(audit: InsertAuditTrail): Promise<AuditTrail>;
   getAuditTrail(entityType?: string, entityId?: string): Promise<AuditTrail[]>;
 
@@ -226,6 +238,29 @@ export interface IStorage {
       invoiceCount: number;
     }>;
   }>;
+
+  // Document storage operations
+  createDocument(document: InsertDocumentStorage): Promise<DocumentStorage>;
+  getDocument(id: number): Promise<DocumentStorage | undefined>;
+  getDocuments(filters?: { entityType?: string; entityId?: number; documentType?: string }): Promise<DocumentStorage[]>;
+  updateDocument(id: number, updates: Partial<DocumentStorage>): Promise<DocumentStorage>;
+  deleteDocument(id: number): Promise<void>;
+  searchDocuments(query: string, filters?: { entityType?: string; documentType?: string }): Promise<DocumentStorage[]>;
+
+  // File sharing operations
+  createFileShare(share: InsertFileSharing): Promise<FileSharing>;
+  getFileShares(documentId: number): Promise<FileSharing[]>;
+  updateFileShare(id: number, updates: Partial<FileSharing>): Promise<FileSharing>;
+  revokeFileShare(id: number): Promise<void>;
+
+  // File access logging
+  logFileAccess(log: InsertFileAccessLog): Promise<FileAccessLog>;
+  getFileAccessLogs(documentId: number): Promise<FileAccessLog[]>;
+
+  // File backup operations
+  createBackupRecord(backup: InsertFileBackupRecord): Promise<FileBackupRecord>;
+  getBackupRecords(): Promise<FileBackupRecord[]>;
+  updateBackupRecord(id: number, updates: Partial<FileBackupRecord>): Promise<FileBackupRecord>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1048,6 +1083,174 @@ export class DatabaseStorage implements IStorage {
       riskLevel: log.riskLevel,
       timestamp: new Date(),
     });
+  }
+
+  // Document storage operations
+  async createDocument(document: InsertDocumentStorage): Promise<DocumentStorage> {
+    const [newDocument] = await db
+      .insert(documentStorage)
+      .values({
+        ...document,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    return newDocument;
+  }
+
+  async getDocument(id: number): Promise<DocumentStorage | undefined> {
+    const [document] = await db
+      .select()
+      .from(documentStorage)
+      .where(eq(documentStorage.id, id));
+    return document;
+  }
+
+  async getDocuments(filters?: { entityType?: string; entityId?: number; documentType?: string }): Promise<DocumentStorage[]> {
+    const conditions = [];
+    
+    if (filters?.entityType) {
+      conditions.push(eq(documentStorage.entityType, filters.entityType));
+    }
+    if (filters?.entityId) {
+      conditions.push(eq(documentStorage.entityId, filters.entityId));
+    }
+    if (filters?.documentType) {
+      conditions.push(eq(documentStorage.documentType, filters.documentType));
+    }
+    
+    const query = conditions.length > 0 
+      ? db.select().from(documentStorage).where(and(...conditions))
+      : db.select().from(documentStorage);
+    
+    return await query.orderBy(desc(documentStorage.createdAt));
+  }
+
+  async updateDocument(id: number, updates: Partial<DocumentStorage>): Promise<DocumentStorage> {
+    const [updatedDocument] = await db
+      .update(documentStorage)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(documentStorage.id, id))
+      .returning();
+    return updatedDocument;
+  }
+
+  async deleteDocument(id: number): Promise<void> {
+    await db.delete(documentStorage).where(eq(documentStorage.id, id));
+  }
+
+  async searchDocuments(query: string, filters?: { entityType?: string; documentType?: string }): Promise<DocumentStorage[]> {
+    const conditions = [
+      sql`${documentStorage.originalName} ILIKE ${`%${query}%`} OR 
+          ${documentStorage.description} ILIKE ${`%${query}%`} OR 
+          array_to_string(${documentStorage.tags}, ' ') ILIKE ${`%${query}%`}`
+    ];
+
+    if (filters?.entityType) {
+      conditions.push(eq(documentStorage.entityType, filters.entityType));
+    }
+    if (filters?.documentType) {
+      conditions.push(eq(documentStorage.documentType, filters.documentType));
+    }
+
+    return await db
+      .select()
+      .from(documentStorage)
+      .where(and(...conditions))
+      .orderBy(desc(documentStorage.createdAt));
+  }
+
+  // File sharing operations
+  async createFileShare(share: InsertFileSharing): Promise<FileSharing> {
+    const [newShare] = await db
+      .insert(fileSharing)
+      .values({
+        ...share,
+        createdAt: new Date(),
+      })
+      .returning();
+    return newShare;
+  }
+
+  async getFileShares(documentId: number): Promise<FileSharing[]> {
+    return await db
+      .select()
+      .from(fileSharing)
+      .where(and(
+        eq(fileSharing.documentId, documentId),
+        eq(fileSharing.isRevoked, false)
+      ))
+      .orderBy(desc(fileSharing.createdAt));
+  }
+
+  async updateFileShare(id: number, updates: Partial<FileSharing>): Promise<FileSharing> {
+    const [updatedShare] = await db
+      .update(fileSharing)
+      .set(updates)
+      .where(eq(fileSharing.id, id))
+      .returning();
+    return updatedShare;
+  }
+
+  async revokeFileShare(id: number): Promise<void> {
+    await db
+      .update(fileSharing)
+      .set({
+        isRevoked: true,
+        revokedAt: new Date(),
+      })
+      .where(eq(fileSharing.id, id));
+  }
+
+  // File access logging
+  async logFileAccess(log: InsertFileAccessLog): Promise<FileAccessLog> {
+    const [newLog] = await db
+      .insert(fileAccessLogs)
+      .values({
+        ...log,
+        createdAt: new Date(),
+      })
+      .returning();
+    return newLog;
+  }
+
+  async getFileAccessLogs(documentId: number): Promise<FileAccessLog[]> {
+    return await db
+      .select()
+      .from(fileAccessLogs)
+      .where(eq(fileAccessLogs.documentId, documentId))
+      .orderBy(desc(fileAccessLogs.createdAt));
+  }
+
+  // File backup operations
+  async createBackupRecord(backup: InsertFileBackupRecord): Promise<FileBackupRecord> {
+    const [newBackup] = await db
+      .insert(fileBackupRecords)
+      .values({
+        ...backup,
+        createdAt: new Date(),
+      })
+      .returning();
+    return newBackup;
+  }
+
+  async getBackupRecords(): Promise<FileBackupRecord[]> {
+    return await db
+      .select()
+      .from(fileBackupRecords)
+      .orderBy(desc(fileBackupRecords.createdAt));
+  }
+
+  async updateBackupRecord(id: number, updates: Partial<FileBackupRecord>): Promise<FileBackupRecord> {
+    const [updatedBackup] = await db
+      .update(fileBackupRecords)
+      .set(updates)
+      .where(eq(fileBackupRecords.id, id))
+      .returning();
+    return updatedBackup;
   }
 }
 

@@ -857,6 +857,7 @@ export const documentStorage = pgTable("document_storage", {
   mimeType: varchar("mime_type").notNull(),
   fileSize: integer("file_size").notNull(),
   filePath: text("file_path").notNull(),
+  thumbnailPath: text("thumbnail_path"),
   uploadedBy: varchar("uploaded_by").references(() => users.id).notNull(),
   entityType: varchar("entity_type").notNull(), // 'resident', 'property', 'incident', 'maintenance'
   entityId: integer("entity_id").notNull(),
@@ -865,12 +866,80 @@ export const documentStorage = pgTable("document_storage", {
   description: text("description"),
   isConfidential: boolean("is_confidential").default(false),
   retentionDate: date("retention_date"),
+  version: integer("version").default(1),
+  parentDocumentId: integer("parent_document_id").references(() => documentStorage.id),
+  isCurrentVersion: boolean("is_current_version").default(true),
+  checksum: varchar("checksum"), // For file integrity verification
+  downloadCount: integer("download_count").default(0),
+  lastAccessedAt: timestamp("last_accessed_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
   index("idx_document_storage_entity").on(table.entityType, table.entityId),
   index("idx_document_storage_uploaded_by").on(table.uploadedBy),
   index("idx_document_storage_document_type").on(table.documentType),
+  index("idx_document_storage_parent").on(table.parentDocumentId),
+  index("idx_document_storage_current_version").on(table.isCurrentVersion),
+  index("idx_document_storage_checksum").on(table.checksum),
+]);
+
+// File sharing for secure document sharing between staff
+export const fileSharing = pgTable("file_sharing", {
+  id: serial("id").primaryKey(),
+  documentId: integer("document_id").references(() => documentStorage.id).notNull(),
+  sharedBy: varchar("shared_by").references(() => users.id).notNull(),
+  sharedWith: varchar("shared_with").references(() => users.id).notNull(),
+  accessLevel: varchar("access_level").default("view"), // 'view', 'download', 'edit'
+  expiresAt: timestamp("expires_at"),
+  isRevoked: boolean("is_revoked").default(false),
+  revokedAt: timestamp("revoked_at"),
+  shareReason: text("share_reason"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_file_sharing_document_id").on(table.documentId),
+  index("idx_file_sharing_shared_by").on(table.sharedBy),
+  index("idx_file_sharing_shared_with").on(table.sharedWith),
+  index("idx_file_sharing_expires_at").on(table.expiresAt),
+]);
+
+// File access logs for audit and compliance
+export const fileAccessLogs = pgTable("file_access_logs", {
+  id: serial("id").primaryKey(),
+  documentId: integer("document_id").references(() => documentStorage.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  actionType: varchar("action_type").notNull(), // 'view', 'download', 'upload', 'delete', 'share'
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  success: boolean("success").default(true),
+  errorMessage: text("error_message"),
+  fileSize: integer("file_size"), // For upload/download actions
+  downloadDuration: integer("download_duration"), // milliseconds
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_file_access_logs_document_id").on(table.documentId),
+  index("idx_file_access_logs_user_id").on(table.userId),
+  index("idx_file_access_logs_action_type").on(table.actionType),
+  index("idx_file_access_logs_created_at").on(table.createdAt),
+]);
+
+// File backup records for disaster recovery
+export const fileBackupRecords = pgTable("file_backup_records", {
+  id: serial("id").primaryKey(),
+  backupDate: date("backup_date").notNull(),
+  backupType: varchar("backup_type").notNull(), // 'full', 'incremental', 'differential'
+  backupLocation: text("backup_location").notNull(),
+  totalFiles: integer("total_files").notNull(),
+  totalSize: integer("total_size").notNull(), // bytes
+  backupStatus: varchar("backup_status").default("in_progress"), // 'in_progress', 'completed', 'failed'
+  backupDuration: integer("backup_duration"), // seconds
+  verificationStatus: varchar("verification_status"), // 'pending', 'verified', 'failed'
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+}, (table) => [
+  index("idx_file_backup_records_backup_date").on(table.backupDate),
+  index("idx_file_backup_records_backup_type").on(table.backupType),
+  index("idx_file_backup_records_backup_status").on(table.backupStatus),
 ]);
 
 // Communication logs for tracking emails/calls/messages with residents
@@ -1529,6 +1598,21 @@ export const insertDocumentStorageSchema = createInsertSchema(documentStorage).o
   updatedAt: true,
 });
 
+export const insertFileSharingSchema = createInsertSchema(fileSharing).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertFileAccessLogSchema = createInsertSchema(fileAccessLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertFileBackupRecordSchema = createInsertSchema(fileBackupRecords).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertCommunicationLogSchema = createInsertSchema(communicationLogs).omit({
   id: true,
   createdAt: true,
@@ -1708,6 +1792,12 @@ export type InsertAuditTrail = z.infer<typeof insertAuditTrailSchema>;
 // Additional comprehensive housing management types
 export type DocumentStorage = typeof documentStorage.$inferSelect;
 export type InsertDocumentStorage = z.infer<typeof insertDocumentStorageSchema>;
+export type FileSharing = typeof fileSharing.$inferSelect;
+export type InsertFileSharing = z.infer<typeof insertFileSharingSchema>;
+export type FileAccessLog = typeof fileAccessLogs.$inferSelect;
+export type InsertFileAccessLog = z.infer<typeof insertFileAccessLogSchema>;
+export type FileBackupRecord = typeof fileBackupRecords.$inferSelect;
+export type InsertFileBackupRecord = z.infer<typeof insertFileBackupRecordSchema>;
 export type CommunicationLog = typeof communicationLogs.$inferSelect;
 export type InsertCommunicationLog = z.infer<typeof insertCommunicationLogSchema>;
 export type CalendarEvent = typeof calendarEvents.$inferSelect;

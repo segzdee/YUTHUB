@@ -50,6 +50,7 @@ import {
   validateDataConsistency
 } from './platformAdmin';
 import { enhancedPlatformAdminAuth } from './platformAdminValidation';
+import fileManagementRoutes from './routes/fileManagement';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -64,6 +65,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // app.use('/api/auth/login', createAuthLimiter());
   // app.use('/api/auth/password-reset', createPasswordResetLimiter());
   app.use(filterDataByRole);
+
+  // File management routes
+  app.use('/api/files', fileManagementRoutes);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {

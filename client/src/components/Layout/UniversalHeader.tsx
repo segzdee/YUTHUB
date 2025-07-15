@@ -12,7 +12,7 @@ export default function UniversalHeader() {
   };
 
   const handleSignUp = () => {
-    window.location.href = '/login?signup=true';
+    window.location.href = '/signup';
   };
 
   const handleLogout = () => {
@@ -83,7 +83,7 @@ export default function UniversalHeader() {
                   size="sm"
                   className="bg-primary hover:bg-blue-700"
                 >
-                  Start Free Trial
+                  Sign Up
                 </Button>
               </div>
             )}
@@ -155,9 +155,9 @@ export default function UniversalHeader() {
                       onClick={handleSignUp}
                       size="sm"
                       className="w-full bg-primary hover:bg-blue-700 interactive-element"
-                      aria-label="Start free trial"
+                      aria-label="Sign up for account"
                     >
-                      Start Free Trial
+                      Sign Up
                     </Button>
                   </div>
                 )}

@@ -1313,6 +1313,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           priority: 0.9
         },
         {
+          url: 'https://yuthub.com/signup',
+          lastmod: new Date().toISOString(),
+          changefreq: 'weekly',
+          priority: 0.8
+        },
+        {
           url: 'https://yuthub.com/privacy',
           lastmod: new Date().toISOString(),
           changefreq: 'yearly',

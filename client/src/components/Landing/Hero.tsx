@@ -20,7 +20,7 @@ export default function Hero() {
             <Button
               size="lg"
               className="interactive-element w-full sm:w-auto px-6 sm:px-8 py-3 text-base sm:text-lg bg-primary hover:bg-blue-700"
-              onClick={() => window.location.href = '/login'}
+              onClick={() => window.location.href = '/signup'}
             >
               Start Free Trial
               <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />

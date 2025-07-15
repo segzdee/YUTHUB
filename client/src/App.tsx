@@ -23,6 +23,7 @@ import Financials from "@/pages/Financials";
 import Settings from "@/pages/Settings";
 import Help from "@/pages/Help";
 import Login from "@/pages/Login";
+import SignUp from "@/pages/SignUp";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
 import Cookies from "@/pages/Cookies";
@@ -53,6 +54,7 @@ function Router() {
           <Route path="/" component={Landing} />
           <Route path="/pricing" component={Pricing} />
           <Route path="/login" component={Login} />
+          <Route path="/signup" component={SignUp} />
           <Route path="/privacy" component={Privacy} />
           <Route path="/terms" component={Terms} />
           <Route path="/cookies" component={Cookies} />

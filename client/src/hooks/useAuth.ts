@@ -78,10 +78,13 @@ export function useAuth() {
           }
         }
       } catch (error) {
-        console.error('Authentication check failed:', {
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString(),
-        });
+        // Log authentication errors in development
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Authentication check failed:', {
+            error: error instanceof Error ? error.message : 'Unknown error',
+            timestamp: new Date().toISOString(),
+          });
+        }
         authCache = {
           user: null,
           status: 'unauthenticated',

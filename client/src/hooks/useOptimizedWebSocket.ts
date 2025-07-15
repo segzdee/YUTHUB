@@ -171,11 +171,14 @@ class WebSocketConnectionManager {
             }
           });
         } catch (error) {
-          console.error('WebSocket message parsing error:', {
-            error: error instanceof Error ? error.message : 'Unknown error',
-            rawMessage: event.data,
-            timestamp: new Date().toISOString(),
-          });
+          // Log WebSocket message parsing errors in development
+          if (process.env.NODE_ENV === 'development') {
+            console.error('WebSocket message parsing error:', {
+              error: error instanceof Error ? error.message : 'Unknown error',
+              rawMessage: event.data,
+              timestamp: new Date().toISOString(),
+            });
+          }
         }
       };
 
@@ -213,11 +216,14 @@ class WebSocketConnectionManager {
       };
 
     } catch (error) {
-      console.error('WebSocket connection creation failed:', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        url: wsUrl,
-        timestamp: new Date().toISOString(),
-      });
+      // Log WebSocket connection creation failures in development
+      if (process.env.NODE_ENV === 'development') {
+        console.error('WebSocket connection creation failed:', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          url: wsUrl,
+          timestamp: new Date().toISOString(),
+        });
+      }
     }
   }
 

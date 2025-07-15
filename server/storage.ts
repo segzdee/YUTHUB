@@ -1095,7 +1095,11 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
       })
       .returning();
-    return result[0];
+    
+    if (!Array.isArray(result) || result.length === 0) {
+      throw new Error('Failed to create document');
+    }
+    return result[0] as DocumentStorage;
   }
 
   async getDocument(id: number): Promise<DocumentStorage | undefined> {

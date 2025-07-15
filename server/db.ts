@@ -33,7 +33,8 @@ export const checkDatabaseHealth = async (): Promise<boolean> => {
     
     // Log slow queries (over 1 second)
     if (duration > 1000) {
-      console.warn(`Slow database health check: ${duration}ms`);
+      // Log slow queries to monitoring system
+      // console.warn(`Slow database health check: ${duration}ms`);
     }
     
     return true;

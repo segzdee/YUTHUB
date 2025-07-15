@@ -6,14 +6,16 @@ async function throwIfResNotOk(res: Response) {
     const error = new Error(`${res.status}: ${text}`);
     error.name = `HttpError${res.status}`;
     
-    // Log structured error information
-    console.error('API Error:', {
-      url: res.url,
-      status: res.status,
-      statusText: res.statusText,
-      message: text,
-      timestamp: new Date().toISOString(),
-    });
+    // Log structured error information in development
+    if (process.env.NODE_ENV === 'development') {
+      console.error('API Error:', {
+        url: res.url,
+        status: res.status,
+        statusText: res.statusText,
+        message: text,
+        timestamp: new Date().toISOString(),
+      });
+    }
     
     throw error;
   }

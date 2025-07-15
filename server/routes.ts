@@ -61,9 +61,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/health/ready', readinessCheck);
   app.get('/health/live', livenessCheck);
   
-  // Apply security middleware (rate limiting temporarily disabled for development)
-  // app.use('/api/auth/login', createAuthLimiter());
-  // app.use('/api/auth/password-reset', createPasswordResetLimiter());
+  // Apply security middleware
+  app.use('/api/auth/login', createAuthLimiter());
+  app.use('/api/auth/password-reset', createPasswordResetLimiter());
   app.use(filterDataByRole);
 
   // File management routes

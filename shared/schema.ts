@@ -36,11 +36,12 @@ export const users = pgTable("users", {
   role: varchar("role").default("staff"), // staff, admin, platform_admin
   department: varchar("department"),
   employeeId: varchar("employee_id"),
-  authMethod: varchar("auth_method").default("OIDC"), // 'OIDC', 'SAML_SSO', 'LDAP_SSO', 'LOCAL'
-  passwordHash: varchar("password_hash"), // For local auth
+  primaryAuthMethod: varchar("primary_auth_method").default("REPLIT"), // 'REPLIT', 'GOOGLE', 'MICROSOFT', 'APPLE', 'EMAIL'
+  passwordHash: varchar("password_hash"), // For email auth
   passwordLastChanged: timestamp("password_last_changed"),
   mfaEnabled: boolean("mfa_enabled").default(false),
   mfaSecret: varchar("mfa_secret"), // TOTP secret
+  mfaBackupCodes: text("mfa_backup_codes").array(), // Array of backup codes
   accountLocked: boolean("account_locked").default(false),
   lastLogin: timestamp("last_login"),
   failedLoginAttempts: integer("failed_login_attempts").default(0),
@@ -60,6 +61,60 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+// User authentication methods table for multi-method auth
+export const userAuthMethods = pgTable("user_auth_methods", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  provider: varchar("provider").notNull(), // 'REPLIT', 'GOOGLE', 'MICROSOFT', 'APPLE', 'EMAIL'
+  providerId: varchar("provider_id").notNull(), // Provider-specific user ID
+  providerEmail: varchar("provider_email"),
+  accessToken: text("access_token"), // OAuth access token
+  refreshToken: text("refresh_token"), // OAuth refresh token
+  tokenExpiresAt: timestamp("token_expires_at"),
+  providerData: jsonb("provider_data"), // Additional provider-specific data
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_user_auth_methods_user_id").on(table.userId),
+  index("idx_user_auth_methods_provider").on(table.provider),
+  index("idx_user_auth_methods_provider_id").on(table.providerId),
+]);
+
+// User sessions table for multi-device session management
+export const userSessions = pgTable("user_sessions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  sessionToken: varchar("session_token").notNull().unique(),
+  deviceInfo: jsonb("device_info"), // Browser, OS, IP, etc.
+  lastActivity: timestamp("last_activity").defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_user_sessions_user_id").on(table.userId),
+  index("idx_user_sessions_token").on(table.sessionToken),
+  index("idx_user_sessions_expires").on(table.expiresAt),
+]);
+
+// Authentication audit log
+export const authAuditLog = pgTable("auth_audit_log", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id),
+  action: varchar("action").notNull(), // 'LOGIN', 'LOGOUT', 'FAILED_LOGIN', 'PASSWORD_RESET', 'MFA_ENABLED', etc.
+  provider: varchar("provider"), // Which auth method was used
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  success: boolean("success").default(false),
+  failureReason: varchar("failure_reason"),
+  metadata: jsonb("metadata"), // Additional context
+  timestamp: timestamp("timestamp").defaultNow(),
+}, (table) => [
+  index("idx_auth_audit_user_id").on(table.userId),
+  index("idx_auth_audit_timestamp").on(table.timestamp),
+  index("idx_auth_audit_action").on(table.action),
+]);
 
 // Properties table
 export const properties = pgTable("properties", {
@@ -561,18 +616,7 @@ export type User = typeof users.$inferSelect;
 
 // Security and audit tables
 
-// User sessions table for concurrent session management
-export const userSessions = pgTable("user_sessions", {
-  id: varchar("id").primaryKey().notNull(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
-  deviceInfo: jsonb("device_info"), // browser, OS, device fingerprint
-  ipAddress: varchar("ip_address"),
-  userAgent: varchar("user_agent"),
-  isActive: boolean("is_active").default(true),
-  lastActivity: timestamp("last_activity").defaultNow(),
-  expiresAt: timestamp("expires_at").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-});
+
 
 // Audit trail table
 export const auditLogs = pgTable("audit_logs", {

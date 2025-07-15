@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupMultiAuth, multiAuthManager } from "./multiAuth";
 import { db } from "./db";
 import { createAuthLimiter, createPasswordResetLimiter, PasswordValidator, MFAManager, AccountLockoutManager, SessionManager, AuditLogger, JWTManager } from "./security/authSecurity";
 import { requirePermission, requireRole, requireResourceAccess, filterDataByRole, PermissionChecker, PERMISSIONS, ROLES } from "./security/rbacMiddleware";
@@ -55,6 +56,7 @@ import fileManagementRoutes from './routes/fileManagement';
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
+  await setupMultiAuth(app);
   
   // Health check endpoints
   app.get('/health', healthCheck);

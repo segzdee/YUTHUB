@@ -1002,7 +1002,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Session management
-  async getSession(sessionId: string): Promise<any> {
+  async getSession(sessionId: number): Promise<any> {
     const [session] = await db
       .select()
       .from(userSessions)
@@ -1013,35 +1013,31 @@ export class DatabaseStorage implements IStorage {
 
   async createSession(session: {
     userId: string;
+    sessionToken: string;
     deviceInfo: any;
-    createdAt: number;
-    lastActivity: number;
-  }): Promise<string> {
-    const sessionId = `sess_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    await db.insert(userSessions).values({
-      id: sessionId,
+    expiresAt: Date;
+  }): Promise<number> {
+    const [result] = await db.insert(userSessions).values({
       userId: session.userId,
+      sessionToken: session.sessionToken,
       deviceInfo: session.deviceInfo,
-      lastActivity: new Date(session.lastActivity),
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
-      createdAt: new Date(session.createdAt),
-    });
+      expiresAt: session.expiresAt,
+      lastActivity: new Date(),
+    }).returning({ id: userSessions.id });
     
-    return sessionId;
+    return result.id;
   }
 
-  async updateSessionActivity(sessionId: string): Promise<void> {
+  async updateSessionActivity(sessionId: number): Promise<void> {
     await db
       .update(userSessions)
       .set({
         lastActivity: new Date(),
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Extend expiry
       })
       .where(eq(userSessions.id, sessionId));
   }
 
-  async deleteSession(sessionId: string): Promise<void> {
+  async deleteSession(sessionId: number): Promise<void> {
     await db.delete(userSessions).where(eq(userSessions.id, sessionId));
   }
 

@@ -94,6 +94,136 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Multi-auth endpoints
+  app.post('/auth/login', async (req, res) => {
+    const { email, password } = req.body;
+    
+    try {
+      const result = await multiAuthManager.handleEmailLogin(email, password);
+      
+      if (result.success) {
+        res.json({
+          success: true,
+          user: result.user,
+          token: result.token
+        });
+      } else {
+        res.status(401).json({
+          success: false,
+          error: result.error || 'Invalid credentials'
+        });
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Login failed'
+      });
+    }
+  });
+
+  app.post('/auth/register', async (req, res) => {
+    const { email, password, firstName, lastName, subscriptionTier } = req.body;
+    
+    try {
+      const result = await multiAuthManager.registerUser({
+        email,
+        password,
+        firstName,
+        lastName,
+        subscriptionTier
+      });
+      
+      if (result.success) {
+        res.json({
+          success: true,
+          user: result.user,
+          token: result.token,
+          needsEmailVerification: result.needsEmailVerification
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          error: result.error || 'Registration failed'
+        });
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Registration failed'
+      });
+    }
+  });
+
+  // OAuth callback endpoints  
+  app.get('/auth/google/callback', async (req, res) => {
+    try {
+      const { code, state } = req.query;
+      const result = await multiAuthManager.handleOAuthLogin({
+        provider: 'GOOGLE',
+        code: code as string,
+        state: state as string
+      });
+      
+      if (result.success) {
+        res.redirect('/dashboard');
+      } else {
+        res.redirect('/login?error=oauth_failed');
+      }
+    } catch (error) {
+      console.error('Google OAuth error:', error);
+      res.redirect('/login?error=oauth_failed');
+    }
+  });
+
+  app.get('/auth/microsoft/callback', async (req, res) => {
+    try {
+      const { code, state } = req.query;
+      const result = await multiAuthManager.handleMicrosoftCallback(code as string, state as string);
+      
+      if (result.success) {
+        res.redirect('/dashboard');
+      } else {
+        res.redirect('/login?error=oauth_failed');
+      }
+    } catch (error) {
+      console.error('Microsoft OAuth error:', error);
+      res.redirect('/login?error=oauth_failed');
+    }
+  });
+
+  // Auth methods management
+  app.get('/api/auth/methods', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const methods = await multiAuthManager.getUserAuthMethods(userId);
+      res.json(methods);
+    } catch (error) {
+      console.error('Error fetching auth methods:', error);
+      res.status(500).json({ message: 'Failed to fetch auth methods' });
+    }
+  });
+
+  app.delete('/api/auth/methods/:methodId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const methodId = parseInt(req.params.methodId);
+      
+      await multiAuthManager.removeAuthMethod(userId, methodId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error removing auth method:', error);
+      res.status(500).json({ message: 'Failed to remove auth method' });
+    }
+  });
+
   // Security endpoints
   app.post('/api/auth/setup-mfa', isAuthenticated, async (req: any, res) => {
     try {

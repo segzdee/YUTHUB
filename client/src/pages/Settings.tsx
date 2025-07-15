@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import AuthenticationSettings from "@/pages/Settings/Authentication";
 import { 
   Settings as SettingsIcon, 
   User, 
@@ -115,9 +116,9 @@ export default function Settings() {
               <TabsTrigger value="profile">Profile</TabsTrigger>
               <TabsTrigger value="organization">Organization</TabsTrigger>
               <TabsTrigger value="notifications">Notifications</TabsTrigger>
+              <TabsTrigger value="authentication">Authentication</TabsTrigger>
               <TabsTrigger value="security">Security</TabsTrigger>
               <TabsTrigger value="system">System</TabsTrigger>
-              <TabsTrigger value="integrations">Integrations</TabsTrigger>
             </TabsList>
 
             <TabsContent value="profile" className="space-y-6">
@@ -333,6 +334,10 @@ export default function Settings() {
                   </Button>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="authentication" className="space-y-6">
+              <AuthenticationSettings />
             </TabsContent>
 
             <TabsContent value="security" className="space-y-6">

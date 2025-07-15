@@ -6,7 +6,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Shield, Trash2, Plus, Mail, Chrome, Microsoft, Apple } from 'lucide-react';
+import { Shield, Trash2, Plus, Mail, Chrome, Building, Apple } from 'lucide-react';
 
 interface AuthMethod {
   id: number;
@@ -17,7 +17,7 @@ interface AuthMethod {
 
 const providerIcons = {
   GOOGLE: Chrome,
-  MICROSOFT: Microsoft,
+  MICROSOFT: Building,
   APPLE: Apple,
   EMAIL: Mail,
   REPLIT: Shield,

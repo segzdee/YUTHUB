@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Chrome, Microsoft, Apple, Shield } from 'lucide-react';
+import { Chrome, Apple, Shield, Building } from 'lucide-react';
 
 interface SocialLoginButtonsProps {
   mode: 'signin' | 'signup';
@@ -65,7 +65,7 @@ export default function SocialLoginButtons({ mode, isLoading, onError }: SocialL
           onClick={() => handleSocialLogin('microsoft')}
           className="flex items-center space-x-2"
         >
-          <Microsoft className="h-4 w-4 text-blue-600" />
+          <Building className="h-4 w-4 text-blue-600" />
           <span>Microsoft</span>
         </Button>
       </div>

@@ -1087,7 +1087,7 @@ export class DatabaseStorage implements IStorage {
 
   // Document storage operations
   async createDocument(document: InsertDocumentStorage): Promise<DocumentStorage> {
-    const [newDocument] = await db
+    const result = await db
       .insert(documentStorage)
       .values({
         ...document,
@@ -1095,7 +1095,7 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
       })
       .returning();
-    return newDocument!;
+    return result[0];
   }
 
   async getDocument(id: number): Promise<DocumentStorage | undefined> {

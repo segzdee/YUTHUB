@@ -9,11 +9,11 @@ export default function Privacy() {
     "@type": "WebPage",
     "name": "Privacy Policy",
     "description": "YUTHUB Privacy Policy - How we protect and handle your personal data",
-    "url": "https://yuthub.com/privacy",
+    "url": "https://www.yuthub.com/privacy",
     "isPartOf": {
       "@type": "WebSite",
       "name": "YUTHUB",
-      "url": "https://yuthub.com"
+      "url": "https://www.yuthub.com"
     }
   };
 
@@ -23,7 +23,7 @@ export default function Privacy() {
         title="Privacy Policy - YUTHUB | Data Protection & GDPR Compliance"
         description="Learn how YUTHUB protects your personal data and complies with GDPR regulations. Our comprehensive privacy policy for youth housing management platform users."
         keywords="YUTHUB privacy policy, data protection, GDPR compliance, youth housing data security, personal data handling"
-        canonicalUrl="https://yuthub.com/privacy"
+        canonicalUrl="https://www.yuthub.com/privacy"
         structuredData={structuredData}
       />
       <UniversalHeader />

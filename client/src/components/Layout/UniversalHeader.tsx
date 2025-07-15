@@ -33,7 +33,7 @@ export default function UniversalHeader() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <a href="/" className="flex items-center space-x-2">
+            <a href="https://www.yuthub.com" className="flex items-center space-x-2">
               <Building2 className="h-8 w-8 text-primary" />
               <span className="text-2xl font-bold text-slate">YUTHUB</span>
             </a>

@@ -42,11 +42,11 @@ export default function Cookies() {
     "@type": "WebPage",
     "name": "Cookie Policy",
     "description": "YUTHUB Cookie Policy - Manage your cookie preferences for our youth housing management platform",
-    "url": "https://yuthub.com/cookies",
+    "url": "https://www.yuthub.com/cookies",
     "isPartOf": {
       "@type": "WebSite",
       "name": "YUTHUB",
-      "url": "https://yuthub.com"
+      "url": "https://www.yuthub.com"
     }
   };
 
@@ -56,7 +56,7 @@ export default function Cookies() {
         title="Cookie Policy - YUTHUB | Manage Cookie Preferences"
         description="Manage your cookie preferences for YUTHUB youth housing management platform. Control analytics, marketing, and personalization cookies."
         keywords="YUTHUB cookie policy, cookie preferences, privacy controls, youth housing platform cookies"
-        canonicalUrl="https://yuthub.com/cookies"
+        canonicalUrl="https://www.yuthub.com/cookies"
         structuredData={structuredData}
       />
       <UniversalHeader />

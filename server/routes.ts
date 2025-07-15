@@ -1433,43 +1433,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const sitemapUrls = [
         {
-          url: 'https://yuthub.com',
+          url: 'https://www.yuthub.com',
           lastmod: new Date().toISOString(),
           changefreq: 'weekly',
           priority: 1.0
         },
         {
-          url: 'https://yuthub.com/pricing',
+          url: 'https://www.yuthub.com/pricing',
           lastmod: new Date().toISOString(),
           changefreq: 'monthly',
           priority: 0.9
         },
         {
-          url: 'https://yuthub.com/signup',
+          url: 'https://www.yuthub.com/signup',
           lastmod: new Date().toISOString(),
           changefreq: 'weekly',
           priority: 0.8
         },
         {
-          url: 'https://yuthub.com/privacy',
+          url: 'https://www.yuthub.com/privacy',
           lastmod: new Date().toISOString(),
           changefreq: 'yearly',
           priority: 0.4
         },
         {
-          url: 'https://yuthub.com/terms',
+          url: 'https://www.yuthub.com/terms',
           lastmod: new Date().toISOString(),
           changefreq: 'yearly',
           priority: 0.4
         },
         {
-          url: 'https://yuthub.com/cookies',
+          url: 'https://www.yuthub.com/cookies',
           lastmod: new Date().toISOString(),
           changefreq: 'yearly',
           priority: 0.3
         },
         {
-          url: 'https://yuthub.com/accessibility',
+          url: 'https://www.yuthub.com/accessibility',
           lastmod: new Date().toISOString(),
           changefreq: 'yearly',
           priority: 0.3

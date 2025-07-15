@@ -38,9 +38,10 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false, // Disable HTTPS requirement for development
+      secure: true, // Enable HTTPS for production
       maxAge: sessionTtl,
       sameSite: 'lax', // Add sameSite policy for better cookie handling
+      domain: 'yuthub.com', // Allow cookies for all yuthub.com subdomains
     },
   });
 }
@@ -99,7 +100,7 @@ export async function setupAuth(app: Express) {
         name: `replitauth:${domain}`,
         config,
         scope: "openid email profile offline_access",
-        callbackURL: `${domain === 'localhost' ? 'http' : 'https'}://${domain}/api/callback`,
+        callbackURL: `https://www.yuthub.com/api/callback`,
       },
       verify,
     );

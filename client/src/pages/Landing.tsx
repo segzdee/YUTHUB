@@ -13,7 +13,7 @@ export default function Landing() {
     "@type": "SoftwareApplication",
     "name": "YUTHUB",
     "description": "Comprehensive youth housing management platform for UK housing associations, local authorities, and social care organizations",
-    "url": "https://yuthub.com",
+    "url": "https://www.yuthub.com",
     "applicationCategory": "BusinessApplication",
     "operatingSystem": "Web",
     "offers": [
@@ -57,7 +57,7 @@ export default function Landing() {
     "creator": {
       "@type": "Organization",
       "name": "YUTHUB",
-      "url": "https://yuthub.com",
+      "url": "https://www.yuthub.com",
       "address": {
         "@type": "PostalAddress",
         "addressCountry": "GB"
@@ -76,7 +76,7 @@ export default function Landing() {
         title="YUTHUB - Youth Housing Management Platform | UK Housing Software"
         description="Comprehensive SaaS platform for youth housing organizations in the UK. Manage residents, track outcomes, and guide young people toward independent living with our specialized housing management software."
         keywords="youth housing management, UK housing software, social care platform, supported housing system, council housing management, housing association software, young people accommodation"
-        canonicalUrl="https://yuthub.com"
+        canonicalUrl="https://www.yuthub.com"
         structuredData={structuredData}
       />
       <UniversalHeader />

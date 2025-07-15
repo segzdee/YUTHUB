@@ -1,4 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
+import cors from "cors";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { WebSocketManager } from "./websocket";
@@ -7,6 +8,21 @@ import { sanitizeInput } from "./middleware/inputSanitization";
 import { backgroundJobScheduler } from "./jobs/backgroundJobs";
 
 const app = express();
+
+// CORS configuration for yuthub.com domain
+app.use(cors({
+  origin: [
+    'https://www.yuthub.com',
+    'https://yuthub.com',
+    'https://app.yuthub.com',
+    'https://admin.yuthub.com'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Set-Cookie'],
+  maxAge: 86400 // 24 hours
+}));
 
 // Security middleware
 // Temporarily disable global rate limiting for development

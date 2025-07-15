@@ -9,11 +9,11 @@ export default function Accessibility() {
     "@type": "WebPage",
     "name": "Accessibility Statement",
     "description": "YUTHUB Accessibility Statement - Our commitment to digital accessibility and WCAG 2.1 compliance",
-    "url": "https://yuthub.com/accessibility",
+    "url": "https://www.yuthub.com/accessibility",
     "isPartOf": {
       "@type": "WebSite",
       "name": "YUTHUB",
-      "url": "https://yuthub.com"
+      "url": "https://www.yuthub.com"
     }
   };
 
@@ -23,7 +23,7 @@ export default function Accessibility() {
         title="Accessibility Statement - YUTHUB | WCAG 2.1 AA Compliance"
         description="Learn about YUTHUB's commitment to digital accessibility. Our youth housing management platform meets WCAG 2.1 Level AA standards for all users."
         keywords="YUTHUB accessibility, WCAG compliance, digital accessibility, youth housing platform accessibility, screen reader compatible"
-        canonicalUrl="https://yuthub.com/accessibility"
+        canonicalUrl="https://www.yuthub.com/accessibility"
         structuredData={structuredData}
       />
       <UniversalHeader />

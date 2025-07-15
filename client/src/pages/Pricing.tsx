@@ -127,7 +127,7 @@ export default function Pricing() {
         title="YUTHUB Pricing Plans | Youth Housing Management Software Costs"
         description="Choose the perfect YUTHUB plan for your youth housing organization. Starter from £169/month, Professional from £429/month, Enterprise from £1,099/month. 15% discount on annual billing."
         keywords="youth housing software pricing, UK housing management costs, social care platform pricing, supported housing software plans, council housing system pricing"
-        canonicalUrl="https://yuthub.com/pricing"
+        canonicalUrl="https://www.yuthub.com/pricing"
         structuredData={structuredData}
       />
       <UniversalHeader />

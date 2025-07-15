@@ -5,7 +5,7 @@ The YUTHUB API provides comprehensive endpoints for managing youth housing opera
 
 ## Base URL
 - Development: `http://localhost:5000/api`
-- Production: `https://your-domain.com/api`
+- Production: `https://www.yuthub.com/api`
 
 ## Authentication
 All API endpoints require authentication using session-based authentication with Replit OIDC.

@@ -9,11 +9,11 @@ export default function Terms() {
     "@type": "WebPage",
     "name": "Terms of Service",
     "description": "YUTHUB Terms of Service - Legal terms and conditions for using our youth housing management platform",
-    "url": "https://yuthub.com/terms",
+    "url": "https://www.yuthub.com/terms",
     "isPartOf": {
       "@type": "WebSite",
       "name": "YUTHUB",
-      "url": "https://yuthub.com"
+      "url": "https://www.yuthub.com"
     }
   };
 
@@ -23,7 +23,7 @@ export default function Terms() {
         title="Terms of Service - YUTHUB | Legal Terms & Conditions"
         description="Read YUTHUB's Terms of Service for our youth housing management platform. Legal terms, conditions, and user responsibilities for UK housing organizations."
         keywords="YUTHUB terms of service, legal terms, youth housing platform conditions, software terms, UK housing management legal"
-        canonicalUrl="https://yuthub.com/terms"
+        canonicalUrl="https://www.yuthub.com/terms"
         structuredData={structuredData}
       />
       <UniversalHeader />

@@ -12,14 +12,17 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-// Configure connection pool for optimal performance
+// Configure connection pool for optimal performance and compute lifecycle
 export const pool = new Pool({ 
   connectionString: process.env.DATABASE_URL,
-  max: 20, // Maximum number of connections in the pool
-  min: 5,  // Minimum number of connections in the pool
-  idleTimeoutMillis: 30000, // Close connections after 30 seconds of inactivity
-  connectionTimeoutMillis: 2000, // Wait up to 2 seconds for a connection
-  maxUses: 7500, // Close connections after 7500 uses to prevent memory leaks
+  max: 15, // Maximum number of connections in the pool (reduced for better resource management)
+  min: 2,  // Minimum number of connections in the pool (reduced for compute efficiency)
+  idleTimeoutMillis: 20000, // Close connections after 20 seconds of inactivity (optimized for serverless)
+  connectionTimeoutMillis: 5000, // Wait up to 5 seconds for a connection (increased for reliability)
+  maxUses: 5000, // Close connections after 5000 uses to prevent memory leaks (reduced for freshness)
+  allowExitOnIdle: true, // Allow process to exit when all connections are idle
+  keepAlive: true, // Enable TCP keepalive
+  keepAliveInitialDelayMillis: 10000, // Initial delay before keepalive probes
 });
 
 export const db = drizzle({ client: pool, schema });
@@ -44,21 +47,88 @@ export const checkDatabaseHealth = async (): Promise<boolean> => {
   }
 };
 
-// Connection pool monitoring
+// Connection pool monitoring and lifecycle management
 export const getPoolStats = () => {
   return {
     totalConnections: pool.totalCount,
     idleConnections: pool.idleCount,
     waitingClients: pool.waitingCount,
+    processId: process.pid,
+    uptime: process.uptime(),
+    memoryUsage: process.memoryUsage(),
   };
 };
 
-// Graceful shutdown
+// Monitor connection pool health
+export const monitorPoolHealth = () => {
+  const stats = getPoolStats();
+  
+  // Log warnings for potential issues
+  if (stats.waitingClients > 0) {
+    console.warn(`Connection pool pressure detected: ${stats.waitingClients} clients waiting`);
+  }
+  
+  if (stats.totalConnections > 12) {
+    console.warn(`High connection count: ${stats.totalConnections} connections active`);
+  }
+  
+  // Memory usage monitoring
+  const memoryUsageMB = stats.memoryUsage.heapUsed / 1024 / 1024;
+  if (memoryUsageMB > 100) {
+    console.warn(`High memory usage: ${memoryUsageMB.toFixed(2)}MB heap used`);
+  }
+  
+  return stats;
+};
+
+// Graceful shutdown and compute lifecycle management
 export const closeDatabaseConnections = async (): Promise<void> => {
   try {
+    console.log('Initiating graceful database shutdown...');
+    
+    // Give existing queries time to complete
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Close all connections
     await pool.end();
     console.log('Database connections closed gracefully');
   } catch (error) {
     console.error('Error closing database connections:', error);
+    throw error;
   }
+};
+
+// Compute lifecycle management
+export const handleComputeLifecycle = () => {
+  // Handle process termination signals
+  process.on('SIGTERM', async () => {
+    console.log('Received SIGTERM, shutting down gracefully...');
+    await closeDatabaseConnections();
+    process.exit(0);
+  });
+  
+  process.on('SIGINT', async () => {
+    console.log('Received SIGINT, shutting down gracefully...');
+    await closeDatabaseConnections();
+    process.exit(0);
+  });
+  
+  // Handle uncaught exceptions
+  process.on('uncaughtException', async (error) => {
+    console.error('Uncaught exception:', error);
+    await closeDatabaseConnections();
+    process.exit(1);
+  });
+  
+  // Handle unhandled promise rejections
+  process.on('unhandledRejection', async (reason, promise) => {
+    console.error('Unhandled rejection at:', promise, 'reason:', reason);
+    await closeDatabaseConnections();
+    process.exit(1);
+  });
+  
+  // Periodic health monitoring
+  setInterval(() => {
+    monitorPoolHealth();
+  }, 60000); // Check every minute
 };

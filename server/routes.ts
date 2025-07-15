@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { setupMultiAuth, multiAuthManager } from "./multiAuth";
-import { db } from "./db";
+import { db, getPoolStats, monitorPoolHealth, checkDatabaseHealth } from "./db";
 import { createAuthLimiter, createPasswordResetLimiter, PasswordValidator, MFAManager, AccountLockoutManager, SessionManager, AuditLogger, JWTManager } from "./security/authSecurity";
 import { requirePermission, requireRole, requireResourceAccess, filterDataByRole, PermissionChecker, PERMISSIONS, ROLES } from "./security/rbacMiddleware";
 import { SSOIntegration } from "./security/ssoIntegration";
@@ -62,6 +62,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/health', healthCheck);
   app.get('/health/ready', readinessCheck);
   app.get('/health/live', livenessCheck);
+  
+  // Connection pool monitoring endpoints
+  app.get('/api/monitoring/pool-stats', async (req, res) => {
+    try {
+      const stats = getPoolStats();
+      const health = await checkDatabaseHealth();
+      
+      res.json({
+        ...stats,
+        databaseHealth: health,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error('Error fetching pool stats:', error);
+      res.status(500).json({ message: 'Failed to fetch pool stats' });
+    }
+  });
+  
+  app.get('/api/monitoring/compute-health', async (req, res) => {
+    try {
+      const poolStats = monitorPoolHealth();
+      const dbHealth = await checkDatabaseHealth();
+      
+      res.json({
+        compute: {
+          processId: process.pid,
+          uptime: process.uptime(),
+          memoryUsage: process.memoryUsage(),
+          cpuUsage: process.cpuUsage(),
+          version: process.version,
+          platform: process.platform,
+          arch: process.arch,
+        },
+        database: {
+          ...poolStats,
+          healthy: dbHealth,
+        },
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error('Error fetching compute health:', error);
+      res.status(500).json({ message: 'Failed to fetch compute health' });
+    }
+  });
   
   // Apply security middleware
   app.use('/api/auth/login', createAuthLimiter());

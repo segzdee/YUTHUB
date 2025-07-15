@@ -6,6 +6,8 @@ import { WebSocketManager } from "./websocket";
 import { apiRateLimit } from "./middleware/rateLimiter";
 import { sanitizeInput } from "./middleware/inputSanitization";
 import { backgroundJobScheduler } from "./jobs/backgroundJobs";
+import { handleComputeLifecycle, monitorPoolHealth, getPoolStats } from "./db";
+import { ComputeLifecycleManager, requestTrackingMiddleware } from "./middleware/computeLifecycle";
 
 const app = express();
 
@@ -40,6 +42,9 @@ app.use(sanitizeInput);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Add request tracking middleware
+app.use(requestTrackingMiddleware);
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -71,6 +76,13 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Initialize compute lifecycle management
+  handleComputeLifecycle();
+  
+  // Initialize enhanced compute lifecycle manager
+  const lifecycleManager = ComputeLifecycleManager.getInstance();
+  lifecycleManager.setupSignalHandlers();
+  
   const server = await registerRoutes(app);
   
   // Setup WebSocket for real-time updates

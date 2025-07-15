@@ -17,6 +17,7 @@ export default function UniversalHeader() {
 
   const navigation = [
     { name: 'Home', href: '/' },
+    { name: 'Features', href: '/#features' },
     { name: 'Pricing', href: '/pricing' },
     ...(isAuthenticated ? [
       { name: 'Dashboard', href: '/dashboard' },
@@ -51,7 +52,7 @@ export default function UniversalHeader() {
           </nav>
 
           {/* Auth Actions */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-3">
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
                 <div className="text-sm text-gray-700">
@@ -66,13 +67,23 @@ export default function UniversalHeader() {
                 </Button>
               </div>
             ) : (
-              <Button 
-                onClick={handleLogin}
-                size="sm"
-                className="bg-primary hover:bg-blue-700"
-              >
-                Sign In
-              </Button>
+              <div className="flex items-center space-x-3">
+                <Button 
+                  onClick={handleLogin}
+                  variant="outline"
+                  size="sm"
+                  className="border-primary text-primary hover:bg-primary hover:text-white"
+                >
+                  Sign In
+                </Button>
+                <Button 
+                  onClick={handleLogin}
+                  size="sm"
+                  className="bg-primary hover:bg-blue-700"
+                >
+                  Start Free Trial
+                </Button>
+              </div>
             )}
           </div>
 
@@ -128,14 +139,25 @@ export default function UniversalHeader() {
                     </Button>
                   </div>
                 ) : (
-                  <Button 
-                    onClick={handleLogin}
-                    size="sm"
-                    className="w-full bg-primary hover:bg-blue-700 interactive-element"
-                    aria-label="Sign in to your account"
-                  >
-                    Sign In
-                  </Button>
+                  <div className="space-y-2">
+                    <Button 
+                      onClick={handleLogin}
+                      variant="outline"
+                      size="sm"
+                      className="w-full border-primary text-primary hover:bg-primary hover:text-white interactive-element"
+                      aria-label="Sign in to your account"
+                    >
+                      Sign In
+                    </Button>
+                    <Button 
+                      onClick={handleLogin}
+                      size="sm"
+                      className="w-full bg-primary hover:bg-blue-700 interactive-element"
+                      aria-label="Start free trial"
+                    >
+                      Start Free Trial
+                    </Button>
+                  </div>
                 )}
               </div>
             </nav>

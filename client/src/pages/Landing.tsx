@@ -81,10 +81,14 @@ export default function Landing() {
       />
       <UniversalHeader />
       <Hero />
-      <Features />
+      <div id="features">
+        <Features />
+      </div>
       <HowItWorks />
       <Testimonials />
-      <PricingSection />
+      <div id="pricing">
+        <PricingSection />
+      </div>
       <UniversalFooter />
     </div>
   );

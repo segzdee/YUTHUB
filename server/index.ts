@@ -9,14 +9,22 @@ import { backgroundJobScheduler } from "./jobs/backgroundJobs";
 
 const app = express();
 
-// CORS configuration for yuthub.com domain
+// CORS configuration for production and development
+const corsOrigins = process.env.NODE_ENV === 'production' 
+  ? [
+      'https://www.yuthub.com',
+      'https://yuthub.com',
+      'https://app.yuthub.com',
+      'https://admin.yuthub.com'
+    ]
+  : [
+      'http://localhost:3000',
+      'http://localhost:5000',
+      'https://27891fa9-b276-4e4e-a11a-60ce998c53b2-00-2uromwtwyow5n.janeway.replit.dev'
+    ];
+
 app.use(cors({
-  origin: [
-    'https://www.yuthub.com',
-    'https://yuthub.com',
-    'https://app.yuthub.com',
-    'https://admin.yuthub.com'
-  ],
+  origin: corsOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],

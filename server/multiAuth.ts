@@ -39,7 +39,7 @@ export class MultiAuthManager {
         {
           clientId: process.env.GOOGLE_CLIENT_ID,
           clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          callbackURL: "https://www.yuthub.com/auth/google/callback",
+          callbackURL: `https://${process.env.PRODUCTION_DOMAIN || 'www.yuthub.com'}/auth/google/callback`,
         },
         async (accessToken, refreshToken, profile, done) => {
           try {
@@ -394,7 +394,7 @@ export class MultiAuthManager {
 
     return this.msalApp.getAuthCodeUrl({
       scopes: ["user.read", "email", "profile"],
-      redirectUri: "https://www.yuthub.com/auth/microsoft/callback",
+      redirectUri: `https://${process.env.PRODUCTION_DOMAIN || 'www.yuthub.com'}/auth/microsoft/callback`,
       state,
     });
   }
@@ -409,7 +409,7 @@ export class MultiAuthManager {
       const tokenResponse = await this.msalApp.acquireTokenByCode({
         code,
         scopes: ["user.read", "email", "profile"],
-        redirectUri: "https://www.yuthub.com/auth/microsoft/callback",
+        redirectUri: `https://${process.env.PRODUCTION_DOMAIN || 'www.yuthub.com'}/auth/microsoft/callback`,
       });
 
       const { account } = tokenResponse;

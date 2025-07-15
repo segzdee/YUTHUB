@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import UniversalHeader from '@/components/Layout/UniversalHeader';
 import UniversalFooter from '@/components/Layout/UniversalFooter';
 import { LogIn, Shield, Users, Building } from 'lucide-react';
+import SEOHead from '@/components/SEO/SEOHead';
 
 export default function Login() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -34,6 +35,11 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SEOHead
+        title="Login - YUTHUB Youth Housing Management Platform"
+        description="Sign in to your YUTHUB account to access your youth housing management dashboard and tools."
+        noindex={true}
+      />
       <UniversalHeader />
       
       <div className="flex items-center justify-center py-12 px-4">

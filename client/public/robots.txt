@@ -1,0 +1,68 @@
+User-agent: *
+Disallow: /api/
+Disallow: /login
+Disallow: /dashboard
+Disallow: /platform-admin
+Disallow: /settings
+Disallow: /profile
+Disallow: /admin
+Disallow: /reports
+Disallow: /incidents
+Disallow: /residents
+Disallow: /properties
+Disallow: /financials
+Disallow: /support
+Disallow: /housing
+Disallow: /independence
+Disallow: /safeguarding
+Disallow: /help
+Disallow: /analytics
+Disallow: /uk-councils
+Disallow: /billing
+Disallow: /subscribe
+Disallow: /auth/
+Disallow: /uploads/
+Disallow: /temp/
+Disallow: /*.json$
+Disallow: /*.xml$
+Disallow: /*?*
+Disallow: /search
+Disallow: /internal/
+
+Allow: /
+Allow: /pricing
+Allow: /features
+Allow: /about
+Allow: /contact
+Allow: /privacy
+Allow: /terms
+Allow: /cookies
+Allow: /accessibility
+Allow: /sitemap.xml
+Allow: /favicon.ico
+Allow: /og-image.jpg
+Allow: /assets/
+
+Sitemap: https://yuthub.com/sitemap.xml
+
+# Crawl delay for respectful crawling
+Crawl-delay: 1
+
+# Block AI training crawlers
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /

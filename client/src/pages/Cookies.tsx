@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import UniversalHeader from '@/components/Layout/UniversalHeader';
 import UniversalFooter from '@/components/Layout/UniversalFooter';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import SEOHead from '@/components/SEO/SEOHead';
+import Breadcrumbs from '@/components/SEO/Breadcrumbs';
 
 export default function Cookies() {
   const [preferences, setPreferences] = useState({
@@ -35,10 +37,31 @@ export default function Cookies() {
     });
   };
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Cookie Policy",
+    "description": "YUTHUB Cookie Policy - Manage your cookie preferences for our youth housing management platform",
+    "url": "https://yuthub.com/cookies",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "YUTHUB",
+      "url": "https://yuthub.com"
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Cookie Policy - YUTHUB | Manage Cookie Preferences"
+        description="Manage your cookie preferences for YUTHUB youth housing management platform. Control analytics, marketing, and personalization cookies."
+        keywords="YUTHUB cookie policy, cookie preferences, privacy controls, youth housing platform cookies"
+        canonicalUrl="https://yuthub.com/cookies"
+        structuredData={structuredData}
+      />
       <UniversalHeader />
       <div className="max-w-4xl mx-auto px-4 py-12">
+        <Breadcrumbs items={[{ label: 'Cookie Policy' }]} />
         <h1 className="text-3xl font-bold text-high-contrast mb-8">Cookie Policy</h1>
         
         <div className="space-y-8">

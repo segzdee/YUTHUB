@@ -1,11 +1,34 @@
 import UniversalHeader from '@/components/Layout/UniversalHeader';
 import UniversalFooter from '@/components/Layout/UniversalFooter';
+import SEOHead from '@/components/SEO/SEOHead';
+import Breadcrumbs from '@/components/SEO/Breadcrumbs';
 
 export default function Accessibility() {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Accessibility Statement",
+    "description": "YUTHUB Accessibility Statement - Our commitment to digital accessibility and WCAG 2.1 compliance",
+    "url": "https://yuthub.com/accessibility",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "YUTHUB",
+      "url": "https://yuthub.com"
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Accessibility Statement - YUTHUB | WCAG 2.1 AA Compliance"
+        description="Learn about YUTHUB's commitment to digital accessibility. Our youth housing management platform meets WCAG 2.1 Level AA standards for all users."
+        keywords="YUTHUB accessibility, WCAG compliance, digital accessibility, youth housing platform accessibility, screen reader compatible"
+        canonicalUrl="https://yuthub.com/accessibility"
+        structuredData={structuredData}
+      />
       <UniversalHeader />
       <div className="max-w-4xl mx-auto px-4 py-12">
+        <Breadcrumbs items={[{ label: 'Accessibility' }]} />
         <h1 className="text-3xl font-bold text-high-contrast mb-8">Accessibility Statement</h1>
         
         <div className="space-y-8 text-medium-contrast">

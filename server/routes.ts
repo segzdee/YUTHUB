@@ -1296,6 +1296,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // SEO-friendly sitemap.xml endpoint
+  app.get('/sitemap.xml', (req, res) => {
+    try {
+      const sitemapUrls = [
+        {
+          url: 'https://yuthub.com',
+          lastmod: new Date().toISOString(),
+          changefreq: 'weekly',
+          priority: 1.0
+        },
+        {
+          url: 'https://yuthub.com/pricing',
+          lastmod: new Date().toISOString(),
+          changefreq: 'monthly',
+          priority: 0.9
+        },
+        {
+          url: 'https://yuthub.com/privacy',
+          lastmod: new Date().toISOString(),
+          changefreq: 'yearly',
+          priority: 0.4
+        },
+        {
+          url: 'https://yuthub.com/terms',
+          lastmod: new Date().toISOString(),
+          changefreq: 'yearly',
+          priority: 0.4
+        },
+        {
+          url: 'https://yuthub.com/cookies',
+          lastmod: new Date().toISOString(),
+          changefreq: 'yearly',
+          priority: 0.3
+        },
+        {
+          url: 'https://yuthub.com/accessibility',
+          lastmod: new Date().toISOString(),
+          changefreq: 'yearly',
+          priority: 0.3
+        }
+      ];
+
+      const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${sitemapUrls.map(url => `  <url>
+    <loc>${url.url}</loc>
+    <lastmod>${url.lastmod}</lastmod>
+    <changefreq>${url.changefreq}</changefreq>
+    <priority>${url.priority}</priority>
+  </url>`).join('\n')}
+</urlset>`;
+      
+      res.set({
+        'Content-Type': 'application/xml',
+        'Cache-Control': 'public, max-age=86400'
+      });
+      
+      res.send(sitemap);
+    } catch (error) {
+      console.error('Error generating sitemap:', error);
+      res.status(500).send('Error generating sitemap');
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

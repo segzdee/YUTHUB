@@ -6,6 +6,8 @@ import { Check, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import UniversalHeader from '@/components/Layout/UniversalHeader';
 import UniversalFooter from '@/components/Layout/UniversalFooter';
+import SEOHead from '@/components/SEO/SEOHead';
+import Breadcrumbs from '@/components/SEO/Breadcrumbs';
 
 const pricingTiers = [
   {
@@ -100,10 +102,37 @@ export default function Pricing() {
     }
   };
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "YUTHUB Youth Housing Management Platform",
+    "description": "Comprehensive software solution for youth housing organizations in the UK",
+    "offers": pricingTiers.map(tier => ({
+      "@type": "Offer",
+      "name": `${tier.name} Plan`,
+      "price": isAnnual ? tier.annualPrice : tier.monthlyPrice,
+      "priceCurrency": "GBP",
+      "description": tier.description,
+      "eligibleQuantity": {
+        "@type": "QuantitativeValue",
+        "value": tier.maxResidents === 'Unlimited' ? 999999 : tier.maxResidents,
+        "unitText": "residents"
+      }
+    }))
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
+      <SEOHead
+        title="YUTHUB Pricing Plans | Youth Housing Management Software Costs"
+        description="Choose the perfect YUTHUB plan for your youth housing organization. Starter from £169/month, Professional from £429/month, Enterprise from £1,099/month. 15% discount on annual billing."
+        keywords="youth housing software pricing, UK housing management costs, social care platform pricing, supported housing software plans, council housing system pricing"
+        canonicalUrl="https://yuthub.com/pricing"
+        structuredData={structuredData}
+      />
       <UniversalHeader />
       <div className="max-w-7xl mx-auto py-12 px-4">
+        <Breadcrumbs items={[{ label: 'Pricing' }]} />
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">

@@ -1,11 +1,34 @@
 import UniversalHeader from '@/components/Layout/UniversalHeader';
 import UniversalFooter from '@/components/Layout/UniversalFooter';
+import SEOHead from '@/components/SEO/SEOHead';
+import Breadcrumbs from '@/components/SEO/Breadcrumbs';
 
 export default function Terms() {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Terms of Service",
+    "description": "YUTHUB Terms of Service - Legal terms and conditions for using our youth housing management platform",
+    "url": "https://yuthub.com/terms",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "YUTHUB",
+      "url": "https://yuthub.com"
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Terms of Service - YUTHUB | Legal Terms & Conditions"
+        description="Read YUTHUB's Terms of Service for our youth housing management platform. Legal terms, conditions, and user responsibilities for UK housing organizations."
+        keywords="YUTHUB terms of service, legal terms, youth housing platform conditions, software terms, UK housing management legal"
+        canonicalUrl="https://yuthub.com/terms"
+        structuredData={structuredData}
+      />
       <UniversalHeader />
       <div className="max-w-4xl mx-auto px-4 py-12">
+        <Breadcrumbs items={[{ label: 'Terms of Service' }]} />
         <h1 className="text-3xl font-bold text-high-contrast mb-8">Terms of Service</h1>
         
         <div className="space-y-8 text-medium-contrast">

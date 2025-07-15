@@ -22,10 +22,8 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
           {index === 0 && <Home className="h-4 w-4 mr-1" />}
           
           {item.href && index < allItems.length - 1 ? (
-            <Link href={item.href}>
-              <a className="hover:text-primary transition-colors">
-                {item.label}
-              </a>
+            <Link href={item.href} className="hover:text-primary transition-colors">
+              {item.label}
             </Link>
           ) : (
             <span className={index === allItems.length - 1 ? 'text-gray-900 font-medium' : ''}>

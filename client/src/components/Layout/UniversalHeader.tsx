@@ -11,17 +11,19 @@ export default function UniversalHeader() {
     window.location.href = '/login';
   };
 
+  const handleSignUp = () => {
+    window.location.href = '/login?signup=true';
+  };
+
   const handleLogout = () => {
     window.location.href = '/api/logout';
   };
 
   const navigation = [
     { name: 'Home', href: '/' },
-    { name: 'Features', href: '/#features' },
     { name: 'Pricing', href: '/pricing' },
     ...(isAuthenticated ? [
       { name: 'Dashboard', href: '/dashboard' },
-      { name: 'Subscription', href: '/subscribe' },
     ] : []),
   ];
 
@@ -77,7 +79,7 @@ export default function UniversalHeader() {
                   Sign In
                 </Button>
                 <Button 
-                  onClick={handleLogin}
+                  onClick={handleSignUp}
                   size="sm"
                   className="bg-primary hover:bg-blue-700"
                 >
@@ -150,7 +152,7 @@ export default function UniversalHeader() {
                       Sign In
                     </Button>
                     <Button 
-                      onClick={handleLogin}
+                      onClick={handleSignUp}
                       size="sm"
                       className="w-full bg-primary hover:bg-blue-700 interactive-element"
                       aria-label="Start free trial"

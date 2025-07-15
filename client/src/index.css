@@ -69,6 +69,34 @@
   }
 }
 
+/* Accessibility: Skip link for keyboard navigation */
+.skip-link {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  z-index: 50;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(var(--primary-foreground));
+}
+
 /* Widget specific styles */
 .widget-container {
   height: 100%;

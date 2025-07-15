@@ -103,7 +103,7 @@ function App() {
           <AccessibilityProvider>
             <QueryClientProvider client={queryClient}>
               <TooltipProvider>
-                <a href="#main-content" className="skip-link">
+                <a href="#main-content" className="absolute left-[-10000px] top-auto w-1 h-1 overflow-hidden focus:left-4 focus:top-4 focus:w-auto focus:h-auto focus:overflow-visible bg-primary text-primary-foreground px-4 py-2 rounded-md z-50 focus:outline-none focus:ring-2 focus:ring-primary-foreground">
                   Skip to main content
                 </a>
                 <Toaster />

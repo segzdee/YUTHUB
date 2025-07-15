@@ -20,7 +20,7 @@ import {
 // Import all form components
 import ResidentIntakeForm from "./ResidentIntakeForm";
 import PropertyRegistrationForm from "./PropertyRegistrationForm";
-import SupportPlanForm from "./SupportPlanForm";
+// SupportPlanForm removed - consolidated into ProgressTrackingForm
 import IncidentReportForm from "./IncidentReportForm";
 import ProgressTrackingForm from "./ProgressTrackingForm";
 import StaffMemberForm from "./StaffMemberForm";
@@ -73,7 +73,7 @@ export default function FormSelector({ onFormSelect }: FormSelectorProps) {
       description: "Create comprehensive support plans for residents",
       icon: Target,
       category: "residents",
-      component: SupportPlanForm,
+      component: ProgressTrackingForm,
       complexity: "high",
       estimatedTime: "20-30 min",
     },

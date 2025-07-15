@@ -3,6 +3,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+// This component provides comprehensive loading states for pages
+// Consolidated from multiple loading components to reduce duplication
+
 interface PageLoaderProps {
   title?: string;
   description?: string;

@@ -1095,7 +1095,7 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
       })
       .returning();
-    return newDocument;
+    return newDocument!;
   }
 
   async getDocument(id: number): Promise<DocumentStorage | undefined> {
@@ -1119,11 +1119,14 @@ export class DatabaseStorage implements IStorage {
       conditions.push(eq(documentStorage.documentType, filters.documentType));
     }
     
-    const query = conditions.length > 0 
-      ? db.select().from(documentStorage).where(and(...conditions))
-      : db.select().from(documentStorage);
+    if (conditions.length > 0) {
+      return await db.select().from(documentStorage)
+        .where(and(...conditions))
+        .orderBy(desc(documentStorage.createdAt));
+    }
     
-    return await query.orderBy(desc(documentStorage.createdAt));
+    return await db.select().from(documentStorage)
+      .orderBy(desc(documentStorage.createdAt));
   }
 
   async updateDocument(id: number, updates: Partial<DocumentStorage>): Promise<DocumentStorage> {

@@ -37,8 +37,16 @@ export default function ProgressTrackingForm() {
   const form = useForm({
     resolver: zodResolver(progressUpdateSchema),
     defaultValues: {
+      residentId: 0,
+      supportPlanId: 0,
+      goalType: 'independence',
+      goal: '',
       currentProgress: 0,
+      targetDate: '',
       milestonesCompleted: [],
+      progressNotes: '',
+      challengesFaced: '',
+      nextSteps: '',
     }
   });
 

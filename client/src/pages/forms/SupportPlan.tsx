@@ -1,5 +1,5 @@
-import SupportPlanForm from "@/components/Forms/SupportPlanForm";
+import ProgressTrackingForm from "@/components/Forms/ProgressTrackingForm";
 
 export default function SupportPlan() {
-  return <SupportPlanForm />;
+  return <ProgressTrackingForm />;
 }

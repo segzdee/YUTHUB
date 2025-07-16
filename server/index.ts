@@ -8,6 +8,21 @@ import { sanitizeInput } from "./middleware/inputSanitization";
 import { backgroundJobScheduler } from "./jobs/backgroundJobs";
 import { handleComputeLifecycle, monitorPoolHealth, getPoolStats } from "./db";
 import { ComputeLifecycleManager, requestTrackingMiddleware } from "./middleware/computeLifecycle";
+import { 
+  memoryTrackingMiddleware, 
+  startMemoryMonitoring, 
+  memoryLimitMiddleware,
+  cleanupMemory 
+} from "./middleware/memoryOptimization";
+import { 
+  performanceTrackingMiddleware, 
+  cacheMiddleware, 
+  queryOptimizationMiddleware 
+} from "./middleware/performanceOptimization";
+import { 
+  errorHandlingMiddleware, 
+  notFoundHandler 
+} from "./middleware/errorHandling";
 
 const app = express();
 
@@ -48,6 +63,21 @@ app.use(express.urlencoded({ extended: false }));
 
 // Add request tracking middleware
 app.use(requestTrackingMiddleware);
+
+// Add memory and performance monitoring
+app.use(memoryTrackingMiddleware);
+app.use(performanceTrackingMiddleware);
+
+// Add memory limit protection for high-memory endpoints
+app.use('/api/platform-admin', memoryLimitMiddleware(120 * 1024 * 1024)); // 120MB limit
+app.use('/api/reports', memoryLimitMiddleware(100 * 1024 * 1024)); // 100MB limit
+
+// Add response caching for static endpoints
+app.use('/api/properties', cacheMiddleware({ maxSize: 500, ttl: 2 * 60 * 1000 })); // 2 minutes
+app.use('/api/metrics', cacheMiddleware({ maxSize: 100, ttl: 30 * 1000 })); // 30 seconds
+
+// Add query optimization hints
+app.use('/api', queryOptimizationMiddleware);
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -97,34 +127,15 @@ app.use((req, res, next) => {
   // Start background job scheduler
   backgroundJobScheduler.start();
 
-  app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+  // Initialize memory monitoring
+  startMemoryMonitoring();
+  
+  // Setup periodic memory cleanup
+  setInterval(() => {
+    cleanupMemory();
+  }, 5 * 60 * 1000); // Every 5 minutes
 
-    // Structured error logging
-    console.error('Server Error:', {
-      error: {
-        message: err.message,
-        stack: err.stack,
-        name: err.name,
-      },
-      request: {
-        method: req.method,
-        url: req.url,
-        headers: req.headers,
-        body: req.body,
-      },
-      timestamp: new Date().toISOString(),
-      status,
-    });
-
-    // Send user-friendly error response
-    res.status(status).json({ 
-      message: status === 500 ? "Internal Server Error" : message,
-      status,
-      timestamp: new Date().toISOString(),
-    });
-  });
+  console.log('🚀 Server optimization completed');
 
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
@@ -134,6 +145,10 @@ app.use((req, res, next) => {
   } else {
     serveStatic(app);
   }
+
+  // Error handling middleware (must be last, after Vite setup)
+  app.use(errorHandlingMiddleware);
+  app.use(notFoundHandler);
 
   // ALWAYS serve the app on port 5000
   // this serves both the API and the client.

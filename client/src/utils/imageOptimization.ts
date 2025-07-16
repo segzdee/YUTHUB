@@ -65,36 +65,69 @@ export interface OptimizedImageProps {
   onError?: () => void;
 }
 
-export function OptimizedImage({
-  src,
-  alt,
-  width,
-  height,
-  className = '',
-  quality = 85,
-  loading = 'lazy',
-  sizes,
-  onLoad,
-  onError
-}: OptimizedImageProps) {
+// This is a utility function that returns props for an optimized image
+export function getOptimizedImageProps(props: OptimizedImageProps) {
+  const {
+    src,
+    alt,
+    width,
+    height,
+    className = '',
+    quality = 85,
+    loading = 'lazy',
+    sizes,
+    onLoad,
+    onError
+  } = props;
+
   const optimizedSrc = generateOptimizedImageSrc(src, { width, height, quality });
   const srcSet = generateSrcSet(src);
   const imageSizes = sizes || generateSizes();
   
-  return (
-    <img
-      src={optimizedSrc}
-      srcSet={srcSet}
-      sizes={imageSizes}
-      alt={alt}
-      width={width}
-      height={height}
-      className={className}
-      loading={loading}
-      decoding="async"
-      onLoad={onLoad}
-      onError={onError}
-      style={{ contentVisibility: 'auto' }}
-    />
+  return {
+    src: optimizedSrc,
+    srcSet,
+    sizes: imageSizes,
+    alt,
+    width,
+    height,
+    className,
+    loading,
+    decoding: 'async' as const,
+    onLoad,
+    onError,
+    style: { 
+      contentVisibility: 'auto' as any,
+      objectFit: 'cover' as const,
+      aspectRatio: width && height ? `${width}/${height}` : 'auto',
+      maxWidth: '100%',
+      height: 'auto'
+    }
+  };
+}
+
+export function preloadImage(src: string, options: ImageOptimizationOptions = {}): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve();
+    img.onerror = reject;
+    img.src = generateOptimizedImageSrc(src, options);
+  });
+}
+
+export function lazyLoadImage(img: HTMLImageElement, options: ImageOptimizationOptions = {}): void {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const target = entry.target as HTMLImageElement;
+          target.src = generateOptimizedImageSrc(target.dataset.src || '', options);
+          observer.unobserve(target);
+        }
+      });
+    },
+    { rootMargin: '50px' }
   );
+  
+  observer.observe(img);
 }

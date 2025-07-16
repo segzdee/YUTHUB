@@ -52,6 +52,7 @@ import {
 } from './platformAdmin';
 import { enhancedPlatformAdminAuth } from './platformAdminValidation';
 import fileManagementRoutes from './routes/fileManagement';
+import monitoringRoutes from './routes/monitoring';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -114,6 +115,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // File management routes
   app.use('/api/files', fileManagementRoutes);
+
+  // Monitoring routes (system optimization)
+  app.use('/api/monitoring', monitoringRoutes);
 
   // Auth routes
   app.get('/api/auth/user', async (req: any, res) => {

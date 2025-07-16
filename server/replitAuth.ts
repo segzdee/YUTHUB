@@ -136,13 +136,20 @@ export async function setupAuth(app: Express) {
 
   passport.serializeUser((user: any, cb) => {
     console.log('🔍 SERIALIZING USER:', user);
-    cb(null, user.id || user);
+    // Extract user ID from different possible structures
+    const userId = user.id || user.claims?.sub || user.sub || user;
+    console.log('🔍 SERIALIZED USER ID:', userId);
+    cb(null, userId);
   });
   
   passport.deserializeUser(async (id: any, cb) => {
     console.log('🔍 DESERIALIZING USER ID:', id);
     try {
-      const user = await storage.getUser(id);
+      // Handle cases where the serialized data might be complex
+      const userId = typeof id === 'string' ? id : (id.claims?.sub || id.sub || id.id || id);
+      console.log('🔍 EXTRACTED USER ID:', userId);
+      
+      const user = await storage.getUser(userId);
       console.log('🔍 DESERIALIZED USER:', user);
       cb(null, user);
     } catch (error) {

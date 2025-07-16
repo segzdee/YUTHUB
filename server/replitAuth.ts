@@ -89,9 +89,12 @@ export async function setupAuth(app: Express) {
   // Register strategies for both production and development
   const domains = process.env.REPLIT_DOMAINS!.split(",");
   
-  // Add production domain if in production or if www.yuthub.com is accessed
+  // Add production domains for yuthub.com
   if (!domains.includes('www.yuthub.com')) {
     domains.push('www.yuthub.com');
+  }
+  if (!domains.includes('yuthub.com')) {
+    domains.push('yuthub.com');
   }
   
   // Add localhost for development if not already present
@@ -124,8 +127,20 @@ export async function setupAuth(app: Express) {
 
   app.get("/api/login", (req, res, next) => {
     // Use the correct domain for authentication
-    const authDomain = req.hostname === 'localhost' ? 'localhost' : req.hostname;
-    console.log(`Attempting authentication with domain: ${authDomain}, available strategies:`, passport._strategies);
+    let authDomain = req.hostname === 'localhost' ? 'localhost' : req.hostname;
+    
+    // Handle both yuthub.com and www.yuthub.com
+    if (authDomain === 'yuthub.com' || authDomain === 'www.yuthub.com') {
+      // Try both variants to find which one has a registered strategy
+      const strategies = Object.keys(passport._strategies);
+      if (strategies.includes('replitauth:www.yuthub.com')) {
+        authDomain = 'www.yuthub.com';
+      } else if (strategies.includes('replitauth:yuthub.com')) {
+        authDomain = 'yuthub.com';
+      }
+    }
+    
+    console.log(`Attempting authentication with domain: ${authDomain}, available strategies:`, Object.keys(passport._strategies));
     
     // Check if strategy exists
     if (!passport._strategies[`replitauth:${authDomain}`]) {
@@ -141,7 +156,19 @@ export async function setupAuth(app: Express) {
 
   app.get("/api/callback", (req, res, next) => {
     // Use the correct domain for authentication callback
-    const authDomain = req.hostname === 'localhost' ? 'localhost' : req.hostname;
+    let authDomain = req.hostname === 'localhost' ? 'localhost' : req.hostname;
+    
+    // Handle both yuthub.com and www.yuthub.com
+    if (authDomain === 'yuthub.com' || authDomain === 'www.yuthub.com') {
+      // Try both variants to find which one has a registered strategy
+      const strategies = Object.keys(passport._strategies);
+      if (strategies.includes('replitauth:www.yuthub.com')) {
+        authDomain = 'www.yuthub.com';
+      } else if (strategies.includes('replitauth:yuthub.com')) {
+        authDomain = 'yuthub.com';
+      }
+    }
+    
     console.log(`Processing callback for domain: ${authDomain}`);
     
     passport.authenticate(`replitauth:${authDomain}`, {

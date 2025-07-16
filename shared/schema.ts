@@ -36,7 +36,7 @@ export const users = pgTable("users", {
   role: varchar("role").default("staff"), // staff, admin, platform_admin
   department: varchar("department"),
   employeeId: varchar("employee_id"),
-  primaryAuthMethod: varchar("primary_auth_method").default("REPLIT"), // 'REPLIT', 'GOOGLE', 'MICROSOFT', 'APPLE', 'EMAIL'
+  authMethod: varchar("auth_method").default("REPLIT"), // 'REPLIT', 'GOOGLE', 'MICROSOFT', 'APPLE', 'EMAIL'
   passwordHash: varchar("password_hash"), // For email auth
   passwordLastChanged: timestamp("password_last_changed"),
   mfaEnabled: boolean("mfa_enabled").default(false),

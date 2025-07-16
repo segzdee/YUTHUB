@@ -127,21 +127,28 @@ export async function setupAuth(app: Express) {
         name: `replitauth:${domain}`,
         config,
         scope: "openid email profile offline_access",
-        callbackURL: `https://${domain}/api/callback`,
+        callbackURL: domain === 'localhost' ? `http://localhost:5000/api/callback` : `https://${domain}/api/callback`,
       },
       verify,
     );
     passport.use(strategy);
   }
 
-  passport.serializeUser((user: Express.User, cb) => {
-    console.log('🔵 Serializing user:', JSON.stringify(user, null, 2));
-    cb(null, user);
+  passport.serializeUser((user: any, cb) => {
+    console.log('🔍 SERIALIZING USER:', user);
+    cb(null, user.id || user);
   });
   
-  passport.deserializeUser((user: Express.User, cb) => {
-    console.log('🔴 Deserializing user:', JSON.stringify(user, null, 2));
-    cb(null, user);
+  passport.deserializeUser(async (id: any, cb) => {
+    console.log('🔍 DESERIALIZING USER ID:', id);
+    try {
+      const user = await storage.getUser(id);
+      console.log('🔍 DESERIALIZED USER:', user);
+      cb(null, user);
+    } catch (error) {
+      console.log('❌ DESERIALIZE ERROR:', error);
+      cb(error, null);
+    }
   });
 
   app.get("/api/login", (req, res, next) => {
@@ -209,8 +216,20 @@ export async function setupAuth(app: Express) {
           return res.redirect("/api/login");
         }
         
-        console.log('🟢 User logged in successfully, redirecting to /');
-        return res.redirect("/");
+        console.log('🔍 AUTH CALLBACK - req.user:', req.user);
+        console.log('🔍 AUTH CALLBACK - req.isAuthenticated():', req.isAuthenticated());
+        console.log('🔍 AUTH CALLBACK - session:', req.session);
+        
+        // Force session save
+        req.session.save((err) => {
+          if (err) {
+            console.log('❌ Session save error:', err);
+            return res.redirect("/api/login");
+          } else {
+            console.log('✅ Session saved successfully');
+          }
+          res.redirect("/");
+        });
       });
     })(req, res, next);
   });

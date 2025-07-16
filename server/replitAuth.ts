@@ -40,8 +40,8 @@ export function getSession() {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production', // Only require HTTPS in production
       maxAge: sessionTtl,
-      sameSite: 'lax', // Add sameSite policy for better cookie handling
-      domain: process.env.NODE_ENV === 'production' ? 'yuthub.com' : undefined, // Allow cookies for all yuthub.com subdomains in production
+      sameSite: 'lax', // Helps with CSRF protection
+      domain: process.env.NODE_ENV === 'production' ? '.yuthub.com' : undefined, // Allow cookies for all yuthub.com subdomains in production
     },
   });
 }
@@ -81,17 +81,26 @@ export async function setupAuth(app: Express) {
     tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
     verified: passport.AuthenticateCallback
   ) => {
-    const claims = tokens.claims();
-    const user = {
-      id: claims.sub,
-      email: claims.email,
-      firstName: claims.first_name,
-      lastName: claims.last_name,
-      profileImageUrl: claims.profile_image_url,
-    };
-    updateUserSession(user, tokens);
-    await upsertUser(claims);
-    verified(null, user);
+    try {
+      const claims = tokens.claims();
+      console.log('🟢 Authentication verify called with claims:', claims);
+      
+      const user = {
+        id: claims.sub,
+        email: claims.email,
+        firstName: claims.first_name,
+        lastName: claims.last_name,
+        profileImageUrl: claims.profile_image_url,
+      };
+      updateUserSession(user, tokens);
+      await upsertUser(claims);
+      
+      console.log('🟢 User object prepared for session:', user);
+      verified(null, user);
+    } catch (error) {
+      console.error('🔴 Authentication verification failed:', error);
+      verified(error, null);
+    }
   };
 
   // Register strategies for both production and development
@@ -126,10 +135,12 @@ export async function setupAuth(app: Express) {
   }
 
   passport.serializeUser((user: Express.User, cb) => {
+    console.log('🔵 Serializing user:', JSON.stringify(user, null, 2));
     cb(null, user);
   });
   
   passport.deserializeUser((user: Express.User, cb) => {
+    console.log('🔴 Deserializing user:', JSON.stringify(user, null, 2));
     cb(null, user);
   });
 
@@ -177,11 +188,30 @@ export async function setupAuth(app: Express) {
       }
     }
     
-    console.log(`Processing callback for domain: ${authDomain}`);
+    console.log(`🟡 Processing callback for domain: ${authDomain}`);
     
-    passport.authenticate(`replitauth:${authDomain}`, {
-      successReturnToOrRedirect: "/",
-      failureRedirect: "/api/login",
+    passport.authenticate(`replitauth:${authDomain}`, (err, user, info) => {
+      if (err) {
+        console.error('🔴 Authentication error:', err);
+        return res.redirect("/api/login");
+      }
+      
+      if (!user) {
+        console.error('🔴 No user returned from authentication');
+        return res.redirect("/api/login");
+      }
+      
+      console.log('🟢 Authentication successful, logging in user:', user);
+      
+      req.logIn(user, (err) => {
+        if (err) {
+          console.error('🔴 Login error:', err);
+          return res.redirect("/api/login");
+        }
+        
+        console.log('🟢 User logged in successfully, redirecting to /');
+        return res.redirect("/");
+      });
     })(req, res, next);
   });
 

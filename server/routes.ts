@@ -116,9 +116,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/files', fileManagementRoutes);
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  app.get('/api/auth/user', async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      // Session debugging - temporary logging
+      console.log('=== AUTH DEBUG ===');
+      console.log('Session ID:', req.sessionID);
+      console.log('User in session:', req.user);
+      console.log('Is authenticated:', req.isAuthenticated());
+      console.log('Session cookies:', req.headers.cookie);
+      console.log('Session store data:', req.session);
+      console.log('==================');
+      
+      // Check if user is authenticated via Passport
+      if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const userId = req.user?.claims?.sub || req.user?.id;
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }

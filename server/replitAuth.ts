@@ -38,7 +38,7 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true, // Enable HTTPS for production
+      secure: process.env.NODE_ENV === 'production', // Only require HTTPS in production
       maxAge: sessionTtl,
       sameSite: 'lax', // Add sameSite policy for better cookie handling
       domain: process.env.NODE_ENV === 'production' ? 'yuthub.com' : undefined, // Allow cookies for all yuthub.com subdomains in production
@@ -81,9 +81,16 @@ export async function setupAuth(app: Express) {
     tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
     verified: passport.AuthenticateCallback
   ) => {
-    const user = {};
+    const claims = tokens.claims();
+    const user = {
+      id: claims.sub,
+      email: claims.email,
+      firstName: claims.first_name,
+      lastName: claims.last_name,
+      profileImageUrl: claims.profile_image_url,
+    };
     updateUserSession(user, tokens);
-    await upsertUser(tokens.claims());
+    await upsertUser(claims);
     verified(null, user);
   };
 
@@ -213,6 +220,10 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   // Token is close to expiry or expired, attempt refresh
   const refreshToken = user.refresh_token;
   if (!refreshToken) {
+    // Clear the session if refresh token is missing
+    req.logout((err) => {
+      if (err) console.error('Logout error:', err);
+    });
     return res.status(401).json({ message: "Unauthorized" });
   }
 
@@ -223,6 +234,10 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return next();
   } catch (error) {
     console.error('Token refresh failed:', error);
+    // Clear the session if refresh fails
+    req.logout((err) => {
+      if (err) console.error('Logout error:', err);
+    });
     return res.status(401).json({ message: "Unauthorized" });
   }
 };

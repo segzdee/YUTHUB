@@ -14,8 +14,11 @@ if (!process.env.REPLIT_DOMAINS) {
 
 const getOidcConfig = memoize(
   async () => {
+    // Use default Replit OIDC issuer if not specified
+    const issuerUrl = process.env.ISSUER_URL ?? "https://replit.com/oidc";
+    console.log(`🔧 Using OIDC issuer: ${issuerUrl}`);
     return await client.discovery(
-      new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
+      new URL(issuerUrl),
       process.env.REPL_ID!
     );
   },
@@ -191,9 +194,10 @@ export async function setupAuth(app: Express) {
       if (process.env.NODE_ENV === 'development') {
         return res.status(500).json({ 
           error: `Authentication not configured for domain: ${authDomain}`,
-          message: "This domain needs to be registered with the OAuth provider. The redirect URI https://" + authDomain + "/api/callback needs to be added to the OAuth configuration.",
+          message: "This domain needs to be registered with the OAuth provider. Please add the callback URL to your OAuth configuration.",
           availableStrategies: Object.keys(passport._strategies),
-          requiredRedirectURI: `https://${authDomain}/api/callback`
+          requiredRedirectURI: `https://${authDomain}/api/callback`,
+          configurationHelp: "Run 'node scripts/configure-oauth.js' for setup instructions"
         });
       }
       

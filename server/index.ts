@@ -1,3 +1,10 @@
+// Load environment variables
+import dotenv from 'dotenv';
+dotenv.config();
+
+// Disable HTTPS for development to fix web server access
+process.env.HTTPS_ENABLED = 'false';
+
 import express, { type Request, Response, NextFunction } from "express";
 import cors from "cors";
 import { registerRoutes } from "./routes";
@@ -138,7 +145,14 @@ app.use((req, res, next) => {
     }
   }
 
-  const server = await registerRoutes(app);
+  // Create HTTPS server if SSL is enabled
+  let server;
+  if (process.env.HTTPS_ENABLED === 'true') {
+    server = createSecureServer(app);
+    await registerRoutes(app, server);
+  } else {
+    server = await registerRoutes(app);
+  }
   
   // Setup WebSocket for real-time updates
   // Initialize WebSocket manager

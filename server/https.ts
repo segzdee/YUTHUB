@@ -93,6 +93,11 @@ export function getServerPort(): { port: number; isSSL: boolean } {
   const isSSLEnabled = process.env.HTTPS_ENABLED === 'true';
   const sslOptions = loadSSLCertificates();
   
+  console.log('🔍 SSL Configuration Debug:');
+  console.log('  HTTPS_ENABLED:', process.env.HTTPS_ENABLED);
+  console.log('  SSL enabled:', isSSLEnabled);
+  console.log('  SSL certificates available:', sslOptions ? 'Yes' : 'No');
+  
   if (isSSLEnabled && sslOptions) {
     return {
       port: parseInt(process.env.SSL_PORT || '443', 10),

@@ -54,7 +54,7 @@ import { enhancedPlatformAdminAuth } from './platformAdminValidation';
 import fileManagementRoutes from './routes/fileManagement';
 import monitoringRoutes from './routes/monitoring';
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export async function registerRoutes(app: Express, server?: Server): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
   await setupMultiAuth(app);
@@ -1560,7 +1560,8 @@ ${sitemapUrls.map(url => `  <url>
     }
   });
 
-  const httpServer = createServer(app);
+  // Return provided server or create new HTTP server
+  const httpServer = server || createServer(app);
   return httpServer;
 }
 

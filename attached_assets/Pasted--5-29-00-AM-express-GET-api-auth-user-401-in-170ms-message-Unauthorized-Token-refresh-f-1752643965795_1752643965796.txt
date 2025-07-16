@@ -1,0 +1,41 @@
+}
+5:29:00 AM [express] GET /api/auth/user 401 in 170ms :: {"message":"Unauthorized"}
+Token refresh failed: ResponseBodyError: server responded with an error in the response body
+    at checkOAuthBodyError (/home/runner/workspace/node_modules/oauth4webapi/src/index.ts:2777:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async processGenericAccessTokenResponse (/home/runner/workspace/node_modules/oauth4webapi/src/index.ts:3453:3)
+    at async Module.refreshTokenGrant (/home/runner/workspace/node_modules/openid-client/src/index.ts:3507:14)
+    at async isAuthenticated (/home/runner/workspace/server/replitAuth.ts:221:27) {
+  cause: {
+    error: 'invalid_grant',
+    error_description: 'grant request is invalid'
+  },
+  code: 'OAUTH_RESPONSE_BODY_ERROR',
+  error: 'invalid_grant',
+  status: 400,
+  error_description: 'grant request is invalid'
+}
+5:29:13 AM [express] GET /api/auth/user 401 in 144ms :: {"message":"Unauthorized"}
+Attempting authentication with domain: 27891fa9-b276-4e4e-a11a-60ce998c53b2-00-2uromwtwyow5n.janeway.replit.dev, available strategies: [
+  'session',
+  'replitauth:27891fa9-b276-4e4e-a11a-60ce998c53b2-00-2uromwtwyow5n.janeway.replit.dev',
+  'replitauth:www.yuthub.com',
+  'replitauth:yuthub.com',
+  'replitauth:localhost',
+  'local'
+]
+express deprecated req.host: Use req.hostname instead file:/home/runner/workspace/node_modules/openid-client/build/passport.js:224:49
+5:29:15 AM [express] GET /api/login 302 in 49ms
+Processing callback for domain: 27891fa9-b276-4e4e-a11a-60ce998c53b2-00-2uromwtwyow5n.janeway.replit.dev
+5:29:19 AM [express] GET /api/callback 302 in 592ms
+5:29:23 AM [express] GET /api/auth/user 200 in 104ms :: {"id":"38954862","email":"segzdeee@gmail.com…
+5:29:23 AM [express] GET /api/invoices 200 in 63ms
+5:29:23 AM [express] GET /api/residents 304 in 88ms :: [{"id":9,"firstName":"Emma","lastName":"Johns…
+5:29:23 AM [express] GET /api/incidents 304 in 159ms :: [{"id":12,"propertyId":null,"residentId":nul…
+5:29:23 AM [express] GET /api/support-plans 304 in 163ms :: [{"id":1,"residentId":9,"keyWorkerId":"s…
+5:29:23 AM [express] GET /api/financial-records 304 in 208ms :: []
+5:29:23 AM [express] GET /api/properties 304 in 214ms :: [{"id":1,"name":"Sunrise House","address":"…
+5:29:23 AM [express] GET /api/maintenance-requests 304 in 69ms :: []
+5:29:23 AM [express] GET /api/activities 304 in 70ms :: [{"id":12,"userId":"38954862","activityType"…
+5:29:23 AM [express] GET /api/dashboard/metrics 304 in 141ms :: {"totalProperties":5,"currentResiden…
+High memory usage: 143.59MB heap used

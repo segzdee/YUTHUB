@@ -41,13 +41,10 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // Only require HTTPS in production
+      secure: false, // Always false for development, will be set to true in production SSL
       maxAge: sessionTtl,
       sameSite: 'lax', // Helps with CSRF protection
-      // Set domain based on environment and host
-      domain: process.env.NODE_ENV === 'production' ? 
-        (process.env.REPLIT_DOMAINS?.includes('yuthub.com') ? '.yuthub.com' : '.replit.app') : 
-        undefined, // Allow cookies for all subdomains in production
+      domain: undefined, // Let browser handle domain automatically
     },
   });
 }

@@ -14,14 +14,18 @@ const app = express();
 // CORS configuration for production and development
 const corsOrigins = process.env.NODE_ENV === 'production' 
   ? [
-      'https://www.yuthub.com',
-      'https://yuthub.com',
-      'https://app.yuthub.com',
-      'https://admin.yuthub.com'
+      'https://yuthub.replit.app',  // Primary Replit domain
+      'https://yuthub.com',         // Custom domain
+      'https://www.yuthub.com',     // Custom domain with www
+      'https://app.yuthub.com',     // App subdomain
+      'https://admin.yuthub.com'    // Admin subdomain
     ]
   : [
       'http://localhost:3000',
       'http://localhost:5000',
+      'https://yuthub.replit.app',  // Allow production domain in development
+      'https://yuthub.com',         // Allow custom domain in development
+      'https://www.yuthub.com',     // Allow www domain in development
       'https://27891fa9-b276-4e4e-a11a-60ce998c53b2-00-2uromwtwyow5n.janeway.replit.dev'
     ];
 

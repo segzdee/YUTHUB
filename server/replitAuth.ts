@@ -41,7 +41,10 @@ export function getSession() {
       secure: process.env.NODE_ENV === 'production', // Only require HTTPS in production
       maxAge: sessionTtl,
       sameSite: 'lax', // Helps with CSRF protection
-      domain: process.env.NODE_ENV === 'production' ? '.yuthub.com' : undefined, // Allow cookies for all yuthub.com subdomains in production
+      // Set domain based on environment and host
+      domain: process.env.NODE_ENV === 'production' ? 
+        (process.env.REPLIT_DOMAINS?.includes('yuthub.com') ? '.yuthub.com' : '.replit.app') : 
+        undefined, // Allow cookies for all subdomains in production
     },
   });
 }
@@ -103,16 +106,21 @@ export async function setupAuth(app: Express) {
     }
   };
 
-  // Register strategies for both production and development
+  // Register strategies for production and development domains
   const domains = process.env.REPLIT_DOMAINS!.split(",");
   
-  // Add production domains for yuthub.com
-  if (!domains.includes('www.yuthub.com')) {
-    domains.push('www.yuthub.com');
-  }
-  if (!domains.includes('yuthub.com')) {
-    domains.push('yuthub.com');
-  }
+  // Add stable production domains
+  const productionDomains = [
+    'yuthub.replit.app',  // Primary Replit domain
+    'yuthub.com',         // Custom domain
+    'www.yuthub.com'      // Custom domain with www
+  ];
+  
+  productionDomains.forEach(domain => {
+    if (!domains.includes(domain)) {
+      domains.push(domain);
+    }
+  });
   
   // Add localhost for development if not already present
   if (process.env.NODE_ENV === 'development' && !domains.includes('localhost')) {

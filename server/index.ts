@@ -23,6 +23,13 @@ import {
   errorHandlingMiddleware, 
   notFoundHandler 
 } from "./middleware/errorHandling";
+import { 
+  createSecureServer, 
+  setupSSLRedirect, 
+  setupSecurityHeaders, 
+  getServerPort, 
+  validateSSLCertificate 
+} from "./https";
 
 const app = express();
 
@@ -79,6 +86,10 @@ app.use('/api/metrics', cacheMiddleware({ maxSize: 100, ttl: 30 * 1000 })); // 3
 // Add query optimization hints
 app.use('/api', queryOptimizationMiddleware);
 
+// Setup SSL redirect and security headers
+setupSSLRedirect(app);
+setupSecurityHeaders(app);
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -117,6 +128,16 @@ app.use((req, res, next) => {
   const lifecycleManager = ComputeLifecycleManager.getInstance();
   lifecycleManager.setupSignalHandlers();
   
+  // Validate SSL certificate if configured
+  if (process.env.HTTPS_ENABLED === 'true') {
+    console.log('🔍 Validating SSL certificate...');
+    if (validateSSLCertificate()) {
+      console.log('✅ SSL certificate validation passed');
+    } else {
+      console.log('⚠️  SSL certificate validation failed, falling back to HTTP');
+    }
+  }
+
   const server = await registerRoutes(app);
   
   // Setup WebSocket for real-time updates
@@ -150,15 +171,19 @@ app.use((req, res, next) => {
   app.use(errorHandlingMiddleware);
   app.use(notFoundHandler);
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
+  // Get server configuration (SSL or HTTP)
+  const { port, isSSL } = getServerPort();
+  
+  // For Replit, always use port 5000 regardless of SSL configuration
+  const finalPort = 5000;
+  
+  console.log(`🌐 Server configuration: ${isSSL ? 'HTTPS' : 'HTTP'} on port ${finalPort}`);
+  
   server.listen({
-    port,
+    port: finalPort,
     host: "0.0.0.0",
     reusePort: true,
   }, () => {
-    log(`serving on port ${port}`);
+    log(`serving on port ${finalPort} (${isSSL ? 'HTTPS' : 'HTTP'} mode)`);
   });
 })();

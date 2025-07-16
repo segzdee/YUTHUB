@@ -178,6 +178,17 @@ export async function setupAuth(app: Express) {
     // Check if strategy exists
     if (!passport._strategies[`replitauth:${authDomain}`]) {
       console.error(`No authentication strategy found for domain: ${authDomain}`);
+      
+      // For development, provide helpful error with instructions
+      if (process.env.NODE_ENV === 'development') {
+        return res.status(500).json({ 
+          error: `Authentication not configured for domain: ${authDomain}`,
+          message: "This domain needs to be registered with the OAuth provider. The redirect URI https://" + authDomain + "/api/callback needs to be added to the OAuth configuration.",
+          availableStrategies: Object.keys(passport._strategies),
+          requiredRedirectURI: `https://${authDomain}/api/callback`
+        });
+      }
+      
       return res.status(500).json({ error: `Authentication not configured for domain: ${authDomain}` });
     }
     

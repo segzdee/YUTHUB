@@ -1,0 +1,166 @@
+# YutHub Housing Management Platform - Cursor IDE Rules
+
+## Project Context
+You are working on YutHub (yuthub.com), a comprehensive housing management platform for UK councils and housing associations. This is a multi-tenant SaaS platform with organization isolation and subscription-based access control.
+
+## Technology Stack
+- Frontend: React 18+ with TypeScript, Tailwind CSS
+- Backend: Express.js with Node.js, TypeScript  
+- Database: PostgreSQL with Neon hosting, Row Level Security
+- Real-time: Socket.io for live updates
+- Authentication: JWT tokens with session management
+- Storage: Secure cloud storage with validation
+
+## Architecture Principles
+- Multi-tenant with organization isolation using RLS policies
+- Role-based access control (staff, admin, platform-admin)
+- Mobile-first responsive design starting from 320px
+- GDPR compliance with comprehensive audit logging
+- Security-first approach with input validation and sanitization
+
+## Core Modules
+1. **Dashboard** - Real-time KPI widgets and cross-module navigation
+2. **Housing Management** - Property and tenant lifecycle management  
+3. **Support Services** - Case management and service coordination
+4. **Independence Pathway** - Goal tracking and skill development
+5. **Analytics & Outcomes** - Reporting and data visualization
+6. **Safeguarding** - Risk assessment and incident reporting
+7. **Crisis Connect** - 24/7 emergency response system
+8. **Financials** - Budget tracking and expense management
+9. **Government Billing** - Automated invoicing and compliance
+10. **Forms** - Dynamic form builder with validation
+11. **Reports** - Scheduled generation and exports
+12. **Settings** - User permissions and system configuration
+
+## Platform Admin (Separate Interface)
+- Routes: /platform-admin/* with enhanced security (MFA, IP whitelisting)
+- Subscription management for three tiers:
+  - Starter: £169/month (25 residents max)
+  - Professional: £429/month (100 residents max)
+  - Enterprise: £1099/month (unlimited residents)
+- System monitoring, organization management, billing oversight
+- Feature flags and emergency tools
+- Data aggregation from all organization dashboards
+
+## Key Requirements
+
+### Security & Compliance
+- All database tables include organization_id for isolation
+- Comprehensive audit logging for all data changes
+- GDPR compliance with data protection measures
+- Multi-factor authentication support
+- Secure file uploads with validation
+- Rate limiting and CORS protection
+
+### Mobile & Accessibility  
+- Mobile-first responsive design with 44px minimum touch targets
+- WCAG 2.1 AA accessibility compliance
+- Offline capabilities for field workers
+- Progressive Web App features
+- Screen reader compatibility
+
+### Emergency Features
+- Crisis Line: 0800 123 4567 (24/7 available)
+- Technical Support: +44 161 123 4568
+- Real-time WebSocket alerts for emergencies
+- Emergency contact prominence in UI
+- Crisis response workflow automation
+
+## Code Standards
+
+### Component Pattern
+```typescript
+interface Props {
+  organizationId: number;
+  // Other props with explicit types
+}
+
+const Component: React.FC<Props> = ({ organizationId }) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Always include loading and error states
+  if (loading) return <LoadingSpinner />;
+  if (error) return <ErrorMessage message={error} />;
+  
+  return (
+    <div className="p-4 md:p-6">
+      {/* Mobile-first responsive layout */}
+    </div>
+  );
+};
+```
+
+### API Response Format
+```typescript
+interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  meta?: {
+    pagination?: PaginationInfo;
+    timestamp: string;
+    organizationId: number;
+  };
+}
+```
+
+### Database Table Requirements
+- Always include: id, organization_id, created_at, updated_at
+- Enable Row Level Security with organization isolation policies
+- Add proper indexes on frequently queried columns
+- Include audit triggers for change tracking
+
+## File Naming
+- Components: PascalCase (ResidentCard.tsx)
+- Hooks: camelCase with 'use' prefix (useResidents.ts)
+- Utils: camelCase (formatCurrency.ts)
+- API routes: kebab-case (/api/support-plans)
+- Database tables: snake_case (support_plans)
+
+## Error Handling
+- Always wrap async operations in try-catch blocks
+- Provide user-friendly error messages, never expose technical details
+- Include proper error logging with context
+- Implement error boundaries for React components
+- Handle network failures gracefully with retry logic
+
+## Performance
+- Use React.lazy() for code splitting on route level
+- Implement proper loading states and skeleton screens
+- Optimize database queries with appropriate indexes
+- Use WebSocket connections efficiently without duplicate connections
+- Compress and optimize images for mobile
+
+## Branding & UI
+- Company: YutHub Solutions Ltd.
+- Professional blue/navy color scheme
+- Emergency contacts prominently displayed
+- Consistent spacing using Tailwind's spacing scale
+- Accessible color contrast ratios
+- Professional typography hierarchy
+
+## Testing Requirements
+- Unit tests for utility functions and hooks
+- Component testing with React Testing Library
+- API endpoint testing with proper mocking
+- Integration testing for critical user workflows
+- Accessibility testing with screen readers
+
+## Common Patterns to Follow
+- Always validate props with TypeScript interfaces
+- Include loading and error states in all components
+- Use proper semantic HTML for accessibility
+- Implement proper form validation with real-time feedback
+- Include audit logging for all data modifications
+- Handle organization context in all database operations
+- Use proper error boundaries and fallback UI
+
+## Patterns to Avoid
+- Never expose sensitive data in error messages
+- Don't create duplicate files or simplified versions
+- Avoid hardcoded values, use environment variables
+- Don't bypass organization isolation in database queries
+- Never skip accessibility attributes
+- Avoid inline styles, use Tailwind classes
+- Don't create components without proper TypeScript types

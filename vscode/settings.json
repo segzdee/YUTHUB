@@ -1,0 +1,69 @@
+{
+  "github.copilot.chat.codeGeneration.instructions": [
+    {
+      "text": "You are working on YutHub (yuthub.com), a comprehensive housing management platform for UK councils and housing associations. Tech stack: React + TypeScript, Express.js backend, PostgreSQL with Neon, Tailwind CSS, Socket.io for real-time features. Always implement mobile-first responsive design.",
+      "file": "**/*"
+    },
+    {
+      "text": "Architecture: Multi-tenant SaaS with organization isolation using Row Level Security policies. Role-based access control (staff, admin, platform-admin). Platform admin has separate interface at /platform-admin/* with enhanced security. Include comprehensive error handling with user-friendly messages.",
+      "file": "**/*"
+    },
+    {
+      "text": "Frontend components: Use consistent YutHub branding, implement loading states and error boundaries, ensure WCAG 2.1 AA accessibility compliance, validate forms with real-time feedback using react-hook-form + zod. Components should be reusable and follow mobile-first design.",
+      "file": "client/**/*.tsx,client/**/*.jsx,client/**/*.ts,client/**/*.js"
+    },
+    {
+      "text": "Backend API: Follow RESTful design with consistent JSON responses. Implement JWT authentication with session management, input validation and sanitization, rate limiting, comprehensive audit logging for all actions. Ensure GDPR compliance and proper CORS configuration.",
+      "file": "server/**/*"
+    },
+    {
+      "text": "Shared code: Ensure type definitions and utilities work across both client and server. Include proper TypeScript interfaces for API responses, database models, and shared business logic.",
+      "file": "shared/**/*"
+    },
+    {
+      "text": "Database: Use PostgreSQL with proper indexes, foreign key constraints, timestamps (created_at, updated_at), and RLS policies for multi-tenancy. All tables should include organization_id for isolation. Include audit trails for data changes.",
+      "file": "server/**/*.sql,server/**/migrations/**/*,server/**/database/**/*"
+    },
+    {
+      "text": "Core modules: Dashboard (KPI widgets), Housing Management (properties/residents), Support Services (case management), Independence Pathway (goal tracking), Analytics & Outcomes (reporting), Safeguarding (risk assessment), Crisis Connect (24/7 emergency), Financials (budget tracking), Government Billing (automated invoicing), Forms (dynamic builder), Reports (scheduled), Settings (permissions), Help & Support.",
+      "file": "**/*"
+    },
+    {
+      "text": "Platform admin features (separate from organization admin): Subscription management (Starter £169/mo for 25 residents, Professional £429/mo for 100 residents, Enterprise £1099/mo unlimited), system monitoring, organization management, billing oversight, feature flags, emergency tools. Routes use /platform-admin/* with enhanced security.",
+      "file": "client/**/platform-admin/**/*,server/**/platform-admin/**/*,client/**/admin/**/*,server/**/admin/**/*"
+    },
+    {
+      "text": "Security & Compliance: GDPR compliance, multi-factor authentication support, comprehensive audit trails, secure file upload with validation, encrypted data storage. Emergency contacts: Crisis Line 0800 123 4567 (24/7), Technical Support +44 161 123 4568.",
+      "file": "**/*"
+    },
+    {
+      "text": "UI/UX: Professional design with emergency contact prominence, mobile-optimized for field workers, offline capabilities for critical functions, consistent color scheme (professional blue/navy theme), accessibility compliance. Company: YutHub Solutions Ltd.",
+      "file": "client/**/*.tsx,client/**/*.jsx,client/**/*.css,client/**/*.scss"
+    },
+    {
+      "text": "WebSocket integration for real-time updates, proper connection management, crisis alerts, maintenance notifications. File structure: components in PascalCase, hooks with 'use' prefix, utils in camelCase, API routes in kebab-case, database tables in snake_case.",
+      "file": "**/*"
+    }
+  ],
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true,
+    "source.organizeImports": true
+  },
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "emmet.includeLanguages": {
+    "typescript": "html",
+    "typescriptreact": "html"
+  },
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "tailwindCSS.includeLanguages": {
+    "typescript": "javascript",
+    "typescriptreact": "javascript"
+  },
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+  ]
+}

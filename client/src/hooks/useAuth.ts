@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // Global auth state cache to prevent multiple simultaneous requests
 let authCache: {
@@ -10,9 +10,30 @@ let authCache: {
 
 const CACHE_DURATION = 30000; // 30 seconds cache
 
-export function useAuth() {
-  const [authStatus, setAuthStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading');
-  const [user, setUser] = useState(null);
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  maxResidents?: number;
+  subscriptionTier?: string;
+  subscriptionStatus?: string;
+  subscriptionStartDate?: string;
+  subscriptionEndDate?: string;
+}
+
+interface AuthState {
+  user: User | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+}
+
+export function useAuth(): AuthState {
+  const [authState, setAuthState] = useState<AuthState>({
+    user: null,
+    isLoading: true,
+    isAuthenticated: false,
+  });
   const mounted = useRef(true);
 
   useEffect(() => {
@@ -24,8 +45,11 @@ export function useAuth() {
         // Check if we have valid cached data
         if (authCache && (Date.now() - authCache.timestamp) < CACHE_DURATION) {
           if (mounted.current) {
-            setUser(authCache.user);
-            setAuthStatus(authCache.status);
+            setAuthState({
+              user: authCache.user,
+              isLoading: false,
+              isAuthenticated: authCache.status === 'authenticated',
+            });
           }
           return;
         }
@@ -34,8 +58,11 @@ export function useAuth() {
         if (authCache?.promise) {
           await authCache.promise;
           if (mounted.current && authCache) {
-            setUser(authCache.user);
-            setAuthStatus(authCache.status);
+            setAuthState({
+              user: authCache.user,
+              isLoading: false,
+              isAuthenticated: authCache.status === 'authenticated',
+            });
           }
           return;
         }
@@ -63,8 +90,11 @@ export function useAuth() {
             timestamp: Date.now(),
           };
           if (mounted.current) {
-            setUser(userData);
-            setAuthStatus('authenticated');
+            setAuthState({
+              user: userData,
+              isLoading: false,
+              isAuthenticated: true,
+            });
           }
         } else {
           authCache = {
@@ -73,8 +103,11 @@ export function useAuth() {
             timestamp: Date.now(),
           };
           if (mounted.current) {
-            setUser(null);
-            setAuthStatus('unauthenticated');
+            setAuthState({
+              user: null,
+              isLoading: false,
+              isAuthenticated: false,
+            });
           }
         }
       } catch (error) {
@@ -91,16 +124,19 @@ export function useAuth() {
           timestamp: Date.now(),
         };
         if (mounted.current) {
-          setUser(null);
-          setAuthStatus('unauthenticated');
+          setAuthState({
+            user: null,
+            isLoading: false,
+            isAuthenticated: false,
+          });
         }
       }
     };
 
     // Set a timeout to prevent infinite loading
     timeoutId = setTimeout(() => {
-      if (mounted.current && authStatus === 'loading') {
-        setAuthStatus('unauthenticated');
+      if (mounted.current && authState.isLoading) {
+        setAuthState((prev) => ({ ...prev, isLoading: false }));
       }
     }, 3000); // 3 seconds timeout
 
@@ -112,9 +148,5 @@ export function useAuth() {
     };
   }, []);
 
-  return {
-    user,
-    isLoading: authStatus === 'loading',
-    isAuthenticated: authStatus === 'authenticated',
-  };
+  return authState;
 }

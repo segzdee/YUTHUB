@@ -1,30 +1,25 @@
-import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  LineChart,
-  Line
-} from 'recharts';
-import { 
-  Users, 
-  Building2, 
-  TrendingUp, 
-  MapPin,
-  Crown,
-  Calendar,
-  DollarSign
+import {
+    Calendar,
+    Crown,
+    MapPin,
+    TrendingUp
 } from 'lucide-react';
+import { useMemo } from 'react';
+import {
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Cell,
+    Line,
+    LineChart,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis
+} from 'recharts';
 
 interface GovernmentClient {
   id: number;

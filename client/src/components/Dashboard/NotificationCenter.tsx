@@ -198,6 +198,11 @@ export default function NotificationCenter({ isOpen, onClose }: NotificationCent
     setNotifications(prev => prev.map(notif => ({ ...notif, read: true })));
   };
 
+  const handleNavigation = (url: string) => {
+    onClose();
+    window.location.href = url;
+  };
+
   const unreadCount = notifications.filter(n => !n.read).length;
 
   if (!isOpen) return null;

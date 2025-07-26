@@ -118,29 +118,38 @@ export const queryClient = new QueryClient({
 
 // API request helper with proper error handling
 export async function apiRequest(
-  endpoint: string, 
+  endpoint: string | RequestInfo, 
   options: RequestInit = {}
 ): Promise<any> {
-  const baseUrl = process.env.NODE_ENV === 'production' 
-    ? window.location.origin 
-    : 'http://localhost:3000';
+  let url: string;
+  let requestOptions: RequestInit;
 
-  const url = endpoint.startsWith('http') ? endpoint : `${baseUrl}${endpoint}`;
-
-  const defaultOptions: RequestInit = {
-    headers: {
-      'Content-Type': 'application/json',
-      // Add auth token if available
-      ...(localStorage.getItem('auth-token') && {
-        'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
-      }),
-      ...options.headers,
-    },
-    ...options,
-  };
+  // Handle different call patterns
+  if (typeof endpoint === 'string') {
+    // Pattern: apiRequest('/api/endpoint', options)
+    const baseUrl = process.env.NODE_ENV === 'production' 
+      ? window.location.origin 
+      : 'http://localhost:3000';
+    
+    url = endpoint.startsWith('http') ? endpoint : `${baseUrl}${endpoint}`;
+    requestOptions = {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(localStorage.getItem('auth-token') && {
+          'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
+        }),
+        ...options.headers,
+      },
+      ...options,
+    };
+  } else {
+    // Pattern: apiRequest('POST', '/api/endpoint', data) - legacy support
+    url = endpoint as string;
+    requestOptions = options;
+  }
 
   try {
-    const response = await fetch(url, defaultOptions);
+    const response = await fetch(url, requestOptions);
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -158,7 +167,7 @@ export async function apiRequest(
     
     // Return mock data for development when API is not available
     if (process.env.NODE_ENV === 'development') {
-      return getMockData(endpoint);
+      return getMockData(typeof endpoint === 'string' ? endpoint : url);
     }
     
     throw error;
@@ -169,6 +178,7 @@ export async function apiRequest(
 function getMockData(endpoint: string): any {
   const mockResponses: Record<string, any> = {
     '/api/residents': [],
+    '/api/residents/at-risk': [],
     '/api/properties': [],
     '/api/incidents': [],
     '/api/support-plans': [],
@@ -189,6 +199,20 @@ function getMockData(endpoint: string): any {
     },
     '/api/security/sessions': [],
     '/api/audit-logs': [],
+    '/api/security/metrics': {
+      totalLogins: 156,
+      failedLogins: 3,
+      mfaEnabled: 12,
+      activeSessions: 15,
+      highRiskEvents: 1,
+      lastIncident: '2 days ago',
+      passwordStrength: 85,
+      accountLockouts: 0,
+    },
+    '/api/security/events': [],
+    '/api/security/alerts': [],
+    '/api/maintenance-requests': [],
+    '/auth/methods': [],
   };
 
   return mockResponses[endpoint] || [];

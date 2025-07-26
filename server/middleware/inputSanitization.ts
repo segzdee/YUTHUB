@@ -1,17 +1,17 @@
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
+import DOMPurify from 'isomorphic-dompurify';
 import { z } from 'zod';
 
 // HTML/XSS sanitization
 export const sanitizeHtml = (input: string): string => {
   if (typeof input !== 'string') return input;
   
-  return input
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;')
-    .replace(/\//g, '&#x2F;');
+  // Use DOMPurify for comprehensive XSS protection
+  return DOMPurify.sanitize(input, {
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'b', 'i'],
+    ALLOWED_ATTR: [],
+    KEEP_CONTENT: true,
+  });
 };
 
 // SQL injection prevention (basic - Drizzle ORM provides better protection)
@@ -33,6 +33,41 @@ export const sanitizePath = (input: string): string => {
     .replace(/\.\./g, '')
     .replace(/[\/\\:*?"<>|]/g, '')
     .replace(/\0/g, '');
+};
+
+// Email sanitization
+export const sanitizeEmail = (input: string): string => {
+  if (typeof input !== 'string') return input;
+  
+  return input
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w@.-]/g, '');
+};
+
+// Phone number sanitization
+export const sanitizePhone = (input: string): string => {
+  if (typeof input !== 'string') return input;
+  
+  return input
+    .replace(/[^\d+\-\s()]/g, '')
+    .trim();
+};
+
+// URL sanitization
+export const sanitizeUrl = (input: string): string => {
+  if (typeof input !== 'string') return input;
+  
+  try {
+    const url = new URL(input);
+    // Only allow http and https protocols
+    if (!['http:', 'https:'].includes(url.protocol)) {
+      return '';
+    }
+    return url.toString();
+  } catch {
+    return '';
+  }
 };
 
 // General input sanitization middleware
@@ -176,4 +211,99 @@ export const sanitizeFileUpload = (req: Request, res: Response, next: NextFuncti
   } else {
     next();
   }
+};
+
+// CSRF protection middleware
+export const csrfProtection = (req: Request, res: Response, next: NextFunction): void => {
+  // Skip CSRF for GET, HEAD, OPTIONS
+  if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
+    return next();
+  }
+
+  const token = req.headers['x-csrf-token'] || req.body._csrf;
+  const sessionToken = req.session?.csrfToken;
+
+  if (!token || !sessionToken || token !== sessionToken) {
+    return res.status(403).json({
+      error: 'CSRF token validation failed',
+      message: 'Invalid or missing CSRF token',
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  next();
+};
+
+// Content type validation
+export const validateContentType = (allowedTypes: string[]) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const contentType = req.get('Content-Type');
+    
+    if (!contentType || !allowedTypes.some(type => contentType.includes(type))) {
+      return res.status(415).json({
+        error: 'Unsupported Media Type',
+        message: `Content-Type must be one of: ${allowedTypes.join(', ')}`,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    next();
+  };
+};
+
+// Request size limiter
+export const limitRequestSize = (maxSize: number) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const contentLength = req.get('Content-Length');
+    
+    if (contentLength && parseInt(contentLength) > maxSize) {
+      return res.status(413).json({
+        error: 'Payload Too Large',
+        message: `Request size exceeds ${maxSize} bytes`,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    next();
+  };
+};
+
+// Header sanitization
+export const sanitizeHeaders = (req: Request, res: Response, next: NextFunction): void => {
+  // Remove potentially dangerous headers
+  const dangerousHeaders = [
+    'x-forwarded-host',
+    'x-real-ip',
+    'x-forwarded-proto'
+  ];
+  
+  dangerousHeaders.forEach(header => {
+    if (req.headers[header]) {
+      delete req.headers[header];
+    }
+  });
+  
+  // Sanitize user-agent
+  if (req.headers['user-agent']) {
+    req.headers['user-agent'] = sanitizeHtml(req.headers['user-agent'] as string);
+  }
+  
+  next();
+};
+
+// Export all sanitization middleware
+export const inputSanitization = {
+  sanitizeInput,
+  validateInput,
+  sanitizeFileUpload,
+  csrfProtection,
+  validateContentType,
+  limitRequestSize,
+  sanitizeHeaders,
+  sanitizeHtml,
+  sanitizeSql,
+  sanitizePath,
+  sanitizeEmail,
+  sanitizePhone,
+  sanitizeUrl,
 };

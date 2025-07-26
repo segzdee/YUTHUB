@@ -1,3 +1,5 @@
+import React from 'react';
+import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +15,7 @@ interface PageLoaderProps {
   tabCount?: number;
   cardCount?: number;
   showMetrics?: boolean;
+  message?: string;
 }
 
 export default function PageLoader({
@@ -22,6 +25,7 @@ export default function PageLoader({
   tabCount = 3,
   cardCount = 4,
   showMetrics = false,
+  message = 'Loading...',
 }: PageLoaderProps) {
   return (
     <div className="space-y-6">
@@ -113,6 +117,31 @@ export default function PageLoader({
           ))}
         </div>
       )}
+
+      {/* Loader */}
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600" />
+          <p className="mt-4 text-gray-600">{message}</p>
+        </div>
+      </div>
     </div>
+  );
+}
+
+export function ComponentLoader({ message = 'Loading...' }: PageLoaderProps) {
+  return (
+    <div className="flex items-center justify-center p-8">
+      <div className="text-center">
+        <Loader2 className="h-6 w-6 animate-spin mx-auto text-blue-600" />
+        <p className="mt-2 text-sm text-gray-600">{message}</p>
+      </div>
+    </div>
+  );
+}
+
+export function InlineLoader() {
+  return (
+    <Loader2 className="h-4 w-4 animate-spin" />
   );
 }

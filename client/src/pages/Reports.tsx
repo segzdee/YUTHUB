@@ -1,35 +1,19 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import Sidebar from "@/components/Layout/Sidebar";
 import Header from "@/components/Layout/Header";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import Sidebar from "@/components/Layout/Sidebar";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format } from "date-fns";
-import { apiRequest } from "@/lib/queryClient";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  FileText, 
-  Download, 
-  Calendar as CalendarIcon, 
-  Filter, 
-  Plus, 
-  BarChart3, 
-  Users, 
-  Building, 
-  AlertTriangle,
-  TrendingUp,
-  DollarSign,
-  FileCheck,
-  Clock
-} from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import { cn } from "@/lib/utils";
 import type { Property } from "@shared/schema";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { AlertTriangle, Building, CalendarIcon, DollarSign, Download, FileText, TrendingUp, Users } from "lucide-react";
+import { useState } from "react";
 
 export default function Reports() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -118,7 +102,7 @@ export default function Reports() {
       id: "compliance",
       title: "Compliance Report",
       description: "Regulatory compliance and audit trail",
-      icon: FileCheck,
+      icon: FileText,
       category: "compliance",
       frequency: "Quarterly",
       estimatedTime: "15 minutes",
@@ -201,7 +185,7 @@ export default function Reports() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Completed": return "bg-green-100 text-green-800";
-      case "Generating": return "bg-yellow-100 text-yellow-800";
+      case "Processing": return "bg-yellow-100 text-yellow-800";
       case "Failed": return "bg-red-100 text-red-800";
       default: return "bg-gray-100 text-gray-800";
     }
@@ -214,16 +198,16 @@ export default function Reports() {
         type: reportId,
         dateRange: selectedDateRange,
         propertyId: selectedProperty !== "all" ? selectedProperty : undefined,
+        filters: { reportType }
       });
     } finally {
       setIsGenerating(false);
     }
   };
 
-  const filteredTemplates = reportTemplates.filter(template => {
-    if (reportType === "all") return true;
-    return template.category === reportType;
-  });
+  const filteredTemplates = reportTemplates.filter(template => 
+    reportType === "all" || template.category === reportType
+  );
 
   return (
     <div className="flex h-screen bg-background">
@@ -236,233 +220,153 @@ export default function Reports() {
           <div className="mb-6 sm:mb-8">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Reports</h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Generate comprehensive reports and analytics for your organization
+              Generate comprehensive reports for housing, financial, and outcome tracking
             </p>
           </div>
 
-          <Tabs defaultValue="generate" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="generate">Generate Reports</TabsTrigger>
-              <TabsTrigger value="scheduled">Scheduled</TabsTrigger>
-              <TabsTrigger value="recent">Recent</TabsTrigger>
-            </TabsList>
+          {/* Report Configuration */}
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Report Configuration</CardTitle>
+              <CardDescription>Configure date range and filters for your reports</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Date Range</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !selectedDateRange && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {selectedDateRange?.from ? (
+                          selectedDateRange.to ? (
+                            <>
+                              {format(selectedDateRange.from, "LLL dd, y")} -{" "}
+                              {format(selectedDateRange.to, "LLL dd, y")}
+                            </>
+                          ) : (
+                            format(selectedDateRange.from, "LLL dd, y")
+                          )
+                        ) : (
+                          <span>Pick a date range</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        initialFocus
+                        mode="range"
+                        defaultMonth={selectedDateRange?.from}
+                        selected={selectedDateRange}
+                        onSelect={(range) => {
+                          if (range?.from && range?.to) {
+                            setSelectedDateRange({ from: range.from, to: range.to });
+                          }
+                        }}
+                        numberOfMonths={2}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
 
-            <TabsContent value="generate" className="space-y-6">
-              {/* Filters */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Filter className="h-5 w-5" />
-                    Report Filters
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">Date Range</label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className="w-full justify-start">
-                            <CalendarIcon className="h-4 w-4 mr-2" />
-                            {selectedDateRange.from && selectedDateRange.to ? (
-                              `${format(selectedDateRange.from, "PPP")} - ${format(selectedDateRange.to, "PPP")}`
-                            ) : (
-                              "Select date range"
-                            )}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            initialFocus
-                            mode="range"
-                            defaultMonth={selectedDateRange.from}
-                            selected={selectedDateRange}
-                            onSelect={(range) => {
-                              if (range?.from && range?.to) {
-                                setSelectedDateRange({ from: range.from, to: range.to });
-                              }
-                            }}
-                            numberOfMonths={2}
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
+                <div>
+                  <label className="text-sm font-medium">Property</label>
+                  <Select value={selectedProperty} onValueChange={setSelectedProperty}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select property" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Properties</SelectItem>
+                      {properties.map((property) => (
+                        <SelectItem key={property.id} value={property.id.toString()}>
+                          {property.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">Property</label>
-                      <Select value={selectedProperty} onValueChange={setSelectedProperty}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select property" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Properties</SelectItem>
-                          {properties.map((property) => (
-                            <SelectItem key={property.id} value={property.id.toString()}>
-                              {property.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                <div>
+                  <label className="text-sm font-medium">Category</label>
+                  <Select value={reportType} onValueChange={setReportType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Categories</SelectItem>
+                      <SelectItem value="housing">Housing</SelectItem>
+                      <SelectItem value="financial">Financial</SelectItem>
+                      <SelectItem value="safeguarding">Safeguarding</SelectItem>
+                      <SelectItem value="outcomes">Outcomes</SelectItem>
+                      <SelectItem value="compliance">Compliance</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">Category</label>
-                      <Select value={reportType} onValueChange={setReportType}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Categories</SelectItem>
-                          <SelectItem value="housing">Housing</SelectItem>
-                          <SelectItem value="financial">Financial</SelectItem>
-                          <SelectItem value="safeguarding">Safeguarding</SelectItem>
-                          <SelectItem value="outcomes">Outcomes</SelectItem>
-                          <SelectItem value="compliance">Compliance</SelectItem>
-                          <SelectItem value="maintenance">Maintenance</SelectItem>
-                          <SelectItem value="staff">Staff</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Report Templates */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredTemplates.map((template) => {
-                  const Icon = template.icon;
-                  
-                  return (
-                    <Card key={template.id} className="hover:shadow-md transition-shadow">
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-primary/10 rounded-lg">
-                              <Icon className="h-5 w-5 text-primary" />
-                            </div>
-                            <div>
-                              <CardTitle className="text-lg">{template.title}</CardTitle>
-                              <CardDescription>{template.description}</CardDescription>
-                            </div>
-                          </div>
-                          <Badge className={getCategoryColor(template.category)}>
-                            {template.category}
-                          </Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-3">
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                              <span className="text-gray-600 dark:text-gray-400">Frequency</span>
-                              <div className="font-medium">{template.frequency}</div>
-                            </div>
-                            <div>
-                              <span className="text-gray-600 dark:text-gray-400">Est. Time</span>
-                              <div className="font-medium">{template.estimatedTime}</div>
-                            </div>
-                          </div>
-                          <Button 
-                            className="w-full" 
-                            onClick={() => handleGenerateReport(template.id)}
-                            disabled={isGenerating}
-                          >
-                            {isGenerating ? (
-                              <>
-                                <Clock className="h-4 w-4 mr-2 animate-spin" />
-                                Generating...
-                              </>
-                            ) : (
-                              <>
-                                <BarChart3 className="h-4 w-4 mr-2" />
-                                Generate Report
-                              </>
-                            )}
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
+                <div className="flex items-end">
+                  <Button className="w-full">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export All
+                  </Button>
+                </div>
               </div>
-            </TabsContent>
+            </CardContent>
+          </Card>
 
-            <TabsContent value="scheduled" className="space-y-6">
-              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Scheduled Reports</h2>
-                <Button className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
-                  Schedule Report
-                </Button>
-              </div>
-
-              <Card>
-                <CardContent className="flex items-center justify-center py-8">
-                  <div className="text-center">
-                    <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">No scheduled reports</p>
-                    <p className="text-sm text-gray-400 mt-1">Schedule reports to run automatically</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="recent" className="space-y-6">
-              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Reports</h2>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Download className="h-4 w-4" />
-                  Export All
-                </Button>
-              </div>
-
-              <div className="space-y-4">
-                {recentReports.map((report) => (
-                  <Card key={report.id} className="hover:shadow-md transition-shadow">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-primary/10 rounded-lg">
-                            <FileText className="h-5 w-5 text-primary" />
-                          </div>
-                          <div>
-                            <CardTitle className="text-lg">{report.title}</CardTitle>
-                            <CardDescription className="flex items-center gap-2">
-                              <span>{report.type}</span>
-                              <span>•</span>
-                              <span>{report.generatedAt}</span>
-                              <span>•</span>
-                              <span>{report.generatedBy}</span>
-                            </CardDescription>
-                          </div>
+          {/* Report Templates */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredTemplates.map((template) => {
+              const Icon = template.icon;
+              return (
+                <Card key={template.id} className="hover:shadow-md transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                          <Icon className="h-5 w-5 text-primary" />
                         </div>
-                        <Badge className={getStatusColor(report.status)}>
-                          {report.status}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                          <span>Size: {report.size}</span>
-                          <span>Format: {report.format}</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button size="sm" variant="outline">
-                            <Download className="h-3 w-3 mr-1" />
-                            Download
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            Share
-                          </Button>
+                        <div>
+                          <CardTitle className="text-lg">{template.title}</CardTitle>
+                          <CardDescription>{template.description}</CardDescription>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-          </Tabs>
+                      <Badge className={getCategoryColor(template.category)}>
+                        {template.category}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-600 dark:text-gray-400">Frequency</span>
+                          <div className="font-medium">{template.frequency}</div>
+                        </div>
+                        <div>
+                          <span className="text-gray-600 dark:text-gray-400">Est. Time</span>
+                          <div className="font-medium">{template.estimatedTime}</div>
+                        </div>
+                      </div>
+                      <Button 
+                        onClick={() => handleGenerateReport(template.id)}
+                        disabled={isGenerating}
+                        className="w-full"
+                      >
+                        <Download className="h-3 w-3 mr-1" />
+                        {isGenerating ? 'Generating...' : 'Generate Report'}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
         </main>
       </div>
     </div>

@@ -1,19 +1,15 @@
-import { Request, Response } from 'express';
-import { db } from './db';
-import { 
-  users, 
-  organizations, 
-  organizationSubscriptions, 
-  properties, 
-  residents, 
-  incidents, 
-  supportPlans, 
-  financialRecords, 
+import { and, count, eq, gte, lte, sql } from 'drizzle-orm';
+import {
+  incidents,
   maintenanceRequests,
-  activities,
-  auditLogs 
+  organizations,
+  organizationSubscriptions,
+  properties,
+  residents,
+  supportPlans,
+  users
 } from '../shared/schema';
-import { eq, desc, count, sql, sum, avg, gte, lte, and, or } from 'drizzle-orm';
+import { db } from './db';
 
 // Platform-wide data aggregation service
 export class PlatformDataAggregator {

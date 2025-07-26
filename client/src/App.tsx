@@ -1,88 +1,88 @@
-import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { useAuth } from "@/hooks/useAuth";
-import { ThemeProvider } from "@/components/providers/ThemeProvider";
-import { AccessibilityProvider } from "@/components/providers/AccessibilityProvider";
-import { LanguageProvider } from "@/components/providers/LanguageProvider";
-import { ErrorBoundary } from "@/components/design-system/ErrorHandling";
-import { LoadingWrapper } from "@/components/design-system/LoadingStates";
-import Dashboard from "@/pages/Dashboard";
-import Landing from "@/pages/Landing";
-import Pricing from "@/pages/Pricing";
-import Subscribe from "@/pages/Subscribe";
-import Housing from "@/pages/Housing";
-import Support from "@/pages/Support";
-import Independence from "@/pages/Independence";
-import Analytics from "@/pages/Analytics";
-import Safeguarding from "@/pages/Safeguarding";
-import Crisis from "@/pages/Crisis";
-import Financials from "@/pages/Financials";
-import Settings from "@/pages/Settings";
-import Help from "@/pages/Help";
-import Login from "@/pages/Login";
-import SignUp from "@/pages/SignUp";
-import Privacy from "@/pages/Privacy";
-import Terms from "@/pages/Terms";
-import Cookies from "@/pages/Cookies";
-import Accessibility from "@/pages/Accessibility";
-import PropertyRegistration from "@/pages/forms/PropertyRegistration";
-import ResidentIntake from "@/pages/forms/ResidentIntake";
-import IncidentReport from "@/pages/forms/IncidentReport";
-import ProgressTracking from "@/pages/forms/ProgressTracking";
-import SupportPlan from "@/pages/forms/SupportPlan";
-import Forms from "@/pages/Forms";
-import Reports from "@/pages/Reports";
-import Billing from "@/pages/Billing";
-import UKCouncils from "@/pages/UKCouncils";
-import PlatformAdmin from "@/pages/PlatformAdmin";
-import NotFound from "@/pages/not-found";
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from '@/components/ui/toaster';
+import { AuthProvider } from '@/contexts/AuthContext';
 
-function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+// Page imports
+import Landing from '@/pages/Landing';
+import Login from '@/pages/Login';
+import Dashboard from '@/pages/Dashboard';
+import Housing from '@/pages/Housing';
+import Safeguarding from '@/pages/Safeguarding';
+import Support from '@/pages/Support';
+import Independence from '@/pages/Independence';
+import Crisis from '@/pages/Crisis';
+import Reports from '@/pages/Reports';
+import Analytics from '@/pages/Analytics';
+import Forms from '@/pages/Forms';
+import Help from '@/pages/Help';
+import Settings from '@/pages/Settings';
+import Financials from '@/pages/Financials';
+import Billing from '@/pages/Billing';
+import PlatformAdmin from '@/pages/PlatformAdmin';
+import Pricing from '@/pages/Pricing';
+import Privacy from '@/pages/Privacy';
+import Terms from '@/pages/Terms';
+import Cookies from '@/pages/Cookies';
+import Accessibility from '@/pages/Accessibility';
+import NotFound from '@/pages/not-found';
+import AuthLogin from '@/pages/AuthLogin';
 
-  if (isLoading) {
-    return <LoadingWrapper loading={true} />;
-  }
+// Create query client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 3,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
+function App() {
   return (
-    <Switch>
-      {!isAuthenticated ? (
-        <>
-          <Route path="/" component={Landing} />
-          <Route path="/pricing" component={Pricing} />
-          <Route path="/login" component={Login} />
-          <Route path="/signup" component={SignUp} />
-          <Route path="/privacy" component={Privacy} />
-          <Route path="/terms" component={Terms} />
-          <Route path="/cookies" component={Cookies} />
-          <Route path="/accessibility" component={Accessibility} />
-        </>
-      ) : (
-        <>
-          <Route path="/" component={Dashboard} />
-          <Route path="/dashboard" component={Dashboard} />
-          <Route path="/pricing" component={Pricing} />
-          <Route path="/subscribe" component={Subscribe} />
-          <Route path="/housing" component={Housing} />
-          <Route path="/support" component={Support} />
-          <Route path="/independence" component={Independence} />
-          <Route path="/analytics" component={Analytics} />
-          <Route path="/safeguarding" component={Safeguarding} />
-          <Route path="/crisis" component={Crisis} />
-          <Route path="/financials" component={Financials} />
-          <Route path="/settings" component={Settings} />
-          <Route path="/help" component={Help} />
-          <Route path="/forms" component={Forms} />
-          <Route path="/reports" component={Reports} />
-          <Route path="/billing" component={Billing} />
-          <Route path="/uk-councils" component={UKCouncils} />
-          <Route path="/platform-admin" component={PlatformAdmin} />
-          <Route path="/platform-admin/:tab" component={PlatformAdmin} />
-          <Route path="/forms/property-registration" component={PropertyRegistration} />
-          <Route path="/forms/resident-intake" component={ResidentIntake} />
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <Router>
+          <div className="App">
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<Landing />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<AuthLogin mode="signup" />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/cookies" element={<Cookies />} />
+              <Route path="/accessibility" element={<Accessibility />} />
+
+              {/* Protected routes */}
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/housing" element={<Housing />} />
+              <Route path="/safeguarding" element={<Safeguarding />} />
+              <Route path="/support" element={<Support />} />
+              <Route path="/independence" element={<Independence />} />
+              <Route path="/crisis" element={<Crisis />} />
+              <Route path="/reports" element={<Reports />} />
+              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/forms" element={<Forms />} />
+              <Route path="/help" element={<Help />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/financials" element={<Financials />} />
+              <Route path="/billing" element={<Billing />} />
+              <Route path="/platform-admin" element={<PlatformAdmin />} />
+
+              {/* Catch all route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <Toaster />
+          </div>
+        </Router>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+}
+
+export default App;
           <Route path="/forms/incident-report" component={IncidentReport} />
           <Route path="/forms/progress-tracking" component={ProgressTracking} />
           <Route path="/forms/support-plan" component={SupportPlan} />

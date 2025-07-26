@@ -1,11 +1,11 @@
 import * as client from "openid-client";
 import { Strategy, type VerifyFunction } from "openid-client/passport";
 
-import passport from "passport";
-import session from "express-session";
-import type { Express, RequestHandler } from "express";
-import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
+import type { Express, RequestHandler } from "express";
+import session from "express-session";
+import memoize from "memoizee";
+import passport from "passport";
 import { storage } from "./storage";
 
 if (!process.env.REPLIT_DOMAINS) {
@@ -363,6 +363,25 @@ export async function setupAuth(app: Express) {
   });
 }
 
+// Mock authentication for development
+export async function setupDevAuth(app: Express) {
+  app.use((req: AuthenticatedRequest, res, next) => {
+    // Add mock user for development
+    req.user = {
+      id: 'dev-user-1',
+      claims: {
+        sub: 'dev-user-1'
+      },
+      email: 'dev@yuthub.com',
+      firstName: 'Development',
+      lastName: 'User'
+    };
+    
+    req.isAuthenticated = () => true;
+    next();
+  });
+}
+
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
 
@@ -407,3 +426,15 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return res.status(401).json({ message: "Unauthorized" });
   }
 };
+
+export function isAuthenticated(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  if (req.isAuthenticated && req.isAuthenticated()) {
+    return next();
+  }
+  
+  res.status(401).json({ message: 'Unauthorized' });
+}
+
+export function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  return isAuthenticated(req, res, next);
+}

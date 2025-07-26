@@ -1,16 +1,13 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  Plus, 
-  FileText, 
-  TrendingUp, 
-  Wrench, 
-  DollarSign, 
-  Download,
-  Home,
-  UserPlus,
-  AlertTriangle,
-  BarChart3
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from '@/hooks/use-toast';
+import {
+    AlertTriangle,
+    BarChart3,
+    FileText,
+    Home,
+    UserPlus,
+    Wrench
 } from "lucide-react";
 
 const quickActions = [
@@ -59,12 +56,21 @@ const quickActions = [
 ];
 
 export default function QuickActions() {
+  const { toast } = useToast();
+
   const handleAction = (action: any) => {
     if (action.path) {
       window.location.href = action.path;
+    } else if (action.action === 'maintenance') {
+      toast({
+        title: "Maintenance Portal",
+        description: "Maintenance request system will be available soon.",
+      });
     } else {
-      // Handle other actions that aren't forms
-      // Handle action: ${action.name}
+      toast({
+        title: "Coming Soon",
+        description: `${action.name} feature will be available soon.`,
+      });
     }
   };
 

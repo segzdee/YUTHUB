@@ -1,8 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { apiRequest } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
 import { Bot, Lightbulb } from "lucide-react";
 
 interface RiskyResident {
@@ -18,6 +18,7 @@ interface RiskyResident {
 export default function RiskInsights() {
   const { data: riskyResidents, isLoading } = useQuery<RiskyResident[]>({
     queryKey: ["/api/residents/at-risk"],
+    queryFn: () => apiRequest("/api/residents/at-risk"),
   });
 
   if (isLoading) {
@@ -74,6 +75,10 @@ export default function RiskInsights() {
     }
   };
 
+  const handleViewDetails = (residentId: number) => {
+    window.location.href = `/residents/${residentId}`;
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -104,7 +109,12 @@ export default function RiskInsights() {
                     Risk Level: {resident.riskLevel.charAt(0).toUpperCase() + resident.riskLevel.slice(1)}
                   </p>
                 </div>
-                <Button variant="ghost" size="sm" className="text-primary hover:text-blue-800">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-primary hover:text-blue-800"
+                  onClick={() => handleViewDetails(resident.id)}
+                >
                   View Details
                 </Button>
               </div>

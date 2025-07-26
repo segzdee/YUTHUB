@@ -1,32 +1,31 @@
-import { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow
 } from '@/components/ui/table';
-import { 
-  Building2, 
-  MapPin, 
-  Users, 
-  Phone, 
-  Mail, 
-  Calendar,
-  TrendingUp,
-  FileText,
-  Settings,
-  Search,
-  BarChart3
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { apiRequest } from '@/lib/queryClient';
+import { useQuery } from '@tanstack/react-query';
+import {
+    Building2,
+    FileText,
+    Mail,
+    MapPin,
+    Phone,
+    Search,
+    Settings,
+    TrendingUp,
+    Users
 } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import UKCouncilAnalytics from './UKCouncilAnalytics';
 
 interface GovernmentClient {
@@ -63,6 +62,9 @@ export default function UKCouncilDashboard() {
 
   const { data: councils = [], isLoading, error } = useQuery<GovernmentClient[]>({
     queryKey: ['/api/billing/government-clients'],
+    queryFn: () => apiRequest('/api/billing/government-clients'),
+    retry: false,
+    select: (data) => data || [],
   });
 
   // Enhanced council data (this would typically come from your JSON file or additional API)
@@ -222,6 +224,18 @@ export default function UKCouncilDashboard() {
     );
   }
 
+  const handleAddCouncil = () => {
+    window.location.href = '/billing?tab=government-clients';
+  };
+
+  const handleEditCouncil = (councilId: number) => {
+    window.location.href = `/billing/government-clients/${councilId}/edit`;
+  };
+
+  const handleViewCouncil = (council: GovernmentClient) => {
+    setSelectedCouncil(council);
+  };
+
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
@@ -229,7 +243,7 @@ export default function UKCouncilDashboard() {
           <h1 className="text-3xl font-bold text-gray-900">UK Borough Council Management</h1>
           <p className="text-gray-600">Manage partnerships with {councils.length} local authorities across the UK</p>
         </div>
-        <Button>
+        <Button onClick={handleAddCouncil}>
           <Building2 className="mr-2 h-4 w-4" />
           Add New Council
         </Button>
@@ -401,12 +415,16 @@ export default function UKCouncilDashboard() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setSelectedCouncil(council)}
+                          onClick={() => handleViewCouncil(council)}
                         >
                           <FileText className="h-3 w-3 mr-1" />
                           View
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEditCouncil(council.id)}
+                        >
                           <Settings className="h-3 w-3 mr-1" />
                           Edit
                         </Button>

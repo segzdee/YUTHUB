@@ -1,14 +1,12 @@
-import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Bell, X, AlertTriangle, DollarSign, Users, Building, Calendar } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/useAuth';
-import { useDashboardStore } from '@/store/dashboardStore';
-import { useCrossModuleIntegration } from '@/hooks/useCrossModuleIntegration';
+import { apiRequest } from '@/lib/queryClient';
+import { useQuery } from '@tanstack/react-query';
+import { AlertTriangle, Bell, Building, Calendar, DollarSign, Users, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface Notification {
   id: string;
@@ -29,15 +27,29 @@ interface NotificationCenterProps {
 
 export default function NotificationCenter({ isOpen, onClose }: NotificationCenterProps) {
   const { user } = useAuth();
-  const { notifications: notificationSettings } = useDashboardStore();
-  const { calculateMetrics } = useCrossModuleIntegration();
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   // Fetch real-time notifications based on user role
-  const { data: incidents = [] } = useQuery({ queryKey: ['/api/incidents'] });
-  const { data: maintenance = [] } = useQuery({ queryKey: ['/api/maintenance-requests'] });
-  const { data: financialRecords = [] } = useQuery({ queryKey: ['/api/financial-records'] });
-  const { data: supportPlans = [] } = useQuery({ queryKey: ['/api/support-plans'] });
+  const { data: incidents = [] } = useQuery({ 
+    queryKey: ['/api/incidents'],
+    queryFn: () => apiRequest('/api/incidents'),
+    enabled: !!user,
+  });
+  const { data: maintenance = [] } = useQuery({ 
+    queryKey: ['/api/maintenance-requests'],
+    queryFn: () => apiRequest('/api/maintenance-requests'),
+    enabled: !!user,
+  });
+  const { data: financialRecords = [] } = useQuery({ 
+    queryKey: ['/api/financial-records'],
+    queryFn: () => apiRequest('/api/financial-records'),
+    enabled: !!user,
+  });
+  const { data: supportPlans = [] } = useQuery({ 
+    queryKey: ['/api/support-plans'],
+    queryFn: () => apiRequest('/api/support-plans'),
+    enabled: !!user,
+  });
 
   // Generate role-based notifications
   useEffect(() => {
@@ -45,17 +57,23 @@ export default function NotificationCenter({ isOpen, onClose }: NotificationCent
 
     const newNotifications: Notification[] = [];
     const userRole = user.role || 'staff';
-    const metrics = calculateMetrics();
 
-    // Housing Officer notifications - property and occupancy focused
+    // Calculate metrics
+    const occupancyRate = 95; // Mock data
+    const pendingMaintenance = maintenance.length;
+    const highRiskResidents = incidents.filter(i => i.severity === 'high').length;
+    const activeIncidents = incidents.filter(i => i.status === 'open').length;
+    const overdueInvoices = financialRecords.filter(r => r.status === 'overdue').length;
+    const pendingInvoices = financialRecords.filter(r => r.status === 'pending').length;
+
+    // Housing Officer notifications
     if (userRole === 'housing_officer' || userRole === 'admin' || userRole === 'manager') {
-      // High occupancy alerts
-      if (metrics.occupancyRate > 95) {
+      if (occupancyRate > 95) {
         newNotifications.push({
           id: 'occupancy-high',
           type: 'property',
           title: 'High Occupancy Alert',
-          message: `Occupancy rate at ${metrics.occupancyRate.toFixed(1)}% - Consider additional capacity`,
+          message: `Occupancy rate at ${occupancyRate}% - Consider additional capacity`,
           priority: 'high',
           timestamp: new Date(),
           read: false,
@@ -63,12 +81,11 @@ export default function NotificationCenter({ isOpen, onClose }: NotificationCent
         });
       }
 
-      // Maintenance requests
-      if (metrics.pendingMaintenance > 0) {
+      if (pendingMaintenance > 0) {
         newNotifications.push({
           id: 'maintenance-pending',
           type: 'maintenance',
-          title: `${metrics.pendingMaintenance} Pending Maintenance`,
+          title: `${pendingMaintenance} Pending Maintenance`,
           message: 'Multiple maintenance requests require attention',
           priority: 'medium',
           timestamp: new Date(),
@@ -78,14 +95,13 @@ export default function NotificationCenter({ isOpen, onClose }: NotificationCent
       }
     }
 
-    // Support Coordinator notifications - case management focused
+    // Support Coordinator notifications
     if (userRole === 'support_coordinator' || userRole === 'admin' || userRole === 'manager') {
-      // High risk residents
-      if (metrics.highRiskResidents > 0) {
+      if (highRiskResidents > 0) {
         newNotifications.push({
           id: 'high-risk-residents',
           type: 'support',
-          title: `${metrics.highRiskResidents} High Risk Residents`,
+          title: `${highRiskResidents} High Risk Residents`,
           message: 'Residents requiring immediate support attention',
           priority: 'urgent',
           timestamp: new Date(),
@@ -94,12 +110,11 @@ export default function NotificationCenter({ isOpen, onClose }: NotificationCent
         });
       }
 
-      // Active incidents
-      if (metrics.activeIncidents > 0) {
+      if (activeIncidents > 0) {
         newNotifications.push({
           id: 'active-incidents',
           type: 'incident',
-          title: `${metrics.activeIncidents} Active Incidents`,
+          title: `${activeIncidents} Active Incidents`,
           message: 'Safety incidents requiring follow-up',
           priority: 'high',
           timestamp: new Date(),
@@ -111,12 +126,11 @@ export default function NotificationCenter({ isOpen, onClose }: NotificationCent
 
     // Financial staff notifications
     if (userRole === 'finance_officer' || userRole === 'admin' || userRole === 'manager') {
-      // Overdue invoices
-      if (metrics.overdueInvoices > 0) {
+      if (overdueInvoices > 0) {
         newNotifications.push({
           id: 'overdue-invoices',
           type: 'financial',
-          title: `${metrics.overdueInvoices} Overdue Invoices`,
+          title: `${overdueInvoices} Overdue Invoices`,
           message: 'Outstanding payments require follow-up',
           priority: 'high',
           timestamp: new Date(),
@@ -125,12 +139,11 @@ export default function NotificationCenter({ isOpen, onClose }: NotificationCent
         });
       }
 
-      // Pending invoices
-      if (metrics.pendingInvoices > 5) {
+      if (pendingInvoices > 5) {
         newNotifications.push({
           id: 'pending-invoices',
           type: 'billing',
-          title: `${metrics.pendingInvoices} Pending Invoices`,
+          title: `${pendingInvoices} Pending Invoices`,
           message: 'Multiple invoices awaiting approval',
           priority: 'medium',
           timestamp: new Date(),
@@ -140,13 +153,8 @@ export default function NotificationCenter({ isOpen, onClose }: NotificationCent
       }
     }
 
-    // Filter notifications based on user preferences
-    const filteredNotifications = newNotifications.filter(notif => 
-      notificationSettings.types.includes(notif.type)
-    );
-
-    setNotifications(filteredNotifications);
-  }, [user, incidents, maintenance, financialRecords, supportPlans, notificationSettings.types, calculateMetrics]);
+    setNotifications(newNotifications);
+  }, [user, incidents, maintenance, financialRecords, supportPlans]);
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
@@ -275,7 +283,7 @@ export default function NotificationCenter({ isOpen, onClose }: NotificationCent
                               className="text-xs h-6 px-2"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                window.location.href = notification.actionUrl!;
+                                handleNavigation(notification.actionUrl!);
                               }}
                             >
                               View

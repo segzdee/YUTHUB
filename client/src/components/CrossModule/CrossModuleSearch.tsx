@@ -1,12 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Search, User, Building, FileText, AlertTriangle, DollarSign, Calendar } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Link } from 'wouter';
-import type { Resident, Property, SupportPlan, Incident, FinancialRecord, Invoice } from '@shared/schema';
+import { Input } from '@/components/ui/input';
+import { apiRequest } from '@/lib/queryClient';
+import { useQuery } from '@tanstack/react-query';
+import { AlertTriangle, Building, Calendar, DollarSign, FileText, Search, User } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 
 interface SearchResult {
   id: string;
@@ -24,12 +21,30 @@ export default function CrossModuleSearch() {
   const [isOpen, setIsOpen] = useState(false);
 
   // Fetch data from all modules
-  const { data: residents = [] } = useQuery<Resident[]>({ queryKey: ['/api/residents'] });
-  const { data: properties = [] } = useQuery<Property[]>({ queryKey: ['/api/properties'] });
-  const { data: supportPlans = [] } = useQuery<SupportPlan[]>({ queryKey: ['/api/support-plans'] });
-  const { data: incidents = [] } = useQuery<Incident[]>({ queryKey: ['/api/incidents'] });
-  const { data: financialRecords = [] } = useQuery<FinancialRecord[]>({ queryKey: ['/api/financial-records'] });
-  const { data: invoices = [] } = useQuery<Invoice[]>({ queryKey: ['/api/invoices'] });
+  const { data: residents = [] } = useQuery({ 
+    queryKey: ['/api/residents'],
+    queryFn: () => apiRequest('/api/residents'),
+  });
+  const { data: properties = [] } = useQuery({ 
+    queryKey: ['/api/properties'],
+    queryFn: () => apiRequest('/api/properties'),
+  });
+  const { data: supportPlans = [] } = useQuery({ 
+    queryKey: ['/api/support-plans'],
+    queryFn: () => apiRequest('/api/support-plans'),
+  });
+  const { data: incidents = [] } = useQuery({ 
+    queryKey: ['/api/incidents'],
+    queryFn: () => apiRequest('/api/incidents'),
+  });
+  const { data: financialRecords = [] } = useQuery({ 
+    queryKey: ['/api/financial-records'],
+    queryFn: () => apiRequest('/api/financial-records'),
+  });
+  const { data: invoices = [] } = useQuery({ 
+    queryKey: ['/api/invoices'],
+    queryFn: () => apiRequest('/api/invoices'),
+  });
 
   // Combined search results from all modules
   const searchResults = useMemo(() => {
@@ -223,6 +238,12 @@ export default function CrossModuleSearch() {
     }
   }, [isOpen]);
 
+  const handleNavigate = (route: string) => {
+    setIsOpen(false);
+    setSearchTerm('');
+    window.location.href = route;
+  };
+
   return (
     <div className="relative">
       <div className="relative">
@@ -243,14 +264,10 @@ export default function CrossModuleSearch() {
               {searchResults.map((result) => {
                 const Icon = getResultIcon(result.type);
                 return (
-                  <Link
+                  <div
                     key={result.id}
-                    href={result.route}
-                    className="block p-3 hover:bg-gray-50 rounded-md transition-colors"
-                    onClick={() => {
-                      setIsOpen(false);
-                      setSearchTerm('');
-                    }}
+                    className="block p-3 hover:bg-gray-50 rounded-md transition-colors cursor-pointer"
+                    onClick={() => handleNavigate(result.route)}
                   >
                     <div className="flex items-start gap-3">
                       <div className="p-2 bg-gray-100 rounded-lg">
@@ -279,7 +296,7 @@ export default function CrossModuleSearch() {
                         )}
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 );
               })}
             </div>

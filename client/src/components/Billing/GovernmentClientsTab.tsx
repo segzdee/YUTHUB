@@ -1,47 +1,43 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
 } from '@/components/ui/select';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow
+} from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Building, 
-  MapPin, 
-  Phone, 
-  Mail,
-  ExternalLink
-} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+    Building,
+    Edit,
+    Mail,
+    Phone,
+    Plus,
+    Trash2
+} from 'lucide-react';
+import { useState } from 'react';
 import { z } from 'zod';
 
 const clientFormSchema = z.object({
@@ -85,29 +81,44 @@ export function GovernmentClientsTab() {
     queryKey: ['/api/billing/government-clients'],
   });
 
-  const form = useForm<ClientFormData>({
-    resolver: zodResolver(clientFormSchema),
-    defaultValues: {
-      clientName: '',
-      clientType: 'local_authority',
-      contactPersonName: '',
-      contactPersonEmail: '',
-      contactPersonPhone: '',
-      address: '',
-      paymentTerms: '',
-      invoiceFrequency: 'monthly',
-      specialInstructions: '',
-      status: 'active',
-    },
+  // Create a simple form handler without react-hook-form for now
+  const [formData, setFormData] = useState<ClientFormData>({
+    clientName: '',
+    clientType: 'local_authority',
+    contactPersonName: '',
+    contactPersonEmail: '',
+    contactPersonPhone: '',
+    address: '',
+    paymentTerms: '',
+    invoiceFrequency: 'monthly',
+    specialInstructions: '',
+    status: 'active',
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: ClientFormData) => apiRequest('POST', '/api/billing/government-clients', data),
+    mutationFn: (data: ClientFormData) => apiRequest('/api/billing/government-clients', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/billing/government-clients'] });
       toast({ title: 'Success', description: 'Government client created successfully' });
       setIsDialogOpen(false);
-      form.reset();
+      setFormData({
+        clientName: '',
+        clientType: 'local_authority',
+        contactPersonName: '',
+        contactPersonEmail: '',
+        contactPersonPhone: '',
+        address: '',
+        paymentTerms: '',
+        invoiceFrequency: 'monthly',
+        specialInstructions: '',
+        status: 'active',
+      });
     },
     onError: (error: any) => {
       toast({ 
@@ -120,13 +131,30 @@ export function GovernmentClientsTab() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Partial<ClientFormData> }) => 
-      apiRequest('PUT', `/api/billing/government-clients/${id}`, data),
+      apiRequest(`/api/billing/government-clients/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/billing/government-clients'] });
       toast({ title: 'Success', description: 'Government client updated successfully' });
       setIsDialogOpen(false);
       setEditingClient(null);
-      form.reset();
+      setFormData({
+        clientName: '',
+        clientType: 'local_authority',
+        contactPersonName: '',
+        contactPersonEmail: '',
+        contactPersonPhone: '',
+        address: '',
+        paymentTerms: '',
+        invoiceFrequency: 'monthly',
+        specialInstructions: '',
+        status: 'active',
+      });
     },
     onError: (error: any) => {
       toast({ 
@@ -138,7 +166,9 @@ export function GovernmentClientsTab() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiRequest('DELETE', `/api/billing/government-clients/${id}`),
+    mutationFn: (id: number) => apiRequest(`/api/billing/government-clients/${id}`, {
+      method: 'DELETE',
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/billing/government-clients'] });
       toast({ title: 'Success', description: 'Government client deleted successfully' });
@@ -152,17 +182,18 @@ export function GovernmentClientsTab() {
     },
   });
 
-  const handleSubmit = (data: ClientFormData) => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     if (editingClient) {
-      updateMutation.mutate({ id: editingClient.id, data });
+      updateMutation.mutate({ id: editingClient.id, data: formData });
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(formData);
     }
   };
 
   const handleEdit = (client: GovernmentClient) => {
     setEditingClient(client);
-    form.reset({
+    setFormData({
       clientName: client.clientName,
       clientType: client.clientType as any,
       contactPersonName: client.contactPersonName,
@@ -229,7 +260,18 @@ export function GovernmentClientsTab() {
           <DialogTrigger asChild>
             <Button onClick={() => {
               setEditingClient(null);
-              form.reset();
+              setFormData({
+                clientName: '',
+                clientType: 'local_authority',
+                contactPersonName: '',
+                contactPersonEmail: '',
+                contactPersonPhone: '',
+                address: '',
+                paymentTerms: '',
+                invoiceFrequency: 'monthly',
+                specialInstructions: '',
+                status: 'active',
+              });
             }}>
               <Plus className="h-4 w-4 mr-2" />
               Add Client
@@ -241,24 +283,22 @@ export function GovernmentClientsTab() {
                 {editingClient ? 'Edit Government Client' : 'Add Government Client'}
               </DialogTitle>
             </DialogHeader>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="clientName">Client Name</Label>
                   <Input
                     id="clientName"
-                    {...form.register('clientName')}
+                    value={formData.clientName}
+                    onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
                     placeholder="Enter client name"
                   />
-                  {form.formState.errors.clientName && (
-                    <p className="text-sm text-red-600">{form.formState.errors.clientName.message}</p>
-                  )}
                 </div>
                 <div>
                   <Label htmlFor="clientType">Client Type</Label>
                   <Select 
-                    value={form.watch('clientType')} 
-                    onValueChange={(value) => form.setValue('clientType', value as any)}
+                    value={formData.clientType} 
+                    onValueChange={(value) => setFormData({ ...formData, clientType: value as any })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select client type" />
@@ -278,24 +318,20 @@ export function GovernmentClientsTab() {
                   <Label htmlFor="contactPersonName">Contact Person</Label>
                   <Input
                     id="contactPersonName"
-                    {...form.register('contactPersonName')}
+                    value={formData.contactPersonName}
+                    onChange={(e) => setFormData({ ...formData, contactPersonName: e.target.value })}
                     placeholder="Enter contact person name"
                   />
-                  {form.formState.errors.contactPersonName && (
-                    <p className="text-sm text-red-600">{form.formState.errors.contactPersonName.message}</p>
-                  )}
                 </div>
                 <div>
                   <Label htmlFor="contactPersonEmail">Email</Label>
                   <Input
                     id="contactPersonEmail"
                     type="email"
-                    {...form.register('contactPersonEmail')}
+                    value={formData.contactPersonEmail}
+                    onChange={(e) => setFormData({ ...formData, contactPersonEmail: e.target.value })}
                     placeholder="Enter email address"
                   />
-                  {form.formState.errors.contactPersonEmail && (
-                    <p className="text-sm text-red-600">{form.formState.errors.contactPersonEmail.message}</p>
-                  )}
                 </div>
               </div>
 
@@ -304,23 +340,19 @@ export function GovernmentClientsTab() {
                   <Label htmlFor="contactPersonPhone">Phone</Label>
                   <Input
                     id="contactPersonPhone"
-                    {...form.register('contactPersonPhone')}
+                    value={formData.contactPersonPhone}
+                    onChange={(e) => setFormData({ ...formData, contactPersonPhone: e.target.value })}
                     placeholder="Enter phone number"
                   />
-                  {form.formState.errors.contactPersonPhone && (
-                    <p className="text-sm text-red-600">{form.formState.errors.contactPersonPhone.message}</p>
-                  )}
                 </div>
                 <div>
                   <Label htmlFor="paymentTerms">Payment Terms</Label>
                   <Input
                     id="paymentTerms"
-                    {...form.register('paymentTerms')}
+                    value={formData.paymentTerms}
+                    onChange={(e) => setFormData({ ...formData, paymentTerms: e.target.value })}
                     placeholder="e.g., Net 30 days"
                   />
-                  {form.formState.errors.paymentTerms && (
-                    <p className="text-sm text-red-600">{form.formState.errors.paymentTerms.message}</p>
-                  )}
                 </div>
               </div>
 
@@ -328,21 +360,19 @@ export function GovernmentClientsTab() {
                 <Label htmlFor="address">Address</Label>
                 <Textarea
                   id="address"
-                  {...form.register('address')}
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   placeholder="Enter full address"
                   rows={3}
                 />
-                {form.formState.errors.address && (
-                  <p className="text-sm text-red-600">{form.formState.errors.address.message}</p>
-                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="invoiceFrequency">Invoice Frequency</Label>
                   <Select 
-                    value={form.watch('invoiceFrequency')} 
-                    onValueChange={(value) => form.setValue('invoiceFrequency', value as any)}
+                    value={formData.invoiceFrequency} 
+                    onValueChange={(value) => setFormData({ ...formData, invoiceFrequency: value as any })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select frequency" />
@@ -357,8 +387,8 @@ export function GovernmentClientsTab() {
                 <div>
                   <Label htmlFor="status">Status</Label>
                   <Select 
-                    value={form.watch('status')} 
-                    onValueChange={(value) => form.setValue('status', value as any)}
+                    value={formData.status} 
+                    onValueChange={(value) => setFormData({ ...formData, status: value as any })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select status" />
@@ -376,7 +406,8 @@ export function GovernmentClientsTab() {
                 <Label htmlFor="specialInstructions">Special Instructions</Label>
                 <Textarea
                   id="specialInstructions"
-                  {...form.register('specialInstructions')}
+                  value={formData.specialInstructions}
+                  onChange={(e) => setFormData({ ...formData, specialInstructions: e.target.value })}
                   placeholder="Any special billing instructions..."
                   rows={3}
                 />

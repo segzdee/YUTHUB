@@ -1,7 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Building, Users, Percent, AlertTriangle } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
+import { apiRequest } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
+import { AlertTriangle, Building, Percent, Users } from "lucide-react";
 
 interface DashboardMetrics {
   totalProperties: number;
@@ -11,8 +12,11 @@ interface DashboardMetrics {
 }
 
 export default function MetricsCards() {
-  const { data: metrics, isLoading } = useQuery<DashboardMetrics>({
+  const { data: metrics, isLoading, error } = useQuery<DashboardMetrics>({
     queryKey: ["/api/dashboard/metrics"],
+    queryFn: () => apiRequest("/api/dashboard/metrics"),
+    retry: 3,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   if (isLoading) {
@@ -22,6 +26,20 @@ export default function MetricsCards() {
           <Card key={i}>
             <CardContent className="p-6">
               <Skeleton className="h-16 w-full" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i}>
+            <CardContent className="p-6 text-center">
+              <p className="text-sm text-red-600">Failed to load metrics</p>
             </CardContent>
           </Card>
         ))}

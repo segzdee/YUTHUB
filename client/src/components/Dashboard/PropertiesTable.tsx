@@ -1,9 +1,10 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useQuery } from "@tanstack/react-query";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MobileTable } from "@/components/ui/mobile-table";
+import { Skeleton } from "@/components/ui/skeleton";
+import { apiRequest } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
 
 interface Property {
   id: number;
@@ -18,6 +19,7 @@ interface Property {
 export default function PropertiesTable() {
   const { data: properties, isLoading } = useQuery<Property[]>({
     queryKey: ["/api/properties"],
+    queryFn: () => apiRequest("/api/properties"),
   });
 
   if (isLoading) {
@@ -88,13 +90,22 @@ export default function PropertiesTable() {
     }
   ];
 
+  const handleViewAll = () => {
+    window.location.href = '/housing';
+  };
+
   return (
     <MobileTable
       title="Properties Overview"
       data={properties?.slice(0, 3) || []}
       columns={columns}
       actions={
-        <Button variant="ghost" size="sm" className="text-primary hover:text-blue-800 text-sm">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="text-primary hover:text-blue-800 text-sm"
+          onClick={handleViewAll}
+        >
           View All
         </Button>
       }

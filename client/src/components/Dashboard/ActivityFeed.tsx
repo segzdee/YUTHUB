@@ -1,8 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import { UserPlus, ClipboardCheck, AlertTriangle, GraduationCap } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
+import { AlertTriangle, ClipboardCheck, GraduationCap, UserPlus } from "lucide-react";
 
 interface Activity {
   id: number;
@@ -45,6 +46,7 @@ const getActivityColor = (type: string) => {
 export default function ActivityFeed() {
   const { data: activities, isLoading } = useQuery<Activity[]>({
     queryKey: ["/api/activities"],
+    queryFn: () => apiRequest("/api/activities"),
   });
 
   if (isLoading) {
@@ -77,7 +79,7 @@ export default function ActivityFeed() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {activities?.map((activity) => {
+          {activities?.length ? activities.map((activity) => {
             const Icon = getActivityIcon(activity.activityType);
             const colorClass = getActivityColor(activity.activityType);
             
@@ -95,7 +97,11 @@ export default function ActivityFeed() {
                 </div>
               </div>
             );
-          })}
+          }) : (
+            <div className="text-center py-8 text-gray-500">
+              <p>No recent activities</p>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

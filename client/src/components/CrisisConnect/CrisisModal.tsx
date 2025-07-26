@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { AlertTriangle, Phone, UserCheck, ClipboardList } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AlertTriangle, ClipboardList, Phone, UserCheck } from "lucide-react";
+import { useState } from "react";
 
 interface CrisisModalProps {
   isOpen: boolean;
@@ -44,7 +44,13 @@ export default function CrisisModal({ isOpen, onClose }: CrisisModalProps) {
 
   const crisisMutation = useMutation({
     mutationFn: async (data: { type: string; message: string }) => {
-      return await apiRequest("POST", "/api/crisis-connect", data);
+      return await apiRequest('/api/crisis-connect', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
     },
     onSuccess: () => {
       toast({

@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
-import { Chrome, Apple, Shield, Building } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { Apple, Building, Chrome, Shield } from 'lucide-react';
 
 interface SocialLoginButtonsProps {
   mode: 'signin' | 'signup';
@@ -8,26 +9,43 @@ interface SocialLoginButtonsProps {
 }
 
 export default function SocialLoginButtons({ mode, isLoading, onError }: SocialLoginButtonsProps) {
+  const { toast } = useToast();
+
   const handleSocialLogin = (provider: string) => {
     if (isLoading) return;
     
     try {
-      const baseUrl = window.location.origin;
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? window.location.origin 
+        : 'http://localhost:3000';
+        
       const authUrls = {
-        google: `${baseUrl}/auth/google`,
-        microsoft: `${baseUrl}/auth/microsoft`,
-        apple: `${baseUrl}/auth/apple`,
-        replit: `${baseUrl}/api/login`, // Existing Replit OIDC
+        google: `/api/auth/google`,
+        microsoft: `/api/auth/microsoft`,
+        apple: `/api/auth/apple`,
+        replit: `/api/auth/replit`,
       };
 
       const url = authUrls[provider as keyof typeof authUrls];
       if (url) {
-        window.location.href = url;
+        window.location.href = `${baseUrl}${url}`;
       } else {
-        onError?.(`${provider} authentication is not configured`);
+        const errorMsg = `${provider} authentication is not configured`;
+        onError?.(errorMsg);
+        toast({
+          title: "Authentication Error",
+          description: errorMsg,
+          variant: "destructive",
+        });
       }
     } catch (error) {
-      onError?.(`Failed to initialize ${provider} authentication`);
+      const errorMsg = `Failed to initialize ${provider} authentication`;
+      onError?.(errorMsg);
+      toast({
+        title: "Authentication Error",
+        description: errorMsg,
+        variant: "destructive",
+      });
     }
   };
 

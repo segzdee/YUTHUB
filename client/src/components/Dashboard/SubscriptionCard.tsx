@@ -1,10 +1,11 @@
-import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Crown, Building2, Zap, Users, Calendar, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { apiRequest } from '@/lib/queryClient';
+import { useQuery } from '@tanstack/react-query';
+import { Building2, Calendar, Crown, TrendingUp, Users, Zap } from 'lucide-react';
 
 const tierIcons = {
   trial: Building2,
@@ -25,6 +26,8 @@ export default function SubscriptionCard() {
 
   const { data: residents } = useQuery({
     queryKey: ['/api/residents'],
+    queryFn: () => apiRequest('/api/residents'),
+    enabled: !!user,
   });
 
   const currentResidents = residents?.length || 0;
@@ -56,6 +59,10 @@ export default function SubscriptionCard() {
 
   const isNearLimit = usagePercentage > 80;
   const isAtLimit = usagePercentage >= 100;
+
+  const handleNavigation = (path: string) => {
+    window.location.href = path;
+  };
 
   return (
     <Card className="col-span-full">
@@ -132,7 +139,7 @@ export default function SubscriptionCard() {
         <div className="flex flex-wrap gap-2">
           {subscriptionTier === 'trial' && (
             <Button 
-              onClick={() => window.location.href = '/pricing'}
+              onClick={() => handleNavigation('/pricing')}
               className="flex-1 min-w-[120px]"
             >
               Upgrade Plan
@@ -141,7 +148,7 @@ export default function SubscriptionCard() {
           
           {subscriptionTier !== 'trial' && subscriptionTier !== 'enterprise' && (
             <Button 
-              onClick={() => window.location.href = '/pricing'}
+              onClick={() => handleNavigation('/pricing')}
               variant="outline"
               className="flex-1 min-w-[120px]"
             >
@@ -150,7 +157,7 @@ export default function SubscriptionCard() {
           )}
           
           <Button 
-            onClick={() => window.location.href = '/subscribe'}
+            onClick={() => handleNavigation('/subscribe')}
             variant="outline"
             className="flex-1 min-w-[120px]"
           >
@@ -166,7 +173,7 @@ export default function SubscriptionCard() {
               You're approaching your resident limit. Upgrade to accommodate more residents and unlock additional features.
             </p>
             <Button 
-              onClick={() => window.location.href = '/pricing'}
+              onClick={() => handleNavigation('/pricing')}
               size="sm"
               className="bg-blue-600 hover:bg-blue-700"
             >

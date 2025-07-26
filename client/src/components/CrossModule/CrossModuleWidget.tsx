@@ -1,23 +1,16 @@
-import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Link } from 'wouter';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Users, 
-  Building, 
-  AlertTriangle, 
-  DollarSign,
-  Clock,
-  CheckCircle,
-  Target,
-  Shield
+import { apiRequest } from '@/lib/queryClient';
+import { useQuery } from '@tanstack/react-query';
+import {
+    AlertTriangle,
+    Building,
+    DollarSign,
+    Shield,
+    Target
 } from 'lucide-react';
-import { useCrossModuleIntegration } from '@/lib/dataIntegration';
-import type { Resident, Property, Incident, SupportPlan, FinancialRecord, Invoice } from '@shared/schema';
 
 interface CrossModuleWidgetProps {
   title: string;
@@ -26,18 +19,61 @@ interface CrossModuleWidgetProps {
 }
 
 export default function CrossModuleWidget({ title, type, className = '' }: CrossModuleWidgetProps) {
-  const { calculateMetrics } = useCrossModuleIntegration();
-
   // Fetch data from all relevant modules
-  const { data: residents = [] } = useQuery<Resident[]>({ queryKey: ['/api/residents'] });
-  const { data: properties = [] } = useQuery<Property[]>({ queryKey: ['/api/properties'] });
-  const { data: incidents = [] } = useQuery<Incident[]>({ queryKey: ['/api/incidents'] });
-  const { data: supportPlans = [] } = useQuery<SupportPlan[]>({ queryKey: ['/api/support-plans'] });
-  const { data: financialRecords = [] } = useQuery<FinancialRecord[]>({ queryKey: ['/api/financial-records'] });
-  const { data: invoices = [] } = useQuery<Invoice[]>({ queryKey: ['/api/invoices'] });
+  const { data: residents = [] } = useQuery({ 
+    queryKey: ['/api/residents'],
+    queryFn: () => apiRequest('/api/residents'),
+  });
+  const { data: properties = [] } = useQuery({ 
+    queryKey: ['/api/properties'],
+    queryFn: () => apiRequest('/api/properties'),
+  });
+  const { data: incidents = [] } = useQuery({ 
+    queryKey: ['/api/incidents'],
+    queryFn: () => apiRequest('/api/incidents'),
+  });
+  const { data: supportPlans = [] } = useQuery({ 
+    queryKey: ['/api/support-plans'],
+    queryFn: () => apiRequest('/api/support-plans'),
+  });
+  const { data: financialRecords = [] } = useQuery({ 
+    queryKey: ['/api/financial-records'],
+    queryFn: () => apiRequest('/api/financial-records'),
+  });
+  const { data: invoices = [] } = useQuery({ 
+    queryKey: ['/api/invoices'],
+    queryFn: () => apiRequest('/api/invoices'),
+  });
 
   // Calculate cross-module metrics
+  const calculateMetrics = () => {
+    const totalCapacity = properties.reduce((sum: number, p: any) => sum + (p.capacity || 0), 0);
+    const occupancyRate = totalCapacity > 0 ? (residents.length / totalCapacity) * 100 : 0;
+    const activeSupportPlans = supportPlans.filter((sp: any) => sp.status === 'active').length;
+    const monthlyRevenue = financialRecords
+      .filter((r: any) => r.type === 'income' && 
+        new Date(r.date).getMonth() === new Date().getMonth())
+      .reduce((sum: number, r: any) => sum + r.amount, 0);
+    const pendingInvoices = invoices.filter((i: any) => i.status === 'pending').length;
+    const incidentRate = incidents.length / Math.max(residents.length, 1);
+    const independenceProgressAverage = residents.reduce((sum: number, r: any) => 
+      sum + (r.independenceLevel || 0), 0) / Math.max(residents.length, 1);
+
+    return {
+      occupancyRate,
+      activeSupportPlans,
+      monthlyRevenue,
+      pendingInvoices,
+      incidentRate,
+      independenceProgressAverage,
+    };
+  };
+
   const metrics = calculateMetrics();
+
+  const handleNavigation = (path: string) => {
+    window.location.href = path;
+  };
 
   const renderContent = () => {
     switch (type) {
@@ -94,11 +130,9 @@ export default function CrossModuleWidget({ title, type, className = '' }: Cross
                 <span className="text-sm font-semibold">{metrics.incidentRate.toFixed(2)}</span>
               </div>
             </div>
-            <Link href="/safeguarding">
-              <Button variant="outline" size="sm" className="w-full">
-                View Safeguarding
-              </Button>
-            </Link>
+            <Button variant="outline" size="sm" className="w-full" onClick={() => handleNavigation('/safeguarding')}>
+              View Safeguarding
+            </Button>
           </div>
         );
 
@@ -143,16 +177,12 @@ export default function CrossModuleWidget({ title, type, className = '' }: Cross
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              <Link href="/financials">
-                <Button variant="outline" size="sm" className="w-full">
-                  Financials
-                </Button>
-              </Link>
-              <Link href="/billing">
-                <Button variant="outline" size="sm" className="w-full">
-                  Billing
-                </Button>
-              </Link>
+              <Button variant="outline" size="sm" className="w-full" onClick={() => handleNavigation('/financials')}>
+                Financials
+              </Button>
+              <Button variant="outline" size="sm" className="w-full" onClick={() => handleNavigation('/billing')}>
+                Billing
+              </Button>
             </div>
           </div>
         );
@@ -187,11 +217,9 @@ export default function CrossModuleWidget({ title, type, className = '' }: Cross
                 </Badge>
               </div>
             </div>
-            <Link href="/housing">
-              <Button variant="outline" size="sm" className="w-full">
-                View Housing
-              </Button>
-            </Link>
+            <Button variant="outline" size="sm" className="w-full" onClick={() => handleNavigation('/housing')}>
+              View Housing
+            </Button>
           </div>
         );
 
@@ -230,11 +258,9 @@ export default function CrossModuleWidget({ title, type, className = '' }: Cross
                 </div>
               )}
             </div>
-            <Link href="/safeguarding">
-              <Button variant="outline" size="sm" className="w-full">
-                View Incidents
-              </Button>
-            </Link>
+            <Button variant="outline" size="sm" className="w-full" onClick={() => handleNavigation('/safeguarding')}>
+              View Incidents
+            </Button>
           </div>
         );
 
@@ -273,16 +299,12 @@ export default function CrossModuleWidget({ title, type, className = '' }: Cross
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              <Link href="/support">
-                <Button variant="outline" size="sm" className="w-full">
-                  Support
-                </Button>
-              </Link>
-              <Link href="/independence">
-                <Button variant="outline" size="sm" className="w-full">
-                  Independence
-                </Button>
-              </Link>
+              <Button variant="outline" size="sm" className="w-full" onClick={() => handleNavigation('/support')}>
+                Support
+              </Button>
+              <Button variant="outline" size="sm" className="w-full" onClick={() => handleNavigation('/independence')}>
+                Independence
+              </Button>
             </div>
           </div>
         );

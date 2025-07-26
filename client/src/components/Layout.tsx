@@ -1,10 +1,10 @@
 import { ReactNode, useState } from "react";
-import Sidebar from "./Layout/Sidebar";
 import Header from "./Layout/Header";
+import Sidebar from "./Layout/Sidebar";
 import UniversalFooter from "./Layout/UniversalFooter";
 
 interface LayoutProps {
-  children: ReactNode;
+  readonly children: ReactNode;
 }
 
 export default function Layout({ children }: LayoutProps) {

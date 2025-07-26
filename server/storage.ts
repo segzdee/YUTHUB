@@ -237,394 +237,394 @@ export interface IStorage {
       totalAmount: number;
       invoiceCount: number;
     }>;
-  }>;
-
-  // Document storage operations
-  createDocument(document: InsertDocumentStorage): Promise<DocumentStorage>;
-  getDocument(id: number): Promise<DocumentStorage | undefined>;
-  getDocuments(filters?: { entityType?: string; entityId?: number; documentType?: string }): Promise<DocumentStorage[]>;
-  updateDocument(id: number, updates: Partial<DocumentStorage>): Promise<DocumentStorage>;
-  deleteDocument(id: number): Promise<void>;
-  searchDocuments(query: string, filters?: { entityType?: string; documentType?: string }): Promise<DocumentStorage[]>;
-
-  // File sharing operations
-  createFileShare(share: InsertFileSharing): Promise<FileSharing>;
-  getFileShares(documentId: number): Promise<FileSharing[]>;
-  updateFileShare(id: number, updates: Partial<FileSharing>): Promise<FileSharing>;
-  revokeFileShare(id: number): Promise<void>;
-
-  // File access logging
-  logFileAccess(log: InsertFileAccessLog): Promise<FileAccessLog>;
-  getFileAccessLogs(documentId: number): Promise<FileAccessLog[]>;
-
-  // File backup operations
-  createBackupRecord(backup: InsertFileBackupRecord): Promise<FileBackupRecord>;
-  getBackupRecords(): Promise<FileBackupRecord[]>;
-  updateBackupRecord(id: number, updates: Partial<FileBackupRecord>): Promise<FileBackupRecord>;
-}
-
-export class DatabaseStorage implements IStorage {
-  // User operations (mandatory for Replit Auth)
-  async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
-  }
-
-  async upsertUser(userData: UpsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(userData)
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          ...userData,
-          updatedAt: new Date(),
-        },
-      })
-      .returning();
-    return user;
-  }
-
-  async updateUserSubscription(id: string, subscription: {
-    tier: string;
-    status: string;
-    maxResidents: number;
-    stripeCustomerId?: string;
-    stripeSubscriptionId?: string;
-    startDate?: Date;
-    endDate?: Date;
-  }): Promise<User> {
-    const [user] = await db
-      .update(users)
-      .set({
-        subscriptionTier: subscription.tier,
-        subscriptionStatus: subscription.status,
-        maxResidents: subscription.maxResidents,
-        stripeCustomerId: subscription.stripeCustomerId,
-        stripeSubscriptionId: subscription.stripeSubscriptionId,
-        subscriptionStartDate: subscription.startDate,
-        subscriptionEndDate: subscription.endDate,
-        updatedAt: new Date(),
-      })
-      .where(eq(users.id, id))
-      .returning();
-    return user;
-  }
-
-  // Property operations
-  async getProperties(): Promise<Property[]> {
-    return await db.select().from(properties).orderBy(desc(properties.createdAt));
-  }
-
-  async getProperty(id: number): Promise<Property | undefined> {
-    const [property] = await db.select().from(properties).where(eq(properties.id, id));
-    return property;
-  }
-
-  async createProperty(property: InsertProperty): Promise<Property> {
-    const [newProperty] = await db.insert(properties).values(property).returning();
-    return newProperty;
-  }
-
-  async updateProperty(id: number, property: Partial<InsertProperty>): Promise<Property> {
-    const [updatedProperty] = await db
-      .update(properties)
-      .set({ ...property, updatedAt: new Date() })
-      .where(eq(properties.id, id))
-      .returning();
-    return updatedProperty;
-  }
-
-  // Resident operations
-  async getResidents(): Promise<Resident[]> {
-    return await db.select().from(residents).orderBy(desc(residents.createdAt));
-  }
-
-  async getResident(id: number): Promise<Resident | undefined> {
-    const [resident] = await db.select().from(residents).where(eq(residents.id, id));
-    return resident;
-  }
-
-  async createResident(resident: InsertResident): Promise<Resident> {
-    const [newResident] = await db.insert(residents).values(resident).returning();
-    
-    // Update property occupancy
-    if (resident.propertyId) {
-      await db
-        .update(properties)
-        .set({ 
-          occupiedUnits: sql`${properties.occupiedUnits} + 1`,
-          updatedAt: new Date()
-        })
-        .where(eq(properties.id, resident.propertyId));
-    }
-    
-    return newResident;
-  }
-
-  async updateResident(id: number, resident: Partial<InsertResident>): Promise<Resident> {
-    const [updatedResident] = await db
-      .update(residents)
-      .set({ ...resident, updatedAt: new Date() })
-      .where(eq(residents.id, id))
-      .returning();
-    return updatedResident;
-  }
-
-  async getResidentsByProperty(propertyId: number): Promise<Resident[]> {
-    return await db.select().from(residents).where(eq(residents.propertyId, propertyId));
-  }
-
-  async getRiskyResidents(): Promise<Resident[]> {
-    return await db
-      .select()
-      .from(residents)
-      .where(sql`${residents.riskLevel} IN ('medium', 'high')`)
-      .orderBy(desc(residents.updatedAt));
-  }
-
-  // Support Plan operations
-  async getSupportPlans(): Promise<SupportPlan[]> {
-    return await db.select().from(supportPlans).orderBy(desc(supportPlans.createdAt));
-  }
-
-  async getSupportPlan(id: number): Promise<SupportPlan | undefined> {
-    const [plan] = await db.select().from(supportPlans).where(eq(supportPlans.id, id));
-    return plan;
-  }
-
-  async createSupportPlan(plan: InsertSupportPlan): Promise<SupportPlan> {
-    const [newPlan] = await db.insert(supportPlans).values(plan).returning();
-    return newPlan;
-  }
-
-  async updateSupportPlan(id: number, plan: Partial<InsertSupportPlan>): Promise<SupportPlan> {
-    const [updatedPlan] = await db
-      .update(supportPlans)
-      .set({ ...plan, updatedAt: new Date() })
-      .where(eq(supportPlans.id, id))
-      .returning();
-    return updatedPlan;
-  }
-
-  async getSupportPlansByResident(residentId: number): Promise<SupportPlan[]> {
-    return await db.select().from(supportPlans).where(eq(supportPlans.residentId, residentId));
-  }
-
-  // Incident operations
-  async getIncidents(): Promise<Incident[]> {
-    return await db.select().from(incidents).orderBy(desc(incidents.createdAt));
-  }
-
-  async getIncident(id: number): Promise<Incident | undefined> {
-    const [incident] = await db.select().from(incidents).where(eq(incidents.id, id));
-    return incident;
-  }
-
-  async createIncident(incident: InsertIncident): Promise<Incident> {
-    const [newIncident] = await db.insert(incidents).values(incident).returning();
-    return newIncident;
-  }
-
-  async updateIncident(id: number, incident: Partial<InsertIncident>): Promise<Incident> {
-    const [updatedIncident] = await db
-      .update(incidents)
-      .set({ ...incident, updatedAt: new Date() })
-      .where(eq(incidents.id, id))
-      .returning();
-    return updatedIncident;
-  }
-
-  async getActiveIncidents(): Promise<Incident[]> {
-    return await db
-      .select()
-      .from(incidents)
-      .where(sql`${incidents.status} IN ('open', 'investigating')`)
-      .orderBy(desc(incidents.createdAt));
-  }
-
-  // Activity operations
-  async getActivities(limit = 10): Promise<Activity[]> {
-    return await db
-      .select()
-      .from(activities)
-      .orderBy(desc(activities.createdAt))
-      .limit(limit);
-  }
-
-  async createActivity(activity: InsertActivity): Promise<Activity> {
-    const [newActivity] = await db.insert(activities).values(activity).returning();
-    return newActivity;
-  }
-
-  // Financial operations
-  async getFinancialRecords(): Promise<FinancialRecord[]> {
-    return await db.select().from(financialRecords).orderBy(desc(financialRecords.createdAt));
-  }
-
-  async createFinancialRecord(record: InsertFinancialRecord): Promise<FinancialRecord> {
-    const [newRecord] = await db.insert(financialRecords).values(record).returning();
-    return newRecord;
-  }
-
-  // Dashboard metrics
-  async getDashboardMetrics(): Promise<{
-    totalProperties: number;
-    currentResidents: number;
-    occupancyRate: number;
-    activeIncidents: number;
   }> {
-    const [propertyCount] = await db.select({ count: count() }).from(properties);
-    const [residentCount] = await db.select({ count: count() }).from(residents).where(eq(residents.status, 'active'));
-    const [activeIncidentCount] = await db.select({ count: count() }).from(incidents).where(sql`${incidents.status} IN ('open', 'investigating')`);
-    
-    const [occupancyData] = await db
-      .select({
-        totalUnits: sum(properties.totalUnits),
-        occupiedUnits: sum(properties.occupiedUnits),
-      })
-      .from(properties);
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1;
+    const currentYear = currentDate.getFullYear();
 
-    const occupancyRate = occupancyData.totalUnits && occupancyData.occupiedUnits 
-      ? Math.round((Number(occupancyData.occupiedUnits) / Number(occupancyData.totalUnits)) * 100)
-      : 0;
+    // Total revenue from paid invoices
+    const [totalRevenueResult] = await db
+      .select({ total: sum(invoices.totalAmount) })
+      .from(invoices)
+      .where(eq(invoices.status, 'paid'));
+
+    // Monthly revenue
+    const [monthlyRevenueResult] = await db
+      .select({ total: sum(invoices.totalAmount) })
+      .from(invoices)
+      .where(
+        and(
+          eq(invoices.status, 'paid'),
+          sql`EXTRACT(MONTH FROM ${invoices.paidDate}) = ${currentMonth}`,
+          sql`EXTRACT(YEAR FROM ${invoices.paidDate}) = ${currentYear}`
+        )
+      );
+
+    // Outstanding amount
+    const [outstandingResult] = await db
+      .select({ total: sum(invoices.totalAmount) })
+      .from(invoices)
+      .where(sql`${invoices.status} IN ('pending', 'sent', 'overdue')`);
+
+    // Invoice counts
+    const [paidCount] = await db
+      .select({ count: count() })
+      .from(invoices)
+      .where(eq(invoices.status, 'paid'));
+
+    const [pendingCount] = await db
+      .select({ count: count() })
+      .from(invoices)
+      .where(eq(invoices.status, 'pending'));
+
+    const [overdueCount] = await db
+      .select({ count: count() })
+      .from(invoices)
+      .where(eq(invoices.status, 'overdue'));
+
+    // Top clients with proper null handling
+    const topClients = await db
+      .select({
+        clientId: invoices.governmentClientId,
+        clientName: governmentClients.clientName,
+        totalAmount: sum(invoices.totalAmount),
+        invoiceCount: count(invoices.id),
+      })
+      .from(invoices)
+      .innerJoin(governmentClients, eq(invoices.governmentClientId, governmentClients.id))
+      .where(sql`${invoices.governmentClientId} IS NOT NULL`)
+      .groupBy(invoices.governmentClientId, governmentClients.clientName)
+      .orderBy(desc(sum(invoices.totalAmount)))
+      .limit(5);
 
     return {
-      totalProperties: propertyCount.count,
-      currentResidents: residentCount.count,
-      occupancyRate,
-      activeIncidents: activeIncidentCount.count,
+      totalRevenue: Number(totalRevenueResult?.total || 0),
+      monthlyRevenue: Number(monthlyRevenueResult?.total || 0),
+      outstandingAmount: Number(outstandingResult?.total || 0),
+      paidInvoices: Number(paidCount?.count || 0),
+      pendingInvoices: Number(pendingCount?.count || 0),
+      overdueInvoices: Number(overdueCount?.count || 0),
+      topClients: topClients.map(client => ({
+        clientId: client.clientId!,
+        clientName: client.clientName,
+        totalAmount: Number(client.totalAmount || 0),
+        invoiceCount: Number(client.invoiceCount || 0),
+      })),
     };
   }
 
-  // Form drafts operations
-  async getFormDraft(userId: string, formType: string): Promise<FormDraft | undefined> {
-    const [draft] = await db.select().from(formDrafts)
-      .where(and(eq(formDrafts.userId, userId), eq(formDrafts.formType, formType)))
-      .orderBy(desc(formDrafts.updatedAt))
-      .limit(1);
-    return draft || undefined;
-  }
-
-  async createFormDraft(draft: InsertFormDraft): Promise<FormDraft> {
-    const [newDraft] = await db.insert(formDrafts).values(draft).returning();
-    return newDraft;
-  }
-
-  async updateFormDraft(id: number, draft: Partial<InsertFormDraft>): Promise<FormDraft> {
-    const [updatedDraft] = await db.update(formDrafts)
-      .set({ ...draft, updatedAt: new Date() })
-      .where(eq(formDrafts.id, id))
-      .returning();
-    return updatedDraft;
-  }
-
-  // Property rooms operations
-  async getPropertyRooms(propertyId: number): Promise<PropertyRoom[]> {
-    return await db.select().from(propertyRooms)
-      .where(eq(propertyRooms.propertyId, propertyId));
-  }
-
-  async createPropertyRoom(room: InsertPropertyRoom): Promise<PropertyRoom> {
-    const [newRoom] = await db.insert(propertyRooms).values(room).returning();
-    return newRoom;
-  }
-
-  async updatePropertyRoom(id: number, room: Partial<InsertPropertyRoom>): Promise<PropertyRoom> {
-    const [updatedRoom] = await db.update(propertyRooms)
-      .set({ ...room, updatedAt: new Date() })
-      .where(eq(propertyRooms.id, id))
-      .returning();
-    return updatedRoom;
-  }
-
-  // Staff members operations
-  async getStaffMembers(): Promise<StaffMember[]> {
-    return await db.select().from(staffMembers)
-      .where(eq(staffMembers.isActive, true));
-  }
-
-  async createStaffMember(staff: InsertStaffMember): Promise<StaffMember> {
-    const [newStaff] = await db.insert(staffMembers).values(staff).returning();
-    return newStaff;
-  }
-
-  async updateStaffMember(id: number, staff: Partial<InsertStaffMember>): Promise<StaffMember> {
-    const [updatedStaff] = await db.update(staffMembers)
-      .set({ ...staff, updatedAt: new Date() })
-      .where(eq(staffMembers.id, id))
-      .returning();
-    return updatedStaff;
-  }
-
-  // Maintenance requests operations
-  async getMaintenanceRequests(): Promise<MaintenanceRequest[]> {
-    return await db.select().from(maintenanceRequests)
-      .orderBy(desc(maintenanceRequests.createdAt));
-  }
-
-  async createMaintenanceRequest(request: InsertMaintenanceRequest): Promise<MaintenanceRequest> {
-    const [newRequest] = await db.insert(maintenanceRequests).values(request).returning();
-    return newRequest;
-  }
-
-  async updateMaintenanceRequest(id: number, request: Partial<InsertMaintenanceRequest>): Promise<MaintenanceRequest> {
-    const [updatedRequest] = await db.update(maintenanceRequests)
-      .set({ ...request, updatedAt: new Date() })
-      .where(eq(maintenanceRequests.id, id))
-      .returning();
-    return updatedRequest;
-  }
-
-  // Tenancy agreements operations
-  async getTenancyAgreements(): Promise<TenancyAgreement[]> {
-    return await db.select().from(tenancyAgreements)
-      .orderBy(desc(tenancyAgreements.createdAt));
-  }
-
-  async createTenancyAgreement(agreement: InsertTenancyAgreement): Promise<TenancyAgreement> {
-    const [newAgreement] = await db.insert(tenancyAgreements).values(agreement).returning();
-    return newAgreement;
-  }
-
-  async updateTenancyAgreement(id: number, agreement: Partial<InsertTenancyAgreement>): Promise<TenancyAgreement> {
-    const [updatedAgreement] = await db.update(tenancyAgreements)
-      .set({ ...agreement, updatedAt: new Date() })
-      .where(eq(tenancyAgreements.id, id))
-      .returning();
-    return updatedAgreement;
-  }
-
-  // Assessment forms operations
-  async getAssessmentForms(): Promise<AssessmentForm[]> {
-    return await db.select().from(assessmentForms)
-      .orderBy(desc(assessmentForms.createdAt));
-  }
-
-  async createAssessmentForm(form: InsertAssessmentForm): Promise<AssessmentForm> {
-    const [newForm] = await db.insert(assessmentForms).values(form).returning();
-    return newForm;
-  }
-
-  async updateAssessmentForm(id: number, form: Partial<InsertAssessmentForm>): Promise<AssessmentForm> {
-    const [updatedForm] = await db.update(assessmentForms)
-      .set({ ...form, updatedAt: new Date() })
-      .where(eq(assessmentForms.id, id))
-      .returning();
-    return updatedForm;
-  }
-
-  // Progress tracking operations
-  async getProgressTracking(residentId?: number): Promise<ProgressTracking[]> {
-    const query = db.select().from(progressTracking);
+  // Security operations
+  async getUserLockoutData(userId: string): Promise<{
+    failedAttempts: number;
+    lockedUntil: number | null;
+    lastAttempt: number | null;
+  }> {
+    const [lockout] = await db
+      .select()
+      .from(accountLockouts)
+      .where(eq(accountLockouts.userId, userId));
     
-    if (residentId) {
-      query.where(eq(progressTracking.residentId, residentId));
+    return {
+      failedAttempts: lockout?.failedAttempts || 0,
+      lockedUntil: lockout?.lockedUntil?.getTime() || null,
+      lastAttempt: lockout?.lastAttempt?.getTime() || null,
+    };
+  }
+
+  async updateUserLockout(userId: string, data: {
+    failedAttempts: number;
+    lockedUntil: number | null;
+    lastAttempt: number;
+  }): Promise<void> {
+    await db
+      .insert(accountLockouts)
+      .values({
+        userId,
+        failedAttempts: data.failedAttempts,
+        lockedUntil: data.lockedUntil ? new Date(data.lockedUntil) : null,
+        lastAttempt: new Date(data.lastAttempt),
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: accountLockouts.userId,
+        set: {
+          failedAttempts: data.failedAttempts,
+          lockedUntil: data.lockedUntil ? new Date(data.lockedUntil) : null,
+          lastAttempt: new Date(data.lastAttempt),
+          updatedAt: new Date(),
+        },
+      });
+  }
+
+  async resetUserLockout(userId: string): Promise<void> {
+    await db
+      .update(accountLockouts)
+      .set({
+        failedAttempts: 0,
+        lockedUntil: null,
+        resetAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(accountLockouts.userId, userId));
+  }
+
+  // Session management
+  async getSession(sessionId: number): Promise<any> {
+    const [session] = await db
+      .select()
+      .from(userSessions)
+      .where(eq(userSessions.id, sessionId));
+    
+    return session;
+  }
+
+  async createSession(session: {
+    userId: string;
+    sessionToken: string;
+    deviceInfo: any;
+    expiresAt: Date;
+  }): Promise<number> {
+    const [result] = await db.insert(userSessions).values({
+      userId: session.userId,
+      sessionToken: session.sessionToken,
+      deviceInfo: session.deviceInfo,
+      expiresAt: session.expiresAt,
+      lastActivity: new Date(),
+    }).returning({ id: userSessions.id });
+    
+    return result.id;
+  }
+
+  async updateSessionActivity(sessionId: number): Promise<void> {
+    await db
+      .update(userSessions)
+      .set({
+        lastActivity: new Date(),
+      })
+      .where(eq(userSessions.id, sessionId));
+  }
+
+  async deleteSession(sessionId: number): Promise<void> {
+    await db.delete(userSessions).where(eq(userSessions.id, sessionId));
+  }
+
+  async getUserActiveSessions(userId: string): Promise<any[]> {
+    return await db
+      .select()
+      .from(userSessions)
+      .where(and(
+        eq(userSessions.userId, userId),
+        eq(userSessions.isActive, true)
+      ));
+  }
+
+  async deleteAllUserSessions(userId: string): Promise<void> {
+    await db.delete(userSessions).where(eq(userSessions.userId, userId));
+  }
+
+  // Audit logging
+  async createAuditLog(log: {
+    userId: string;
+    action: string;
+    resource: string;
+    resourceId?: string;
+    details: any;
+    ipAddress?: string;
+    userAgent?: string;
+    success: boolean;
+    riskLevel: string;
+  }): Promise<void> {
+    await db.insert(auditLogs).values({
+      userId: log.userId,
+      action: log.action,
+      resource: log.resource,
+      resourceId: log.resourceId,
+      details: log.details,
+      ipAddress: log.ipAddress,
+      userAgent: log.userAgent,
+      success: log.success,
+      riskLevel: log.riskLevel,
+      timestamp: new Date(),
+    });
+  }
+
+  // Document storage operations
+  async createDocument(document: InsertDocumentStorage): Promise<DocumentStorage> {
+    const result = await db
+      .insert(documentStorage)
+      .values({
+        ...document,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+    
+    if (!Array.isArray(result) || result.length === 0) {
+      throw new Error('Failed to create document');
+    }
+    return result[0] as DocumentStorage;
+  }
+
+  async getDocument(id: number): Promise<DocumentStorage | undefined> {
+    const [document] = await db
+      .select()
+      .from(documentStorage)
+      .where(eq(documentStorage.id, id));
+    return document;
+  }
+
+  async getDocuments(filters?: { entityType?: string; entityId?: number; documentType?: string }): Promise<DocumentStorage[]> {
+    const conditions = [];
+    
+    if (filters?.entityType) {
+      conditions.push(eq(documentStorage.entityType, filters.entityType));
+    }
+    if (filters?.entityId) {
+      conditions.push(eq(documentStorage.entityId, filters.entityId));
+    }
+    if (filters?.documentType) {
+      conditions.push(eq(documentStorage.documentType, filters.documentType));
     }
     
-    return await query.orderBy(desc(progressTracking.lastUpdated));
+    if (conditions.length > 0) {
+      return await db.select().from(documentStorage)
+        .where(and(...conditions))
+        .orderBy(desc(documentStorage.createdAt));
+    }
+    
+    return await db.select().from(documentStorage)
+      .orderBy(desc(documentStorage.createdAt));
   }
 
+  async updateDocument(id: number, updates: Partial<DocumentStorage>): Promise<DocumentStorage> {
+    const [updatedDocument] = await db
+      .update(documentStorage)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(documentStorage.id, id))
+      .returning();
+    return updatedDocument;
+  }
+
+  async deleteDocument(id: number): Promise<void> {
+    await db.delete(documentStorage).where(eq(documentStorage.id, id));
+  }
+
+  async searchDocuments(query: string, filters?: { entityType?: string; documentType?: string }): Promise<DocumentStorage[]> {
+    const conditions = [
+      sql`${documentStorage.originalName} ILIKE ${`%${query}%`} OR 
+          ${documentStorage.description} ILIKE ${`%${query}%`} OR 
+          array_to_string(${documentStorage.tags}, ' ') ILIKE ${`%${query}%`}`
+    ];
+
+    if (filters?.entityType) {
+      conditions.push(eq(documentStorage.entityType, filters.entityType));
+    }
+    if (filters?.documentType) {
+      conditions.push(eq(documentStorage.documentType, filters.documentType));
+    }
+
+    return await db
+      .select()
+      .from(documentStorage)
+      .where(and(...conditions))
+      .orderBy(desc(documentStorage.createdAt));
+  }
+
+  // File sharing operations
+  async createFileShare(share: InsertFileSharing): Promise<FileSharing> {
+    const [newShare] = await db
+      .insert(fileSharing)
+      .values({
+        ...share,
+        createdAt: new Date(),
+      })
+      .returning();
+    return newShare;
+  }
+
+  async getFileShares(documentId: number): Promise<FileSharing[]> {
+    return await db
+      .select()
+      .from(fileSharing)
+      .where(and(
+        eq(fileSharing.documentId, documentId),
+        eq(fileSharing.isRevoked, false)
+      ))
+      .orderBy(desc(fileSharing.createdAt));
+  }
+
+  async updateFileShare(id: number, updates: Partial<FileSharing>): Promise<FileSharing> {
+    const [updatedShare] = await db
+      .update(fileSharing)
+      .set(updates)
+      .where(eq(fileSharing.id, id))
+      .returning();
+    return updatedShare;
+  }
+
+  async revokeFileShare(id: number): Promise<void> {
+    await db
+      .update(fileSharing)
+      .set({
+        isRevoked: true,
+        revokedAt: new Date(),
+      })
+      .where(eq(fileSharing.id, id));
+  }
+
+  // File access logging
+  async logFileAccess(log: InsertFileAccessLog): Promise<FileAccessLog> {
+    const [newLog] = await db
+      .insert(fileAccessLogs)
+      .values({
+        ...log,
+        createdAt: new Date(),
+      })
+      .returning();
+    return newLog;
+  }
+
+  async getFileAccessLogs(documentId: number): Promise<FileAccessLog[]> {
+    return await db
+      .select()
+      .from(fileAccessLogs)
+      .where(eq(fileAccessLogs.documentId, documentId))
+      .orderBy(desc(fileAccessLogs.createdAt));
+  }
+
+  // File backup operations
+  async createBackupRecord(backup: InsertFileBackupRecord): Promise<FileBackupRecord> {
+    const [newBackup] = await db
+      .insert(fileBackupRecords)
+      .values({
+        ...backup,
+        createdAt: new Date(),
+      })
+      .returning();
+    return newBackup;
+  }
+
+  async getBackupRecords(): Promise<FileBackupRecord[]> {
+    return await db
+      .select()
+      .from(fileBackupRecords)
+      .orderBy(desc(fileBackupRecords.createdAt));
+  }
+
+  async updateBackupRecord(id: number, updates: Partial<FileBackupRecord>): Promise<FileBackupRecord> {
+    const [updatedBackup] = await db
+      .update(fileBackupRecords)
+      .set(updates)
+      .where(eq(fileBackupRecords.id, id))
+      .returning();
+    return updatedBackup;
+  }
+}
+
+export const storage = new DatabaseStorage();
   async createProgressTracking(tracking: InsertProgressTracking): Promise<ProgressTracking> {
     const [newTracking] = await db.insert(progressTracking).values(tracking).returning();
     return newTracking;

@@ -1,58 +1,47 @@
+import {
+  auditLogs,
+  insertAssessmentFormSchema,
+  insertFinancialRecordSchema,
+  insertGovernmentClientSchema,
+  insertIncidentSchema,
+  insertMaintenanceRequestSchema,
+  insertPropertyRoomSchema,
+  insertPropertySchema,
+  insertResidentSchema,
+  insertStaffMemberSchema,
+  insertSupportPlanSchema,
+  insertTenancyAgreementSchema
+} from "@shared/schema";
+import { and, desc, eq, sql } from "drizzle-orm";
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
-import { setupMultiAuth, multiAuthManager } from "./multiAuth";
-import { db, getPoolStats, monitorPoolHealth, checkDatabaseHealth } from "./db";
-import { createAuthLimiter, createPasswordResetLimiter, PasswordValidator, MFAManager, AccountLockoutManager, SessionManager, AuditLogger, JWTManager } from "./security/authSecurity";
-import { requirePermission, requireRole, requireResourceAccess, filterDataByRole, PermissionChecker, PERMISSIONS, ROLES } from "./security/rbacMiddleware";
-import { SSOIntegration } from "./security/ssoIntegration";
-import { healthCheck, readinessCheck, livenessCheck } from "./middleware/healthCheck";
-import { strictApiRateLimit, createRateLimit, reportRateLimit } from "./middleware/rateLimiter";
+import { checkDatabaseHealth, db, getPoolStats, monitorPoolHealth } from "./db";
+import { healthCheck, livenessCheck, readinessCheck } from "./middleware/healthCheck";
 import { validateInput } from "./middleware/inputSanitization";
-import { 
-  insertPropertySchema, 
-  insertResidentSchema, 
-  insertSupportPlanSchema, 
-  insertIncidentSchema,
-  insertActivitySchema,
-  insertFinancialRecordSchema,
-  insertMaintenanceRequestSchema,
-  insertTenancyAgreementSchema,
-  insertAssessmentFormSchema,
-  insertStaffMemberSchema,
-  insertPropertyRoomSchema,
-  insertGovernmentClientSchema,
-  insertSupportLevelRateSchema,
-  insertBillingPeriodSchema,
-  insertInvoiceSchema,
-  insertInvoiceLineItemSchema,
-  insertPaymentReminderSchema,
-  insertAuditTrailSchema,
-  auditLogs,
-} from "@shared/schema";
-import { z } from "zod";
-import { eq, desc, sql, and } from "drizzle-orm";
+import { multiAuthManager, setupMultiAuth } from "./multiAuth";
 import {
-  verifyPlatformAdmin,
   checkPlatformAdminAuth,
-  getPlatformOverview,
-  getPlatformSubscriptions,
-  getPlatformOrganizations,
-  getSystemMonitoring,
-  getPlatformAnalytics,
+  exportAggregatedData,
   getBillingOversight,
   getFeatureFlags,
-  handleEmergencyAction,
-  getOrganizationBreakdowns,
   getHistoricalTrends,
+  getOrganizationBreakdowns,
+  getPlatformAnalytics,
+  getPlatformOrganizations,
+  getPlatformOverview,
+  getPlatformSubscriptions,
   getRealTimeDashboardMetrics,
-  exportAggregatedData,
+  getSystemMonitoring,
+  handleEmergencyAction,
   validateDataConsistency
 } from './platformAdmin';
 import { enhancedPlatformAdminAuth } from './platformAdminValidation';
+import { isAuthenticated, setupAuth } from "./replitAuth";
 import fileManagementRoutes from './routes/fileManagement';
 import monitoringRoutes from './routes/monitoring';
+import { AuditLogger, createAuthLimiter, createPasswordResetLimiter, MFAManager } from "./security/authSecurity";
+import { filterDataByRole, PERMISSIONS, requirePermission } from "./security/rbacMiddleware";
+import { storage } from "./storage";
 
 export async function registerRoutes(app: Express, server?: Server): Promise<Server> {
   // Auth middleware
@@ -119,20 +108,18 @@ export async function registerRoutes(app: Express, server?: Server): Promise<Ser
   // Monitoring routes (system optimization)
   app.use('/api/monitoring', monitoringRoutes);
 
-  // Auth routes
-  app.get('/api/auth/user', async (req: any, res) => {
+  // Auth routes with proper typing
+  app.get('/api/auth/user', async (req: Request & { user?: any }, res: Response) => {
     try {
       // Session debugging - temporary logging
       console.log('=== AUTH DEBUG ===');
       console.log('Session ID:', req.sessionID);
       console.log('User in session:', req.user);
-      console.log('Is authenticated:', req.isAuthenticated());
-      console.log('Session cookies:', req.headers.cookie);
-      console.log('Session store data:', req.session);
+      console.log('Is authenticated:', req.isAuthenticated?.());
       console.log('==================');
       
       // Check if user is authenticated via Passport
-      if (!req.isAuthenticated() || !req.user) {
+      if (!req.isAuthenticated?.() || !req.user) {
         return res.status(401).json({ message: "Unauthorized" });
       }
       
@@ -142,11 +129,15 @@ export async function registerRoutes(app: Express, server?: Server): Promise<Ser
       }
       const user = await storage.getUser(userId);
       
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
       // Log successful user data access
       await AuditLogger.logAuthAttempt(userId, true, {
         action: 'USER_DATA_ACCESS',
-        ip: req.ip,
-        userAgent: req.get('User-Agent'),
+        ip: req.ip || 'unknown',
+        userAgent: req.get('User-Agent') || 'unknown',
       });
       
       res.json(user);
@@ -586,8 +577,8 @@ export async function registerRoutes(app: Express, server?: Server): Promise<Ser
     }
   });
 
-  // Dashboard metrics
-  app.get('/api/dashboard/metrics', isAuthenticated, async (req, res) => {
+  // Dashboard metrics with proper error handling
+  app.get('/api/dashboard/metrics', isAuthenticated, async (req: Request, res: Response) => {
     try {
       const metrics = await storage.getDashboardMetrics();
       res.json(metrics);
@@ -598,7 +589,7 @@ export async function registerRoutes(app: Express, server?: Server): Promise<Ser
   });
 
   // Properties routes
-  app.get('/api/properties', isAuthenticated, requirePermission(PERMISSIONS.PROPERTIES_READ), async (req: any, res) => {
+  app.get('/api/properties', isAuthenticated, requirePermission(PERMISSIONS.PROPERTIES_READ), async (req: any, res: Response) => {
     try {
       const properties = await storage.getProperties();
       
@@ -787,7 +778,7 @@ export async function registerRoutes(app: Express, server?: Server): Promise<Ser
   });
 
   // Financial records routes
-  app.get('/api/financial-records', isAuthenticated, requirePermission(PERMISSIONS.FINANCIAL_READ), async (req: any, res) => {
+  app.get('/api/financial-records', isAuthenticated, requirePermission(PERMISSIONS.FINANCIAL_READ), async (req: any, res: Response) => {
     try {
       const records = await storage.getFinancialRecords();
       

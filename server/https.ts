@@ -1,9 +1,9 @@
-import https from 'https';
-import http from 'http';
+import { Express } from 'express';
 import fs from 'fs';
+import http from 'http';
+import https from 'https';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { Express } from 'express';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -89,36 +89,15 @@ export function setupSecurityHeaders(app: Express): void {
   });
 }
 
-export function getServerPort(): { port: number; isSSL: boolean } {
-  const isSSLEnabled = process.env.HTTPS_ENABLED === 'true';
-  const sslOptions = loadSSLCertificates();
-  
-  console.log('🔍 SSL Configuration Debug:');
-  console.log('  HTTPS_ENABLED:', process.env.HTTPS_ENABLED);
-  console.log('  SSL enabled:', isSSLEnabled);
-  console.log('  SSL certificates available:', sslOptions ? 'Yes' : 'No');
-  
-  if (isSSLEnabled && sslOptions) {
-    return {
-      port: parseInt(process.env.SSL_PORT || '443', 10),
-      isSSL: true
-    };
-  }
-  
-  return {
-    port: parseInt(process.env.PORT || '5000', 10),
-    isSSL: false
-  };
-}
-
 export function validateSSLCertificate(): boolean {
-  const sslOptions = loadSSLCertificates();
-  
-  if (!sslOptions) {
-    return false;
-  }
-  
   try {
+    const sslOptions = loadSSLCertificates();
+    
+    if (!sslOptions) {
+      console.log('📋 No SSL certificates found for validation');
+      return false;
+    }
+    
     // Basic certificate validation
     const certString = sslOptions.cert.toString();
     const keyString = sslOptions.key.toString();
@@ -126,7 +105,8 @@ export function validateSSLCertificate(): boolean {
     // Check if certificate and key contain required headers
     const hasCertHeader = certString.includes('-----BEGIN CERTIFICATE-----');
     const hasKeyHeader = keyString.includes('-----BEGIN PRIVATE KEY-----') || 
-                        keyString.includes('-----BEGIN RSA PRIVATE KEY-----');
+                        keyString.includes('-----BEGIN RSA PRIVATE KEY-----') ||
+                        keyString.includes('-----BEGIN EC PRIVATE KEY-----');
     
     if (!hasCertHeader || !hasKeyHeader) {
       console.error('❌ Invalid SSL certificate format');
@@ -139,4 +119,23 @@ export function validateSSLCertificate(): boolean {
     console.error('❌ SSL certificate validation failed:', error);
     return false;
   }
+}
+
+export function getServerPort(): { port: number; isSSL: boolean } {
+  const isSSLEnabled = process.env.HTTPS_ENABLED === 'true';
+  const sslOptions = loadSSLCertificates();
+  
+  console.log('🔍 SSL Configuration Debug:');
+  console.log('  HTTPS_ENABLED:', process.env.HTTPS_ENABLED);
+  console.log('  SSL enabled:', isSSLEnabled);
+  console.log('  SSL certificates available:', sslOptions ? 'Yes' : 'No');
+  
+  // For Replit deployment, always use port 5000
+  const port = parseInt(process.env.PORT || '5000', 10);
+  
+  if (isSSLEnabled && sslOptions && validateSSLCertificate()) {
+    return { port, isSSL: true };
+  }
+  
+  return { port, isSSL: false };
 }

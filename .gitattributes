@@ -1,0 +1,17 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# TypeScript files
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.json text eol=lf
+
+# Config files
+*.md text eol=lf
+tsconfig.json text eol=lf
+package.json text eol=lf
+.cursorrules text eol=lf
+
+# Ensure consistent line endings for development across platforms

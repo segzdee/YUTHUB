@@ -5,64 +5,76 @@ dotenv.config();
 // Disable HTTPS for development to fix web server access
 process.env.HTTPS_ENABLED = 'false';
 
-import express, { type Request, Response, NextFunction } from "express";
 import cors from "cors";
-import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
-import { WebSocketManager } from "./websocket";
-import { apiRateLimit } from "./middleware/rateLimiter";
-import { sanitizeInput } from "./middleware/inputSanitization";
-import { backgroundJobScheduler } from "./jobs/backgroundJobs";
-import { handleComputeLifecycle, monitorPoolHealth, getPoolStats } from "./db";
-import { ComputeLifecycleManager, requestTrackingMiddleware } from "./middleware/computeLifecycle";
-import { 
-  memoryTrackingMiddleware, 
-  startMemoryMonitoring, 
-  memoryLimitMiddleware,
-  cleanupMemory 
-} from "./middleware/memoryOptimization";
-import { 
-  performanceTrackingMiddleware, 
-  cacheMiddleware, 
-  queryOptimizationMiddleware 
-} from "./middleware/performanceOptimization";
-import { 
-  errorHandlingMiddleware, 
-  notFoundHandler 
-} from "./middleware/errorHandling";
-import { 
-  createSecureServer, 
-  setupSSLRedirect, 
-  setupSecurityHeaders, 
-  getServerPort, 
-  validateSSLCertificate 
+import express from "express";
+import { handleComputeLifecycle } from "./db";
+import {
+  createSecureServer,
+  getServerPort,
+  setupSSLRedirect,
+  setupSecurityHeaders,
+  validateSSLCertificate
 } from "./https";
+import { backgroundJobScheduler } from "./jobs/backgroundJobs";
+import { ComputeLifecycleManager, requestTrackingMiddleware } from "./middleware/computeLifecycle";
+import {
+  errorHandlingMiddleware,
+  notFoundHandler
+} from "./middleware/errorHandling";
+import { sanitizeInput } from "./middleware/inputSanitization";
+import {
+  cleanupMemory,
+  memoryLimitMiddleware,
+  memoryTrackingMiddleware,
+  startMemoryMonitoring
+} from "./middleware/memoryOptimization";
+import {
+  cacheMiddleware,
+  performanceTrackingMiddleware,
+  queryOptimizationMiddleware
+} from "./middleware/performanceOptimization";
+import { registerRoutes } from "./routes";
+import { log, serveStatic, setupVite } from "./vite";
+import { WebSocketManager } from "./websocket";
 
 const app = express();
 
 // CORS configuration for production and development
 const corsOrigins = process.env.NODE_ENV === 'production' 
   ? [
-      'https://yuthub.replit.app',  // Primary Replit domain
-      'https://yuthub.com',         // Custom domain
-      'https://www.yuthub.com',     // Custom domain with www
-      'https://app.yuthub.com',     // App subdomain
-      'https://admin.yuthub.com'    // Admin subdomain
+      'https://yuthub.replit.app',
+      'https://yuthub.com',
+      'https://www.yuthub.com',
+      'https://app.yuthub.com',
+      'https://admin.yuthub.com'
     ]
   : [
       'http://localhost:3000',
       'http://localhost:5000',
-      'https://yuthub.replit.app',  // Allow production domain in development
-      'https://yuthub.com',         // Allow custom domain in development
-      'https://www.yuthub.com',     // Allow www domain in development
-      'https://27891fa9-b276-4e4e-a11a-60ce998c53b2-00-2uromwtwyow5n.janeway.replit.dev'
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:5000',
+      'https://yuthub.replit.app'
     ];
 
 app.use(cors({
-  origin: corsOrigins,
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (corsOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    // Allow Replit preview domains in development
+    if (process.env.NODE_ENV === 'development' && origin.includes('.replit.dev')) {
+      return callback(null, true);
+    }
+    
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
   exposedHeaders: ['Set-Cookie'],
   maxAge: 86400 // 24 hours
 }));
@@ -72,8 +84,8 @@ app.use(cors({
 // app.use(apiRateLimit);
 app.use(sanitizeInput);
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Add request tracking middleware
 app.use(requestTrackingMiddleware);

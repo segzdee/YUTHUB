@@ -1,10 +1,9 @@
+import { desc, eq, sql } from 'drizzle-orm';
 import { Request, Response } from 'express';
+import { auditLogs, organizations, organizationSubscriptions, users } from '../shared/schema';
 import { db } from './db';
-import { users, organizations, auditLogs, organizationSubscriptions } from '../shared/schema';
-import { eq, desc, count, sql } from 'drizzle-orm';
-import { PlatformAdminValidator, DataIntegrityValidator, PerformanceMonitor } from './platformAdminValidation';
-import { PlatformDataAggregator, AggregatedDataValidator, SecureDataExporter } from './platformAdminAggregation';
-import { PlatformDataAggregator, AggregatedDataValidator, SecureDataExporter } from './platformAdminAggregation';
+import { AggregatedDataValidator, PlatformDataAggregator, SecureDataExporter } from './platformAdminAggregation';
+import { DataIntegrityValidator, PerformanceMonitor, PlatformAdminValidator } from './platformAdminValidation';
 
 // Platform Admin Authentication Middleware
 export async function verifyPlatformAdmin(req: Request, res: Response, next: any) {

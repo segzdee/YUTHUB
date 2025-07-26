@@ -20,14 +20,16 @@ export class WebSocketManager {
   initialize(server: Server) {
     this.wss = new WebSocketServer({ 
       server,
-      path: '/platform-ws' 
+      path: '/ws',
+      perMessageDeflate: false,
+      maxPayload: 1024 * 1024 // 1MB max payload
     });
 
     this.wss.on('connection', (ws: WebSocket, req: any) => {
       const clientId = this.generateClientId();
       this.clients.set(clientId, ws);
 
-      console.log(`WebSocket client connected: ${clientId}`);
+      console.log(`🔌 WebSocket client connected: ${clientId}`);
 
       // Send initial data
       this.sendInitialData(ws);

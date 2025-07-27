@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -8,10 +7,12 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ChevronLeft, ChevronRight, Save, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
 import { useAuth } from '@/hooks/useAuth';
+import { apiRequest } from '@/lib/queryClient';
+import type { FormStep, FormStepData } from '@shared/types';
+import { Check, ChevronLeft, ChevronRight, Save } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface FormStep {
   id: string;
@@ -136,11 +137,8 @@ export default function FormWizard({
     }
   };
 
-  const updateFormData = (stepData: any) => {
-    setFormData(prev => ({
-      ...prev,
-      ...stepData,
-    }));
+  const updateFormData = (stepData: FormStepData) => {
+    setFormData(prev => ({ ...prev, ...stepData }));
   };
 
   const canProceed = () => {

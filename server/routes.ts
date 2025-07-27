@@ -12,10 +12,10 @@ import {
   insertSupportPlanSchema,
   insertTenancyAgreementSchema,
 } from '@shared/schema';
-import { emailService } from './services/emailService.js';
+import type { ApiResponse, User } from '@shared/types';
 import crypto from 'crypto';
 import { and, desc, eq, sql } from 'drizzle-orm';
-import type { Express } from 'express';
+import type { Express, Request, Response } from 'express';
 import { createServer, type Server } from 'http';
 import { checkDatabaseHealth, db, getPoolStats, monitorPoolHealth } from './db';
 import {
@@ -56,7 +56,16 @@ import {
   PERMISSIONS,
   requirePermission,
 } from './security/rbacMiddleware';
+import { emailService } from './services/emailService.js';
 import { storage } from './storage';
+
+interface AuthenticatedRequest extends Request {
+  user?: {
+    claims?: {
+      sub: string;
+    };
+  };
+}
 
 export async function registerRoutes(
   app: Express,
@@ -129,28 +138,24 @@ export async function registerRoutes(
   // Auth routes with proper typing
   app.get(
     '/api/auth/user',
-    async (req: Request & { user?: any }, res: Response) => {
+    isAuthenticated,
+    async (req: AuthenticatedRequest, res: Response<ApiResponse<User>>) => {
       try {
-        // Session debugging - temporary logging
-        console.log('=== AUTH DEBUG ===');
-        console.log('Session ID:', req.sessionID);
-        console.log('User in session:', req.user);
-        console.log('Is authenticated:', req.isAuthenticated?.());
-        console.log('==================');
-
-        // Check if user is authenticated via Passport
-        if (!req.isAuthenticated?.() || !req.user) {
-          return res.status(401).json({ message: 'Unauthorized' });
-        }
-
-        const userId = req.user?.claims?.sub || req.user?.id;
+        const userId = req.user?.claims?.sub;
         if (!userId) {
-          return res.status(401).json({ message: 'Unauthorized' });
+          return res.status(401).json({
+            success: false,
+            error: 'User not authenticated',
+          });
         }
+
         const user = await storage.getUser(userId);
 
         if (!user) {
-          return res.status(404).json({ message: 'User not found' });
+          return res.status(404).json({
+            success: false,
+            error: 'User not found',
+          });
         }
 
         // Log successful user data access
@@ -160,10 +165,16 @@ export async function registerRoutes(
           userAgent: req.get('User-Agent') || 'unknown',
         });
 
-        res.json(user);
+        res.json({
+          success: true,
+          data: user,
+        });
       } catch (error) {
         console.error('Error fetching user:', error);
-        res.status(500).json({ message: 'Failed to fetch user' });
+        res.status(500).json({
+          success: false,
+          error: 'Internal server error',
+        });
       }
     }
   );

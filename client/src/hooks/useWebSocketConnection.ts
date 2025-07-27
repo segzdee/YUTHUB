@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { useAuth } from './useAuth';
 import { useDashboardStore } from '@/store/dashboardStore';
+import type { WebSocketMessage } from '@shared/types';
+import { useQueryClient } from '@tanstack/react-query';
+import { useEffect, useRef, useState } from 'react';
+import { useAuth } from './useAuth';
 
 interface WebSocketMessage {
   type: 'update' | 'notification' | 'metric_change' | 'incident_alert';
@@ -141,8 +142,8 @@ export function useWebSocketConnection() {
     };
   }, [isAuthenticated, user, queryClient, notifications]);
 
-  const sendMessage = (message: any) => {
-    if (ws.current && connectionStatus === 'connected') {
+  const sendMessage = (message: WebSocketMessage) => {
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
       ws.current.send(JSON.stringify(message));
     }
   };

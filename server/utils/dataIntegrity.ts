@@ -151,33 +151,20 @@ export class DatabaseBackupManager {
   }> {
     const timestamp = new Date().toISOString();
 
-    const [
-      users,
-      properties,
-      residents,
-      incidents,
-      activities,
-      financialRecords,
-    ] = await Promise.all([
-      db.execute(sql`SELECT COUNT(*) as count FROM users`),
-      db.execute(sql`SELECT COUNT(*) as count FROM properties`),
-      db.execute(sql`SELECT COUNT(*) as count FROM residents`),
-      db.execute(sql`SELECT COUNT(*) as count FROM incidents`),
-      db.execute(sql`SELECT COUNT(*) as count FROM activities`),
-      db.execute(sql`SELECT COUNT(*) as count FROM financial_records`),
-    ]);
-
+    // Remove unused tableChecks, dbSize, storage variables
     const tables = {
-      users: Number(users.rows[0]?.count || 0),
-      properties: Number(properties.rows[0]?.count || 0),
-      residents: Number(residents.rows[0]?.count || 0),
-      incidents: Number(incidents.rows[0]?.count || 0),
-      activities: Number(activities.rows[0]?.count || 0),
-      financial_records: Number(financialRecords.rows[0]?.count || 0),
+      users: await db.select({ count: count() }).from(users),
+      properties: await db.select({ count: count() }).from(properties),
+      residents: await db.select({ count: count() }).from(residents),
+      incidents: await db.select({ count: count() }).from(incidents),
+      activities: await db.select({ count: count() }).from(activities),
+      financialRecords: await db
+        .select({ count: count() })
+        .from(financialRecords),
     };
 
     const totalRecords = Object.values(tables).reduce(
-      (sum, count) => sum + count,
+      (sum, table) => sum + (table[0]?.count || 0),
       0
     );
 
@@ -185,9 +172,8 @@ export class DatabaseBackupManager {
       timestamp,
       tables,
       totalRecords,
+      version: '1.0.0',
     };
-
-    console.log('Database backup snapshot created:', snapshot);
 
     return snapshot;
   }

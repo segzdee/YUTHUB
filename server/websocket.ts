@@ -235,6 +235,27 @@ export class WebSocketManager {
   }
 
   // Platform admin specific methods
+  // Add type definitions at the top of the file
+  interface PlatformUpdateData {
+    type: string;
+    data: Record<string, unknown>;
+    timestamp?: number;
+  }
+  
+  interface OrganizationUpdateData {
+    organizationId: string;
+    type: string;
+    data: Record<string, unknown>;
+    timestamp?: number;
+  }
+  
+  interface SystemAlertData {
+    level: 'info' | 'warning' | 'error' | 'critical';
+    message: string;
+    details?: Record<string, unknown>;
+    timestamp?: number;
+  }
+
   async broadcastPlatformUpdate(updateType: string, data: any) {
     const message = {
       type: 'platform_update',
@@ -262,22 +283,16 @@ export class WebSocketManager {
     this.broadcast(message);
   }
 
-  // Around line 264 - prefix unused parameter with underscore
-  broadcastToRoles(_roles: string[], message: any) {
-    this.clients.forEach((ws, clientId) => {
-      if (ws.readyState === WebSocket.OPEN) {
-        // For now, broadcast to all connected clients
-        // In a full implementation, you'd check user roles from session
-        try {
-          ws.send(JSON.stringify(message));
-        } catch (error) {
-          console.error(`Error sending to client ${clientId}:`, error);
-          this.clients.delete(clientId);
-        }
-      } else {
-        this.clients.delete(clientId);
-      }
-    });
+  // Around line 266 - Fix broadcastToRoles method
+  broadcastToRoles(roles: string[], data: Record<string, unknown>): void {
+    const message = {
+      type: 'role_broadcast',
+      roles,
+      ...data,
+      timestamp: Date.now()
+    };
+    
+    this.broadcast(message);
   }
 
   async broadcastSystemAlert(

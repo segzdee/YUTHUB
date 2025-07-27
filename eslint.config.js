@@ -196,19 +196,6 @@ export default [
     },
   },
   {
-    ignores: [
-      'dist/**',
-      'build/**',
-      'node_modules/**',
-      'jest.config.js',
-      'vite.config.ts',
-      'tailwind.config.ts',
-      'postcss.config.js',
-      'drizzle.config.ts',
-      'test-*.js', // Add your test files that were causing issues
-      'test-session.js',
-      'test-ssl-config.js',
-      '**/*.config.*',
-    ],
+    ignores: ['dist/', 'jest.config.cjs'],
   },
 ];

@@ -1054,7 +1054,8 @@ export const documentStorage = pgTable(
     retentionDate: date('retention_date'),
     version: integer('version').default(1),
     parentDocumentId: integer('parent_document_id').references(
-      (): any => documentStorage.id
+      () => documentStorage.id,
+      { onDelete: 'set null' }
     ),
     isCurrentVersion: boolean('is_current_version').default(true),
     checksum: varchar('checksum'), // For file integrity verification
@@ -1646,7 +1647,8 @@ export const organizations = pgTable(
     settings: jsonb('settings'), // Organization-specific settings
     subscription: jsonb('subscription'), // Subscription details
     parentOrganizationId: integer('parent_organization_id').references(
-      (): any => organizations.id
+      () => organizations.id,
+      { onDelete: 'set null' }
     ),
     isActive: boolean('is_active').default(true),
     createdAt: timestamp('created_at').defaultNow(),
@@ -2860,7 +2862,8 @@ export const multiTenantSettings = pgTable(
     dataType: varchar('data_type').notNull(), // 'string', 'number', 'boolean', 'json'
     isInherited: boolean('is_inherited').default(false),
     parentSettingId: integer('parent_setting_id').references(
-      (): any => multiTenantSettings.id
+      () => multiTenantSettings.id,
+      { onDelete: 'set null' }
     ),
     lastModifiedBy: varchar('last_modified_by').references(() => users.id),
     createdAt: timestamp('created_at').defaultNow(),

@@ -1,230 +1,125 @@
 import {
-  users,
-  properties,
-  residents,
-  supportPlans,
-  incidents,
-  activities,
-  financialRecords,
-  formDrafts,
-  propertyRooms,
-  staffMembers,
-  maintenanceRequests,
-  tenancyAgreements,
-  assessmentForms,
-  progressTracking,
-  governmentClients,
-  supportLevelRates,
-  billingPeriods,
-  invoices,
-  invoiceLineItems,
-  paymentReminders,
-  auditTrail,
-  userSessions,
-  auditLogs,
   accountLockouts,
+  auditLogs,
+  auditTrail,
+  billingPeriods,
   documentStorage,
-  fileSharing,
   fileAccessLogs,
   fileBackupRecords,
-  type User,
-  type UpsertUser,
-  type Property,
-  type InsertProperty,
-  type Resident,
-  type InsertResident,
-  type SupportPlan,
-  type InsertSupportPlan,
-  type Incident,
-  type InsertIncident,
-  type Activity,
-  type InsertActivity,
-  type FinancialRecord,
-  type InsertFinancialRecord,
-  type FormDraft,
-  type InsertFormDraft,
-  type PropertyRoom,
-  type InsertPropertyRoom,
-  type StaffMember,
-  type InsertStaffMember,
-  type MaintenanceRequest,
-  type InsertMaintenanceRequest,
-  type TenancyAgreement,
-  type InsertTenancyAgreement,
-  type AssessmentForm,
-  type InsertAssessmentForm,
-  type ProgressTracking,
-  type InsertProgressTracking,
-  type GovernmentClient,
-  type InsertGovernmentClient,
-  type SupportLevelRate,
-  type InsertSupportLevelRate,
-  type BillingPeriod,
-  type InsertBillingPeriod,
-  type Invoice,
-  type InsertInvoice,
-  type InvoiceLineItem,
-  type InsertInvoiceLineItem,
-  type PaymentReminder,
-  type InsertPaymentReminder,
+  fileSharing,
+  governmentClients,
+  invoiceLineItems,
+  invoices,
+  paymentReminders,
+  progressTracking,
+  properties,
+  residents,
+  supportLevelRates,
+  userSessions,
   type AuditTrail,
-  type InsertAuditTrail,
+  type BillingPeriod,
   type DocumentStorage,
-  type InsertDocumentStorage,
-  type FileSharing,
-  type InsertFileSharing,
   type FileAccessLog,
-  type InsertFileAccessLog,
   type FileBackupRecord,
+  type FileSharing,
+  type GovernmentClient,
+  type InsertAuditTrail,
+  type InsertBillingPeriod,
+  type InsertDocumentStorage,
+  type InsertFileAccessLog,
   type InsertFileBackupRecord,
-} from "@shared/schema";
-import { db } from "./db";
-import { eq, desc, sql, and, count, avg, sum } from "drizzle-orm";
+  type InsertFileSharing,
+  type InsertGovernmentClient,
+  type InsertInvoice,
+  type InsertInvoiceLineItem,
+  type InsertPaymentReminder,
+  type InsertProgressTracking,
+  type InsertSupportLevelRate,
+  type Invoice,
+  type InvoiceLineItem,
+  type PaymentReminder,
+  type ProgressTracking,
+  type Property,
+  type Resident,
+  type SupportLevelRate,
+  type UpsertUser,
+  type User,
+} from '@shared/schema';
+import { and, count, desc, eq, sql, sum } from 'drizzle-orm';
+import { db } from './db';
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
-  updateUserSubscription(id: string, subscription: {
-    tier: string;
-    status: string;
-    maxResidents: number;
-    stripeCustomerId?: string;
-    stripeSubscriptionId?: string;
-    startDate?: Date;
-    endDate?: Date;
-  }): Promise<User>;
-  
-  // Property operations
+  updateUserSubscription(
+    id: string,
+    subscription: {
+      tier: string;
+      status: string;
+      maxResidents: number;
+      stripeCustomerId?: string;
+      stripeSubscriptionId?: string;
+      startDate?: Date;
+      endDate?: Date;
+    }
+  ): Promise<User>;
+
+  // Add missing method signatures
   getProperties(): Promise<Property[]>;
-  getProperty(id: number): Promise<Property | undefined>;
-  createProperty(property: InsertProperty): Promise<Property>;
-  updateProperty(id: number, property: Partial<InsertProperty>): Promise<Property>;
-  
-  // Resident operations
   getResidents(): Promise<Resident[]>;
-  getResident(id: number): Promise<Resident | undefined>;
-  createResident(resident: InsertResident): Promise<Resident>;
-  updateResident(id: number, resident: Partial<InsertResident>): Promise<Resident>;
-  getResidentsByProperty(propertyId: number): Promise<Resident[]>;
-  getRiskyResidents(): Promise<Resident[]>;
-  
-  // Support Plan operations
-  getSupportPlans(): Promise<SupportPlan[]>;
-  getSupportPlan(id: number): Promise<SupportPlan | undefined>;
-  createSupportPlan(plan: InsertSupportPlan): Promise<SupportPlan>;
-  updateSupportPlan(id: number, plan: Partial<InsertSupportPlan>): Promise<SupportPlan>;
-  getSupportPlansByResident(residentId: number): Promise<SupportPlan[]>;
-  
-  // Incident operations
-  getIncidents(): Promise<Incident[]>;
-  getIncident(id: number): Promise<Incident | undefined>;
-  createIncident(incident: InsertIncident): Promise<Incident>;
-  updateIncident(id: number, incident: Partial<InsertIncident>): Promise<Incident>;
-  getActiveIncidents(): Promise<Incident[]>;
-  
-  // Activity operations
-  getActivities(limit?: number): Promise<Activity[]>;
-  createActivity(activity: InsertActivity): Promise<Activity>;
-  
-  // Financial operations
-  getFinancialRecords(): Promise<FinancialRecord[]>;
-  createFinancialRecord(record: InsertFinancialRecord): Promise<FinancialRecord>;
-  
-  // Dashboard metrics
-  getDashboardMetrics(): Promise<{
+  getDashboardMetrics(): Promise<any>;
+}
+
+class DatabaseStorage implements IStorage {
+  // Add missing method implementations
+  async getProperties(): Promise<Property[]> {
+    return await db
+      .select()
+      .from(properties)
+      .orderBy(desc(properties.createdAt));
+  }
+
+  async getResidents(): Promise<Resident[]> {
+    return await db.select().from(residents).orderBy(desc(residents.createdAt));
+  }
+
+  async getDashboardMetrics(): Promise<{
     totalProperties: number;
-    currentResidents: number;
+    totalResidents: number;
     occupancyRate: number;
-    activeIncidents: number;
-  }>;
+    maintenanceRequests: number;
+    recentActivity: any[];
+  }> {
+    const [propertiesCount] = await db
+      .select({ count: count() })
+      .from(properties);
+    const [residentsCount] = await db
+      .select({ count: count() })
+      .from(residents);
 
-  // Form drafts operations
-  getFormDraft(userId: string, formType: string): Promise<FormDraft | undefined>;
-  createFormDraft(draft: InsertFormDraft): Promise<FormDraft>;
-  updateFormDraft(id: number, draft: Partial<InsertFormDraft>): Promise<FormDraft>;
+    // Calculate occupancy rate
+    const [occupiedProperties] = await db
+      .select({ count: count() })
+      .from(properties)
+      .where(eq(properties.status, 'occupied'));
 
-  // Property rooms operations
-  getPropertyRooms(propertyId: number): Promise<PropertyRoom[]>;
-  createPropertyRoom(room: InsertPropertyRoom): Promise<PropertyRoom>;
-  updatePropertyRoom(id: number, room: Partial<InsertPropertyRoom>): Promise<PropertyRoom>;
+    const occupancyRate =
+      propertiesCount.count > 0
+        ? (occupiedProperties.count / propertiesCount.count) * 100
+        : 0;
 
-  // Staff members operations
-  getStaffMembers(): Promise<StaffMember[]>;
-  createStaffMember(staff: InsertStaffMember): Promise<StaffMember>;
-  updateStaffMember(id: number, staff: Partial<InsertStaffMember>): Promise<StaffMember>;
-
-  // Maintenance requests operations
-  getMaintenanceRequests(): Promise<MaintenanceRequest[]>;
-  createMaintenanceRequest(request: InsertMaintenanceRequest): Promise<MaintenanceRequest>;
-  updateMaintenanceRequest(id: number, request: Partial<InsertMaintenanceRequest>): Promise<MaintenanceRequest>;
-
-  // Tenancy agreements operations
-  getTenancyAgreements(): Promise<TenancyAgreement[]>;
-  createTenancyAgreement(agreement: InsertTenancyAgreement): Promise<TenancyAgreement>;
-  updateTenancyAgreement(id: number, agreement: Partial<InsertTenancyAgreement>): Promise<TenancyAgreement>;
-
-  // Assessment forms operations
-  getAssessmentForms(): Promise<AssessmentForm[]>;
-  createAssessmentForm(form: InsertAssessmentForm): Promise<AssessmentForm>;
-  updateAssessmentForm(id: number, form: Partial<InsertAssessmentForm>): Promise<AssessmentForm>;
-
-  // Progress tracking operations
-  getProgressTracking(residentId?: number): Promise<ProgressTracking[]>;
-  createProgressTracking(tracking: InsertProgressTracking): Promise<ProgressTracking>;
-  updateProgressTracking(id: number, tracking: Partial<InsertProgressTracking>): Promise<ProgressTracking>;
-
-  // Billing operations
-  // Government clients
-  getGovernmentClients(): Promise<GovernmentClient[]>;
-  getGovernmentClient(id: number): Promise<GovernmentClient | undefined>;
-  createGovernmentClient(client: InsertGovernmentClient): Promise<GovernmentClient>;
-  updateGovernmentClient(id: number, client: Partial<InsertGovernmentClient>): Promise<GovernmentClient>;
-  deleteGovernmentClient(id: number): Promise<void>;
-
-  // Support level rates
-  getSupportLevelRates(): Promise<SupportLevelRate[]>;
-  getSupportLevelRate(id: number): Promise<SupportLevelRate | undefined>;
-  createSupportLevelRate(rate: InsertSupportLevelRate): Promise<SupportLevelRate>;
-  updateSupportLevelRate(id: number, rate: Partial<InsertSupportLevelRate>): Promise<SupportLevelRate>;
-  deleteSupportLevelRate(id: number): Promise<void>;
-
-  // Billing periods
-  getBillingPeriods(): Promise<BillingPeriod[]>;
-  getBillingPeriod(id: number): Promise<BillingPeriod | undefined>;
-  createBillingPeriod(period: InsertBillingPeriod): Promise<BillingPeriod>;
-  updateBillingPeriod(id: number, period: Partial<InsertBillingPeriod>): Promise<BillingPeriod>;
-  getBillingPeriodsByClient(clientId: number): Promise<BillingPeriod[]>;
-  getBillingPeriodsByResident(residentId: number): Promise<BillingPeriod[]>;
-  getActiveBillingPeriods(): Promise<BillingPeriod[]>;
-
-  // Invoices
-  getInvoices(): Promise<Invoice[]>;
-  getInvoice(id: number): Promise<Invoice | undefined>;
-  createInvoice(invoice: InsertInvoice): Promise<Invoice>;
-  updateInvoice(id: number, invoice: Partial<InsertInvoice>): Promise<Invoice>;
-  getInvoicesByClient(clientId: number): Promise<Invoice[]>;
-  getOverdueInvoices(): Promise<Invoice[]>;
-  getPendingInvoices(): Promise<Invoice[]>;
-  generateInvoiceNumber(): Promise<string>;
-
-  // Invoice line items
-  getInvoiceLineItems(invoiceId: number): Promise<InvoiceLineItem[]>;
-  createInvoiceLineItem(lineItem: InsertInvoiceLineItem): Promise<InvoiceLineItem>;
-  updateInvoiceLineItem(id: number, lineItem: Partial<InsertInvoiceLineItem>): Promise<InvoiceLineItem>;
-  deleteInvoiceLineItem(id: number): Promise<void>;
-
-  // Payment reminders
-  getPaymentReminders(invoiceId?: number): Promise<PaymentReminder[]>;
-  createPaymentReminder(reminder: InsertPaymentReminder): Promise<PaymentReminder>;
-  updatePaymentReminder(id: number, reminder: Partial<InsertPaymentReminder>): Promise<PaymentReminder>;
-
-  // Audit trail operations
-  createAuditTrail(audit: InsertAuditTrail): Promise<AuditTrail>;
-  getAuditTrail(entityType?: string, entityId?: string): Promise<AuditTrail[]>;
+    return {
+      totalProperties: propertiesCount.count,
+      totalResidents: residentsCount.count,
+      occupancyRate: Math.round(occupancyRate * 100) / 100,
+      maintenanceRequests: 0, // Implement based on your maintenance schema
+      recentActivity: [], // Implement based on your activity schema
+    };
+  }
 
   // Billing analytics
-  getBillingAnalytics(): Promise<{
+  async getBillingAnalytics(): Promise<{
     totalRevenue: number;
     monthlyRevenue: number;
     outstandingAmount: number;
@@ -291,7 +186,10 @@ export interface IStorage {
         invoiceCount: count(invoices.id),
       })
       .from(invoices)
-      .innerJoin(governmentClients, eq(invoices.governmentClientId, governmentClients.id))
+      .innerJoin(
+        governmentClients,
+        eq(invoices.governmentClientId, governmentClients.id)
+      )
       .where(sql`${invoices.governmentClientId} IS NOT NULL`)
       .groupBy(invoices.governmentClientId, governmentClients.clientName)
       .orderBy(desc(sum(invoices.totalAmount)))
@@ -323,7 +221,7 @@ export interface IStorage {
       .select()
       .from(accountLockouts)
       .where(eq(accountLockouts.userId, userId));
-    
+
     return {
       failedAttempts: lockout?.failedAttempts || 0,
       lockedUntil: lockout?.lockedUntil?.getTime() || null,
@@ -331,11 +229,14 @@ export interface IStorage {
     };
   }
 
-  async updateUserLockout(userId: string, data: {
-    failedAttempts: number;
-    lockedUntil: number | null;
-    lastAttempt: number;
-  }): Promise<void> {
+  async updateUserLockout(
+    userId: string,
+    data: {
+      failedAttempts: number;
+      lockedUntil: number | null;
+      lastAttempt: number;
+    }
+  ): Promise<void> {
     await db
       .insert(accountLockouts)
       .values({
@@ -374,7 +275,7 @@ export interface IStorage {
       .select()
       .from(userSessions)
       .where(eq(userSessions.id, sessionId));
-    
+
     return session;
   }
 
@@ -384,14 +285,17 @@ export interface IStorage {
     deviceInfo: any;
     expiresAt: Date;
   }): Promise<number> {
-    const [result] = await db.insert(userSessions).values({
-      userId: session.userId,
-      sessionToken: session.sessionToken,
-      deviceInfo: session.deviceInfo,
-      expiresAt: session.expiresAt,
-      lastActivity: new Date(),
-    }).returning({ id: userSessions.id });
-    
+    const [result] = await db
+      .insert(userSessions)
+      .values({
+        userId: session.userId,
+        sessionToken: session.sessionToken,
+        deviceInfo: session.deviceInfo,
+        expiresAt: session.expiresAt,
+        lastActivity: new Date(),
+      })
+      .returning({ id: userSessions.id });
+
     return result.id;
   }
 
@@ -412,10 +316,9 @@ export interface IStorage {
     return await db
       .select()
       .from(userSessions)
-      .where(and(
-        eq(userSessions.userId, userId),
-        eq(userSessions.isActive, true)
-      ));
+      .where(
+        and(eq(userSessions.userId, userId), eq(userSessions.isActive, true))
+      );
   }
 
   async deleteAllUserSessions(userId: string): Promise<void> {
@@ -449,7 +352,9 @@ export interface IStorage {
   }
 
   // Document storage operations
-  async createDocument(document: InsertDocumentStorage): Promise<DocumentStorage> {
+  async createDocument(
+    document: InsertDocumentStorage
+  ): Promise<DocumentStorage> {
     const result = await db
       .insert(documentStorage)
       .values({
@@ -458,11 +363,11 @@ export interface IStorage {
         updatedAt: new Date(),
       })
       .returning();
-    
+
     if (!Array.isArray(result) || result.length === 0) {
       throw new Error('Failed to create document');
     }
-    return result[0] as DocumentStorage;
+    return result[0];
   }
 
   async getDocument(id: number): Promise<DocumentStorage | undefined> {
@@ -473,9 +378,13 @@ export interface IStorage {
     return document;
   }
 
-  async getDocuments(filters?: { entityType?: string; entityId?: number; documentType?: string }): Promise<DocumentStorage[]> {
+  async getDocuments(filters?: {
+    entityType?: string;
+    entityId?: number;
+    documentType?: string;
+  }): Promise<DocumentStorage[]> {
     const conditions = [];
-    
+
     if (filters?.entityType) {
       conditions.push(eq(documentStorage.entityType, filters.entityType));
     }
@@ -485,18 +394,25 @@ export interface IStorage {
     if (filters?.documentType) {
       conditions.push(eq(documentStorage.documentType, filters.documentType));
     }
-    
+
     if (conditions.length > 0) {
-      return await db.select().from(documentStorage)
+      return await db
+        .select()
+        .from(documentStorage)
         .where(and(...conditions))
         .orderBy(desc(documentStorage.createdAt));
     }
-    
-    return await db.select().from(documentStorage)
+
+    return await db
+      .select()
+      .from(documentStorage)
       .orderBy(desc(documentStorage.createdAt));
   }
 
-  async updateDocument(id: number, updates: Partial<DocumentStorage>): Promise<DocumentStorage> {
+  async updateDocument(
+    id: number,
+    updates: Partial<DocumentStorage>
+  ): Promise<DocumentStorage> {
     const [updatedDocument] = await db
       .update(documentStorage)
       .set({
@@ -512,11 +428,14 @@ export interface IStorage {
     await db.delete(documentStorage).where(eq(documentStorage.id, id));
   }
 
-  async searchDocuments(query: string, filters?: { entityType?: string; documentType?: string }): Promise<DocumentStorage[]> {
+  async searchDocuments(
+    query: string,
+    filters?: { entityType?: string; documentType?: string }
+  ): Promise<DocumentStorage[]> {
     const conditions = [
       sql`${documentStorage.originalName} ILIKE ${`%${query}%`} OR 
           ${documentStorage.description} ILIKE ${`%${query}%`} OR 
-          array_to_string(${documentStorage.tags}, ' ') ILIKE ${`%${query}%`}`
+          array_to_string(${documentStorage.tags}, ' ') ILIKE ${`%${query}%`}`,
     ];
 
     if (filters?.entityType) {
@@ -549,14 +468,19 @@ export interface IStorage {
     return await db
       .select()
       .from(fileSharing)
-      .where(and(
-        eq(fileSharing.documentId, documentId),
-        eq(fileSharing.isRevoked, false)
-      ))
+      .where(
+        and(
+          eq(fileSharing.documentId, documentId),
+          eq(fileSharing.isRevoked, false)
+        )
+      )
       .orderBy(desc(fileSharing.createdAt));
   }
 
-  async updateFileShare(id: number, updates: Partial<FileSharing>): Promise<FileSharing> {
+  async updateFileShare(
+    id: number,
+    updates: Partial<FileSharing>
+  ): Promise<FileSharing> {
     const [updatedShare] = await db
       .update(fileSharing)
       .set(updates)
@@ -596,7 +520,9 @@ export interface IStorage {
   }
 
   // File backup operations
-  async createBackupRecord(backup: InsertFileBackupRecord): Promise<FileBackupRecord> {
+  async createBackupRecord(
+    backup: InsertFileBackupRecord
+  ): Promise<FileBackupRecord> {
     const [newBackup] = await db
       .insert(fileBackupRecords)
       .values({
@@ -614,7 +540,10 @@ export interface IStorage {
       .orderBy(desc(fileBackupRecords.createdAt));
   }
 
-  async updateBackupRecord(id: number, updates: Partial<FileBackupRecord>): Promise<FileBackupRecord> {
+  async updateBackupRecord(
+    id: number,
+    updates: Partial<FileBackupRecord>
+  ): Promise<FileBackupRecord> {
     const [updatedBackup] = await db
       .update(fileBackupRecords)
       .set(updates)
@@ -622,16 +551,24 @@ export interface IStorage {
       .returning();
     return updatedBackup;
   }
-}
 
-export const storage = new DatabaseStorage();
-  async createProgressTracking(tracking: InsertProgressTracking): Promise<ProgressTracking> {
-    const [newTracking] = await db.insert(progressTracking).values(tracking).returning();
+  // Progress tracking operations
+  async createProgressTracking(
+    tracking: InsertProgressTracking
+  ): Promise<ProgressTracking> {
+    const [newTracking] = await db
+      .insert(progressTracking)
+      .values(tracking)
+      .returning();
     return newTracking;
   }
 
-  async updateProgressTracking(id: number, tracking: Partial<InsertProgressTracking>): Promise<ProgressTracking> {
-    const [updatedTracking] = await db.update(progressTracking)
+  async updateProgressTracking(
+    id: number,
+    tracking: Partial<InsertProgressTracking>
+  ): Promise<ProgressTracking> {
+    const [updatedTracking] = await db
+      .update(progressTracking)
       .set({ ...tracking, lastUpdated: new Date() })
       .where(eq(progressTracking.id, id))
       .returning();
@@ -641,20 +578,34 @@ export const storage = new DatabaseStorage();
   // Billing operations implementation
   // Government clients
   async getGovernmentClients(): Promise<GovernmentClient[]> {
-    return await db.select().from(governmentClients).orderBy(desc(governmentClients.createdAt));
+    return await db
+      .select()
+      .from(governmentClients)
+      .orderBy(desc(governmentClients.createdAt));
   }
 
   async getGovernmentClient(id: number): Promise<GovernmentClient | undefined> {
-    const [client] = await db.select().from(governmentClients).where(eq(governmentClients.id, id));
+    const [client] = await db
+      .select()
+      .from(governmentClients)
+      .where(eq(governmentClients.id, id));
     return client;
   }
 
-  async createGovernmentClient(client: InsertGovernmentClient): Promise<GovernmentClient> {
-    const [newClient] = await db.insert(governmentClients).values(client).returning();
+  async createGovernmentClient(
+    client: InsertGovernmentClient
+  ): Promise<GovernmentClient> {
+    const [newClient] = await db
+      .insert(governmentClients)
+      .values(client)
+      .returning();
     return newClient;
   }
 
-  async updateGovernmentClient(id: number, client: Partial<InsertGovernmentClient>): Promise<GovernmentClient> {
+  async updateGovernmentClient(
+    id: number,
+    client: Partial<InsertGovernmentClient>
+  ): Promise<GovernmentClient> {
     const [updatedClient] = await db
       .update(governmentClients)
       .set({ ...client, updatedAt: new Date() })
@@ -669,20 +620,34 @@ export const storage = new DatabaseStorage();
 
   // Support level rates
   async getSupportLevelRates(): Promise<SupportLevelRate[]> {
-    return await db.select().from(supportLevelRates).where(eq(supportLevelRates.isActive, true));
+    return await db
+      .select()
+      .from(supportLevelRates)
+      .where(eq(supportLevelRates.isActive, true));
   }
 
   async getSupportLevelRate(id: number): Promise<SupportLevelRate | undefined> {
-    const [rate] = await db.select().from(supportLevelRates).where(eq(supportLevelRates.id, id));
+    const [rate] = await db
+      .select()
+      .from(supportLevelRates)
+      .where(eq(supportLevelRates.id, id));
     return rate;
   }
 
-  async createSupportLevelRate(rate: InsertSupportLevelRate): Promise<SupportLevelRate> {
-    const [newRate] = await db.insert(supportLevelRates).values(rate).returning();
+  async createSupportLevelRate(
+    rate: InsertSupportLevelRate
+  ): Promise<SupportLevelRate> {
+    const [newRate] = await db
+      .insert(supportLevelRates)
+      .values(rate)
+      .returning();
     return newRate;
   }
 
-  async updateSupportLevelRate(id: number, rate: Partial<InsertSupportLevelRate>): Promise<SupportLevelRate> {
+  async updateSupportLevelRate(
+    id: number,
+    rate: Partial<InsertSupportLevelRate>
+  ): Promise<SupportLevelRate> {
     const [updatedRate] = await db
       .update(supportLevelRates)
       .set({ ...rate, updatedAt: new Date() })
@@ -692,25 +657,42 @@ export const storage = new DatabaseStorage();
   }
 
   async deleteSupportLevelRate(id: number): Promise<void> {
-    await db.update(supportLevelRates).set({ isActive: false }).where(eq(supportLevelRates.id, id));
+    await db
+      .update(supportLevelRates)
+      .set({ isActive: false })
+      .where(eq(supportLevelRates.id, id));
   }
 
   // Billing periods
   async getBillingPeriods(): Promise<BillingPeriod[]> {
-    return await db.select().from(billingPeriods).orderBy(desc(billingPeriods.createdAt));
+    return await db
+      .select()
+      .from(billingPeriods)
+      .orderBy(desc(billingPeriods.createdAt));
   }
 
   async getBillingPeriod(id: number): Promise<BillingPeriod | undefined> {
-    const [period] = await db.select().from(billingPeriods).where(eq(billingPeriods.id, id));
+    const [period] = await db
+      .select()
+      .from(billingPeriods)
+      .where(eq(billingPeriods.id, id));
     return period;
   }
 
-  async createBillingPeriod(period: InsertBillingPeriod): Promise<BillingPeriod> {
-    const [newPeriod] = await db.insert(billingPeriods).values(period).returning();
+  async createBillingPeriod(
+    period: InsertBillingPeriod
+  ): Promise<BillingPeriod> {
+    const [newPeriod] = await db
+      .insert(billingPeriods)
+      .values(period)
+      .returning();
     return newPeriod;
   }
 
-  async updateBillingPeriod(id: number, period: Partial<InsertBillingPeriod>): Promise<BillingPeriod> {
+  async updateBillingPeriod(
+    id: number,
+    period: Partial<InsertBillingPeriod>
+  ): Promise<BillingPeriod> {
     const [updatedPeriod] = await db
       .update(billingPeriods)
       .set({ ...period, updatedAt: new Date() })
@@ -720,15 +702,26 @@ export const storage = new DatabaseStorage();
   }
 
   async getBillingPeriodsByClient(clientId: number): Promise<BillingPeriod[]> {
-    return await db.select().from(billingPeriods).where(eq(billingPeriods.governmentClientId, clientId));
+    return await db
+      .select()
+      .from(billingPeriods)
+      .where(eq(billingPeriods.governmentClientId, clientId));
   }
 
-  async getBillingPeriodsByResident(residentId: number): Promise<BillingPeriod[]> {
-    return await db.select().from(billingPeriods).where(eq(billingPeriods.residentId, residentId));
+  async getBillingPeriodsByResident(
+    residentId: number
+  ): Promise<BillingPeriod[]> {
+    return await db
+      .select()
+      .from(billingPeriods)
+      .where(eq(billingPeriods.residentId, residentId));
   }
 
   async getActiveBillingPeriods(): Promise<BillingPeriod[]> {
-    return await db.select().from(billingPeriods).where(eq(billingPeriods.status, 'active'));
+    return await db
+      .select()
+      .from(billingPeriods)
+      .where(eq(billingPeriods.status, 'active'));
   }
 
   // Invoices
@@ -737,7 +730,10 @@ export const storage = new DatabaseStorage();
   }
 
   async getInvoice(id: number): Promise<Invoice | undefined> {
-    const [invoice] = await db.select().from(invoices).where(eq(invoices.id, id));
+    const [invoice] = await db
+      .select()
+      .from(invoices)
+      .where(eq(invoices.id, id));
     return invoice;
   }
 
@@ -746,7 +742,10 @@ export const storage = new DatabaseStorage();
     return newInvoice;
   }
 
-  async updateInvoice(id: number, invoice: Partial<InsertInvoice>): Promise<Invoice> {
+  async updateInvoice(
+    id: number,
+    invoice: Partial<InsertInvoice>
+  ): Promise<Invoice> {
     const [updatedInvoice] = await db
       .update(invoices)
       .set({ ...invoice, updatedAt: new Date() })
@@ -756,35 +755,46 @@ export const storage = new DatabaseStorage();
   }
 
   async getInvoicesByClient(clientId: number): Promise<Invoice[]> {
-    return await db.select().from(invoices).where(eq(invoices.governmentClientId, clientId));
+    return await db
+      .select()
+      .from(invoices)
+      .where(eq(invoices.governmentClientId, clientId));
   }
 
   async getOverdueInvoices(): Promise<Invoice[]> {
-    return await db.select().from(invoices).where(
-      and(
-        eq(invoices.status, 'sent'),
-        sql`${invoices.dueDate} < CURRENT_DATE`
-      )
-    );
+    return await db
+      .select()
+      .from(invoices)
+      .where(
+        and(
+          eq(invoices.status, 'sent'),
+          sql`${invoices.dueDate} < CURRENT_DATE`
+        )
+      );
   }
 
   async getPendingInvoices(): Promise<Invoice[]> {
-    return await db.select().from(invoices).where(eq(invoices.status, 'pending'));
+    return await db
+      .select()
+      .from(invoices)
+      .where(eq(invoices.status, 'pending'));
   }
 
   async generateInvoiceNumber(): Promise<string> {
     const currentYear = new Date().getFullYear();
     const currentMonth = String(new Date().getMonth() + 1).padStart(2, '0');
-    
+
     const [lastInvoice] = await db
       .select()
       .from(invoices)
-      .where(sql`${invoices.invoiceNumber} LIKE ${currentYear + currentMonth + '%'}`)
+      .where(
+        sql`${invoices.invoiceNumber} LIKE ${currentYear + currentMonth + '%'}`
+      )
       .orderBy(desc(invoices.invoiceNumber))
       .limit(1);
 
     let nextNumber = 1;
-    if (lastInvoice) {
+    if (lastInvoice?.invoiceNumber) {
       const lastNumber = parseInt(lastInvoice.invoiceNumber.slice(-4));
       nextNumber = lastNumber + 1;
     }
@@ -794,15 +804,26 @@ export const storage = new DatabaseStorage();
 
   // Invoice line items
   async getInvoiceLineItems(invoiceId: number): Promise<InvoiceLineItem[]> {
-    return await db.select().from(invoiceLineItems).where(eq(invoiceLineItems.invoiceId, invoiceId));
+    return await db
+      .select()
+      .from(invoiceLineItems)
+      .where(eq(invoiceLineItems.invoiceId, invoiceId));
   }
 
-  async createInvoiceLineItem(lineItem: InsertInvoiceLineItem): Promise<InvoiceLineItem> {
-    const [newLineItem] = await db.insert(invoiceLineItems).values(lineItem).returning();
+  async createInvoiceLineItem(
+    lineItem: InsertInvoiceLineItem
+  ): Promise<InvoiceLineItem> {
+    const [newLineItem] = await db
+      .insert(invoiceLineItems)
+      .values(lineItem)
+      .returning();
     return newLineItem;
   }
 
-  async updateInvoiceLineItem(id: number, lineItem: Partial<InsertInvoiceLineItem>): Promise<InvoiceLineItem> {
+  async updateInvoiceLineItem(
+    id: number,
+    lineItem: Partial<InsertInvoiceLineItem>
+  ): Promise<InvoiceLineItem> {
     const [updatedLineItem] = await db
       .update(invoiceLineItems)
       .set(lineItem)
@@ -818,17 +839,31 @@ export const storage = new DatabaseStorage();
   // Payment reminders
   async getPaymentReminders(invoiceId?: number): Promise<PaymentReminder[]> {
     if (invoiceId) {
-      return await db.select().from(paymentReminders).where(eq(paymentReminders.invoiceId, invoiceId));
+      return await db
+        .select()
+        .from(paymentReminders)
+        .where(eq(paymentReminders.invoiceId, invoiceId));
     }
-    return await db.select().from(paymentReminders).orderBy(desc(paymentReminders.createdAt));
+    return await db
+      .select()
+      .from(paymentReminders)
+      .orderBy(desc(paymentReminders.createdAt));
   }
 
-  async createPaymentReminder(reminder: InsertPaymentReminder): Promise<PaymentReminder> {
-    const [newReminder] = await db.insert(paymentReminders).values(reminder).returning();
+  async createPaymentReminder(
+    reminder: InsertPaymentReminder
+  ): Promise<PaymentReminder> {
+    const [newReminder] = await db
+      .insert(paymentReminders)
+      .values(reminder)
+      .returning();
     return newReminder;
   }
 
-  async updatePaymentReminder(id: number, reminder: Partial<InsertPaymentReminder>): Promise<PaymentReminder> {
+  async updatePaymentReminder(
+    id: number,
+    reminder: Partial<InsertPaymentReminder>
+  ): Promise<PaymentReminder> {
     const [updatedReminder] = await db
       .update(paymentReminders)
       .set(reminder)
@@ -843,18 +878,33 @@ export const storage = new DatabaseStorage();
     return newAudit;
   }
 
-  async getAuditTrail(entityType?: string, entityId?: string): Promise<AuditTrail[]> {
+  async getAuditTrail(
+    entityType?: string,
+    entityId?: string
+  ): Promise<AuditTrail[]> {
     if (entityType && entityId) {
-      return await db.select().from(auditTrail)
-        .where(and(eq(auditTrail.entityType, entityType), eq(auditTrail.entityId, entityId)))
+      return await db
+        .select()
+        .from(auditTrail)
+        .where(
+          and(
+            eq(auditTrail.entityType, entityType),
+            eq(auditTrail.entityId, entityId)
+          )
+        )
         .orderBy(desc(auditTrail.timestamp));
     } else if (entityType) {
-      return await db.select().from(auditTrail)
+      return await db
+        .select()
+        .from(auditTrail)
         .where(eq(auditTrail.entityType, entityType))
         .orderBy(desc(auditTrail.timestamp));
     }
-    
-    return await db.select().from(auditTrail).orderBy(desc(auditTrail.timestamp));
+
+    return await db
+      .select()
+      .from(auditTrail)
+      .orderBy(desc(auditTrail.timestamp));
   }
 
   // Billing analytics
@@ -925,7 +975,10 @@ export const storage = new DatabaseStorage();
         invoiceCount: count(invoices.id),
       })
       .from(invoices)
-      .innerJoin(governmentClients, eq(invoices.governmentClientId, governmentClients.id))
+      .innerJoin(
+        governmentClients,
+        eq(invoices.governmentClientId, governmentClients.id)
+      )
       .groupBy(invoices.governmentClientId, governmentClients.clientName)
       .orderBy(desc(sum(invoices.totalAmount)))
       .limit(5);
@@ -956,7 +1009,7 @@ export const storage = new DatabaseStorage();
       .select()
       .from(accountLockouts)
       .where(eq(accountLockouts.userId, userId));
-    
+
     return {
       failedAttempts: lockout?.failedAttempts || 0,
       lockedUntil: lockout?.lockedUntil?.getTime() || null,
@@ -964,11 +1017,14 @@ export const storage = new DatabaseStorage();
     };
   }
 
-  async updateUserLockout(userId: string, data: {
-    failedAttempts: number;
-    lockedUntil: number | null;
-    lastAttempt: number;
-  }): Promise<void> {
+  async updateUserLockout(
+    userId: string,
+    data: {
+      failedAttempts: number;
+      lockedUntil: number | null;
+      lastAttempt: number;
+    }
+  ): Promise<void> {
     await db
       .insert(accountLockouts)
       .values({
@@ -1007,7 +1063,7 @@ export const storage = new DatabaseStorage();
       .select()
       .from(userSessions)
       .where(eq(userSessions.id, sessionId));
-    
+
     return session;
   }
 
@@ -1017,14 +1073,17 @@ export const storage = new DatabaseStorage();
     deviceInfo: any;
     expiresAt: Date;
   }): Promise<number> {
-    const [result] = await db.insert(userSessions).values({
-      userId: session.userId,
-      sessionToken: session.sessionToken,
-      deviceInfo: session.deviceInfo,
-      expiresAt: session.expiresAt,
-      lastActivity: new Date(),
-    }).returning({ id: userSessions.id });
-    
+    const [result] = await db
+      .insert(userSessions)
+      .values({
+        userId: session.userId,
+        sessionToken: session.sessionToken,
+        deviceInfo: session.deviceInfo,
+        expiresAt: session.expiresAt,
+        lastActivity: new Date(),
+      })
+      .returning({ id: userSessions.id });
+
     return result.id;
   }
 
@@ -1045,10 +1104,9 @@ export const storage = new DatabaseStorage();
     return await db
       .select()
       .from(userSessions)
-      .where(and(
-        eq(userSessions.userId, userId),
-        eq(userSessions.isActive, true)
-      ));
+      .where(
+        and(eq(userSessions.userId, userId), eq(userSessions.isActive, true))
+      );
   }
 
   async deleteAllUserSessions(userId: string): Promise<void> {
@@ -1082,7 +1140,9 @@ export const storage = new DatabaseStorage();
   }
 
   // Document storage operations
-  async createDocument(document: InsertDocumentStorage): Promise<DocumentStorage> {
+  async createDocument(
+    document: InsertDocumentStorage
+  ): Promise<DocumentStorage> {
     const result = await db
       .insert(documentStorage)
       .values({
@@ -1091,11 +1151,11 @@ export const storage = new DatabaseStorage();
         updatedAt: new Date(),
       })
       .returning();
-    
+
     if (!Array.isArray(result) || result.length === 0) {
       throw new Error('Failed to create document');
     }
-    return result[0] as DocumentStorage;
+    return result[0];
   }
 
   async getDocument(id: number): Promise<DocumentStorage | undefined> {
@@ -1106,9 +1166,13 @@ export const storage = new DatabaseStorage();
     return document;
   }
 
-  async getDocuments(filters?: { entityType?: string; entityId?: number; documentType?: string }): Promise<DocumentStorage[]> {
+  async getDocuments(filters?: {
+    entityType?: string;
+    entityId?: number;
+    documentType?: string;
+  }): Promise<DocumentStorage[]> {
     const conditions = [];
-    
+
     if (filters?.entityType) {
       conditions.push(eq(documentStorage.entityType, filters.entityType));
     }
@@ -1118,18 +1182,25 @@ export const storage = new DatabaseStorage();
     if (filters?.documentType) {
       conditions.push(eq(documentStorage.documentType, filters.documentType));
     }
-    
+
     if (conditions.length > 0) {
-      return await db.select().from(documentStorage)
+      return await db
+        .select()
+        .from(documentStorage)
         .where(and(...conditions))
         .orderBy(desc(documentStorage.createdAt));
     }
-    
-    return await db.select().from(documentStorage)
+
+    return await db
+      .select()
+      .from(documentStorage)
       .orderBy(desc(documentStorage.createdAt));
   }
 
-  async updateDocument(id: number, updates: Partial<DocumentStorage>): Promise<DocumentStorage> {
+  async updateDocument(
+    id: number,
+    updates: Partial<DocumentStorage>
+  ): Promise<DocumentStorage> {
     const [updatedDocument] = await db
       .update(documentStorage)
       .set({
@@ -1145,11 +1216,14 @@ export const storage = new DatabaseStorage();
     await db.delete(documentStorage).where(eq(documentStorage.id, id));
   }
 
-  async searchDocuments(query: string, filters?: { entityType?: string; documentType?: string }): Promise<DocumentStorage[]> {
+  async searchDocuments(
+    query: string,
+    filters?: { entityType?: string; documentType?: string }
+  ): Promise<DocumentStorage[]> {
     const conditions = [
       sql`${documentStorage.originalName} ILIKE ${`%${query}%`} OR 
           ${documentStorage.description} ILIKE ${`%${query}%`} OR 
-          array_to_string(${documentStorage.tags}, ' ') ILIKE ${`%${query}%`}`
+          array_to_string(${documentStorage.tags}, ' ') ILIKE ${`%${query}%`}`,
     ];
 
     if (filters?.entityType) {
@@ -1182,14 +1256,19 @@ export const storage = new DatabaseStorage();
     return await db
       .select()
       .from(fileSharing)
-      .where(and(
-        eq(fileSharing.documentId, documentId),
-        eq(fileSharing.isRevoked, false)
-      ))
+      .where(
+        and(
+          eq(fileSharing.documentId, documentId),
+          eq(fileSharing.isRevoked, false)
+        )
+      )
       .orderBy(desc(fileSharing.createdAt));
   }
 
-  async updateFileShare(id: number, updates: Partial<FileSharing>): Promise<FileSharing> {
+  async updateFileShare(
+    id: number,
+    updates: Partial<FileSharing>
+  ): Promise<FileSharing> {
     const [updatedShare] = await db
       .update(fileSharing)
       .set(updates)
@@ -1229,7 +1308,9 @@ export const storage = new DatabaseStorage();
   }
 
   // File backup operations
-  async createBackupRecord(backup: InsertFileBackupRecord): Promise<FileBackupRecord> {
+  async createBackupRecord(
+    backup: InsertFileBackupRecord
+  ): Promise<FileBackupRecord> {
     const [newBackup] = await db
       .insert(fileBackupRecords)
       .values({
@@ -1247,7 +1328,10 @@ export const storage = new DatabaseStorage();
       .orderBy(desc(fileBackupRecords.createdAt));
   }
 
-  async updateBackupRecord(id: number, updates: Partial<FileBackupRecord>): Promise<FileBackupRecord> {
+  async updateBackupRecord(
+    id: number,
+    updates: Partial<FileBackupRecord>
+  ): Promise<FileBackupRecord> {
     const [updatedBackup] = await db
       .update(fileBackupRecords)
       .set(updates)

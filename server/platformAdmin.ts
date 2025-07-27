@@ -444,12 +444,10 @@ export async function handleEmergencyAction(req: Request, res: Response) {
             parseInt(targetId)
           );
         if (!orgValidation.valid) {
-          return res
-            .status(400)
-            .json({
-              message: 'Organization validation failed',
-              issues: orgValidation.issues,
-            });
+          return res.status(400).json({
+            message: 'Organization validation failed',
+            issues: orgValidation.issues,
+          });
         }
 
         await db

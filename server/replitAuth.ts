@@ -207,11 +207,9 @@ export async function setupAuth(app: Express) {
         });
       }
 
-      return res
-        .status(500)
-        .json({
-          error: `Authentication not configured for domain: ${authDomain}`,
-        });
+      return res.status(500).json({
+        error: `Authentication not configured for domain: ${authDomain}`,
+      });
     }
 
     passport.authenticate(`replitauth:${authDomain}`, {

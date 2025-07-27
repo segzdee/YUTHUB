@@ -1,5 +1,5 @@
-import { WebSocketServer, WebSocket } from 'ws';
 import { Server } from 'http';
+import { WebSocket, WebSocketServer } from 'ws';
 import { PlatformDataAggregator } from './platformAdminAggregation';
 
 export class WebSocketManager {
@@ -25,7 +25,8 @@ export class WebSocketManager {
       maxPayload: 1024 * 1024, // 1MB max payload
     });
 
-    this.wss.on('connection', (ws: WebSocket, req: any) => {
+    // Around line 28 - remove unused req parameter
+    this.wss.on('connection', (ws: WebSocket) => {
       const clientId = this.generateClientId();
       this.clients.set(clientId, ws);
 
@@ -261,7 +262,8 @@ export class WebSocketManager {
     this.broadcast(message);
   }
 
-  broadcastToRoles(roles: string[], message: any) {
+  // Around line 264 - prefix unused parameter with underscore
+  broadcastToRoles(_roles: string[], message: any) {
     this.clients.forEach((ws, clientId) => {
       if (ws.readyState === WebSocket.OPEN) {
         // For now, broadcast to all connected clients

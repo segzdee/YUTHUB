@@ -115,3 +115,14 @@ export interface UploadedFile {
   filename: string;
   path: string;
 }
+
+// Authentication interfaces
+export interface AuthenticatedRequest {
+  user?: {
+    claims?: {
+      sub: string;
+    };
+    id?: string;
+    role?: string;
+  };
+}

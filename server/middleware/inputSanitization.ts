@@ -306,7 +306,7 @@ export const sanitizeHeaders = (
   // Sanitize user-agent
   if (req.headers['user-agent']) {
     req.headers['user-agent'] = sanitizeHtml(
-      req.headers['user-agent'] as string
+      req.headers['user-agent']
     );
   }
 

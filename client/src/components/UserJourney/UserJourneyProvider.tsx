@@ -220,7 +220,7 @@ export function UserJourneyProvider({
       },
     };
 
-    const userRole = user.role as keyof typeof personas;
+    const userRole = user.role;
     if (personas[userRole]) {
       setState(prev => ({ ...prev, userPersona: personas[userRole] }));
     }

@@ -111,11 +111,9 @@ export async function enhancedPlatformAdminAuth(
         ip: clientIP,
         userAgent: req.headers['user-agent'],
       });
-      return res
-        .status(403)
-        .json({
-          message: 'IP address not authorized for platform admin access',
-        });
+      return res.status(403).json({
+        message: 'IP address not authorized for platform admin access',
+      });
     }
 
     // Check MFA requirement
@@ -129,12 +127,10 @@ export async function enhancedPlatformAdminAuth(
         ip: clientIP,
         userAgent: req.headers['user-agent'],
       });
-      return res
-        .status(403)
-        .json({
-          message:
-            'Multi-factor authentication required for platform admin access',
-        });
+      return res.status(403).json({
+        message:
+          'Multi-factor authentication required for platform admin access',
+      });
     }
 
     // Log successful access

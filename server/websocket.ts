@@ -18,11 +18,11 @@ export class WebSocketManager {
   }
 
   initialize(server: Server) {
-    this.wss = new WebSocketServer({ 
+    this.wss = new WebSocketServer({
       server,
       path: '/ws',
       perMessageDeflate: false,
-      maxPayload: 1024 * 1024 // 1MB max payload
+      maxPayload: 1024 * 1024, // 1MB max payload
     });
 
     this.wss.on('connection', (ws: WebSocket, req: any) => {
@@ -51,7 +51,7 @@ export class WebSocketManager {
       });
 
       // Handle errors
-      ws.on('error', (error) => {
+      ws.on('error', error => {
         console.error(`WebSocket error for client ${clientId}:`, error);
         this.clients.delete(clientId);
       });
@@ -62,14 +62,16 @@ export class WebSocketManager {
   }
 
   private generateClientId(): string {
-    return 'client_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    return (
+      'client_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+    );
   }
 
   private async sendInitialData(ws: WebSocket) {
     try {
       const [overview, realTimeMetrics] = await Promise.all([
         PlatformDataAggregator.getPlatformOverview(),
-        PlatformDataAggregator.getRealTimeMetrics()
+        PlatformDataAggregator.getRealTimeMetrics(),
       ]);
 
       const initialData = {
@@ -77,8 +79,8 @@ export class WebSocketManager {
         data: {
           overview,
           realTimeMetrics,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       };
 
       if (ws.readyState === WebSocket.OPEN) {
@@ -97,7 +99,9 @@ export class WebSocketManager {
 
     switch (message.type) {
       case 'ping':
-        ws.send(JSON.stringify({ type: 'pong', timestamp: new Date().toISOString() }));
+        ws.send(
+          JSON.stringify({ type: 'pong', timestamp: new Date().toISOString() })
+        );
         break;
 
       case 'request_data':
@@ -114,7 +118,11 @@ export class WebSocketManager {
     }
   }
 
-  private async sendRequestedData(ws: WebSocket, dataType: string, params: any = {}) {
+  private async sendRequestedData(
+    ws: WebSocket,
+    dataType: string,
+    params: any = {}
+  ) {
     try {
       let data;
 
@@ -124,11 +132,15 @@ export class WebSocketManager {
           break;
 
         case 'organization_breakdowns':
-          data = await PlatformDataAggregator.getOrganizationBreakdowns(params.timeRange);
+          data = await PlatformDataAggregator.getOrganizationBreakdowns(
+            params.timeRange
+          );
           break;
 
         case 'historical_trends':
-          data = await PlatformDataAggregator.getHistoricalTrends(params.months);
+          data = await PlatformDataAggregator.getHistoricalTrends(
+            params.months
+          );
           break;
 
         case 'real_time_metrics':
@@ -143,7 +155,7 @@ export class WebSocketManager {
         type: 'data_response',
         dataType,
         data,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       if (ws.readyState === WebSocket.OPEN) {
@@ -151,11 +163,11 @@ export class WebSocketManager {
       }
     } catch (error) {
       console.error('Error sending requested data:', error);
-      
+
       const errorResponse = {
         type: 'error',
         message: 'Failed to fetch requested data',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       if (ws.readyState === WebSocket.OPEN) {
@@ -185,7 +197,7 @@ export class WebSocketManager {
     try {
       const [overview, realTimeMetrics] = await Promise.all([
         PlatformDataAggregator.getPlatformOverview(),
-        PlatformDataAggregator.getRealTimeMetrics()
+        PlatformDataAggregator.getRealTimeMetrics(),
       ]);
 
       const updateData = {
@@ -193,8 +205,8 @@ export class WebSocketManager {
         data: {
           overview,
           realTimeMetrics,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       };
 
       this.broadcast(updateData);
@@ -205,7 +217,7 @@ export class WebSocketManager {
 
   broadcast(data: any) {
     const message = JSON.stringify(data);
-    
+
     this.clients.forEach((ws, clientId) => {
       if (ws.readyState === WebSocket.OPEN) {
         try {
@@ -227,19 +239,23 @@ export class WebSocketManager {
       type: 'platform_update',
       updateType,
       data,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     this.broadcast(message);
   }
 
-  async broadcastOrganizationUpdate(organizationId: number, updateType: string, data: any) {
+  async broadcastOrganizationUpdate(
+    organizationId: number,
+    updateType: string,
+    data: any
+  ) {
     const message = {
       type: 'organization_update',
       organizationId,
       updateType,
       data,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     this.broadcast(message);
@@ -262,13 +278,17 @@ export class WebSocketManager {
     });
   }
 
-  async broadcastSystemAlert(severity: 'low' | 'medium' | 'high' | 'critical', message: string, data?: any) {
+  async broadcastSystemAlert(
+    severity: 'low' | 'medium' | 'high' | 'critical',
+    message: string,
+    data?: any
+  ) {
     const alert = {
       type: 'system_alert',
       severity,
       message,
       data,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     this.broadcast(alert);
@@ -285,7 +305,7 @@ export class WebSocketManager {
       clearInterval(this.dataRefreshInterval);
     }
 
-    this.clients.forEach((ws) => {
+    this.clients.forEach(ws => {
       if (ws.readyState === WebSocket.OPEN) {
         ws.close();
       }
@@ -303,7 +323,7 @@ export class WebSocketManager {
     return {
       connectedClients: this.clients.size,
       serverRunning: this.wss !== null,
-      dataRefreshActive: this.dataRefreshInterval !== null
+      dataRefreshActive: this.dataRefreshInterval !== null,
     };
   }
 }

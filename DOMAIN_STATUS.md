@@ -3,10 +3,12 @@
 ## Current Status: Domain Purchased, Ready for Hostinger Configuration
 
 ### Working URLs (Current)
+
 - **Development Server**: http://localhost:5000
 - **Replit Domain**: https://27891fa9-b276-4e4e-a11a-60ce998c53b2-00-2uromwtwyow5n.janeway.replit.dev
 
 ### Production Domain (Purchased on Hostinger)
+
 - **Target Domain**: https://www.yuthub.com
 - **Status**: Domain purchased, needs DNS configuration
 - **Registrar**: Hostinger
@@ -32,6 +34,7 @@ The domain www.yuthub.com is not live because:
 ## Next Steps to Make www.yuthub.com Live with Hostinger
 
 ### Option 1: Use Hostinger Web Hosting
+
 1. **Purchase Hostinger Web Hosting** (if not already done)
 2. **Upload Application Files** to Hostinger's file manager
 3. **Configure Node.js** on Hostinger (if supported)
@@ -39,6 +42,7 @@ The domain www.yuthub.com is not live because:
 5. **Configure DNS** automatically (Hostinger handles this)
 
 ### Option 2: Use External Server + Hostinger DNS
+
 1. **Deploy to Cloud Provider** (AWS, Google Cloud, DigitalOcean)
 2. **Configure DNS in Hostinger**:
    ```
@@ -49,6 +53,7 @@ The domain www.yuthub.com is not live because:
 4. **Deploy Application**: `./deploy.sh`
 
 ### Option 3: Use Replit Deployment + Custom Domain
+
 1. **Deploy on Replit** (easiest option)
 2. **Add Custom Domain** in Replit settings
 3. **Configure DNS in Hostinger**:
@@ -59,12 +64,14 @@ The domain www.yuthub.com is not live because:
 ## Current Working Application
 
 Your application is fully functional and can be accessed at:
+
 - **Local**: http://localhost:5000 (when running `npm run dev`)
 - **Replit**: https://27891fa9-b276-4e4e-a11a-60ce998c53b2-00-2uromwtwyow5n.janeway.replit.dev
 
 ## Alternative: Use Replit Deployment
 
 Instead of purchasing a domain, you can deploy directly on Replit:
+
 1. Click "Deploy" in Replit
 2. Your app will be available at a replit.app subdomain
 3. You can later add a custom domain if needed

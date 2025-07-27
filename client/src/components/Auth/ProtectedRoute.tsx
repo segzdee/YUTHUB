@@ -9,30 +9,33 @@ interface ProtectedRouteProps {
   requiredPermissions?: string[];
 }
 
-export default function ProtectedRoute({ 
-  children, 
-  requiredRole, 
-  requiredPermissions 
+export default function ProtectedRoute({
+  children,
+  requiredRole,
+  requiredPermissions,
 }: ProtectedRouteProps) {
   const { user, isLoading, isAuthenticated } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
-    return <PageLoader message="Verifying authentication..." />;
+    return <PageLoader message='Verifying authentication...' />;
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to='/login' state={{ from: location }} replace />;
   }
 
   if (requiredRole && user?.role !== requiredRole) {
-    return <Navigate to="/app/dashboard" replace />;
+    return <Navigate to='/app/dashboard' replace />;
   }
 
-  if (requiredPermissions && !requiredPermissions.every(permission => 
-    user?.permissions?.includes(permission)
-  )) {
-    return <Navigate to="/app/dashboard" replace />;
+  if (
+    requiredPermissions &&
+    !requiredPermissions.every(permission =>
+      user?.permissions?.includes(permission)
+    )
+  ) {
+    return <Navigate to='/app/dashboard' replace />;
   }
 
   return <>{children}</>;

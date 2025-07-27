@@ -3,8 +3,9 @@
 ## Replit OIDC Configuration
 
 ### Current Configuration Status
+
 - **REPL_ID**: ✅ Configured
-- **SESSION_SECRET**: ✅ Configured  
+- **SESSION_SECRET**: ✅ Configured
 - **ISSUER_URL**: Using default `https://replit.com/oidc`
 
 ### Required Callback URLs
@@ -20,19 +21,23 @@ https://www.yuthub.com/api/callback
 ### Step-by-Step Configuration
 
 #### 1. Access Replit OAuth Settings
+
 1. Go to [Replit Teams/Apps Settings](https://replit.com/account/apps)
 2. Find your application with REPL_ID: `${process.env.REPL_ID}`
 3. Click "Edit" or "Configure"
 
 #### 2. Update Redirect URIs
+
 Remove old development URLs and add production URLs:
 
 **Remove (if present):**
+
 ```
 https://27891fa9-b276-4e4e-a11a-60ce998c53b2-00-2uromwtwyow5n.janeway.replit.dev/api/callback
 ```
 
 **Add these stable production URLs:**
+
 ```
 https://yuthub.replit.app/api/callback
 https://yuthub.com/api/callback
@@ -40,13 +45,16 @@ https://www.yuthub.com/api/callback
 ```
 
 #### 3. Configure OAuth Scopes
+
 Ensure these scopes are enabled:
+
 - `openid`
 - `email`
 - `profile`
 - `offline_access`
 
 #### 4. Save Configuration
+
 Click "Save" or "Update" to apply the changes
 
 ### Testing the Configuration
@@ -67,11 +75,13 @@ After updating the OAuth provider settings:
 ### Troubleshooting
 
 If you see `invalid_redirect_uri` error:
+
 - Verify callback URLs are exactly as specified above
 - Check that the domain is properly configured in Replit OAuth settings
 - Ensure HTTPS is used for all production URLs
 
 If authentication succeeds but session doesn't persist:
+
 - Check browser cookies are being set
 - Verify the domain configuration in session settings
 - Check for CORS issues in browser developer tools
@@ -79,6 +89,7 @@ If authentication succeeds but session doesn't persist:
 ### Environment Variables
 
 Current configuration uses these environment variables:
+
 - `REPL_ID`: Your Replit application ID
 - `SESSION_SECRET`: Secret key for session signing
 - `ISSUER_URL`: OAuth provider URL (defaults to https://replit.com/oidc)

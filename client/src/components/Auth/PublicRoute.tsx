@@ -8,14 +8,14 @@ interface PublicRouteProps {
   redirectTo?: string;
 }
 
-export default function PublicRoute({ 
-  children, 
-  redirectTo = '/app/dashboard' 
+export default function PublicRoute({
+  children,
+  redirectTo = '/app/dashboard',
 }: PublicRouteProps) {
   const { isLoading, isAuthenticated } = useAuth();
 
   if (isLoading) {
-    return <PageLoader message="Loading..." />;
+    return <PageLoader message='Loading...' />;
   }
 
   if (isAuthenticated) {

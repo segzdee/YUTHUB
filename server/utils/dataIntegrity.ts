@@ -4,24 +4,24 @@ import { storage } from '../storage';
 
 // Database integrity checks
 export class DataIntegrityChecker {
-  
   // Check for orphaned records
   static async checkOrphanedRecords(): Promise<{
     orphanedResidents: number;
     orphanedIncidents: number;
     orphanedFinancialRecords: number;
   }> {
-    const [orphanedResidents, orphanedIncidents, orphanedFinancialRecords] = await Promise.all([
-      // Residents without valid properties
-      db.execute(sql`
+    const [orphanedResidents, orphanedIncidents, orphanedFinancialRecords] =
+      await Promise.all([
+        // Residents without valid properties
+        db.execute(sql`
         SELECT COUNT(*) as count 
         FROM residents r 
         LEFT JOIN properties p ON r.property_id = p.id 
         WHERE r.property_id IS NOT NULL AND p.id IS NULL
       `),
-      
-      // Incidents without valid residents or properties
-      db.execute(sql`
+
+        // Incidents without valid residents or properties
+        db.execute(sql`
         SELECT COUNT(*) as count 
         FROM incidents i 
         LEFT JOIN residents r ON i.resident_id = r.id 
@@ -29,22 +29,24 @@ export class DataIntegrityChecker {
         WHERE (i.resident_id IS NOT NULL AND r.id IS NULL) 
            OR (i.property_id IS NOT NULL AND p.id IS NULL)
       `),
-      
-      // Financial records without valid residents or properties
-      db.execute(sql`
+
+        // Financial records without valid residents or properties
+        db.execute(sql`
         SELECT COUNT(*) as count 
         FROM financial_records f 
         LEFT JOIN residents r ON f.resident_id = r.id 
         LEFT JOIN properties p ON f.property_id = p.id 
         WHERE (f.resident_id IS NOT NULL AND r.id IS NULL) 
            OR (f.property_id IS NOT NULL AND p.id IS NULL)
-      `)
-    ]);
+      `),
+      ]);
 
     return {
       orphanedResidents: Number(orphanedResidents.rows[0]?.count || 0),
       orphanedIncidents: Number(orphanedIncidents.rows[0]?.count || 0),
-      orphanedFinancialRecords: Number(orphanedFinancialRecords.rows[0]?.count || 0),
+      orphanedFinancialRecords: Number(
+        orphanedFinancialRecords.rows[0]?.count || 0
+      ),
     };
   }
 
@@ -54,9 +56,10 @@ export class DataIntegrityChecker {
     invalidStatusCombinations: number;
     dateInconsistencies: number;
   }> {
-    const [occupancyMismatch, statusCombinations, dateInconsistencies] = await Promise.all([
-      // Properties with incorrect occupancy counts
-      db.execute(sql`
+    const [occupancyMismatch, statusCombinations, dateInconsistencies] =
+      await Promise.all([
+        // Properties with incorrect occupancy counts
+        db.execute(sql`
         SELECT COUNT(*) as count 
         FROM properties p 
         WHERE p.occupied_units != (
@@ -65,23 +68,23 @@ export class DataIntegrityChecker {
           WHERE r.property_id = p.id AND r.status = 'active'
         )
       `),
-      
-      // Residents with invalid status combinations
-      db.execute(sql`
+
+        // Residents with invalid status combinations
+        db.execute(sql`
         SELECT COUNT(*) as count 
         FROM residents r 
         WHERE (r.status = 'moved_out' AND r.move_out_date IS NULL) 
            OR (r.status = 'active' AND r.move_out_date IS NOT NULL)
       `),
-      
-      // Date inconsistencies
-      db.execute(sql`
+
+        // Date inconsistencies
+        db.execute(sql`
         SELECT COUNT(*) as count 
         FROM residents r 
         WHERE r.move_in_date > r.move_out_date 
            OR r.move_in_date > CURRENT_DATE
-      `)
-    ]);
+      `),
+      ]);
 
     return {
       propertyOccupancyMismatch: Number(occupancyMismatch.rows[0]?.count || 0),
@@ -107,7 +110,7 @@ export class DataIntegrityChecker {
           AND residents.status = 'active'
       )
     `);
-    
+
     return result.rowCount || 0;
   }
 
@@ -119,29 +122,28 @@ export class DataIntegrityChecker {
     fixedRecords: number;
   }> {
     const timestamp = new Date().toISOString();
-    
+
     console.log('Running data integrity check...');
-    
+
     const orphanedRecords = await this.checkOrphanedRecords();
     const dataConsistency = await this.checkDataConsistency();
     const fixedRecords = await this.fixPropertyOccupancyCounts();
-    
+
     const result = {
       timestamp,
       orphanedRecords,
       dataConsistency,
       fixedRecords,
     };
-    
+
     console.log('Data integrity check completed:', result);
-    
+
     return result;
   }
 }
 
 // Database backup utilities
 export class DatabaseBackupManager {
-  
   // Create a logical backup of critical data
   static async createBackupSnapshot(): Promise<{
     timestamp: string;
@@ -149,8 +151,15 @@ export class DatabaseBackupManager {
     totalRecords: number;
   }> {
     const timestamp = new Date().toISOString();
-    
-    const [users, properties, residents, incidents, activities, financialRecords] = await Promise.all([
+
+    const [
+      users,
+      properties,
+      residents,
+      incidents,
+      activities,
+      financialRecords,
+    ] = await Promise.all([
       db.execute(sql`SELECT COUNT(*) as count FROM users`),
       db.execute(sql`SELECT COUNT(*) as count FROM properties`),
       db.execute(sql`SELECT COUNT(*) as count FROM residents`),
@@ -168,7 +177,10 @@ export class DatabaseBackupManager {
       financial_records: Number(financialRecords.rows[0]?.count || 0),
     };
 
-    const totalRecords = Object.values(tables).reduce((sum, count) => sum + count, 0);
+    const totalRecords = Object.values(tables).reduce(
+      (sum, count) => sum + count,
+      0
+    );
 
     const snapshot = {
       timestamp,
@@ -177,7 +189,7 @@ export class DatabaseBackupManager {
     };
 
     console.log('Database backup snapshot created:', snapshot);
-    
+
     return snapshot;
   }
 
@@ -188,7 +200,7 @@ export class DatabaseBackupManager {
     lastSnapshot: any;
   }> {
     const errors: string[] = [];
-    
+
     try {
       // Check if critical tables exist
       const tableChecks = await Promise.all([
@@ -220,9 +232,10 @@ export class DatabaseBackupManager {
       if (Number(indexCheck.rows[0]?.count || 0) === 0) {
         errors.push('Performance indexes not found');
       }
-
     } catch (error) {
-      errors.push(`Database connectivity error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      errors.push(
+        `Database connectivity error: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
 
     const lastSnapshot = await this.createBackupSnapshot();
@@ -237,7 +250,6 @@ export class DatabaseBackupManager {
 
 // Migration safety utilities
 export class MigrationSafetyManager {
-  
   // Pre-migration checks
   static async preMigrationChecks(): Promise<{
     canProceed: boolean;
@@ -246,19 +258,23 @@ export class MigrationSafetyManager {
   }> {
     const warnings: string[] = [];
     let backupRequired = false;
-    
+
     // Check for data inconsistencies
     const integrity = await DataIntegrityChecker.runFullIntegrityCheck();
-    
+
     if (integrity.orphanedRecords.orphanedResidents > 0) {
-      warnings.push(`Found ${integrity.orphanedRecords.orphanedResidents} orphaned residents`);
+      warnings.push(
+        `Found ${integrity.orphanedRecords.orphanedResidents} orphaned residents`
+      );
       backupRequired = true;
     }
-    
+
     if (integrity.dataConsistency.propertyOccupancyMismatch > 0) {
-      warnings.push(`Found ${integrity.dataConsistency.propertyOccupancyMismatch} properties with incorrect occupancy counts`);
+      warnings.push(
+        `Found ${integrity.dataConsistency.propertyOccupancyMismatch} properties with incorrect occupancy counts`
+      );
     }
-    
+
     // Check for active connections
     const activeConnections = await db.execute(sql`
       SELECT COUNT(*) as count 
@@ -266,26 +282,27 @@ export class MigrationSafetyManager {
       WHERE state = 'active' 
         AND pid != pg_backend_pid()
     `);
-    
+
     const connectionCount = Number(activeConnections.rows[0]?.count || 0);
     if (connectionCount > 10) {
       warnings.push(`High number of active connections: ${connectionCount}`);
     }
-    
+
     // Check available disk space (simplified check)
     const dbSize = await db.execute(sql`
       SELECT pg_size_pretty(pg_database_size(current_database())) as size
     `);
-    
-    const canProceed = warnings.length === 0 || warnings.every(w => !w.includes('orphaned'));
-    
+
+    const canProceed =
+      warnings.length === 0 || warnings.every(w => !w.includes('orphaned'));
+
     return {
       canProceed,
       warnings,
       backupRequired,
     };
   }
-  
+
   // Post-migration verification
   static async postMigrationVerification(): Promise<{
     success: boolean;
@@ -296,15 +313,17 @@ export class MigrationSafetyManager {
     };
   }> {
     const errors: string[] = [];
-    
+
     try {
       // Verify data integrity after migration
       const integrity = await DataIntegrityChecker.runFullIntegrityCheck();
-      
+
       if (integrity.orphanedRecords.orphanedResidents > 0) {
-        errors.push(`Migration introduced ${integrity.orphanedRecords.orphanedResidents} orphaned residents`);
+        errors.push(
+          `Migration introduced ${integrity.orphanedRecords.orphanedResidents} orphaned residents`
+        );
       }
-      
+
       // Test critical queries
       const start = Date.now();
       await Promise.all([
@@ -313,32 +332,33 @@ export class MigrationSafetyManager {
         storage.getDashboardMetrics(),
       ]);
       const avgQueryTime = (Date.now() - start) / 3;
-      
+
       // Check for slow queries
       const slowQueries = await db.execute(sql`
         SELECT COUNT(*) as count 
         FROM pg_stat_statements 
         WHERE mean_time > 1000
       `);
-      
+
       const performance = {
         avgQueryTime,
         slowQueries: Number(slowQueries.rows[0]?.count || 0),
       };
-      
+
       if (avgQueryTime > 500) {
         errors.push(`Average query time too high: ${avgQueryTime}ms`);
       }
-      
+
       return {
         success: errors.length === 0,
         errors,
         performance,
       };
-      
     } catch (error) {
-      errors.push(`Post-migration verification failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      
+      errors.push(
+        `Post-migration verification failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+
       return {
         success: false,
         errors,

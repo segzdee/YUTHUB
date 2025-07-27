@@ -1,16 +1,14 @@
 import { useAuth as useAuthHook } from '@/hooks/useAuth';
 import React, { createContext, useContext } from 'react';
 
-const AuthContext = createContext<ReturnType<typeof useAuthHook> | undefined>(undefined);
+const AuthContext = createContext<ReturnType<typeof useAuthHook> | undefined>(
+  undefined
+);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const auth = useAuthHook();
-  
-  return (
-    <AuthContext.Provider value={auth}>
-      {children}
-    </AuthContext.Provider>
-  );
+
+  return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

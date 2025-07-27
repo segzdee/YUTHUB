@@ -1,11 +1,35 @@
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Apple, Building, Chrome, Mail, Plus, Shield, Trash2 } from 'lucide-react';
+import {
+  Apple,
+  Building,
+  Chrome,
+  Mail,
+  Plus,
+  Shield,
+  Trash2,
+} from 'lucide-react';
 
 interface AuthMethod {
   id: number;
@@ -48,21 +72,22 @@ export default function AuthMethodManager() {
   });
 
   const removeMethodMutation = useMutation({
-    mutationFn: (methodId: number) => apiRequest(`/auth/methods/${methodId}`, {
-      method: 'DELETE',
-    }),
+    mutationFn: (methodId: number) =>
+      apiRequest(`/auth/methods/${methodId}`, {
+        method: 'DELETE',
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/auth/methods'] });
       toast({
-        title: "Success",
-        description: "Authentication method removed successfully",
+        title: 'Success',
+        description: 'Authentication method removed successfully',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to remove authentication method",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to remove authentication method',
+        variant: 'destructive',
       });
     },
   });
@@ -94,10 +119,10 @@ export default function AuthMethodManager() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="animate-pulse">
-                <div className="h-16 bg-gray-200 rounded-lg"></div>
+          <div className='space-y-4'>
+            {[1, 2, 3].map(i => (
+              <div key={i} className='animate-pulse'>
+                <div className='h-16 bg-gray-200 rounded-lg'></div>
               </div>
             ))}
           </div>
@@ -116,52 +141,68 @@ export default function AuthMethodManager() {
       <CardHeader>
         <CardTitle>Authentication Methods</CardTitle>
         <CardDescription>
-          Manage how you sign in to your account. You must have at least one method enabled.
+          Manage how you sign in to your account. You must have at least one
+          method enabled.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className='space-y-4'>
         {/* Current Methods */}
-        <div className="space-y-3">
-          <h4 className="font-medium text-sm text-gray-700">Current Methods</h4>
+        <div className='space-y-3'>
+          <h4 className='font-medium text-sm text-gray-700'>Current Methods</h4>
           {methods.map((method: AuthMethod) => {
-            const Icon = providerIcons[method.provider as keyof typeof providerIcons];
-            const label = providerLabels[method.provider as keyof typeof providerLabels];
-            const color = providerColors[method.provider as keyof typeof providerColors];
-            
+            const Icon =
+              providerIcons[method.provider as keyof typeof providerIcons];
+            const label =
+              providerLabels[method.provider as keyof typeof providerLabels];
+            const color =
+              providerColors[method.provider as keyof typeof providerColors];
+
             return (
-              <div key={method.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center space-x-3">
+              <div
+                key={method.id}
+                className='flex items-center justify-between p-4 border rounded-lg'
+              >
+                <div className='flex items-center space-x-3'>
                   <div className={`p-2 rounded-full ${color} text-white`}>
-                    <Icon className="h-4 w-4" />
+                    <Icon className='h-4 w-4' />
                   </div>
                   <div>
-                    <div className="font-medium">{label}</div>
-                    <div className="text-sm text-gray-500">{method.providerEmail}</div>
+                    <div className='font-medium'>{label}</div>
+                    <div className='text-sm text-gray-500'>
+                      {method.providerEmail}
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Badge variant="secondary" className="text-xs">
+                <div className='flex items-center space-x-2'>
+                  <Badge variant='secondary' className='text-xs'>
                     Added {new Date(method.createdAt).toLocaleDateString()}
                   </Badge>
                   {methods.length > 1 && (
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-800">
-                          <Trash2 className="h-4 w-4" />
+                        <Button
+                          variant='ghost'
+                          size='sm'
+                          className='text-red-600 hover:text-red-800'
+                        >
+                          <Trash2 className='h-4 w-4' />
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Remove Authentication Method</AlertDialogTitle>
+                          <AlertDialogTitle>
+                            Remove Authentication Method
+                          </AlertDialogTitle>
                           <AlertDialogDescription>
-                            Are you sure you want to remove {label}? You won't be able to sign in using this method anymore.
+                            Are you sure you want to remove {label}? You won't
+                            be able to sign in using this method anymore.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => handleRemoveMethod(method.id)}
-                            className="bg-red-600 hover:bg-red-700"
+                            className='bg-red-600 hover:bg-red-700'
                           >
                             Remove
                           </AlertDialogAction>
@@ -177,29 +218,36 @@ export default function AuthMethodManager() {
 
         {/* Available Methods */}
         {availableProviders.length > 0 && (
-          <div className="space-y-3">
-            <h4 className="font-medium text-sm text-gray-700">Add New Method</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {availableProviders.map((provider) => {
-                const Icon = providerIcons[provider as keyof typeof providerIcons];
-                const label = providerLabels[provider as keyof typeof providerLabels];
-                const color = providerColors[provider as keyof typeof providerColors];
-                
+          <div className='space-y-3'>
+            <h4 className='font-medium text-sm text-gray-700'>
+              Add New Method
+            </h4>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+              {availableProviders.map(provider => {
+                const Icon =
+                  providerIcons[provider as keyof typeof providerIcons];
+                const label =
+                  providerLabels[provider as keyof typeof providerLabels];
+                const color =
+                  providerColors[provider as keyof typeof providerColors];
+
                 return (
                   <Button
                     key={provider}
-                    variant="outline"
+                    variant='outline'
                     onClick={() => handleAddMethod(provider)}
-                    className="flex items-center space-x-2 p-4 h-auto"
+                    className='flex items-center space-x-2 p-4 h-auto'
                   >
                     <div className={`p-2 rounded-full ${color} text-white`}>
-                      <Icon className="h-4 w-4" />
+                      <Icon className='h-4 w-4' />
                     </div>
                     <div>
-                      <div className="font-medium">Add {label}</div>
-                      <div className="text-sm text-gray-500">Link your {label} account</div>
+                      <div className='font-medium'>Add {label}</div>
+                      <div className='text-sm text-gray-500'>
+                        Link your {label} account
+                      </div>
                     </div>
-                    <Plus className="h-4 w-4 ml-auto" />
+                    <Plus className='h-4 w-4 ml-auto' />
                   </Button>
                 );
               })}
@@ -208,13 +256,16 @@ export default function AuthMethodManager() {
         )}
 
         {/* Security Notice */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-start space-x-3">
-            <Shield className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+        <div className='bg-blue-50 border border-blue-200 rounded-lg p-4'>
+          <div className='flex items-start space-x-3'>
+            <Shield className='h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0' />
             <div>
-              <h4 className="font-medium text-blue-900">Security Recommendation</h4>
-              <p className="text-sm text-blue-700 mt-1">
-                We recommend having multiple authentication methods enabled for better security and account recovery options.
+              <h4 className='font-medium text-blue-900'>
+                Security Recommendation
+              </h4>
+              <p className='text-sm text-blue-700 mt-1'>
+                We recommend having multiple authentication methods enabled for
+                better security and account recovery options.
               </p>
             </div>
           </div>

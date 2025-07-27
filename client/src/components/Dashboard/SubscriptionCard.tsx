@@ -1,11 +1,24 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
 import { useQuery } from '@tanstack/react-query';
-import { Building2, Calendar, Crown, TrendingUp, Users, Zap } from 'lucide-react';
+import {
+  Building2,
+  Calendar,
+  Crown,
+  TrendingUp,
+  Users,
+  Zap,
+} from 'lucide-react';
 
 const tierIcons = {
   trial: Building2,
@@ -49,11 +62,16 @@ export default function SubscriptionCard() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      case 'expired': return 'bg-gray-100 text-gray-800';
-      case 'past_due': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'active':
+        return 'bg-green-100 text-green-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      case 'expired':
+        return 'bg-gray-100 text-gray-800';
+      case 'past_due':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -65,101 +83,120 @@ export default function SubscriptionCard() {
   };
 
   return (
-    <Card className="col-span-full">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <TierIcon className="h-5 w-5 text-gray-600" />
+    <Card className='col-span-full'>
+      <CardHeader className='pb-3'>
+        <div className='flex items-center justify-between'>
+          <div className='flex items-center space-x-3'>
+            <TierIcon className='h-5 w-5 text-gray-600' />
             <div>
-              <CardTitle className="text-lg">Subscription</CardTitle>
-              <CardDescription>
-                Your current plan and usage
-              </CardDescription>
+              <CardTitle className='text-lg'>Subscription</CardTitle>
+              <CardDescription>Your current plan and usage</CardDescription>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
-            <Badge className={tierColors[subscriptionTier as keyof typeof tierColors]}>
-              {subscriptionTier.charAt(0).toUpperCase() + subscriptionTier.slice(1)}
+          <div className='flex items-center space-x-2'>
+            <Badge
+              className={
+                tierColors[subscriptionTier as keyof typeof tierColors]
+              }
+            >
+              {subscriptionTier.charAt(0).toUpperCase() +
+                subscriptionTier.slice(1)}
             </Badge>
-            <Badge variant="outline" className={getStatusColor(subscriptionStatus)}>
-              {subscriptionStatus.charAt(0).toUpperCase() + subscriptionStatus.slice(1)}
+            <Badge
+              variant='outline'
+              className={getStatusColor(subscriptionStatus)}
+            >
+              {subscriptionStatus.charAt(0).toUpperCase() +
+                subscriptionStatus.slice(1)}
             </Badge>
           </div>
         </div>
       </CardHeader>
-      
-      <CardContent className="space-y-6">
+
+      <CardContent className='space-y-6'>
         {/* Resident Usage */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center space-x-2">
-              <Users className="h-4 w-4 text-gray-500" />
+        <div className='space-y-2'>
+          <div className='flex items-center justify-between text-sm'>
+            <div className='flex items-center space-x-2'>
+              <Users className='h-4 w-4 text-gray-500' />
               <span>Residents</span>
             </div>
-            <span className={`font-medium ${isNearLimit ? 'text-orange-600' : isAtLimit ? 'text-red-600' : 'text-gray-600'}`}>
-              {currentResidents} / {maxResidents === 999999 ? '∞' : maxResidents}
+            <span
+              className={`font-medium ${isNearLimit ? 'text-orange-600' : isAtLimit ? 'text-red-600' : 'text-gray-600'}`}
+            >
+              {currentResidents} /{' '}
+              {maxResidents === 999999 ? '∞' : maxResidents}
             </span>
           </div>
-          <Progress 
-            value={Math.min(usagePercentage, 100)} 
-            className="h-2"
-            indicatorClassName={isNearLimit ? 'bg-orange-500' : isAtLimit ? 'bg-red-500' : 'bg-green-500'}
+          <Progress
+            value={Math.min(usagePercentage, 100)}
+            className='h-2'
+            indicatorClassName={
+              isNearLimit
+                ? 'bg-orange-500'
+                : isAtLimit
+                  ? 'bg-red-500'
+                  : 'bg-green-500'
+            }
           />
           {isNearLimit && (
-            <p className="text-sm text-orange-600">
-              {isAtLimit ? 'Resident limit reached' : 'Approaching resident limit'}
+            <p className='text-sm text-orange-600'>
+              {isAtLimit
+                ? 'Resident limit reached'
+                : 'Approaching resident limit'}
             </p>
           )}
         </div>
 
         {/* Subscription Details */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <div className="flex items-center space-x-2 text-sm text-gray-600">
-              <Calendar className="h-4 w-4" />
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <div className='space-y-2'>
+            <div className='flex items-center space-x-2 text-sm text-gray-600'>
+              <Calendar className='h-4 w-4' />
               <span>Start Date</span>
             </div>
-            <p className="font-medium">
+            <p className='font-medium'>
               {formatDate(user?.subscriptionStartDate)}
             </p>
           </div>
-          
-          <div className="space-y-2">
-            <div className="flex items-center space-x-2 text-sm text-gray-600">
-              <TrendingUp className="h-4 w-4" />
+
+          <div className='space-y-2'>
+            <div className='flex items-center space-x-2 text-sm text-gray-600'>
+              <TrendingUp className='h-4 w-4' />
               <span>Renewal Date</span>
             </div>
-            <p className="font-medium">
+            <p className='font-medium'>
               {formatDate(user?.subscriptionEndDate)}
             </p>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap gap-2">
+        <div className='flex flex-wrap gap-2'>
           {subscriptionTier === 'trial' && (
-            <Button 
+            <Button
               onClick={() => handleNavigation('/pricing')}
-              className="flex-1 min-w-[120px]"
+              className='flex-1 min-w-[120px]'
             >
               Upgrade Plan
             </Button>
           )}
-          
-          {subscriptionTier !== 'trial' && subscriptionTier !== 'enterprise' && (
-            <Button 
-              onClick={() => handleNavigation('/pricing')}
-              variant="outline"
-              className="flex-1 min-w-[120px]"
-            >
-              Upgrade Plan
-            </Button>
-          )}
-          
-          <Button 
+
+          {subscriptionTier !== 'trial' &&
+            subscriptionTier !== 'enterprise' && (
+              <Button
+                onClick={() => handleNavigation('/pricing')}
+                variant='outline'
+                className='flex-1 min-w-[120px]'
+              >
+                Upgrade Plan
+              </Button>
+            )}
+
+          <Button
             onClick={() => handleNavigation('/subscribe')}
-            variant="outline"
-            className="flex-1 min-w-[120px]"
+            variant='outline'
+            className='flex-1 min-w-[120px]'
           >
             Manage Subscription
           </Button>
@@ -167,15 +204,18 @@ export default function SubscriptionCard() {
 
         {/* Upgrade Recommendations */}
         {isNearLimit && subscriptionTier !== 'enterprise' && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="font-medium text-blue-900 mb-2">Consider Upgrading</h4>
-            <p className="text-sm text-blue-800 mb-3">
-              You're approaching your resident limit. Upgrade to accommodate more residents and unlock additional features.
+          <div className='bg-blue-50 border border-blue-200 rounded-lg p-4'>
+            <h4 className='font-medium text-blue-900 mb-2'>
+              Consider Upgrading
+            </h4>
+            <p className='text-sm text-blue-800 mb-3'>
+              You're approaching your resident limit. Upgrade to accommodate
+              more residents and unlock additional features.
             </p>
-            <Button 
+            <Button
               onClick={() => handleNavigation('/pricing')}
-              size="sm"
-              className="bg-blue-600 hover:bg-blue-700"
+              size='sm'
+              className='bg-blue-600 hover:bg-blue-700'
             >
               View Plans
             </Button>

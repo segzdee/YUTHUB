@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -87,21 +93,23 @@ export default function Subscribe() {
 
   const createSubscriptionMutation = useMutation({
     mutationFn: async (tier: string) => {
-      const response = await apiRequest('POST', '/api/subscriptions/create', { tier });
+      const response = await apiRequest('POST', '/api/subscriptions/create', {
+        tier,
+      });
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       toast({
-        title: "Subscription Created",
-        description: "Your subscription has been created successfully!",
+        title: 'Subscription Created',
+        description: 'Your subscription has been created successfully!',
       });
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
     },
-    onError: (error) => {
+    onError: error => {
       toast({
-        title: "Subscription Error",
-        description: error.message || "Failed to create subscription",
-        variant: "destructive",
+        title: 'Subscription Error',
+        description: error.message || 'Failed to create subscription',
+        variant: 'destructive',
       });
     },
   });
@@ -116,10 +124,10 @@ export default function Subscribe() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className='min-h-screen bg-gray-50'>
         <UniversalHeader />
-        <div className="flex items-center justify-center py-20">
-          <Card className="w-full max-w-md">
+        <div className='flex items-center justify-center py-20'>
+          <Card className='w-full max-w-md'>
             <CardHeader>
               <CardTitle>Login Required</CardTitle>
               <CardDescription>
@@ -127,7 +135,10 @@ export default function Subscribe() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button onClick={() => window.location.href = '/login'} className="w-full">
+              <Button
+                onClick={() => (window.location.href = '/login')}
+                className='w-full'
+              >
                 Login to Continue
               </Button>
             </CardContent>
@@ -139,31 +150,32 @@ export default function Subscribe() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className='min-h-screen bg-gray-50'>
       <UniversalHeader />
-      <div className="max-w-4xl mx-auto py-12 px-4">
+      <div className='max-w-4xl mx-auto py-12 px-4'>
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <div className='text-center mb-8'>
+          <h1 className='text-3xl font-bold text-gray-900 mb-2'>
             Subscribe to YUTHUB
           </h1>
-          <p className="text-gray-600">
+          <p className='text-gray-600'>
             Choose the perfect plan for your organization
           </p>
         </div>
 
         {/* Current Subscription Status */}
         {user && (
-          <Alert className="mb-8">
+          <Alert className='mb-8'>
             <AlertDescription>
-              <div className="flex items-center justify-between">
+              <div className='flex items-center justify-between'>
                 <div>
-                  <strong>Current Plan:</strong> {user.subscriptionTier || 'Trial'} 
-                  <Badge variant="outline" className="ml-2">
+                  <strong>Current Plan:</strong>{' '}
+                  {user.subscriptionTier || 'Trial'}
+                  <Badge variant='outline' className='ml-2'>
                     {user.subscriptionStatus || 'Active'}
                   </Badge>
                 </div>
-                <div className="text-sm text-gray-600">
+                <div className='text-sm text-gray-600'>
                   Max residents: {user.maxResidents || 25}
                 </div>
               </div>
@@ -172,57 +184,57 @@ export default function Subscribe() {
         )}
 
         {/* Subscription Tiers */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-8'>
           {Object.entries(tierFeatures).map(([key, tier]) => {
             const Icon = tierIcons[key as keyof typeof tierIcons];
             const isSelected = selectedTier === key;
             const isCurrentTier = user?.subscriptionTier === key;
-            
+
             return (
-              <Card 
-                key={key} 
+              <Card
+                key={key}
                 className={`cursor-pointer transition-all ${
                   isSelected ? 'ring-2 ring-blue-500' : ''
                 } ${tier.color} relative`}
                 onClick={() => setSelectedTier(key)}
               >
                 {isCurrentTier && (
-                  <div className="absolute -top-2 -right-2">
-                    <Badge className="bg-green-600 text-white">Current</Badge>
+                  <div className='absolute -top-2 -right-2'>
+                    <Badge className='bg-green-600 text-white'>Current</Badge>
                   </div>
                 )}
-                
+
                 <CardHeader>
-                  <div className="flex items-center space-x-3">
-                    <Icon className="h-8 w-8 text-gray-700" />
+                  <div className='flex items-center space-x-3'>
+                    <Icon className='h-8 w-8 text-gray-700' />
                     <div>
-                      <CardTitle className="text-xl">{tier.name}</CardTitle>
+                      <CardTitle className='text-xl'>{tier.name}</CardTitle>
                       <CardDescription>{tier.description}</CardDescription>
                     </div>
                   </div>
-                  
-                  <div className="mt-4">
-                    <div className="flex items-baseline">
-                      <span className="text-3xl font-bold text-gray-900">
+
+                  <div className='mt-4'>
+                    <div className='flex items-baseline'>
+                      <span className='text-3xl font-bold text-gray-900'>
                         £{tier.price}
                       </span>
-                      <span className="text-gray-500 ml-2">/month</span>
+                      <span className='text-gray-500 ml-2'>/month</span>
                     </div>
-                    <div className="text-sm text-gray-600 mt-1">
+                    <div className='text-sm text-gray-600 mt-1'>
                       Billed annually
                     </div>
-                    <div className="text-sm text-gray-600 mt-1">
+                    <div className='text-sm text-gray-600 mt-1'>
                       Max residents: {tier.maxResidents}
                     </div>
                   </div>
                 </CardHeader>
-                
+
                 <CardContent>
-                  <ul className="space-y-2">
+                  <ul className='space-y-2'>
                     {tier.features.map((feature, index) => (
-                      <li key={index} className="flex items-start">
-                        <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm text-gray-700">{feature}</span>
+                      <li key={index} className='flex items-start'>
+                        <Check className='h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5' />
+                        <span className='text-sm text-gray-700'>{feature}</span>
                       </li>
                     ))}
                   </ul>
@@ -234,28 +246,38 @@ export default function Subscribe() {
 
         {/* Subscribe Button */}
         {selectedTier && (
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
+          <Card className='p-6'>
+            <div className='flex items-center justify-between'>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Ready to subscribe to {tierFeatures[selectedTier as keyof typeof tierFeatures].name}?
+                <h3 className='text-lg font-semibold text-gray-900'>
+                  Ready to subscribe to{' '}
+                  {tierFeatures[selectedTier as keyof typeof tierFeatures].name}
+                  ?
                 </h3>
-                <p className="text-gray-600 mt-1">
-                  £{tierFeatures[selectedTier as keyof typeof tierFeatures].price}/month billed annually
+                <p className='text-gray-600 mt-1'>
+                  £
+                  {
+                    tierFeatures[selectedTier as keyof typeof tierFeatures]
+                      .price
+                  }
+                  /month billed annually
                 </p>
-                <p className="text-sm text-gray-500 mt-2">
+                <p className='text-sm text-gray-500 mt-2'>
                   Includes free setup, migration, training, and configuration
                 </p>
               </div>
               <Button
                 onClick={() => handleSubscribe(selectedTier)}
-                disabled={createSubscriptionMutation.isPending || user?.subscriptionTier === selectedTier}
-                size="lg"
-                className="px-8"
+                disabled={
+                  createSubscriptionMutation.isPending ||
+                  user?.subscriptionTier === selectedTier
+                }
+                size='lg'
+                className='px-8'
               >
                 {createSubscriptionMutation.isPending ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className='h-4 w-4 mr-2 animate-spin' />
                     Creating...
                   </>
                 ) : user?.subscriptionTier === selectedTier ? (
@@ -269,12 +291,13 @@ export default function Subscribe() {
         )}
 
         {/* Additional Information */}
-        <div className="mt-8 text-center text-sm text-gray-600">
-          <p>
-            All plans include a 30-day free trial. Cancel anytime.
-          </p>
-          <p className="mt-2">
-            Need help choosing? <a href="/contact" className="text-blue-600 hover:underline">Contact our team</a>
+        <div className='mt-8 text-center text-sm text-gray-600'>
+          <p>All plans include a 30-day free trial. Cancel anytime.</p>
+          <p className='mt-2'>
+            Need help choosing?{' '}
+            <a href='/contact' className='text-blue-600 hover:underline'>
+              Contact our team
+            </a>
           </p>
         </div>
       </div>

@@ -22,12 +22,12 @@ class MemoryStore implements RateLimitStore {
   async incr(key: string): Promise<number> {
     const now = Date.now();
     const entry = this.store.get(key);
-    
+
     if (!entry || entry.resetTime < now) {
       this.store.set(key, { count: 1, resetTime: now + 60000 }); // 1 minute window
       return 1;
     }
-    
+
     entry.count++;
     return entry.count;
   }
@@ -35,7 +35,7 @@ class MemoryStore implements RateLimitStore {
   async expire(key: string, seconds: number): Promise<void> {
     const entry = this.store.get(key);
     if (entry) {
-      entry.resetTime = Date.now() + (seconds * 1000);
+      entry.resetTime = Date.now() + seconds * 1000;
     }
   }
 
@@ -91,16 +91,19 @@ export class RateLimiter {
       message: 'Too many requests, please try again later',
       skipSuccessfulRequests: false,
       skipFailedRequests: false,
-      keyGenerator: (req) => req.ip || 'unknown',
+      keyGenerator: req => req.ip || 'unknown',
       ...config,
     };
     this.store = store || new MemoryStore();
 
     // Cleanup memory store every 5 minutes
     if (this.store instanceof MemoryStore) {
-      setInterval(() => {
-        (this.store as MemoryStore).cleanup();
-      }, 5 * 60 * 1000);
+      setInterval(
+        () => {
+          (this.store as MemoryStore).cleanup();
+        },
+        5 * 60 * 1000
+      );
     }
   }
 
@@ -109,7 +112,7 @@ export class RateLimiter {
       try {
         const key = `rate_limit:${this.config.keyGenerator!(req)}`;
         const current = await this.store.incr(key);
-        
+
         // Set expiry for the window
         if (current === 1) {
           await this.store.expire(key, Math.ceil(this.config.windowMs / 1000));
@@ -118,7 +121,7 @@ export class RateLimiter {
         // Check if limit exceeded
         if (current > this.config.maxRequests) {
           const resetTime = new Date(Date.now() + this.config.windowMs);
-          
+
           res.set({
             'X-RateLimit-Limit': this.config.maxRequests.toString(),
             'X-RateLimit-Remaining': '0',
@@ -135,8 +138,13 @@ export class RateLimiter {
         // Add rate limit headers
         res.set({
           'X-RateLimit-Limit': this.config.maxRequests.toString(),
-          'X-RateLimit-Remaining': Math.max(0, this.config.maxRequests - current).toString(),
-          'X-RateLimit-Reset': new Date(Date.now() + this.config.windowMs).toISOString(),
+          'X-RateLimit-Remaining': Math.max(
+            0,
+            this.config.maxRequests - current
+          ).toString(),
+          'X-RateLimit-Reset': new Date(
+            Date.now() + this.config.windowMs
+          ).toISOString(),
         });
 
         next();
@@ -204,17 +212,17 @@ export class SlidingWindowRateLimiter {
     return (req: Request, res: Response, next: NextFunction) => {
       const key = req.ip || 'unknown';
       const now = Date.now();
-      
+
       if (!this.store.has(key)) {
         this.store.set(key, []);
       }
 
       const requests = this.store.get(key)!;
-      
+
       // Remove old requests outside the window
       const cutoff = now - this.windowSize;
       const validRequests = requests.filter(time => time > cutoff);
-      
+
       if (validRequests.length >= this.maxRequests) {
         return res.status(429).json({
           error: 'Rate limit exceeded',
@@ -227,7 +235,10 @@ export class SlidingWindowRateLimiter {
       this.store.set(key, validRequests);
 
       res.set({
-        'X-RateLimit-Remaining': Math.max(0, this.maxRequests - validRequests.length).toString(),
+        'X-RateLimit-Remaining': Math.max(
+          0,
+          this.maxRequests - validRequests.length
+        ).toString(),
       });
 
       next();
@@ -236,7 +247,7 @@ export class SlidingWindowRateLimiter {
 
   private cleanup(): void {
     const cutoff = Date.now() - this.windowSize;
-    
+
     for (const [key, requests] of this.store.entries()) {
       const validRequests = requests.filter(time => time > cutoff);
       if (validRequests.length === 0) {

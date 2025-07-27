@@ -1,7 +1,13 @@
 import React from 'react';
 import { AlertTriangle, RefreshCw, Home, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface ErrorBoundaryProps {
@@ -19,7 +25,10 @@ interface ErrorBoundaryState {
   error: Error | null;
 }
 
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null };
@@ -48,41 +57,52 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   render() {
     if (this.state.hasError) {
       const FallbackComponent = this.props.fallback || DefaultErrorFallback;
-      return <FallbackComponent error={this.state.error!} resetError={this.resetError} />;
+      return (
+        <FallbackComponent
+          error={this.state.error!}
+          resetError={this.resetError}
+        />
+      );
     }
 
     return this.props.children;
   }
 }
 
-export function DefaultErrorFallback({ error, resetError }: ErrorFallbackProps) {
+export function DefaultErrorFallback({
+  error,
+  resetError,
+}: ErrorFallbackProps) {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-6">
-      <Card className="max-w-lg w-full">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
-            <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
+    <div className='min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-6'>
+      <Card className='max-w-lg w-full'>
+        <CardHeader className='text-center'>
+          <div className='mx-auto mb-4 w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center'>
+            <AlertTriangle className='w-8 h-8 text-red-600 dark:text-red-400' />
           </div>
-          <CardTitle className="text-red-900 dark:text-red-100">Something went wrong</CardTitle>
+          <CardTitle className='text-red-900 dark:text-red-100'>
+            Something went wrong
+          </CardTitle>
           <CardDescription>
-            An unexpected error occurred. This has been logged for investigation.
+            An unexpected error occurred. This has been logged for
+            investigation.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 p-3 rounded font-mono">
+        <CardContent className='space-y-4'>
+          <div className='text-sm text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 p-3 rounded font-mono'>
             {error.message}
           </div>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Button onClick={resetError} className="flex-1">
-              <RefreshCw className="w-4 h-4 mr-2" />
+          <div className='flex flex-col sm:flex-row gap-2'>
+            <Button onClick={resetError} className='flex-1'>
+              <RefreshCw className='w-4 h-4 mr-2' />
               Try Again
             </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => window.location.href = '/'}
-              className="flex-1"
+            <Button
+              variant='outline'
+              onClick={() => (window.location.href = '/')}
+              className='flex-1'
             >
-              <Home className="w-4 h-4 mr-2" />
+              <Home className='w-4 h-4 mr-2' />
               Go Home
             </Button>
           </div>
@@ -92,16 +112,27 @@ export function DefaultErrorFallback({ error, resetError }: ErrorFallbackProps) 
   );
 }
 
-export function ApiError({ message, retry }: { message: string; retry?: () => void }) {
+export function ApiError({
+  message,
+  retry,
+}: {
+  message: string;
+  retry?: () => void;
+}) {
   return (
-    <Alert className="border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950">
-      <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
-      <AlertDescription className="text-red-800 dark:text-red-200">
-        <div className="flex items-center justify-between">
+    <Alert className='border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950'>
+      <AlertTriangle className='h-4 w-4 text-red-600 dark:text-red-400' />
+      <AlertDescription className='text-red-800 dark:text-red-200'>
+        <div className='flex items-center justify-between'>
           <span>{message}</span>
           {retry && (
-            <Button variant="outline" size="sm" onClick={retry} className="ml-2">
-              <RefreshCw className="w-4 h-4 mr-1" />
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={retry}
+              className='ml-2'
+            >
+              <RefreshCw className='w-4 h-4 mr-1' />
               Retry
             </Button>
           )}
@@ -113,14 +144,21 @@ export function ApiError({ message, retry }: { message: string; retry?: () => vo
 
 export function NetworkError({ retry }: { retry?: () => void }) {
   return (
-    <Alert className="border-orange-200 bg-orange-50 dark:border-orange-900 dark:bg-orange-950">
-      <AlertTriangle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-      <AlertDescription className="text-orange-800 dark:text-orange-200">
-        <div className="flex items-center justify-between">
-          <span>Network connection error. Please check your internet connection.</span>
+    <Alert className='border-orange-200 bg-orange-50 dark:border-orange-900 dark:bg-orange-950'>
+      <AlertTriangle className='h-4 w-4 text-orange-600 dark:text-orange-400' />
+      <AlertDescription className='text-orange-800 dark:text-orange-200'>
+        <div className='flex items-center justify-between'>
+          <span>
+            Network connection error. Please check your internet connection.
+          </span>
           {retry && (
-            <Button variant="outline" size="sm" onClick={retry} className="ml-2">
-              <RefreshCw className="w-4 h-4 mr-1" />
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={retry}
+              className='ml-2'
+            >
+              <RefreshCw className='w-4 h-4 mr-1' />
               Retry
             </Button>
           )}
@@ -132,50 +170,52 @@ export function NetworkError({ retry }: { retry?: () => void }) {
 
 export function FormError({ message }: { message: string }) {
   return (
-    <Alert className="border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950">
-      <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
-      <AlertDescription className="text-red-800 dark:text-red-200">
+    <Alert className='border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950'>
+      <AlertTriangle className='h-4 w-4 text-red-600 dark:text-red-400' />
+      <AlertDescription className='text-red-800 dark:text-red-200'>
         {message}
       </AlertDescription>
     </Alert>
   );
 }
 
-export function NotFoundError({ 
-  title = "Page Not Found", 
+export function NotFoundError({
+  title = 'Page Not Found',
   description = "The page you're looking for doesn't exist or has been moved.",
-  showBackButton = true 
-}: { 
-  title?: string; 
-  description?: string; 
-  showBackButton?: boolean; 
+  showBackButton = true,
+}: {
+  title?: string;
+  description?: string;
+  showBackButton?: boolean;
 }) {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-6">
-      <Card className="max-w-lg w-full">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-            <AlertTriangle className="w-8 h-8 text-gray-600 dark:text-gray-400" />
+    <div className='min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-6'>
+      <Card className='max-w-lg w-full'>
+        <CardHeader className='text-center'>
+          <div className='mx-auto mb-4 w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center'>
+            <AlertTriangle className='w-8 h-8 text-gray-600 dark:text-gray-400' />
           </div>
-          <CardTitle className="text-gray-900 dark:text-gray-100">{title}</CardTitle>
+          <CardTitle className='text-gray-900 dark:text-gray-100'>
+            {title}
+          </CardTitle>
           <CardDescription>{description}</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Button 
-              onClick={() => window.location.href = '/'}
-              className="flex-1"
+        <CardContent className='space-y-4'>
+          <div className='flex flex-col sm:flex-row gap-2'>
+            <Button
+              onClick={() => (window.location.href = '/')}
+              className='flex-1'
             >
-              <Home className="w-4 h-4 mr-2" />
+              <Home className='w-4 h-4 mr-2' />
               Go Home
             </Button>
             {showBackButton && (
-              <Button 
-                variant="outline" 
+              <Button
+                variant='outline'
                 onClick={() => window.history.back()}
-                className="flex-1"
+                className='flex-1'
               >
-                <ArrowLeft className="w-4 h-4 mr-2" />
+                <ArrowLeft className='w-4 h-4 mr-2' />
                 Go Back
               </Button>
             )}

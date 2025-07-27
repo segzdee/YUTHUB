@@ -20,27 +20,32 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const root = window.document.documentElement;
-    
+
     const updateTheme = () => {
       let newTheme: 'light' | 'dark' = 'light';
-      
+
       if (theme === 'system') {
-        newTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        newTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light';
       } else {
         newTheme = theme;
       }
-      
+
       root.classList.remove('light', 'dark');
       root.classList.add(newTheme);
       setActualTheme(newTheme);
-      
+
       // Store preference
       localStorage.setItem('yuthub-theme', theme);
-      
+
       // Update meta theme color for mobile browsers
       const metaThemeColor = document.querySelector('meta[name="theme-color"]');
       if (metaThemeColor) {
-        metaThemeColor.setAttribute('content', newTheme === 'dark' ? '#0a0a0a' : '#ffffff');
+        metaThemeColor.setAttribute(
+          'content',
+          newTheme === 'dark' ? '#0a0a0a' : '#ffffff'
+        );
       }
     };
 

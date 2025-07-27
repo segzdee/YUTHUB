@@ -11,21 +11,21 @@ export function generateOptimizedImageSrc(
   options: ImageOptimizationOptions = {}
 ): string {
   const { width, height, quality = 85, format = 'webp' } = options;
-  
+
   // For development, return original src
   if (import.meta.env.DEV) {
     return src;
   }
-  
+
   // In production, you would integrate with a CDN service like Cloudinary or ImageKit
   // For now, return the original src with cache-busting for better performance
   const url = new URL(src, window.location.origin);
-  
+
   if (width) url.searchParams.set('w', width.toString());
   if (height) url.searchParams.set('h', height.toString());
   if (quality !== 85) url.searchParams.set('q', quality.toString());
   if (format !== 'webp') url.searchParams.set('f', format);
-  
+
   return url.toString();
 }
 
@@ -42,13 +42,15 @@ export function generateSizes(
   breakpoints: { [key: string]: string } = {
     '(max-width: 640px)': '100vw',
     '(max-width: 1024px)': '50vw',
-    default: '33vw'
+    default: '33vw',
   }
 ): string {
   const entries = Object.entries(breakpoints);
-  const mediaQueries = entries.slice(0, -1).map(([query, size]) => `${query} ${size}`);
+  const mediaQueries = entries
+    .slice(0, -1)
+    .map(([query, size]) => `${query} ${size}`);
   const defaultSize = entries[entries.length - 1][1];
-  
+
   return [...mediaQueries, defaultSize].join(', ');
 }
 
@@ -77,13 +79,17 @@ export function getOptimizedImageProps(props: OptimizedImageProps) {
     loading = 'lazy',
     sizes,
     onLoad,
-    onError
+    onError,
   } = props;
 
-  const optimizedSrc = generateOptimizedImageSrc(src, { width, height, quality });
+  const optimizedSrc = generateOptimizedImageSrc(src, {
+    width,
+    height,
+    quality,
+  });
   const srcSet = generateSrcSet(src);
   const imageSizes = sizes || generateSizes();
-  
+
   return {
     src: optimizedSrc,
     srcSet,
@@ -96,17 +102,20 @@ export function getOptimizedImageProps(props: OptimizedImageProps) {
     decoding: 'async' as const,
     onLoad,
     onError,
-    style: { 
+    style: {
       contentVisibility: 'auto' as any,
       objectFit: 'cover' as const,
       aspectRatio: width && height ? `${width}/${height}` : 'auto',
       maxWidth: '100%',
-      height: 'auto'
-    }
+      height: 'auto',
+    },
   };
 }
 
-export function preloadImage(src: string, options: ImageOptimizationOptions = {}): Promise<void> {
+export function preloadImage(
+  src: string,
+  options: ImageOptimizationOptions = {}
+): Promise<void> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve();
@@ -115,19 +124,25 @@ export function preloadImage(src: string, options: ImageOptimizationOptions = {}
   });
 }
 
-export function lazyLoadImage(img: HTMLImageElement, options: ImageOptimizationOptions = {}): void {
+export function lazyLoadImage(
+  img: HTMLImageElement,
+  options: ImageOptimizationOptions = {}
+): void {
   const observer = new IntersectionObserver(
-    (entries) => {
+    entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           const target = entry.target as HTMLImageElement;
-          target.src = generateOptimizedImageSrc(target.dataset.src || '', options);
+          target.src = generateOptimizedImageSrc(
+            target.dataset.src || '',
+            options
+          );
           observer.unobserve(target);
         }
       });
     },
     { rootMargin: '50px' }
   );
-  
+
   observer.observe(img);
 }

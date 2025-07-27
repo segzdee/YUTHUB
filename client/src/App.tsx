@@ -1,6 +1,11 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Suspense, lazy } from 'react';
-import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import {
+  Navigate,
+  Route,
+  BrowserRouter as Router,
+  Routes,
+} from 'react-router-dom';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import PublicRoute from './components/auth/PublicRoute';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
@@ -54,68 +59,96 @@ function App() {
                 <TooltipProvider>
                   <Router>
                     {/* Skip link for accessibility */}
-                    <a 
-                      href="#main-content" 
-                      className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-primary-foreground px-4 py-2 rounded-md z-50 focus:outline-none focus:ring-2 focus:ring-primary-foreground"
+                    <a
+                      href='#main-content'
+                      className='sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-primary-foreground px-4 py-2 rounded-md z-50 focus:outline-none focus:ring-2 focus:ring-primary-foreground'
                     >
                       Skip to main content
                     </a>
-                    
-                    <div id="main-content" tabIndex={-1}>
-                      <Suspense fallback={<PageLoader message="Loading application..." />}>
+
+                    <div id='main-content' tabIndex={-1}>
+                      <Suspense
+                        fallback={
+                          <PageLoader message='Loading application...' />
+                        }
+                      >
                         <Routes>
                           {/* Public routes */}
-                          <Route path="/" element={
-                            <PublicRoute>
-                              <Landing />
-                            </PublicRoute>
-                          } />
-                          <Route path="/login" element={
-                            <PublicRoute>
-                              <AuthLogin mode="signin" />
-                            </PublicRoute>
-                          } />
-                          <Route path="/signup" element={
-                            <PublicRoute>
-                              <AuthLogin mode="signup" />
-                            </PublicRoute>
-                          } />
-                          
+                          <Route
+                            path='/'
+                            element={
+                              <PublicRoute>
+                                <Landing />
+                              </PublicRoute>
+                            }
+                          />
+                          <Route
+                            path='/login'
+                            element={
+                              <PublicRoute>
+                                <AuthLogin mode='signin' />
+                              </PublicRoute>
+                            }
+                          />
+                          <Route
+                            path='/signup'
+                            element={
+                              <PublicRoute>
+                                <AuthLogin mode='signup' />
+                              </PublicRoute>
+                            }
+                          />
+
                           {/* Protected application routes */}
-                          <Route path="/app" element={
-                            <ProtectedRoute>
-                              <Layout />
-                            </ProtectedRoute>
-                          }>
-                            <Route index element={<Navigate to="/app/dashboard" replace />} />
-                            <Route path="dashboard" element={<Dashboard />} />
-                            <Route path="housing" element={<Housing />} />
-                            <Route path="support" element={<Support />} />
-                            <Route path="independence" element={<Independence />} />
-                            <Route path="analytics" element={<Analytics />} />
-                            <Route path="safeguarding" element={<Safeguarding />} />
-                            <Route path="crisis" element={<Crisis />} />
-                            <Route path="financials" element={<Financials />} />
-                            <Route path="billing" element={<Billing />} />
-                            <Route path="forms/*" element={<Forms />} />
-                            <Route path="reports" element={<Reports />} />
-                            <Route path="settings/*" element={<Settings />} />
-                            <Route path="help" element={<Help />} />
+                          <Route
+                            path='/app'
+                            element={
+                              <ProtectedRoute>
+                                <Layout />
+                              </ProtectedRoute>
+                            }
+                          >
+                            <Route
+                              index
+                              element={<Navigate to='/app/dashboard' replace />}
+                            />
+                            <Route path='dashboard' element={<Dashboard />} />
+                            <Route path='housing' element={<Housing />} />
+                            <Route path='support' element={<Support />} />
+                            <Route
+                              path='independence'
+                              element={<Independence />}
+                            />
+                            <Route path='analytics' element={<Analytics />} />
+                            <Route
+                              path='safeguarding'
+                              element={<Safeguarding />}
+                            />
+                            <Route path='crisis' element={<Crisis />} />
+                            <Route path='financials' element={<Financials />} />
+                            <Route path='billing' element={<Billing />} />
+                            <Route path='forms/*' element={<Forms />} />
+                            <Route path='reports' element={<Reports />} />
+                            <Route path='settings/*' element={<Settings />} />
+                            <Route path='help' element={<Help />} />
                           </Route>
-                          
+
                           {/* Platform admin routes */}
-                          <Route path="/platform-admin/*" element={
-                            <ProtectedRoute requiredRole="platform-admin">
-                              <PlatformAdmin />
-                            </ProtectedRoute>
-                          } />
-                          
+                          <Route
+                            path='/platform-admin/*'
+                            element={
+                              <ProtectedRoute requiredRole='platform-admin'>
+                                <PlatformAdmin />
+                              </ProtectedRoute>
+                            }
+                          />
+
                           {/* Catch all route */}
-                          <Route path="*" element={<NotFound />} />
+                          <Route path='*' element={<NotFound />} />
                         </Routes>
                       </Suspense>
                     </div>
-                    
+
                     <Toaster />
                   </Router>
                 </TooltipProvider>

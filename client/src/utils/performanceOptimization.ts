@@ -4,7 +4,8 @@ export function preloadCriticalResources() {
   // Preload critical fonts
   const fontLink = document.createElement('link');
   fontLink.rel = 'preload';
-  fontLink.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap';
+  fontLink.href =
+    'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap';
   fontLink.as = 'style';
   fontLink.crossOrigin = 'anonymous';
   document.head.appendChild(fontLink);
@@ -20,9 +21,9 @@ export function preloadCriticalResources() {
 export function optimizeImages() {
   // Enable native lazy loading for images
   const images = document.querySelectorAll('img[loading="lazy"]');
-  
+
   if ('IntersectionObserver' in window) {
-    const imageObserver = new IntersectionObserver((entries) => {
+    const imageObserver = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           const img = entry.target as HTMLImageElement;
@@ -42,7 +43,8 @@ export function optimizeImages() {
 export function enableServiceWorker() {
   if ('serviceWorker' in navigator && import.meta.env.PROD) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
+      navigator.serviceWorker
+        .register('/sw.js')
         .then(registration => {
           console.log('SW registered: ', registration);
         })
@@ -57,10 +59,10 @@ export function measureWebVitals() {
   // Measure Core Web Vitals
   if ('PerformanceObserver' in window) {
     // Largest Contentful Paint (LCP)
-    const lcpObserver = new PerformanceObserver((list) => {
+    const lcpObserver = new PerformanceObserver(list => {
       const entries = list.getEntries();
       const lastEntry = entries[entries.length - 1];
-      
+
       // Send to analytics
       if (window.gtag) {
         window.gtag('event', 'LCP', {
@@ -70,14 +72,14 @@ export function measureWebVitals() {
         });
       }
     });
-    
+
     lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
 
     // First Input Delay (FID)
-    const fidObserver = new PerformanceObserver((list) => {
+    const fidObserver = new PerformanceObserver(list => {
       const entries = list.getEntries();
       const firstEntry = entries[0];
-      
+
       if (window.gtag) {
         window.gtag('event', 'FID', {
           event_category: 'Web Vitals',
@@ -86,20 +88,20 @@ export function measureWebVitals() {
         });
       }
     });
-    
+
     fidObserver.observe({ entryTypes: ['first-input'] });
 
     // Cumulative Layout Shift (CLS)
     let clsValue = 0;
-    const clsObserver = new PerformanceObserver((list) => {
+    const clsObserver = new PerformanceObserver(list => {
       const entries = list.getEntries();
-      
+
       entries.forEach(entry => {
         if (!entry.hadRecentInput) {
           clsValue += entry.value;
         }
       });
-      
+
       if (window.gtag) {
         window.gtag('event', 'CLS', {
           event_category: 'Web Vitals',
@@ -108,7 +110,7 @@ export function measureWebVitals() {
         });
       }
     });
-    
+
     clsObserver.observe({ entryTypes: ['layout-shift'] });
   }
 }
@@ -117,7 +119,10 @@ export function optimizeForMobile() {
   // Optimize viewport for mobile
   const viewport = document.querySelector('meta[name="viewport"]');
   if (viewport) {
-    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes');
+    viewport.setAttribute(
+      'content',
+      'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes'
+    );
   }
 
   // Add touch-friendly styles
@@ -166,7 +171,7 @@ export function initializePerformanceOptimizations() {
     optimizeForMobile();
     measureWebVitals();
   }
-  
+
   // Enable service worker
   enableServiceWorker();
 }

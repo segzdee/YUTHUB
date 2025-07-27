@@ -3,6 +3,7 @@
 ## Method 1: VS Code Workspace Settings (Recommended)
 
 ### 1. Create/Edit Workspace Settings
+
 Create or edit `.vscode/settings.json` in your project root:
 
 ```json
@@ -45,6 +46,7 @@ Create or edit `.vscode/settings.json` in your project root:
 ```
 
 ### 2. User-Level Settings (Optional)
+
 Edit VS Code user settings (`Ctrl+,` → Open Settings JSON):
 
 ```json
@@ -62,10 +64,11 @@ Edit VS Code user settings (`Ctrl+,` → Open Settings JSON):
 
 ### Create `.copilot-instructions.md` in project root:
 
-```markdown
+````markdown
 # YutHub Housing Management Platform - Copilot Instructions
 
 ## Project Context
+
 - **Platform**: Comprehensive housing management system for UK councils and housing associations
 - **Domain**: yuthub.com
 - **Tech Stack**: React + TypeScript, Express.js, PostgreSQL (Neon), Tailwind CSS, Socket.io
@@ -74,6 +77,7 @@ Edit VS Code user settings (`Ctrl+,` → Open Settings JSON):
 ## Coding Standards
 
 ### Frontend (React/TypeScript)
+
 - Use functional components with hooks
 - Implement mobile-first responsive design with Tailwind CSS
 - Include loading states, error boundaries, and accessibility features
@@ -81,6 +85,7 @@ Edit VS Code user settings (`Ctrl+,` → Open Settings JSON):
 - Consistent component structure with proper TypeScript interfaces
 
 ### Backend (Express.js/Node.js)
+
 - RESTful API design with consistent JSON responses
 - JWT authentication with session management
 - Comprehensive error handling and logging
@@ -88,6 +93,7 @@ Edit VS Code user settings (`Ctrl+,` → Open Settings JSON):
 - Rate limiting and security headers
 
 ### Database (PostgreSQL)
+
 - Row Level Security (RLS) policies for multi-tenancy
 - Proper indexing and foreign key constraints
 - Audit logging for all data changes
@@ -96,6 +102,7 @@ Edit VS Code user settings (`Ctrl+,` → Open Settings JSON):
 ## Key Features to Remember
 
 ### Core Modules
+
 1. **Dashboard** - Real-time KPI widgets and cross-module navigation
 2. **Housing Management** - Property and tenant lifecycle management
 3. **Support Services** - Case management and service coordination
@@ -110,13 +117,15 @@ Edit VS Code user settings (`Ctrl+,` → Open Settings JSON):
 12. **Settings** - User permissions and system configuration
 
 ### Platform Admin (Separate Interface)
+
 - Subscription management (Starter £169/mo, Professional £429/mo, Enterprise £1099/mo)
 - System monitoring and analytics aggregation
 - Organization management and billing oversight
 - Feature flags and emergency tools
-- Routes: /platform-admin/* with enhanced security
+- Routes: /platform-admin/\* with enhanced security
 
 ### Security & Compliance
+
 - GDPR compliance with data protection
 - Multi-factor authentication (MFA) support
 - Role-based access control (staff, admin, platform-admin)
@@ -124,6 +133,7 @@ Edit VS Code user settings (`Ctrl+,` → Open Settings JSON):
 - Secure file upload and storage
 
 ### User Experience
+
 - Professional design with consistent branding
 - Emergency contact information prominently displayed
 - Mobile-optimized for field workers
@@ -133,6 +143,7 @@ Edit VS Code user settings (`Ctrl+,` → Open Settings JSON):
 ## Common Patterns
 
 ### API Response Format
+
 ```typescript
 interface ApiResponse<T> {
   success: boolean;
@@ -144,8 +155,10 @@ interface ApiResponse<T> {
   };
 }
 ```
+````
 
 ### Component Structure
+
 ```typescript
 interface ComponentProps {
   // Props definition
@@ -161,6 +174,7 @@ export default Component;
 ```
 
 ### Database Table Pattern
+
 ```sql
 CREATE TABLE table_name (
   id SERIAL PRIMARY KEY,
@@ -179,6 +193,7 @@ CREATE POLICY org_isolation ON table_name
 ```
 
 ## File Naming Conventions
+
 - Components: PascalCase (e.g., `DashboardWidget.tsx`)
 - Hooks: camelCase with "use" prefix (e.g., `useResidents.ts`)
 - Utils: camelCase (e.g., `formatCurrency.ts`)
@@ -186,10 +201,12 @@ CREATE POLICY org_isolation ON table_name
 - Database tables: snake_case (e.g., `support_plans`)
 
 ## Emergency Contacts & Branding
+
 - Crisis Line: 0800 123 4567 (24/7)
 - Technical Support: +44 161 123 4568
 - Company: YutHub Solutions Ltd.
 - Colors: Professional blue/navy theme with accessibility compliant contrast
+
 ```
 
 ## Method 3: IDE-Specific Setup
@@ -203,12 +220,15 @@ CREATE POLICY org_isolation ON table_name
 1. Create `.cursorrules` file in project root:
 
 ```
+
 # YutHub Housing Management Platform Rules
 
 ## Project Context
+
 You are working on YutHub, a comprehensive housing management platform for UK councils and housing associations using React + TypeScript, Express.js, PostgreSQL (Neon), Tailwind CSS, and Socket.io.
 
 ## Key Principles
+
 - Multi-tenant SaaS with organization isolation using RLS policies
 - Mobile-first responsive design with accessibility (WCAG 2.1 AA)
 - Role-based access control (staff, admin, platform-admin)
@@ -216,23 +236,28 @@ You are working on YutHub, a comprehensive housing management platform for UK co
 - Professional branding with emergency contact prominence
 
 ## Core Modules
+
 Dashboard, Housing Management, Support Services, Independence Pathway, Analytics & Outcomes, Safeguarding, Crisis Connect, Financials, Government Billing, Forms, Reports, Settings, Help & Support
 
 ## Platform Admin (Separate)
-Subscription management, system monitoring, organization management, billing oversight, feature flags, emergency tools at /platform-admin/* routes
+
+Subscription management, system monitoring, organization management, billing oversight, feature flags, emergency tools at /platform-admin/\* routes
 
 ## Pricing Tiers
+
 - Starter: £169/month (25 residents max)
-- Professional: £429/month (100 residents max) 
+- Professional: £429/month (100 residents max)
 - Enterprise: £1099/month (unlimited residents)
 
 ## Always Include
+
 - Loading states and error boundaries
 - Real-time validation with user-friendly messages
 - Proper TypeScript interfaces
 - Security measures and input sanitization
 - Mobile optimization for field workers
-```
+
+````
 
 ## Method 4: Global Git Configuration
 
@@ -243,13 +268,15 @@ mkdir -p ~/.copilot
 
 # Create global instructions file
 touch ~/.copilot/instructions.md
-```
+````
 
 ### Add to global instructions:
+
 ```markdown
 # Global Development Standards
 
 ## General Principles
+
 - Security first: Always validate inputs and sanitize outputs
 - Accessibility: Ensure WCAG 2.1 AA compliance
 - Performance: Optimize for mobile and slow networks
@@ -257,6 +284,7 @@ touch ~/.copilot/instructions.md
 - Testing: Include unit tests for critical functions
 
 ## Code Quality
+
 - Use meaningful variable and function names
 - Include comprehensive error handling
 - Add proper documentation and comments
@@ -266,12 +294,14 @@ touch ~/.copilot/instructions.md
 ## Verification & Testing
 
 ### Test Copilot Instructions
+
 1. Open a new file in your project
 2. Start typing a comment describing what you want to build
 3. Check if Copilot suggestions align with your platform requirements
 4. Test with different file types (.tsx, .ts, .sql, .md)
 
 ### Example Test Prompts
+
 ```typescript
 // Create a new resident registration form with validation
 // Build a maintenance request component with photo upload
@@ -282,6 +312,7 @@ touch ~/.copilot/instructions.md
 ## Troubleshooting
 
 ### Instructions Not Working
+
 1. Restart VS Code/IDE
 2. Check GitHub Copilot extension is enabled
 3. Verify JSON syntax in settings files
@@ -289,20 +320,23 @@ touch ~/.copilot/instructions.md
 5. Ensure GitHub Copilot subscription is active
 
 ### Performance Issues
+
 1. Limit instruction length (keep under 500 characters per instruction)
-2. Use specific file patterns instead of "**/*"
+2. Use specific file patterns instead of "\*_/_"
 3. Organize instructions by file type/context
 4. Remove duplicate or conflicting instructions
 
 ## Maintenance
 
 ### Regular Updates
+
 - Review and update instructions monthly
 - Add new patterns as the project evolves
 - Remove outdated technology references
 - Keep examples current with latest features
 
 ### Team Synchronization
+
 - Share .vscode/settings.json in version control
 - Document any team-specific conventions
 - Regular team reviews of code generation quality

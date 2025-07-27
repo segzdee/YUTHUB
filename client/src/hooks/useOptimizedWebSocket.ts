@@ -4,7 +4,13 @@ import { useAuth } from './useAuth';
 import { useDashboardStore } from '@/store/dashboardStore';
 
 interface WebSocketMessage {
-  type: 'update' | 'notification' | 'metric_change' | 'incident_alert' | 'connection_established' | 'pong';
+  type:
+    | 'update'
+    | 'notification'
+    | 'metric_change'
+    | 'incident_alert'
+    | 'connection_established'
+    | 'pong';
   data: any;
   timestamp: string;
   clientId?: string;
@@ -13,15 +19,18 @@ interface WebSocketMessage {
 // Global connection manager to prevent multiple connections per user
 class WebSocketConnectionManager {
   private static instance: WebSocketConnectionManager;
-  private connections = new Map<string, {
-    ws: WebSocket;
-    status: 'connecting' | 'connected' | 'disconnected' | 'error';
-    listeners: Set<(message: WebSocketMessage) => void>;
-    reconnectAttempts: number;
-    reconnectTimeout?: NodeJS.Timeout;
-    lastActivity: number;
-    heartbeatInterval?: NodeJS.Timeout;
-  }>();
+  private connections = new Map<
+    string,
+    {
+      ws: WebSocket;
+      status: 'connecting' | 'connected' | 'disconnected' | 'error';
+      listeners: Set<(message: WebSocketMessage) => void>;
+      reconnectAttempts: number;
+      reconnectTimeout?: NodeJS.Timeout;
+      lastActivity: number;
+      heartbeatInterval?: NodeJS.Timeout;
+    }
+  >();
 
   static getInstance(): WebSocketConnectionManager {
     if (!WebSocketConnectionManager.instance) {
@@ -70,7 +79,9 @@ class WebSocketConnectionManager {
     }
 
     const delay = this.getExponentialBackoffDelay(connection.reconnectAttempts);
-    console.log(`WebSocket reconnection attempt ${connection.reconnectAttempts + 1} in ${delay}ms`);
+    console.log(
+      `WebSocket reconnection attempt ${connection.reconnectAttempts + 1} in ${delay}ms`
+    );
 
     connection.reconnectTimeout = setTimeout(() => {
       connection.reconnectAttempts++;
@@ -81,8 +92,13 @@ class WebSocketConnectionManager {
   connect(userId: string, userRole: string): void {
     // If already connecting or connected, don't create new connection
     const existing = this.connections.get(userId);
-    if (existing && (existing.status === 'connecting' || existing.status === 'connected')) {
-      console.log(`WebSocket connection already exists for user ${userId}, skipping...`);
+    if (
+      existing &&
+      (existing.status === 'connecting' || existing.status === 'connected')
+    ) {
+      console.log(
+        `WebSocket connection already exists for user ${userId}, skipping...`
+      );
       return;
     }
 
@@ -101,7 +117,10 @@ class WebSocketConnectionManager {
   private establishConnection(userId: string, userRole: string): void {
     // Double check we still need this connection
     const existing = this.connections.get(userId);
-    if (existing && (existing.status === 'connecting' || existing.status === 'connected')) {
+    if (
+      existing &&
+      (existing.status === 'connecting' || existing.status === 'connected')
+    ) {
       return;
     }
 
@@ -110,7 +129,7 @@ class WebSocketConnectionManager {
 
     try {
       const ws = new WebSocket(wsUrl);
-      
+
       const connection = {
         ws,
         status: 'connecting' as const,
@@ -123,21 +142,27 @@ class WebSocketConnectionManager {
 
       // Notify listeners about status change
       connection.listeners.forEach(listener => {
-        listener({ type: 'notification', data: { status: 'connecting' }, timestamp: new Date().toISOString() });
+        listener({
+          type: 'notification',
+          data: { status: 'connecting' },
+          timestamp: new Date().toISOString(),
+        });
       });
 
       ws.onopen = () => {
         connection.status = 'connected';
         connection.reconnectAttempts = 0; // Reset on successful connection
         console.log(`WebSocket connected for user ${userId}`);
-        
+
         // Send authentication info immediately
         try {
-          ws.send(JSON.stringify({
-            type: 'auth',
-            userId,
-            role: userRole,
-          }));
+          ws.send(
+            JSON.stringify({
+              type: 'auth',
+              userId,
+              role: userRole,
+            })
+          );
         } catch (error) {
           console.error('Failed to send authentication message:', error);
         }
@@ -147,27 +172,37 @@ class WebSocketConnectionManager {
 
         // Notify listeners about successful connection
         connection.listeners.forEach(listener => {
-          listener({ type: 'notification', data: { status: 'connected' }, timestamp: new Date().toISOString() });
+          listener({
+            type: 'notification',
+            data: { status: 'connected' },
+            timestamp: new Date().toISOString(),
+          });
         });
       };
 
-      ws.onmessage = (event) => {
+      ws.onmessage = event => {
         try {
           const message: WebSocketMessage = JSON.parse(event.data);
           connection.lastActivity = Date.now();
-          
+
           // Handle different message types
-          if (message.type === 'pong' || message.type === 'connection_established') {
+          if (
+            message.type === 'pong' ||
+            message.type === 'connection_established'
+          ) {
             // Keep connection alive or acknowledge connection
             return;
           }
-          
+
           // Broadcast to all listeners
           connection.listeners.forEach(listener => {
             try {
               listener(message);
             } catch (listenerError) {
-              console.error('Error in WebSocket message listener:', listenerError);
+              console.error(
+                'Error in WebSocket message listener:',
+                listenerError
+              );
             }
           });
         } catch (error) {
@@ -182,15 +217,23 @@ class WebSocketConnectionManager {
         }
       };
 
-      ws.onclose = (event) => {
+      ws.onclose = event => {
         connection.status = 'disconnected';
         this.stopHeartbeat(userId);
-        
-        console.log(`WebSocket disconnected for user ${userId}:`, event.code, event.reason);
-        
+
+        console.log(
+          `WebSocket disconnected for user ${userId}:`,
+          event.code,
+          event.reason
+        );
+
         // Notify listeners about disconnection
         connection.listeners.forEach(listener => {
-          listener({ type: 'notification', data: { status: 'disconnected' }, timestamp: new Date().toISOString() });
+          listener({
+            type: 'notification',
+            data: { status: 'disconnected' },
+            timestamp: new Date().toISOString(),
+          });
         });
 
         // Only attempt reconnection if it wasn't a clean close (code 1000)
@@ -199,10 +242,10 @@ class WebSocketConnectionManager {
         }
       };
 
-      ws.onerror = (error) => {
+      ws.onerror = error => {
         connection.status = 'error';
         this.stopHeartbeat(userId);
-        
+
         console.error('WebSocket connection error:', {
           error: error instanceof Error ? error.message : 'Connection failed',
           url: wsUrl,
@@ -211,10 +254,13 @@ class WebSocketConnectionManager {
 
         // Notify listeners about error
         connection.listeners.forEach(listener => {
-          listener({ type: 'notification', data: { status: 'error' }, timestamp: new Date().toISOString() });
+          listener({
+            type: 'notification',
+            data: { status: 'error' },
+            timestamp: new Date().toISOString(),
+          });
         });
       };
-
     } catch (error) {
       // Log WebSocket connection creation failures in development
       if (process.env.NODE_ENV === 'development') {
@@ -227,18 +273,24 @@ class WebSocketConnectionManager {
     }
   }
 
-  addListener(userId: string, listener: (message: WebSocketMessage) => void): void {
+  addListener(
+    userId: string,
+    listener: (message: WebSocketMessage) => void
+  ): void {
     const connection = this.connections.get(userId);
     if (connection) {
       connection.listeners.add(listener);
     }
   }
 
-  removeListener(userId: string, listener: (message: WebSocketMessage) => void): void {
+  removeListener(
+    userId: string,
+    listener: (message: WebSocketMessage) => void
+  ): void {
     const connection = this.connections.get(userId);
     if (connection) {
       connection.listeners.delete(listener);
-      
+
       // If no more listeners, close the connection
       if (connection.listeners.size === 0) {
         this.disconnect(userId);
@@ -250,20 +302,22 @@ class WebSocketConnectionManager {
     const connection = this.connections.get(userId);
     if (connection) {
       this.stopHeartbeat(userId);
-      
+
       if (connection.reconnectTimeout) {
         clearTimeout(connection.reconnectTimeout);
       }
-      
+
       if (connection.ws.readyState === WebSocket.OPEN) {
         connection.ws.close(1000, 'Component unmounted');
       }
-      
+
       this.connections.delete(userId);
     }
   }
 
-  getStatus(userId: string): 'connecting' | 'connected' | 'disconnected' | 'error' {
+  getStatus(
+    userId: string
+  ): 'connecting' | 'connected' | 'disconnected' | 'error' {
     const connection = this.connections.get(userId);
     return connection?.status || 'disconnected';
   }
@@ -281,66 +335,77 @@ export function useOptimizedWebSocket() {
   const { user, isAuthenticated } = useAuth();
   const { notifications } = useDashboardStore();
   const queryClient = useQueryClient();
-  const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected' | 'error'>('disconnected');
+  const [connectionStatus, setConnectionStatus] = useState<
+    'connecting' | 'connected' | 'disconnected' | 'error'
+  >('disconnected');
   const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
   const mounted = useRef(true);
   const manager = useRef(WebSocketConnectionManager.getInstance());
 
   // Message handler
-  const handleMessage = useCallback((message: WebSocketMessage) => {
-    if (!mounted.current) return;
+  const handleMessage = useCallback(
+    (message: WebSocketMessage) => {
+      if (!mounted.current) return;
 
-    setLastMessage(message);
-    
-    // Update connection status from internal messages
-    if (message.type === 'notification' && message.data.status) {
-      setConnectionStatus(message.data.status);
-      return;
-    }
+      setLastMessage(message);
 
-    switch (message.type) {
-      case 'update':
-        // Invalidate relevant queries based on the update type
-        if (message.data.entityType) {
-          queryClient.invalidateQueries({ 
-            queryKey: [`/api/${message.data.entityType}`] 
-          });
-        }
-        break;
-      
-      case 'metric_change':
-        // Update dashboard metrics
-        queryClient.invalidateQueries({ 
-          queryKey: ['/api/dashboard/metrics'] 
-        });
-        break;
-      
-      case 'incident_alert':
-        // High priority alert - show desktop notification if enabled
-        if (notifications.enabled && notifications.desktop) {
-          if (Notification.permission === 'granted') {
-            new Notification('YUTHUB - Incident Alert', {
-              body: message.data.message,
-              icon: '/favicon.ico',
-              badge: '/favicon.ico',
+      // Update connection status from internal messages
+      if (message.type === 'notification' && message.data.status) {
+        setConnectionStatus(message.data.status);
+        return;
+      }
+
+      switch (message.type) {
+        case 'update':
+          // Invalidate relevant queries based on the update type
+          if (message.data.entityType) {
+            queryClient.invalidateQueries({
+              queryKey: [`/api/${message.data.entityType}`],
             });
           }
-        }
-        break;
-      
-      case 'notification':
-        // Standard notification
-        if (notifications.enabled && message.data.status !== 'connecting' && message.data.status !== 'connected' && message.data.status !== 'disconnected' && message.data.status !== 'error') {
-          // Handle other notification types
-          console.log('Received notification:', message.data);
-        }
-        break;
-    }
-  }, [queryClient, notifications, mounted]);
+          break;
+
+        case 'metric_change':
+          // Update dashboard metrics
+          queryClient.invalidateQueries({
+            queryKey: ['/api/dashboard/metrics'],
+          });
+          break;
+
+        case 'incident_alert':
+          // High priority alert - show desktop notification if enabled
+          if (notifications.enabled && notifications.desktop) {
+            if (Notification.permission === 'granted') {
+              new Notification('YUTHUB - Incident Alert', {
+                body: message.data.message,
+                icon: '/favicon.ico',
+                badge: '/favicon.ico',
+              });
+            }
+          }
+          break;
+
+        case 'notification':
+          // Standard notification
+          if (
+            notifications.enabled &&
+            message.data.status !== 'connecting' &&
+            message.data.status !== 'connected' &&
+            message.data.status !== 'disconnected' &&
+            message.data.status !== 'error'
+          ) {
+            // Handle other notification types
+            console.log('Received notification:', message.data);
+          }
+          break;
+      }
+    },
+    [queryClient, notifications, mounted]
+  );
 
   useEffect(() => {
     mounted.current = true;
-    
+
     if (!isAuthenticated || !user) {
       setConnectionStatus('disconnected');
       return;
@@ -351,7 +416,7 @@ export function useOptimizedWebSocket() {
 
     // Add message listener
     manager.current.addListener(userId, handleMessage);
-    
+
     // Connect if not already connected
     if (manager.current.getStatus(userId) === 'disconnected') {
       manager.current.connect(userId, userRole);
@@ -368,11 +433,14 @@ export function useOptimizedWebSocket() {
     };
   }, [isAuthenticated, user?.id, user?.role]); // Remove handleMessage from dependencies
 
-  const sendMessage = useCallback((message: any) => {
-    if (user?.id) {
-      manager.current.sendMessage(user.id, message);
-    }
-  }, [user?.id]);
+  const sendMessage = useCallback(
+    (message: any) => {
+      if (user?.id) {
+        manager.current.sendMessage(user.id, message);
+      }
+    },
+    [user?.id]
+  );
 
   return {
     connectionStatus,

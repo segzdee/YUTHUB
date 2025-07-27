@@ -2,7 +2,7 @@
 
 /**
  * Production OAuth Setup Script
- * 
+ *
  * This script displays the OAuth configuration for production domains
  */
 
@@ -10,11 +10,7 @@ console.log('🔧 Production OAuth Configuration');
 console.log('=================================');
 
 // Production domains
-const productionDomains = [
-  'yuthub.replit.app',
-  'yuthub.com',
-  'www.yuthub.com'
-];
+const productionDomains = ['yuthub.replit.app', 'yuthub.com', 'www.yuthub.com'];
 
 console.log('📝 OAuth Callback URLs to Configure:');
 productionDomains.forEach((domain, index) => {
@@ -38,7 +34,9 @@ console.log('   - offline_access');
 console.log('\n🧪 Test Authentication:');
 productionDomains.forEach((domain, index) => {
   console.log(`   ${index + 1}. Visit https://${domain}`);
-  console.log(`      Click "Sign In" → Should redirect to OAuth → Return authenticated`);
+  console.log(
+    `      Click "Sign In" → Should redirect to OAuth → Return authenticated`
+  );
 });
 
 console.log('\n✅ After configuring OAuth provider:');

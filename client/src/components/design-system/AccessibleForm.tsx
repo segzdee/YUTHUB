@@ -42,22 +42,24 @@ export function AccessibleFormField({
   const [focused, setFocused] = useState(false);
   const hasError = Boolean(error);
   const hasSuccess = Boolean(success);
-  
+
   const fieldId = id;
   const errorId = `${fieldId}-error`;
   const successId = `${fieldId}-success`;
   const descriptionId = `${fieldId}-description`;
-  
+
   const ariaDescribedByIds = [
     description && descriptionId,
     error && errorId,
     success && successId,
     ariaDescribedBy,
-  ].filter(Boolean).join(' ');
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <div className={cn('space-y-2', className)}>
-      <Label 
+      <Label
         htmlFor={fieldId}
         className={cn(
           'block text-sm font-medium transition-colors',
@@ -69,23 +71,25 @@ export function AccessibleFormField({
       >
         {label}
         {required && (
-          <span className="text-destructive ml-1" aria-label="required">*</span>
+          <span className='text-destructive ml-1' aria-label='required'>
+            *
+          </span>
         )}
       </Label>
-      
+
       {description && (
-        <p id={descriptionId} className="text-sm text-muted-foreground">
+        <p id={descriptionId} className='text-sm text-muted-foreground'>
           {description}
         </p>
       )}
-      
-      <div className="relative">
+
+      <div className='relative'>
         <Input
           id={fieldId}
           type={type}
           placeholder={placeholder}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={e => onChange(e.target.value)}
           onBlur={() => {
             setFocused(false);
             onBlur?.();
@@ -93,8 +97,10 @@ export function AccessibleFormField({
           onFocus={() => setFocused(true)}
           className={cn(
             'transition-all duration-200',
-            hasError && 'border-destructive focus:border-destructive focus:ring-destructive',
-            hasSuccess && 'border-success focus:border-success focus:ring-success',
+            hasError &&
+              'border-destructive focus:border-destructive focus:ring-destructive',
+            hasSuccess &&
+              'border-success focus:border-success focus:ring-success',
             disabled && 'cursor-not-allowed opacity-50'
           )}
           disabled={disabled}
@@ -102,33 +108,29 @@ export function AccessibleFormField({
           aria-invalid={hasError}
           aria-describedby={ariaDescribedByIds || undefined}
         />
-        
+
         {/* Status icons */}
         {(hasError || hasSuccess) && (
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-            {hasError && <XCircle className="h-4 w-4 text-destructive" />}
-            {hasSuccess && <CheckCircle className="h-4 w-4 text-success" />}
+          <div className='absolute right-3 top-1/2 transform -translate-y-1/2'>
+            {hasError && <XCircle className='h-4 w-4 text-destructive' />}
+            {hasSuccess && <CheckCircle className='h-4 w-4 text-success' />}
           </div>
         )}
       </div>
-      
+
       {/* Error message */}
       {error && (
-        <Alert id={errorId} variant="destructive" className="py-2">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription className="text-sm">
-            {error}
-          </AlertDescription>
+        <Alert id={errorId} variant='destructive' className='py-2'>
+          <AlertTriangle className='h-4 w-4' />
+          <AlertDescription className='text-sm'>{error}</AlertDescription>
         </Alert>
       )}
-      
+
       {/* Success message */}
       {success && (
-        <Alert id={successId} className="py-2 border-success text-success">
-          <CheckCircle className="h-4 w-4" />
-          <AlertDescription className="text-sm">
-            {success}
-          </AlertDescription>
+        <Alert id={successId} className='py-2 border-success text-success'>
+          <CheckCircle className='h-4 w-4' />
+          <AlertDescription className='text-sm'>{success}</AlertDescription>
         </Alert>
       )}
     </div>
@@ -163,7 +165,7 @@ export function AccessibleForm({
       className={cn('space-y-6', className)}
       noValidate
     >
-      <fieldset disabled={disabled || loading} className="space-y-4">
+      <fieldset disabled={disabled || loading} className='space-y-4'>
         {children}
       </fieldset>
     </form>
@@ -190,21 +192,21 @@ export function FormActions({
   return (
     <div className={cn('flex flex-col sm:flex-row gap-3 sm:gap-4', className)}>
       <Button
-        type="submit"
-        className="order-2 sm:order-1"
+        type='submit'
+        className='order-2 sm:order-1'
         disabled={disabled || loading}
         loading={loading}
       >
         {submitText}
       </Button>
-      
+
       {onCancel && (
         <Button
-          type="button"
-          variant="outline"
+          type='button'
+          variant='outline'
           onClick={onCancel}
           disabled={loading}
-          className="order-1 sm:order-2"
+          className='order-1 sm:order-2'
         >
           {cancelText}
         </Button>
@@ -215,14 +217,14 @@ export function FormActions({
 
 // Form validation utilities
 export const validators = {
-  required: (value: string) => value.trim() ? null : 'This field is required',
+  required: (value: string) => (value.trim() ? null : 'This field is required'),
   email: (value: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(value) ? null : 'Please enter a valid email address';
   },
-  minLength: (min: number) => (value: string) => 
+  minLength: (min: number) => (value: string) =>
     value.length >= min ? null : `Must be at least ${min} characters`,
-  maxLength: (max: number) => (value: string) => 
+  maxLength: (max: number) => (value: string) =>
     value.length <= max ? null : `Must be no more than ${max} characters`,
   pattern: (pattern: RegExp, message: string) => (value: string) =>
     pattern.test(value) ? null : message,
@@ -248,7 +250,7 @@ export function useFormValidation<T extends Record<string, string>>(
 
   const setValue = (name: keyof T, value: string) => {
     setValues(prev => ({ ...prev, [name]: value }));
-    
+
     // Real-time validation
     const error = validateField(name, value);
     setErrors(prev => ({ ...prev, [name]: error }));

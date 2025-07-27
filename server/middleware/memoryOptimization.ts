@@ -21,11 +21,13 @@ class MemoryManager {
   private maxHistoryLength = 100;
   private leakDetectionEnabled = true;
 
-  constructor(thresholds: MemoryThresholds = {
-    warning: 256,
-    critical: 512,
-    forceGC: 400
-  }) {
+  constructor(
+    thresholds: MemoryThresholds = {
+      warning: 256,
+      critical: 512,
+      forceGC: 400,
+    }
+  ) {
     this.thresholds = thresholds;
     this.startMemoryMonitoring();
   }
@@ -66,7 +68,9 @@ class MemoryManager {
 
     // Force garbage collection if needed
     if (heapUsedMB > this.thresholds.forceGC && global.gc) {
-      console.log(`🧹 Forcing garbage collection at ${Math.round(heapUsedMB)}MB`);
+      console.log(
+        `🧹 Forcing garbage collection at ${Math.round(heapUsedMB)}MB`
+      );
       global.gc();
     }
 
@@ -78,7 +82,7 @@ class MemoryManager {
 
   private emergencyMemoryCleanup(): void {
     console.log('🚨 Initiating emergency memory cleanup...');
-    
+
     // Force garbage collection multiple times
     if (global.gc) {
       global.gc();
@@ -92,7 +96,9 @@ class MemoryManager {
     // Log post-cleanup memory usage
     setTimeout(() => {
       const postCleanup = process.memoryUsage();
-      console.log(`🧹 Post-cleanup memory: ${Math.round(postCleanup.heapUsed / 1024 / 1024)}MB`);
+      console.log(
+        `🧹 Post-cleanup memory: ${Math.round(postCleanup.heapUsed / 1024 / 1024)}MB`
+      );
     }, 1000);
   }
 
@@ -116,8 +122,11 @@ class MemoryManager {
     const trend = this.calculateMemoryTrend(recent);
 
     // If memory is consistently increasing, it might be a leak
-    if (trend > 5) { // 5MB increase trend
-      console.warn(`🔍 Potential memory leak detected: ${trend.toFixed(2)}MB/minute trend`);
+    if (trend > 5) {
+      // 5MB increase trend
+      console.warn(
+        `🔍 Potential memory leak detected: ${trend.toFixed(2)}MB/minute trend`
+      );
     }
   }
 
@@ -170,10 +179,13 @@ class MemoryManager {
 // Stream processing optimization
 class StreamOptimizer {
   private static readonly CHUNK_SIZE = 64 * 1024; // 64KB chunks
-  
+
   static optimizeStream(req: Request, res: Response): void {
     // Set optimal chunk size for streaming
-    if (req.url?.includes('/api/export') || req.url?.includes('/api/download')) {
+    if (
+      req.url?.includes('/api/export') ||
+      req.url?.includes('/api/download')
+    ) {
       res.setHeader('Transfer-Encoding', 'chunked');
       res.setHeader('Cache-Control', 'no-cache');
     }
@@ -186,7 +198,7 @@ class StreamOptimizer {
       let writeBuffer: Buffer[] = [];
       let isWriting = false;
 
-      res.write = function(chunk: any, encoding?: any): boolean {
+      res.write = function (chunk: any, encoding?: any): boolean {
         if (!isWriting && writeBuffer.length === 0) {
           return originalWrite.call(this, chunk, encoding);
         }
@@ -201,7 +213,7 @@ class StreamOptimizer {
         return true;
       };
 
-      (res as any).flushBuffer = function() {
+      (res as any).flushBuffer = function () {
         while (writeBuffer.length > 0 && this.writable) {
           const chunk = writeBuffer.shift();
           if (!originalWrite.call(this, chunk)) {
@@ -219,7 +231,7 @@ class StreamOptimizer {
         isWriting = false;
       };
 
-      res.end = function(chunk?: any, encoding?: any): Response {
+      res.end = function (chunk?: any, encoding?: any): Response {
         if (chunk) {
           this.write(chunk, encoding);
         }
@@ -285,7 +297,7 @@ class BufferPool {
     if (!this.pools.has(size)) {
       this.pools.set(size, []);
     }
-    
+
     const pool = this.pools.get(size)!;
     if (pool.length < this.MAX_POOL_SIZE) {
       buffer.fill(0); // Clear the buffer
@@ -305,7 +317,7 @@ const bufferPool = new BufferPool();
 // Request object pool
 const requestDataPool = new ObjectPool(
   () => ({ body: null, params: {}, query: {}, headers: {} }),
-  (obj) => {
+  obj => {
     obj.body = null;
     obj.params = {};
     obj.query = {};
@@ -314,7 +326,11 @@ const requestDataPool = new ObjectPool(
 );
 
 // Memory optimization middleware
-export const memoryOptimizationMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const memoryOptimizationMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   // Optimize streams
   StreamOptimizer.optimizeStream(req, res);
 
@@ -337,7 +353,11 @@ export const memoryOptimizationMiddleware = (req: Request, res: Response, next: 
 };
 
 // Large file handling middleware
-export const largeFileMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const largeFileMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   // Handle large file uploads
   if (req.headers['content-length']) {
     const contentLength = parseInt(req.headers['content-length'], 10);
@@ -356,7 +376,11 @@ export const largeFileMiddleware = (req: Request, res: Response, next: NextFunct
 };
 
 // Memory leak detection middleware
-export const memoryLeakDetectionMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const memoryLeakDetectionMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const startMemory = process.memoryUsage().heapUsed;
 
   res.on('finish', () => {
@@ -364,8 +388,11 @@ export const memoryLeakDetectionMiddleware = (req: Request, res: Response, next:
     const memoryDiff = (endMemory - startMemory) / 1024 / 1024;
 
     // Log if request caused significant memory increase
-    if (memoryDiff > 10) { // 10MB
-      console.warn(`🔍 Large memory allocation: ${req.method} ${req.url} (+${memoryDiff.toFixed(2)}MB)`);
+    if (memoryDiff > 10) {
+      // 10MB
+      console.warn(
+        `🔍 Large memory allocation: ${req.method} ${req.url} (+${memoryDiff.toFixed(2)}MB)`
+      );
     }
   });
 
@@ -400,7 +427,7 @@ export const forceGCHandler = (req: Request, res: Response) => {
     const beforeGC = process.memoryUsage();
     global.gc();
     const afterGC = process.memoryUsage();
-    
+
     res.json({
       message: 'Garbage collection forced',
       before: {

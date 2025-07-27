@@ -36,7 +36,7 @@ export default function ContextualHelp({ tips }: ContextualHelpProps) {
         const rect = target.getBoundingClientRect();
         setTipPosition({
           top: rect.bottom + window.scrollY + 8,
-          left: rect.left + window.scrollX
+          left: rect.left + window.scrollX,
         });
         setActiveTip(tip);
         markTipAsShown(tip.id);
@@ -48,16 +48,26 @@ export default function ContextualHelp({ tips }: ContextualHelpProps) {
     };
 
     // Attach event listeners
-    const listeners: Array<{ element: Element; tip: HelpTip; enterHandler: any; leaveHandler: any }> = [];
-    
+    const listeners: Array<{
+      element: Element;
+      tip: HelpTip;
+      enterHandler: any;
+      leaveHandler: any;
+    }> = [];
+
     tips.forEach(tip => {
       const elements = document.querySelectorAll(tip.triggerSelector);
       elements.forEach(element => {
         const enterHandler = handleMouseEnter(tip);
         element.addEventListener('mouseenter', enterHandler);
         element.addEventListener('mouseleave', handleMouseLeave);
-        
-        listeners.push({ element, tip, enterHandler, leaveHandler: handleMouseLeave });
+
+        listeners.push({
+          element,
+          tip,
+          enterHandler,
+          leaveHandler: handleMouseLeave,
+        });
       });
     });
 
@@ -86,7 +96,9 @@ export default function ContextualHelp({ tips }: ContextualHelpProps) {
 
     // Check max show count
     if (tip.conditions.maxShowCount) {
-      const showCount = Array.from(shownTips).filter(id => id === tip.id).length;
+      const showCount = Array.from(shownTips).filter(
+        id => id === tip.id
+      ).length;
       if (showCount >= tip.conditions.maxShowCount) {
         return false;
       }
@@ -116,48 +128,48 @@ export default function ContextualHelp({ tips }: ContextualHelpProps) {
   if (!activeTip) return null;
 
   return (
-    <div 
-      className="fixed z-[1000] max-w-sm"
+    <div
+      className='fixed z-[1000] max-w-sm'
       style={{ top: tipPosition.top, left: tipPosition.left }}
     >
-      <Card className="shadow-lg border border-blue-200 bg-blue-50">
-        <CardContent className="p-4">
-          <div className="flex items-start justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <HelpCircle className="h-4 w-4 text-blue-500" />
-              <h4 className="font-medium text-blue-900">{activeTip.title}</h4>
+      <Card className='shadow-lg border border-blue-200 bg-blue-50'>
+        <CardContent className='p-4'>
+          <div className='flex items-start justify-between mb-2'>
+            <div className='flex items-center gap-2'>
+              <HelpCircle className='h-4 w-4 text-blue-500' />
+              <h4 className='font-medium text-blue-900'>{activeTip.title}</h4>
             </div>
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant='ghost'
+              size='sm'
               onClick={() => setActiveTip(null)}
-              className="h-6 w-6 p-0"
+              className='h-6 w-6 p-0'
             >
-              <X className="h-3 w-3" />
+              <X className='h-3 w-3' />
             </Button>
           </div>
-          
-          <p className="text-sm text-blue-800 mb-3">{activeTip.content}</p>
-          
-          <div className="flex gap-2">
+
+          <p className='text-sm text-blue-800 mb-3'>{activeTip.content}</p>
+
+          <div className='flex gap-2'>
             {activeTip.learnMoreUrl && (
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant='outline'
+                size='sm'
                 onClick={handleLearnMore}
-                className="text-xs"
+                className='text-xs'
               >
-                <BookOpen className="h-3 w-3 mr-1" />
+                <BookOpen className='h-3 w-3 mr-1' />
                 Learn More
               </Button>
             )}
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant='outline'
+              size='sm'
               onClick={handleRequestHelp}
-              className="text-xs"
+              className='text-xs'
             >
-              <HelpCircle className="h-3 w-3 mr-1" />
+              <HelpCircle className='h-3 w-3 mr-1' />
               Get Help
             </Button>
           </div>
@@ -172,41 +184,45 @@ export const defaultHelpTips: HelpTip[] = [
   {
     id: 'dashboard_metrics',
     title: 'Dashboard Metrics',
-    content: 'These cards show your key performance indicators. Click any card for detailed analytics.',
+    content:
+      'These cards show your key performance indicators. Click any card for detailed analytics.',
     triggerSelector: '[data-help="dashboard-metrics"]',
-    conditions: { firstTimeOnly: true }
+    conditions: { firstTimeOnly: true },
   },
   {
     id: 'quick_actions',
     title: 'Quick Actions',
     content: 'Access frequently used features quickly from this panel.',
     triggerSelector: '[data-help="quick-actions"]',
-    conditions: { firstTimeOnly: true }
+    conditions: { firstTimeOnly: true },
   },
   {
     id: 'add_resident',
     title: 'Add Resident',
-    content: 'Click here to register a new resident. You\'ll be guided through the intake process.',
+    content:
+      "Click here to register a new resident. You'll be guided through the intake process.",
     triggerSelector: '[data-help="add-resident"]',
     learnMoreUrl: '/help/residents/adding',
-    conditions: { 
+    conditions: {
       userRole: ['housing_officer', 'support_coordinator', 'admin'],
-      maxShowCount: 3 
-    }
+      maxShowCount: 3,
+    },
   },
   {
     id: 'property_status',
     title: 'Property Status',
-    content: 'The status indicator shows the current operational state of this property.',
+    content:
+      'The status indicator shows the current operational state of this property.',
     triggerSelector: '[data-help="property-status"]',
-    conditions: { userRole: ['housing_officer', 'admin'] }
+    conditions: { userRole: ['housing_officer', 'admin'] },
   },
   {
     id: 'incident_reporting',
     title: 'Report Incident',
-    content: 'Use this to report safety incidents or concerns that require attention.',
+    content:
+      'Use this to report safety incidents or concerns that require attention.',
     triggerSelector: '[data-help="incident-report"]',
     learnMoreUrl: '/help/safeguarding/incidents',
-    conditions: { userRole: ['support_coordinator', 'admin'] }
-  }
+    conditions: { userRole: ['support_coordinator', 'admin'] },
+  },
 ];

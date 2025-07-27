@@ -1,12 +1,18 @@
 #!/usr/bin/env npx tsx
 
 import { db } from '../server/db';
-import { users, organizations, organizationSubscriptions, subscriptionPlans, auditLogs } from '../shared/schema';
+import {
+  users,
+  organizations,
+  organizationSubscriptions,
+  subscriptionPlans,
+  auditLogs,
+} from '../shared/schema';
 import { eq } from 'drizzle-orm';
 
 async function seedPlatformAdminData() {
   console.log('🌱 Seeding Platform Admin Test Data...');
-  
+
   try {
     // 1. Create a test platform admin user
     const testAdmin = {
@@ -29,11 +35,14 @@ async function seedPlatformAdminData() {
       subscriptionStatus: 'active',
       maxResidents: 999999,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     // Check if admin already exists
-    const existingAdmin = await db.select().from(users).where(eq(users.id, testAdmin.id));
+    const existingAdmin = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, testAdmin.id));
     if (existingAdmin.length === 0) {
       await db.insert(users).values(testAdmin);
       console.log('✅ Created test platform admin user');
@@ -52,7 +61,7 @@ async function seedPlatformAdminData() {
         website: 'https://testnorth.gov.uk',
         status: 'active',
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       },
       {
         name: 'Test Council South',
@@ -63,12 +72,15 @@ async function seedPlatformAdminData() {
         website: 'https://testsouth.gov.uk',
         status: 'active',
         createdAt: new Date(),
-        updatedAt: new Date()
-      }
+        updatedAt: new Date(),
+      },
     ];
 
     for (const org of testOrganizations) {
-      const existing = await db.select().from(organizations).where(eq(organizations.name, org.name));
+      const existing = await db
+        .select()
+        .from(organizations)
+        .where(eq(organizations.name, org.name));
       if (existing.length === 0) {
         await db.insert(organizations).values(org);
         console.log(`✅ Created test organization: ${org.name}`);
@@ -90,15 +102,22 @@ async function seedPlatformAdminData() {
       maxUsers: 10,
       maxApiCalls: 50000,
       maxStorage: 100,
-      features: JSON.stringify(['advanced_reporting', 'api_access', 'multi_property']),
+      features: JSON.stringify([
+        'advanced_reporting',
+        'api_access',
+        'multi_property',
+      ]),
       isActive: true,
       sortOrder: 2,
       trialDays: 14,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
-    const existingPlan = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.planName, testPlan.planName));
+    const existingPlan = await db
+      .select()
+      .from(subscriptionPlans)
+      .where(eq(subscriptionPlans.planName, testPlan.planName));
     if (existingPlan.length === 0) {
       await db.insert(subscriptionPlans).values(testPlan);
       console.log('✅ Created test subscription plan');
@@ -109,7 +128,7 @@ async function seedPlatformAdminData() {
     // 4. Create test organization subscriptions
     const orgs = await db.select().from(organizations).limit(2);
     const plans = await db.select().from(subscriptionPlans).limit(1);
-    
+
     if (orgs.length > 0 && plans.length > 0) {
       const testSubscription = {
         organizationId: orgs[0].id,
@@ -123,10 +142,13 @@ async function seedPlatformAdminData() {
         autoRenew: true,
         nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
-      const existingSub = await db.select().from(organizationSubscriptions).where(eq(organizationSubscriptions.organizationId, orgs[0].id));
+      const existingSub = await db
+        .select()
+        .from(organizationSubscriptions)
+        .where(eq(organizationSubscriptions.organizationId, orgs[0].id));
       if (existingSub.length === 0) {
         await db.insert(organizationSubscriptions).values(testSubscription);
         console.log('✅ Created test organization subscription');
@@ -144,7 +166,7 @@ async function seedPlatformAdminData() {
         details: JSON.stringify({ ip: '127.0.0.1', userAgent: 'Test Browser' }),
         timestamp: new Date(),
         riskLevel: 'low' as const,
-        metadata: { source: 'platform_admin_test' }
+        metadata: { source: 'platform_admin_test' },
       },
       {
         id: 'audit-2-' + Date.now(),
@@ -153,8 +175,8 @@ async function seedPlatformAdminData() {
         details: JSON.stringify({ organizationId: orgs[0]?.id || 1 }),
         timestamp: new Date(),
         riskLevel: 'low' as const,
-        metadata: { source: 'platform_admin_test' }
-      }
+        metadata: { source: 'platform_admin_test' },
+      },
     ];
 
     for (const log of testAuditLogs) {
@@ -174,8 +196,9 @@ async function seedPlatformAdminData() {
       console.log(`  - ${org.name} (${org.status})`);
     }
 
-    console.log('\nRun validation again: npx tsx scripts/validate-platform-admin.ts');
-
+    console.log(
+      '\nRun validation again: npx tsx scripts/validate-platform-admin.ts'
+    );
   } catch (error) {
     console.error('❌ Error seeding platform admin data:', error);
     process.exit(1);

@@ -15,7 +15,12 @@ interface UserJourneyStep {
 }
 
 interface UserPersona {
-  type: 'housing_officer' | 'support_coordinator' | 'admin' | 'finance_officer' | 'manager';
+  type:
+    | 'housing_officer'
+    | 'support_coordinator'
+    | 'admin'
+    | 'finance_officer'
+    | 'manager';
   primaryTasks: string[];
   preferredNavigation: string[];
   keyMetrics: string[];
@@ -57,11 +62,11 @@ const defaultOnboardingSteps: UserJourneyStep[] = [
   {
     id: 'welcome',
     title: 'Welcome to YUTHUB',
-    description: 'Let\'s get you started with the platform',
+    description: "Let's get you started with the platform",
     component: 'WelcomeStep',
     isCompleted: false,
     isSkippable: false,
-    estimatedTime: 2
+    estimatedTime: 2,
   },
   {
     id: 'profile-setup',
@@ -70,7 +75,7 @@ const defaultOnboardingSteps: UserJourneyStep[] = [
     component: 'ProfileSetupStep',
     isCompleted: false,
     isSkippable: false,
-    estimatedTime: 5
+    estimatedTime: 5,
   },
   {
     id: 'organization-config',
@@ -80,7 +85,7 @@ const defaultOnboardingSteps: UserJourneyStep[] = [
     requiredRole: ['admin', 'manager'],
     isCompleted: false,
     isSkippable: true,
-    estimatedTime: 10
+    estimatedTime: 10,
   },
   {
     id: 'role-assignment',
@@ -89,7 +94,7 @@ const defaultOnboardingSteps: UserJourneyStep[] = [
     component: 'RoleAssignmentStep',
     isCompleted: false,
     isSkippable: false,
-    estimatedTime: 3
+    estimatedTime: 3,
   },
   {
     id: 'feature-introduction',
@@ -98,7 +103,7 @@ const defaultOnboardingSteps: UserJourneyStep[] = [
     component: 'FeatureIntroStep',
     isCompleted: false,
     isSkippable: true,
-    estimatedTime: 8
+    estimatedTime: 8,
   },
   {
     id: 'first-action',
@@ -107,11 +112,15 @@ const defaultOnboardingSteps: UserJourneyStep[] = [
     component: 'FirstActionStep',
     isCompleted: false,
     isSkippable: false,
-    estimatedTime: 5
-  }
+    estimatedTime: 5,
+  },
 ];
 
-export function UserJourneyProvider({ children }: { children: React.ReactNode }) {
+export function UserJourneyProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { user } = useAuth();
   const [state, setState] = useState<UserJourneyState>({
     currentStep: null,
@@ -122,7 +131,7 @@ export function UserJourneyProvider({ children }: { children: React.ReactNode })
     showTour: false,
     contextualHelp: true,
     featureAdoption: {},
-    userSatisfaction: null
+    userSatisfaction: null,
   });
 
   const [onboardingSteps] = useState<UserJourneyStep[]>(defaultOnboardingSteps);
@@ -140,7 +149,7 @@ export function UserJourneyProvider({ children }: { children: React.ReactNode })
       setState(prev => ({
         ...prev,
         ...journeyData,
-        isFirstVisit: !journeyData.completedSteps?.length
+        isFirstVisit: !journeyData.completedSteps?.length,
       }));
     } catch (error) {
       console.log('No existing journey data, starting fresh');
@@ -153,34 +162,62 @@ export function UserJourneyProvider({ children }: { children: React.ReactNode })
     const personas: Record<string, UserPersona> = {
       housing_officer: {
         type: 'housing_officer',
-        primaryTasks: ['property_management', 'maintenance_requests', 'occupancy_tracking'],
+        primaryTasks: [
+          'property_management',
+          'maintenance_requests',
+          'occupancy_tracking',
+        ],
         preferredNavigation: ['housing', 'properties', 'maintenance'],
-        keyMetrics: ['occupancy_rate', 'maintenance_response_time', 'property_utilization']
+        keyMetrics: [
+          'occupancy_rate',
+          'maintenance_response_time',
+          'property_utilization',
+        ],
       },
       support_coordinator: {
         type: 'support_coordinator',
-        primaryTasks: ['resident_management', 'support_plans', 'incident_reporting'],
+        primaryTasks: [
+          'resident_management',
+          'support_plans',
+          'incident_reporting',
+        ],
         preferredNavigation: ['residents', 'support', 'safeguarding'],
-        keyMetrics: ['support_plan_completion', 'incident_resolution', 'resident_satisfaction']
+        keyMetrics: [
+          'support_plan_completion',
+          'incident_resolution',
+          'resident_satisfaction',
+        ],
       },
       admin: {
         type: 'admin',
         primaryTasks: ['user_management', 'system_configuration', 'analytics'],
         preferredNavigation: ['dashboard', 'admin', 'reports'],
-        keyMetrics: ['system_usage', 'user_adoption', 'performance_metrics']
+        keyMetrics: ['system_usage', 'user_adoption', 'performance_metrics'],
       },
       finance_officer: {
         type: 'finance_officer',
-        primaryTasks: ['billing_management', 'financial_reporting', 'invoice_processing'],
+        primaryTasks: [
+          'billing_management',
+          'financial_reporting',
+          'invoice_processing',
+        ],
         preferredNavigation: ['billing', 'financials', 'reports'],
-        keyMetrics: ['revenue_tracking', 'payment_efficiency', 'cost_analysis']
+        keyMetrics: ['revenue_tracking', 'payment_efficiency', 'cost_analysis'],
       },
       manager: {
         type: 'manager',
-        primaryTasks: ['team_oversight', 'strategic_planning', 'performance_monitoring'],
+        primaryTasks: [
+          'team_oversight',
+          'strategic_planning',
+          'performance_monitoring',
+        ],
         preferredNavigation: ['dashboard', 'reports', 'analytics'],
-        keyMetrics: ['team_performance', 'operational_efficiency', 'strategic_goals']
-      }
+        keyMetrics: [
+          'team_performance',
+          'operational_efficiency',
+          'strategic_goals',
+        ],
+      },
     };
 
     const userRole = user.role as keyof typeof personas;
@@ -193,7 +230,7 @@ export function UserJourneyProvider({ children }: { children: React.ReactNode })
     try {
       await apiRequest('/api/user-journey', {
         method: 'PUT',
-        body: JSON.stringify(newState)
+        body: JSON.stringify(newState),
       });
     } catch (error) {
       console.error('Failed to save user journey state:', error);
@@ -205,7 +242,7 @@ export function UserJourneyProvider({ children }: { children: React.ReactNode })
     const newState = {
       currentStep: firstStep.id,
       isFirstVisit: false,
-      showTour: true
+      showTour: true,
     };
     setState(prev => ({ ...prev, ...newState }));
     saveUserJourneyState(newState);
@@ -215,13 +252,13 @@ export function UserJourneyProvider({ children }: { children: React.ReactNode })
     const newCompletedSteps = [...state.completedSteps, stepId];
     const progress = (newCompletedSteps.length / onboardingSteps.length) * 100;
     const nextStep = getNextStepAfter(stepId);
-    
+
     const newState = {
       completedSteps: newCompletedSteps,
       onboardingProgress: progress,
-      currentStep: nextStep?.id || null
+      currentStep: nextStep?.id || null,
     };
-    
+
     setState(prev => ({ ...prev, ...newState }));
     saveUserJourneyState(newState);
 
@@ -232,9 +269,9 @@ export function UserJourneyProvider({ children }: { children: React.ReactNode })
   const skipStep = (stepId: string) => {
     const nextStep = getNextStepAfter(stepId);
     const newState = {
-      currentStep: nextStep?.id || null
+      currentStep: nextStep?.id || null,
     };
-    
+
     setState(prev => ({ ...prev, ...newState }));
     saveUserJourneyState(newState);
 
@@ -257,8 +294,8 @@ export function UserJourneyProvider({ children }: { children: React.ReactNode })
       ...prev,
       featureAdoption: {
         ...prev.featureAdoption,
-        [feature]: (prev.featureAdoption[feature] || 0) + 1
-      }
+        [feature]: (prev.featureAdoption[feature] || 0) + 1,
+      },
     }));
   };
 
@@ -266,9 +303,9 @@ export function UserJourneyProvider({ children }: { children: React.ReactNode })
     try {
       await apiRequest('/api/user-feedback', {
         method: 'POST',
-        body: JSON.stringify(feedback)
+        body: JSON.stringify(feedback),
       });
-      
+
       if (feedback.type === 'satisfaction') {
         setState(prev => ({ ...prev, userSatisfaction: feedback.rating }));
       }
@@ -294,30 +331,35 @@ export function UserJourneyProvider({ children }: { children: React.ReactNode })
 
   const getNextStepAfter = (stepId: string): UserJourneyStep | null => {
     const currentIndex = onboardingSteps.findIndex(step => step.id === stepId);
-    if (currentIndex === -1 || currentIndex === onboardingSteps.length - 1) return null;
-    
+    if (currentIndex === -1 || currentIndex === onboardingSteps.length - 1)
+      return null;
+
     // Filter steps based on user role
-    const availableSteps = onboardingSteps.slice(currentIndex + 1).filter(step => {
-      if (!step.requiredRole) return true;
-      return step.requiredRole.includes(user?.role || '');
-    });
-    
+    const availableSteps = onboardingSteps
+      .slice(currentIndex + 1)
+      .filter(step => {
+        if (!step.requiredRole) return true;
+        return step.requiredRole.includes(user?.role || '');
+      });
+
     return availableSteps[0] || null;
   };
 
   const getCurrentStepProgress = (): number => {
     if (!state.currentStep) return 0;
-    const currentIndex = onboardingSteps.findIndex(step => step.id === state.currentStep);
+    const currentIndex = onboardingSteps.findIndex(
+      step => step.id === state.currentStep
+    );
     return ((currentIndex + 1) / onboardingSteps.length) * 100;
   };
 
   const getPersonalizedContent = () => {
     if (!state.userPersona) return null;
-    
+
     return {
       dashboardWidgets: state.userPersona.keyMetrics,
       quickActions: state.userPersona.primaryTasks,
-      navigation: state.userPersona.preferredNavigation
+      navigation: state.userPersona.preferredNavigation,
     };
   };
 
@@ -332,11 +374,11 @@ export function UserJourneyProvider({ children }: { children: React.ReactNode })
       trackFeatureUsage,
       submitFeedback,
       requestHelp,
-      startOffboarding
+      startOffboarding,
     },
     getNextStep,
     getCurrentStepProgress,
-    getPersonalizedContent
+    getPersonalizedContent,
   };
 
   return (

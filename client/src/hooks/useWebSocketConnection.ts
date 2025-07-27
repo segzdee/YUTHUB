@@ -15,7 +15,9 @@ export function useWebSocketConnection() {
   const { notifications } = useDashboardStore();
   const queryClient = useQueryClient();
   const ws = useRef<WebSocket | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected' | 'error'>('disconnected');
+  const [connectionStatus, setConnectionStatus] = useState<
+    'connecting' | 'connected' | 'disconnected' | 'error'
+  >('disconnected');
   const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
 
   useEffect(() => {
@@ -32,39 +34,41 @@ export function useWebSocketConnection() {
         ws.current.onopen = () => {
           setConnectionStatus('connected');
           console.log('WebSocket connected for real-time updates');
-          
+
           // Send authentication info
           if (ws.current) {
-            ws.current.send(JSON.stringify({
-              type: 'auth',
-              userId: user.id,
-              role: user.role,
-            }));
+            ws.current.send(
+              JSON.stringify({
+                type: 'auth',
+                userId: user.id,
+                role: user.role,
+              })
+            );
           }
         };
 
-        ws.current.onmessage = (event) => {
+        ws.current.onmessage = event => {
           try {
             const message: WebSocketMessage = JSON.parse(event.data);
             setLastMessage(message);
-            
+
             switch (message.type) {
               case 'update':
                 // Invalidate relevant queries based on the update type
                 if (message.data.entityType) {
-                  queryClient.invalidateQueries({ 
-                    queryKey: [`/api/${message.data.entityType}`] 
+                  queryClient.invalidateQueries({
+                    queryKey: [`/api/${message.data.entityType}`],
                   });
                 }
                 break;
-              
+
               case 'metric_change':
                 // Update dashboard metrics
-                queryClient.invalidateQueries({ 
-                  queryKey: ['/api/dashboard/metrics'] 
+                queryClient.invalidateQueries({
+                  queryKey: ['/api/dashboard/metrics'],
                 });
                 break;
-              
+
               case 'incident_alert':
                 // High priority alert - show desktop notification if enabled
                 if (notifications.enabled && notifications.desktop) {
@@ -77,7 +81,7 @@ export function useWebSocketConnection() {
                   }
                 }
                 break;
-              
+
               case 'notification':
                 // Standard notification
                 if (notifications.enabled) {
@@ -101,17 +105,18 @@ export function useWebSocketConnection() {
         ws.current.onclose = () => {
           setConnectionStatus('disconnected');
           console.log('WebSocket disconnected');
-          
+
           // Attempt to reconnect after 3 seconds
           setTimeout(connect, 3000);
         };
 
-        ws.current.onerror = (error) => {
+        ws.current.onerror = error => {
           setConnectionStatus('error');
           // Log WebSocket connection errors in development
           if (process.env.NODE_ENV === 'development') {
             console.error('WebSocket connection error:', {
-              error: error instanceof Error ? error.message : 'Connection failed',
+              error:
+                error instanceof Error ? error.message : 'Connection failed',
               url: url,
               timestamp: new Date().toISOString(),
             });

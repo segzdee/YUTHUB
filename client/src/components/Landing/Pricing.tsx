@@ -1,5 +1,12 @@
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Check, ArrowRight } from 'lucide-react';
 
@@ -21,7 +28,7 @@ export default function PricingSection() {
         'Basic reporting dashboard',
       ],
       popular: false,
-      color: 'border-gray-200'
+      color: 'border-gray-200',
     },
     {
       name: 'Professional',
@@ -42,7 +49,7 @@ export default function PricingSection() {
         'API access',
       ],
       popular: true,
-      color: 'border-primary ring-2 ring-primary'
+      color: 'border-primary ring-2 ring-primary',
     },
     {
       name: 'Enterprise',
@@ -63,99 +70,110 @@ export default function PricingSection() {
         'SLA guarantees',
       ],
       popular: false,
-      color: 'border-gray-200'
-    }
+      color: 'border-gray-200',
+    },
   ];
 
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50" id="pricing">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <Badge variant="outline" className="mb-4 px-4 py-2">
+    <section className='py-20 px-4 sm:px-6 lg:px-8 bg-gray-50' id='pricing'>
+      <div className='max-w-7xl mx-auto'>
+        <div className='text-center mb-16'>
+          <Badge variant='outline' className='mb-4 px-4 py-2'>
             Transparent Pricing
           </Badge>
-          <h2 className="text-3xl md:text-4xl font-bold text-high-contrast mb-4">
+          <h2 className='text-3xl md:text-4xl font-bold text-high-contrast mb-4'>
             Choose the Right Plan for Your Organization
           </h2>
-          <p className="text-xl text-medium-contrast max-w-3xl mx-auto">
-            Simple, transparent pricing with no hidden fees. All plans include free setup, training, and onboarding.
+          <p className='text-xl text-medium-contrast max-w-3xl mx-auto'>
+            Simple, transparent pricing with no hidden fees. All plans include
+            free setup, training, and onboarding.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+        <div className='grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8'>
           {pricingTiers.map((tier, index) => (
-            <Card key={index} className={`interactive-element hover:shadow-lg transition-all duration-300 relative ${tier.color}`}>
+            <Card
+              key={index}
+              className={`interactive-element hover:shadow-lg transition-all duration-300 relative ${tier.color}`}
+            >
               {tier.popular && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-primary text-white px-3 py-1 text-sm">
+                <div className='absolute -top-3 left-1/2 transform -translate-x-1/2'>
+                  <Badge className='bg-primary text-white px-3 py-1 text-sm'>
                     Most Popular
                   </Badge>
                 </div>
               )}
-              
-              <CardHeader className="text-center pb-4 sm:pb-6">
-                <CardTitle className="text-xl sm:text-2xl font-bold text-high-contrast">
+
+              <CardHeader className='text-center pb-4 sm:pb-6'>
+                <CardTitle className='text-xl sm:text-2xl font-bold text-high-contrast'>
                   {tier.name}
                 </CardTitle>
-                <CardDescription className="text-medium-contrast text-sm sm:text-base">
+                <CardDescription className='text-medium-contrast text-sm sm:text-base'>
                   {tier.description}
                 </CardDescription>
-                
-                <div className="mt-4">
-                  <div className="flex items-baseline justify-center gap-2">
-                    <span className="text-3xl sm:text-4xl font-bold text-high-contrast">
+
+                <div className='mt-4'>
+                  <div className='flex items-baseline justify-center gap-2'>
+                    <span className='text-3xl sm:text-4xl font-bold text-high-contrast'>
                       £{tier.annualPrice}
                     </span>
-                    <span className="text-medium-contrast text-sm sm:text-base">/month</span>
+                    <span className='text-medium-contrast text-sm sm:text-base'>
+                      /month
+                    </span>
                   </div>
-                  <div className="text-xs sm:text-sm text-medium-contrast mt-1">
+                  <div className='text-xs sm:text-sm text-medium-contrast mt-1'>
                     Annual billing (save 15%)
                   </div>
-                  <div className="text-xs sm:text-sm text-medium-contrast">
+                  <div className='text-xs sm:text-sm text-medium-contrast'>
                     £{tier.monthlyPrice}/month if billed monthly
                   </div>
                 </div>
-                
-                <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                  <div className="text-sm text-high-contrast font-semibold">
+
+                <div className='mt-4 p-3 bg-blue-50 rounded-lg'>
+                  <div className='text-sm text-high-contrast font-semibold'>
                     Max Residents: {tier.maxResidents}
                   </div>
-                  <div className="text-xs text-medium-contrast mt-1">
+                  <div className='text-xs text-medium-contrast mt-1'>
                     Free setup and onboarding included
                   </div>
                 </div>
               </CardHeader>
-              
-              <CardContent className="space-y-3">
+
+              <CardContent className='space-y-3'>
                 {tier.features.map((feature, featureIndex) => (
-                  <div key={featureIndex} className="flex items-start gap-3">
-                    <Check className="h-5 w-5 text-success mt-0.5 flex-shrink-0" aria-hidden="true" />
-                    <span className="text-medium-contrast text-sm leading-relaxed">
+                  <div key={featureIndex} className='flex items-start gap-3'>
+                    <Check
+                      className='h-5 w-5 text-success mt-0.5 flex-shrink-0'
+                      aria-hidden='true'
+                    />
+                    <span className='text-medium-contrast text-sm leading-relaxed'>
                       {feature}
                     </span>
                   </div>
                 ))}
               </CardContent>
-              
-              <CardFooter className="pt-6">
-                <Button 
+
+              <CardFooter className='pt-6'>
+                <Button
                   className={`w-full interactive-element ${tier.popular ? 'bg-primary hover:bg-blue-700' : 'bg-gray-900 hover:bg-gray-800'}`}
-                  onClick={() => window.location.href = `/subscribe?tier=${tier.name.toLowerCase()}`}
+                  onClick={() =>
+                    (window.location.href = `/subscribe?tier=${tier.name.toLowerCase()}`)
+                  }
                 >
                   Start Free Trial
-                  <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                  <ArrowRight className='ml-2 h-4 w-4' aria-hidden='true' />
                 </Button>
               </CardFooter>
             </Card>
           ))}
         </div>
 
-        <div className="mt-16 text-center">
-          <div className="inline-flex flex-col items-center gap-4 px-8 py-6 bg-white rounded-xl shadow-sm">
-            <div className="text-high-contrast font-semibold">
+        <div className='mt-16 text-center'>
+          <div className='inline-flex flex-col items-center gap-4 px-8 py-6 bg-white rounded-xl shadow-sm'>
+            <div className='text-high-contrast font-semibold'>
               All plans include:
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-medium-contrast">
+            <div className='grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-medium-contrast'>
               <span>✓ 30-day free trial</span>
               <span>✓ Free setup & training</span>
               <span>✓ Cancel anytime</span>

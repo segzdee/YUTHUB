@@ -57,7 +57,9 @@ export class SSOIntegration {
         issuer: config.issuer,
         cert: config.cert,
         callbackUrl: config.callbackUrl,
-        identifierFormat: config.identifierFormat || 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress',
+        identifierFormat:
+          config.identifierFormat ||
+          'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress',
         signatureAlgorithm: config.signatureAlgorithm || 'sha256',
         digestAlgorithm: config.digestAlgorithm || 'sha256',
         wantAssertionsSigned: config.wantAssertionsSigned ?? true,
@@ -66,7 +68,7 @@ export class SSOIntegration {
       async (profile: any, done: any) => {
         try {
           const user = await this.processSAMLUser(profile);
-          
+
           // Log successful SSO authentication
           await AuditLogger.logAuthAttempt(user.id, true, {
             method: 'SAML_SSO',
@@ -74,7 +76,7 @@ export class SSOIntegration {
             email: user.email,
             timestamp: new Date().toISOString(),
           });
-          
+
           done(null, user);
         } catch (error) {
           console.error('SAML authentication error:', error);
@@ -99,7 +101,13 @@ export class SSOIntegration {
           bindCredentials: config.password,
           searchBase: config.searchBase,
           searchFilter: config.searchFilter,
-          searchAttributes: config.searchAttributes || ['cn', 'mail', 'givenName', 'sn', 'memberOf'],
+          searchAttributes: config.searchAttributes || [
+            'cn',
+            'mail',
+            'givenName',
+            'sn',
+            'memberOf',
+          ],
           tlsOptions: config.tlsOptions || {},
           reconnect: config.reconnect ?? true,
         },
@@ -107,7 +115,7 @@ export class SSOIntegration {
       async (profile: any, done: any) => {
         try {
           const user = await this.processLDAPUser(profile);
-          
+
           // Log successful LDAP authentication
           await AuditLogger.logAuthAttempt(user.id, true, {
             method: 'LDAP_SSO',
@@ -115,7 +123,7 @@ export class SSOIntegration {
             email: user.email,
             timestamp: new Date().toISOString(),
           });
-          
+
           done(null, user);
         } catch (error) {
           console.error('LDAP authentication error:', error);
@@ -134,9 +142,12 @@ export class SSOIntegration {
     const lastName = profile[this.userMapping.lastNameField] || '';
     const department = profile[this.userMapping.departmentField] || '';
     const employeeId = profile[this.userMapping.employeeIdField] || '';
-    
+
     // Map SAML groups/roles to application roles
-    const role = this.mapSSORole(profile[this.userMapping.roleField] || profile[this.userMapping.groupField]);
+    const role = this.mapSSORole(
+      profile[this.userMapping.roleField] ||
+        profile[this.userMapping.groupField]
+    );
 
     // Create or update user
     const user = await storage.upsertUser({
@@ -157,11 +168,12 @@ export class SSOIntegration {
   // Process LDAP user profile
   private static async processLDAPUser(profile: any): Promise<any> {
     const email = profile[this.userMapping.emailField] || profile.mail;
-    const firstName = profile[this.userMapping.firstNameField] || profile.givenName;
+    const firstName =
+      profile[this.userMapping.firstNameField] || profile.givenName;
     const lastName = profile[this.userMapping.lastNameField] || profile.sn;
     const department = profile[this.userMapping.departmentField] || '';
     const employeeId = profile[this.userMapping.employeeIdField] || profile.cn;
-    
+
     // Map LDAP groups to application roles
     const groups = profile.memberOf || [];
     const role = this.mapLDAPGroups(groups);
@@ -185,16 +197,16 @@ export class SSOIntegration {
   // Map SSO role to application role
   private static mapSSORole(ssoRole: string): string {
     const roleMappings: { [key: string]: string } = {
-      'YUTHUB_ADMIN': 'admin',
-      'YUTHUB_MANAGER': 'manager',
-      'YUTHUB_SUPERVISOR': 'supervisor',
-      'YUTHUB_HOUSING_OFFICER': 'housing_officer',
-      'YUTHUB_SUPPORT_COORDINATOR': 'support_coordinator',
-      'YUTHUB_FINANCE_OFFICER': 'finance_officer',
-      'YUTHUB_SAFEGUARDING_OFFICER': 'safeguarding_officer',
-      'YUTHUB_MAINTENANCE_STAFF': 'maintenance_staff',
-      'YUTHUB_STAFF': 'staff',
-      'YUTHUB_READONLY': 'readonly',
+      YUTHUB_ADMIN: 'admin',
+      YUTHUB_MANAGER: 'manager',
+      YUTHUB_SUPERVISOR: 'supervisor',
+      YUTHUB_HOUSING_OFFICER: 'housing_officer',
+      YUTHUB_SUPPORT_COORDINATOR: 'support_coordinator',
+      YUTHUB_FINANCE_OFFICER: 'finance_officer',
+      YUTHUB_SAFEGUARDING_OFFICER: 'safeguarding_officer',
+      YUTHUB_MAINTENANCE_STAFF: 'maintenance_staff',
+      YUTHUB_STAFF: 'staff',
+      YUTHUB_READONLY: 'readonly',
     };
 
     return roleMappings[ssoRole] || 'staff';
@@ -209,7 +221,8 @@ export class SSOIntegration {
       'CN=YUTHUB_Housing,OU=Groups,DC=company,DC=com': 'housing_officer',
       'CN=YUTHUB_Support,OU=Groups,DC=company,DC=com': 'support_coordinator',
       'CN=YUTHUB_Finance,OU=Groups,DC=company,DC=com': 'finance_officer',
-      'CN=YUTHUB_Safeguarding,OU=Groups,DC=company,DC=com': 'safeguarding_officer',
+      'CN=YUTHUB_Safeguarding,OU=Groups,DC=company,DC=com':
+        'safeguarding_officer',
       'CN=YUTHUB_Maintenance,OU=Groups,DC=company,DC=com': 'maintenance_staff',
       'CN=YUTHUB_Staff,OU=Groups,DC=company,DC=com': 'staff',
       'CN=YUTHUB_Readonly,OU=Groups,DC=company,DC=com': 'readonly',
@@ -241,14 +254,18 @@ export class SSOIntegration {
       });
 
       return new Promise((resolve, reject) => {
-        client.bind(this.ldapConfig.username, this.ldapConfig.password, (err: any) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(true);
+        client.bind(
+          this.ldapConfig.username,
+          this.ldapConfig.password,
+          (err: any) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(true);
+            }
+            client.unbind();
           }
-          client.unbind();
-        });
+        );
       });
     } catch (error) {
       console.error('LDAP connection test failed:', error);
@@ -265,39 +282,53 @@ export class SSOIntegration {
         tlsOptions: this.ldapConfig.tlsOptions || {},
       });
 
-      client.bind(this.ldapConfig.username, this.ldapConfig.password, (err: any) => {
-        if (err) {
-          console.error('LDAP bind error:', err);
-          return;
-        }
-
-        const opts = {
-          filter: this.ldapConfig.searchFilter,
-          scope: 'sub',
-          attributes: this.ldapConfig.searchAttributes || ['cn', 'mail', 'givenName', 'sn', 'memberOf'],
-        };
-
-        client.search(this.ldapConfig.searchBase, opts, (err: any, res: any) => {
+      client.bind(
+        this.ldapConfig.username,
+        this.ldapConfig.password,
+        (err: any) => {
           if (err) {
-            console.error('LDAP search error:', err);
+            console.error('LDAP bind error:', err);
             return;
           }
 
-          res.on('searchEntry', async (entry: any) => {
-            try {
-              const user = await this.processLDAPUser(entry.object);
-              console.log('Synced user:', user.email);
-            } catch (error) {
-              console.error('Error syncing user:', error);
-            }
-          });
+          const opts = {
+            filter: this.ldapConfig.searchFilter,
+            scope: 'sub',
+            attributes: this.ldapConfig.searchAttributes || [
+              'cn',
+              'mail',
+              'givenName',
+              'sn',
+              'memberOf',
+            ],
+          };
 
-          res.on('end', () => {
-            console.log('LDAP user sync completed');
-            client.unbind();
-          });
-        });
-      });
+          client.search(
+            this.ldapConfig.searchBase,
+            opts,
+            (err: any, res: any) => {
+              if (err) {
+                console.error('LDAP search error:', err);
+                return;
+              }
+
+              res.on('searchEntry', async (entry: any) => {
+                try {
+                  const user = await this.processLDAPUser(entry.object);
+                  console.log('Synced user:', user.email);
+                } catch (error) {
+                  console.error('Error syncing user:', error);
+                }
+              });
+
+              res.on('end', () => {
+                console.log('LDAP user sync completed');
+                client.unbind();
+              });
+            }
+          );
+        }
+      );
     } catch (error) {
       console.error('LDAP sync error:', error);
     }

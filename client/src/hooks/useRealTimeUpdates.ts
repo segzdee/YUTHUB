@@ -9,7 +9,7 @@ export function useRealTimeUpdates() {
   useEffect(() => {
     const handleDataUpdate = (event: CustomEvent) => {
       const { entityType, action, entityId, timestamp } = event.detail;
-      
+
       // Prevent duplicate updates
       const updateTime = new Date(timestamp).getTime();
       if (updateTime <= lastUpdateRef.current) return;
@@ -25,16 +25,22 @@ export function useRealTimeUpdates() {
       // Real-time update: ${action} ${entityType} - ${entityId} at ${timestamp}
     };
 
-    window.addEventListener('dataIntegrationUpdate', handleDataUpdate as EventListener);
+    window.addEventListener(
+      'dataIntegrationUpdate',
+      handleDataUpdate as EventListener
+    );
 
     return () => {
-      window.removeEventListener('dataIntegrationUpdate', handleDataUpdate as EventListener);
+      window.removeEventListener(
+        'dataIntegrationUpdate',
+        handleDataUpdate as EventListener
+      );
     };
   }, [queryClient]);
 
   return {
     triggerUpdate: (entityType: string, action: string, entityId?: number) => {
       DataIntegration.notifyModules(entityType, action, entityId);
-    }
+    },
   };
 }

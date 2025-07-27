@@ -1,21 +1,26 @@
 # YUTHUB API Documentation
 
 ## Overview
+
 The YUTHUB API provides comprehensive endpoints for managing youth housing operations, including property management, resident tracking, incident reporting, and financial operations.
 
 ## Base URL
+
 - Development: `http://localhost:5000/api`
 - Production: `https://www.yuthub.com/api`
 
 ## Authentication
+
 All API endpoints require authentication using session-based authentication with Replit OIDC.
 
 ### Authentication Headers
+
 ```
 Cookie: connect.sid=<session-id>
 ```
 
 ## Rate Limiting
+
 - General API endpoints: 100 requests per 15 minutes
 - Create operations: 5 requests per minute
 - Report generation: 3 requests per 5 minutes
@@ -24,9 +29,11 @@ Cookie: connect.sid=<session-id>
 ## Health Check Endpoints
 
 ### GET /health
+
 Returns overall system health status.
 
 **Response:**
+
 ```json
 {
   "status": "healthy",
@@ -51,17 +58,21 @@ Returns overall system health status.
 ```
 
 ### GET /health/ready
+
 Readiness check for load balancers.
 
 ### GET /health/live
+
 Liveness check for container orchestration.
 
 ## Authentication Endpoints
 
 ### GET /api/auth/user
+
 Returns current authenticated user information.
 
 **Response:**
+
 ```json
 {
   "id": "user123",
@@ -74,9 +85,11 @@ Returns current authenticated user information.
 ```
 
 ### POST /api/auth/setup-mfa
+
 Setup Multi-Factor Authentication for user account.
 
 **Request:**
+
 ```json
 {
   "enabled": true
@@ -84,6 +97,7 @@ Setup Multi-Factor Authentication for user account.
 ```
 
 **Response:**
+
 ```json
 {
   "qrCode": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
@@ -95,9 +109,11 @@ Setup Multi-Factor Authentication for user account.
 ## Properties Endpoints
 
 ### GET /api/properties
+
 Retrieve all properties.
 
 **Response:**
+
 ```json
 [
   {
@@ -114,9 +130,11 @@ Retrieve all properties.
 ```
 
 ### POST /api/properties
+
 Create a new property.
 
 **Request:**
+
 ```json
 {
   "name": "New Property",
@@ -128,6 +146,7 @@ Create a new property.
 ```
 
 **Response:**
+
 ```json
 {
   "id": 2,
@@ -142,22 +161,27 @@ Create a new property.
 ```
 
 ### PUT /api/properties/:id
+
 Update an existing property.
 
 ### DELETE /api/properties/:id
+
 Delete a property (admin only).
 
 ## Residents Endpoints
 
 ### GET /api/residents
+
 Retrieve all residents.
 
 **Query Parameters:**
+
 - `propertyId`: Filter by property ID
 - `status`: Filter by status (active, moved_out, at_risk)
 - `riskLevel`: Filter by risk level (low, medium, high)
 
 **Response:**
+
 ```json
 [
   {
@@ -179,9 +203,11 @@ Retrieve all residents.
 ```
 
 ### POST /api/residents
+
 Create a new resident record.
 
 **Request:**
+
 ```json
 {
   "firstName": "John",
@@ -199,9 +225,11 @@ Create a new resident record.
 ## Incidents Endpoints
 
 ### GET /api/incidents
+
 Retrieve all incidents.
 
 **Query Parameters:**
+
 - `propertyId`: Filter by property
 - `residentId`: Filter by resident
 - `status`: Filter by status
@@ -209,9 +237,11 @@ Retrieve all incidents.
 - `incidentType`: Filter by type
 
 ### POST /api/incidents
+
 Create a new incident report.
 
 **Request:**
+
 ```json
 {
   "propertyId": 1,
@@ -224,30 +254,35 @@ Create a new incident report.
 ```
 
 ### PUT /api/incidents/:id
+
 Update incident status or details.
 
 ## Financial Records Endpoints
 
 ### GET /api/financial-records
+
 Retrieve financial records.
 
 **Query Parameters:**
+
 - `propertyId`: Filter by property
 - `residentId`: Filter by resident
 - `recordType`: Filter by type (income, expense, rent, etc.)
 - `status`: Filter by status
 
 ### POST /api/financial-records
+
 Create a new financial record.
 
 **Request:**
+
 ```json
 {
   "propertyId": 1,
   "residentId": 5,
   "recordType": "rent",
   "category": "monthly_rent",
-  "amount": 800.00,
+  "amount": 800.0,
   "description": "Monthly rent payment",
   "date": "2025-01-15",
   "dueDate": "2025-01-31"
@@ -257,9 +292,11 @@ Create a new financial record.
 ## Dashboard Endpoints
 
 ### GET /api/dashboard/metrics
+
 Retrieve dashboard metrics.
 
 **Response:**
+
 ```json
 {
   "totalProperties": 5,
@@ -267,7 +304,7 @@ Retrieve dashboard metrics.
   "occupancyRate": 85.5,
   "activeIncidents": 3,
   "pendingMaintenance": 7,
-  "monthlyRevenue": 35000.00,
+  "monthlyRevenue": 35000.0,
   "overduePayments": 2
 }
 ```
@@ -275,9 +312,11 @@ Retrieve dashboard metrics.
 ## Reports Endpoints
 
 ### POST /api/reports/generate
+
 Generate various reports.
 
 **Request:**
+
 ```json
 {
   "type": "occupancy",
@@ -298,6 +337,7 @@ Generate various reports.
 All endpoints return consistent error responses:
 
 ### 400 Bad Request
+
 ```json
 {
   "error": "Validation failed",
@@ -314,6 +354,7 @@ All endpoints return consistent error responses:
 ```
 
 ### 401 Unauthorized
+
 ```json
 {
   "message": "Unauthorized",
@@ -322,6 +363,7 @@ All endpoints return consistent error responses:
 ```
 
 ### 403 Forbidden
+
 ```json
 {
   "error": "Insufficient permissions",
@@ -331,6 +373,7 @@ All endpoints return consistent error responses:
 ```
 
 ### 404 Not Found
+
 ```json
 {
   "error": "Resource not found",
@@ -340,6 +383,7 @@ All endpoints return consistent error responses:
 ```
 
 ### 429 Too Many Requests
+
 ```json
 {
   "error": "Rate limit exceeded",
@@ -350,6 +394,7 @@ All endpoints return consistent error responses:
 ```
 
 ### 500 Internal Server Error
+
 ```json
 {
   "message": "Internal Server Error",
@@ -363,17 +408,20 @@ All endpoints return consistent error responses:
 The YUTHUB API includes WebSocket support for real-time updates.
 
 ### Connection
+
 ```javascript
 const ws = new WebSocket('ws://localhost:5000/ws');
 ```
 
 ### Message Types
+
 - `metric_change`: Dashboard metrics updated
 - `incident_alert`: High-priority incident reported
 - `maintenance_notification`: Maintenance request requires attention
 - `notification`: General system notification
 
 ### Example Message
+
 ```json
 {
   "type": "incident_alert",
@@ -390,22 +438,26 @@ const ws = new WebSocket('ws://localhost:5000/ws');
 ## Security
 
 ### Input Validation
+
 - All input is validated using Zod schemas
 - HTML/XSS sanitization applied to all string inputs
 - SQL injection prevention through parameterized queries
 
 ### Rate Limiting
+
 - Multiple rate limiting tiers based on endpoint sensitivity
 - IP-based rate limiting with configurable windows
 - Graceful degradation with proper error messages
 
 ### Authentication & Authorization
+
 - Session-based authentication with secure cookies
 - Role-based access control (RBAC)
 - Multi-factor authentication support
 - Account lockout protection
 
 ### Audit Logging
+
 - All security events are logged
 - Resource access tracking
 - Failed authentication attempts monitoring
@@ -414,18 +466,21 @@ const ws = new WebSocket('ws://localhost:5000/ws');
 ## Best Practices
 
 ### Request/Response
+
 - Use proper HTTP methods (GET, POST, PUT, DELETE)
 - Include appropriate headers
 - Handle errors gracefully
 - Implement retry logic for rate-limited requests
 
 ### Performance
+
 - Use pagination for large datasets
 - Implement caching where appropriate
 - Monitor response times
 - Optimize database queries
 
 ### Security
+
 - Always use HTTPS in production
 - Validate all inputs
 - Follow principle of least privilege

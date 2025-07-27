@@ -1,5 +1,5 @@
-import Layout from "@/components/Layout";
-import UKCouncilDashboard from "@/components/UKCouncilDashboard";
+import Layout from '@/components/Layout';
+import UKCouncilDashboard from '@/components/UKCouncilDashboard';
 
 export default function UKCouncils() {
   return (

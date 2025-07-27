@@ -22,7 +22,12 @@ interface ErrorMetrics {
 class ErrorTracker {
   private static instance: ErrorTracker;
   private errorCounts = new Map<string, ErrorMetrics>();
-  private recentErrors: Array<{ error: string; timestamp: Date; path: string; userAgent?: string }> = [];
+  private recentErrors: Array<{
+    error: string;
+    timestamp: Date;
+    path: string;
+    userAgent?: string;
+  }> = [];
   private maxRecentErrors = 100;
   private alertThresholds = {
     errorRate: 0.1, // 10% error rate
@@ -50,7 +55,7 @@ class ErrorTracker {
     existing.lastOccurrence = new Date();
     existing.paths.add(path);
     if (userAgent) existing.userAgents.add(userAgent);
-    
+
     this.errorCounts.set(errorKey, existing);
 
     // Keep recent errors for analysis
@@ -72,8 +77,10 @@ class ErrorTracker {
   private checkErrorAlerts(errorKey: string, metrics: ErrorMetrics): void {
     // Alert on frequent errors
     if (metrics.count > 10 && metrics.count % 10 === 0) {
-      console.warn(`🚨 Frequent error detected: ${errorKey} (${metrics.count} occurrences)`);
-      
+      console.warn(
+        `🚨 Frequent error detected: ${errorKey} (${metrics.count} occurrences)`
+      );
+
       // In production, this would trigger alerts to monitoring systems
       this.triggerAlert('frequent_error', {
         errorType: errorKey,
@@ -87,10 +94,12 @@ class ErrorTracker {
     const recentErrors = this.recentErrors.filter(
       e => Date.now() - e.timestamp.getTime() < this.alertThresholds.timeWindow
     );
-    
+
     if (recentErrors.length > this.alertThresholds.errorCount) {
-      console.error(`🚨 High error rate: ${recentErrors.length} errors in ${this.alertThresholds.timeWindow / 1000} seconds`);
-      
+      console.error(
+        `🚨 High error rate: ${recentErrors.length} errors in ${this.alertThresholds.timeWindow / 1000} seconds`
+      );
+
       this.triggerAlert('high_error_rate', {
         errorCount: recentErrors.length,
         timeWindow: this.alertThresholds.timeWindow,
@@ -104,10 +113,10 @@ class ErrorTracker {
     errors.forEach(error => {
       errorCounts[error.error] = (errorCounts[error.error] || 0) + 1;
     });
-    
+
     return Object.fromEntries(
       Object.entries(errorCounts)
-        .sort(([,a], [,b]) => b - a)
+        .sort(([, a], [, b]) => b - a)
         .slice(0, 5)
     );
   }
@@ -118,16 +127,16 @@ class ErrorTracker {
     // - DataDog
     // - New Relic
     // - Custom alerting systems
-    
+
     console.log(`Alert triggered: ${type}`, data);
-    
+
     // Example: Send to monitoring service
     // await monitoringService.sendAlert(type, data);
   }
 
   getErrorMetrics(): Record<string, any> {
     const metrics: Record<string, any> = {};
-    
+
     this.errorCounts.forEach((stats, errorType) => {
       metrics[errorType] = {
         count: stats.count,
@@ -140,7 +149,10 @@ class ErrorTracker {
     return {
       errorTypes: metrics,
       recentErrors: this.recentErrors.slice(-20), // Last 20 errors
-      totalErrors: Array.from(this.errorCounts.values()).reduce((sum, stats) => sum + stats.count, 0),
+      totalErrors: Array.from(this.errorCounts.values()).reduce(
+        (sum, stats) => sum + stats.count,
+        0
+      ),
       uniqueErrorTypes: this.errorCounts.size,
       errorRate: this.calculateErrorRate(),
     };
@@ -150,7 +162,7 @@ class ErrorTracker {
     const recentErrors = this.recentErrors.filter(
       e => Date.now() - e.timestamp.getTime() < this.alertThresholds.timeWindow
     );
-    
+
     // This would need total request count for accurate rate
     // For now, return count as approximation
     return recentErrors.length;
@@ -165,23 +177,25 @@ class ErrorTracker {
   getHealthStatus(): { healthy: boolean; issues: string[] } {
     const issues: string[] = [];
     const now = Date.now();
-    
+
     // Check for recent error spikes
     const recentErrors = this.recentErrors.filter(
       e => now - e.timestamp.getTime() < this.alertThresholds.timeWindow
     );
-    
+
     if (recentErrors.length > this.alertThresholds.errorCount) {
-      issues.push(`High error rate: ${recentErrors.length} errors in last 5 minutes`);
+      issues.push(
+        `High error rate: ${recentErrors.length} errors in last 5 minutes`
+      );
     }
-    
+
     // Check for frequent error types
     this.errorCounts.forEach((stats, errorType) => {
       if (stats.count > 50) {
         issues.push(`Frequent ${errorType}: ${stats.count} occurrences`);
       }
     });
-    
+
     return {
       healthy: issues.length === 0,
       issues,
@@ -275,7 +289,7 @@ const formatDatabaseError = (error: any): any => {
       code: 'DATABASE_ERROR',
     };
   }
-  
+
   return {
     message: error.message,
     code: error.code || 'DATABASE_ERROR',
@@ -358,16 +372,17 @@ export const errorHandlingMiddleware = (
     // Generic error handling
     statusCode = error.statusCode || 500;
     errorResponse = {
-      error: process.env.NODE_ENV === 'production' 
-        ? 'Internal server error' 
-        : error.message || 'Unknown error occurred',
+      error:
+        process.env.NODE_ENV === 'production'
+          ? 'Internal server error'
+          : error.message || 'Unknown error occurred',
       code: 'INTERNAL_ERROR',
       timestamp: new Date().toISOString(),
       path: req.path,
       method: req.method,
       requestId,
     };
-    
+
     // Include stack trace in development
     if (process.env.NODE_ENV === 'development') {
       errorResponse.stack = error.stack;
@@ -376,14 +391,17 @@ export const errorHandlingMiddleware = (
 
   // Log error details
   const logLevel = statusCode >= 500 ? 'error' : 'warn';
-  console[logLevel](`${logLevel.toUpperCase()} ${statusCode} on ${req.method} ${req.path}:`, {
-    message: error.message,
-    stack: error.stack,
-    user: (req as any).user?.id || 'anonymous',
-    userAgent: req.get('User-Agent'),
-    ip: req.ip,
-    requestId,
-  });
+  console[logLevel](
+    `${logLevel.toUpperCase()} ${statusCode} on ${req.method} ${req.path}:`,
+    {
+      message: error.message,
+      stack: error.stack,
+      user: (req as any).user?.id || 'anonymous',
+      userAgent: req.get('User-Agent'),
+      ip: req.ip,
+      requestId,
+    }
+  );
 
   // Send error response
   res.status(statusCode).json(errorResponse);
@@ -414,38 +432,47 @@ export const asyncHandler = (fn: Function) => {
 };
 
 // Error recovery middleware
-export const errorRecoveryMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const errorRecoveryMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   // Add error recovery helpers to response
   res.locals.recover = {
     withFallback: (primary: () => any, fallback: () => any) => {
       try {
         return primary();
       } catch (error) {
-        console.warn('Primary operation failed, using fallback:', error.message);
+        console.warn(
+          'Primary operation failed, using fallback:',
+          error.message
+        );
         return fallback();
       }
     },
-    
+
     withRetry: async (operation: () => Promise<any>, maxRetries = 3) => {
       let lastError;
-      
+
       for (let i = 0; i < maxRetries; i++) {
         try {
           return await operation();
         } catch (error) {
           lastError = error;
-          
+
           // Wait before retry (exponential backoff)
           if (i < maxRetries - 1) {
-            await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+            await new Promise(resolve =>
+              setTimeout(resolve, Math.pow(2, i) * 1000)
+            );
           }
         }
       }
-      
+
       throw lastError;
     },
   };
-  
+
   next();
 };
 
@@ -453,7 +480,7 @@ export const errorRecoveryMiddleware = (req: Request, res: Response, next: NextF
 export const errorMetricsHandler = (req: Request, res: Response) => {
   const metrics = errorTracker.getErrorMetrics();
   const health = errorTracker.getHealthStatus();
-  
+
   res.json({
     ...metrics,
     health,

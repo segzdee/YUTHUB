@@ -1,33 +1,45 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+} from 'recharts';
 
 interface BillingAnalyticsProps {
-  analytics: {
-    totalRevenue: number;
-    monthlyRevenue: number;
-    outstandingAmount: number;
-    paidInvoices: number;
-    pendingInvoices: number;
-    overdueInvoices: number;
-    topClients: Array<{
-      clientId: number;
-      clientName: string;
-      totalAmount: number;
-      invoiceCount: number;
-    }>;
-  } | undefined;
+  analytics:
+    | {
+        totalRevenue: number;
+        monthlyRevenue: number;
+        outstandingAmount: number;
+        paidInvoices: number;
+        pendingInvoices: number;
+        overdueInvoices: number;
+        topClients: Array<{
+          clientId: number;
+          clientName: string;
+          totalAmount: number;
+          invoiceCount: number;
+        }>;
+      }
+    | undefined;
 }
 
 export function BillingAnalytics({ analytics }: BillingAnalyticsProps) {
   if (!analytics) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
         <Card>
           <CardHeader>
             <CardTitle>Revenue Analytics</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-center text-muted-foreground">
+            <div className='text-center text-muted-foreground'>
               Loading analytics...
             </div>
           </CardContent>
@@ -55,20 +67,25 @@ export function BillingAnalytics({ analytics }: BillingAnalyticsProps) {
   const topClients = analytics.topClients.slice(0, 5);
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+    <div className='grid grid-cols-1 xl:grid-cols-2 gap-6'>
       <Card>
         <CardHeader>
           <CardTitle>Monthly Revenue Trend</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className='h-[300px] w-full'>
+            <ResponsiveContainer width='100%' height='100%'>
               <LineChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
+                <CartesianGrid strokeDasharray='3 3' />
+                <XAxis dataKey='month' />
                 <YAxis />
-                <Tooltip formatter={(value) => formatCurrency(value as number)} />
-                <Line type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={2} />
+                <Tooltip formatter={value => formatCurrency(value as number)} />
+                <Line
+                  type='monotone'
+                  dataKey='revenue'
+                  stroke='#3b82f6'
+                  strokeWidth={2}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -80,23 +97,30 @@ export function BillingAnalytics({ analytics }: BillingAnalyticsProps) {
           <CardTitle>Top Government Clients</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className='space-y-4'>
             {topClients.length > 0 ? (
-              topClients.map((client) => (
-                <div key={client.clientId} className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium truncate">{client.clientName}</div>
-                    <div className="text-sm text-muted-foreground">
+              topClients.map(client => (
+                <div
+                  key={client.clientId}
+                  className='flex items-center justify-between'
+                >
+                  <div className='flex-1 min-w-0'>
+                    <div className='font-medium truncate'>
+                      {client.clientName}
+                    </div>
+                    <div className='text-sm text-muted-foreground'>
                       {client.invoiceCount} invoices
                     </div>
                   </div>
-                  <div className="text-right ml-4">
-                    <div className="font-semibold">{formatCurrency(client.totalAmount)}</div>
+                  <div className='text-right ml-4'>
+                    <div className='font-semibold'>
+                      {formatCurrency(client.totalAmount)}
+                    </div>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="text-center py-8 text-muted-foreground">
+              <div className='text-center py-8 text-muted-foreground'>
                 No client data available
               </div>
             )}
@@ -109,18 +133,20 @@ export function BillingAnalytics({ analytics }: BillingAnalyticsProps) {
           <CardTitle>Invoice Status Distribution</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={[
-                { status: 'Paid', count: analytics.paidInvoices },
-                { status: 'Pending', count: analytics.pendingInvoices },
-                { status: 'Overdue', count: analytics.overdueInvoices },
-              ]}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="status" />
+          <div className='h-[300px] w-full'>
+            <ResponsiveContainer width='100%' height='100%'>
+              <BarChart
+                data={[
+                  { status: 'Paid', count: analytics.paidInvoices },
+                  { status: 'Pending', count: analytics.pendingInvoices },
+                  { status: 'Overdue', count: analytics.overdueInvoices },
+                ]}
+              >
+                <CartesianGrid strokeDasharray='3 3' />
+                <XAxis dataKey='status' />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="count" fill="#3b82f6" />
+                <Bar dataKey='count' fill='#3b82f6' />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -132,26 +158,42 @@ export function BillingAnalytics({ analytics }: BillingAnalyticsProps) {
           <CardTitle>Financial Summary</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Total Revenue</span>
-              <span className="font-semibold">{formatCurrency(analytics.totalRevenue)}</span>
+          <div className='space-y-4'>
+            <div className='flex justify-between items-center'>
+              <span className='text-muted-foreground'>Total Revenue</span>
+              <span className='font-semibold'>
+                {formatCurrency(analytics.totalRevenue)}
+              </span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Monthly Revenue</span>
-              <span className="font-semibold">{formatCurrency(analytics.monthlyRevenue)}</span>
+            <div className='flex justify-between items-center'>
+              <span className='text-muted-foreground'>Monthly Revenue</span>
+              <span className='font-semibold'>
+                {formatCurrency(analytics.monthlyRevenue)}
+              </span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Outstanding Amount</span>
-              <span className="font-semibold text-red-600">{formatCurrency(analytics.outstandingAmount)}</span>
+            <div className='flex justify-between items-center'>
+              <span className='text-muted-foreground'>Outstanding Amount</span>
+              <span className='font-semibold text-red-600'>
+                {formatCurrency(analytics.outstandingAmount)}
+              </span>
             </div>
-            <div className="border-t pt-4">
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Collection Rate</span>
-                <span className="font-semibold">
-                  {analytics.paidInvoices + analytics.pendingInvoices + analytics.overdueInvoices > 0 
-                    ? ((analytics.paidInvoices / (analytics.paidInvoices + analytics.pendingInvoices + analytics.overdueInvoices)) * 100).toFixed(1)
-                    : 0}%
+            <div className='border-t pt-4'>
+              <div className='flex justify-between items-center'>
+                <span className='text-muted-foreground'>Collection Rate</span>
+                <span className='font-semibold'>
+                  {analytics.paidInvoices +
+                    analytics.pendingInvoices +
+                    analytics.overdueInvoices >
+                  0
+                    ? (
+                        (analytics.paidInvoices /
+                          (analytics.paidInvoices +
+                            analytics.pendingInvoices +
+                            analytics.overdueInvoices)) *
+                        100
+                      ).toFixed(1)
+                    : 0}
+                  %
                 </span>
               </div>
             </div>

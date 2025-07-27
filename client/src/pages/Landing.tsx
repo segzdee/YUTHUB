@@ -9,84 +9,85 @@ import SEOHead from '@/components/SEO/SEOHead';
 
 export default function Landing() {
   const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "YUTHUB",
-    "description": "Comprehensive youth housing management platform for UK housing associations, local authorities, and social care organizations",
-    "url": "https://www.yuthub.com",
-    "applicationCategory": "BusinessApplication",
-    "operatingSystem": "Web",
-    "offers": [
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'YUTHUB',
+    description:
+      'Comprehensive youth housing management platform for UK housing associations, local authorities, and social care organizations',
+    url: 'https://www.yuthub.com',
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web',
+    offers: [
       {
-        "@type": "Offer",
-        "name": "Starter Plan",
-        "price": "169",
-        "priceCurrency": "GBP",
-        "priceSpecification": {
-          "@type": "UnitPriceSpecification",
-          "price": "169",
-          "priceCurrency": "GBP",
-          "unitText": "MONTH"
-        }
+        '@type': 'Offer',
+        name: 'Starter Plan',
+        price: '169',
+        priceCurrency: 'GBP',
+        priceSpecification: {
+          '@type': 'UnitPriceSpecification',
+          price: '169',
+          priceCurrency: 'GBP',
+          unitText: 'MONTH',
+        },
       },
       {
-        "@type": "Offer",
-        "name": "Professional Plan", 
-        "price": "429",
-        "priceCurrency": "GBP",
-        "priceSpecification": {
-          "@type": "UnitPriceSpecification",
-          "price": "429",
-          "priceCurrency": "GBP",
-          "unitText": "MONTH"
-        }
+        '@type': 'Offer',
+        name: 'Professional Plan',
+        price: '429',
+        priceCurrency: 'GBP',
+        priceSpecification: {
+          '@type': 'UnitPriceSpecification',
+          price: '429',
+          priceCurrency: 'GBP',
+          unitText: 'MONTH',
+        },
       },
       {
-        "@type": "Offer",
-        "name": "Enterprise Plan",
-        "price": "1099", 
-        "priceCurrency": "GBP",
-        "priceSpecification": {
-          "@type": "UnitPriceSpecification",
-          "price": "1099",
-          "priceCurrency": "GBP",
-          "unitText": "MONTH"
-        }
-      }
+        '@type': 'Offer',
+        name: 'Enterprise Plan',
+        price: '1099',
+        priceCurrency: 'GBP',
+        priceSpecification: {
+          '@type': 'UnitPriceSpecification',
+          price: '1099',
+          priceCurrency: 'GBP',
+          unitText: 'MONTH',
+        },
+      },
     ],
-    "creator": {
-      "@type": "Organization",
-      "name": "YUTHUB",
-      "url": "https://www.yuthub.com",
-      "address": {
-        "@type": "PostalAddress",
-        "addressCountry": "GB"
-      }
+    creator: {
+      '@type': 'Organization',
+      name: 'YUTHUB',
+      url: 'https://www.yuthub.com',
+      address: {
+        '@type': 'PostalAddress',
+        addressCountry: 'GB',
+      },
     },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.8",
-      "ratingCount": "127"
-    }
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.8',
+      ratingCount: '127',
+    },
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className='min-h-screen bg-background'>
       <SEOHead
-        title="YUTHUB - Youth Housing Management Platform | UK Housing Software"
-        description="Comprehensive SaaS platform for youth housing organizations in the UK. Manage residents, track outcomes, and guide young people toward independent living with our specialized housing management software."
-        keywords="youth housing management, UK housing software, social care platform, supported housing system, council housing management, housing association software, young people accommodation"
-        canonicalUrl="https://www.yuthub.com"
+        title='YUTHUB - Youth Housing Management Platform | UK Housing Software'
+        description='Comprehensive SaaS platform for youth housing organizations in the UK. Manage residents, track outcomes, and guide young people toward independent living with our specialized housing management software.'
+        keywords='youth housing management, UK housing software, social care platform, supported housing system, council housing management, housing association software, young people accommodation'
+        canonicalUrl='https://www.yuthub.com'
         structuredData={structuredData}
       />
       <UniversalHeader />
       <Hero />
-      <div id="features">
+      <div id='features'>
         <Features />
       </div>
       <HowItWorks />
       <Testimonials />
-      <div id="pricing">
+      <div id='pricing'>
         <PricingSection />
       </div>
       <UniversalFooter />

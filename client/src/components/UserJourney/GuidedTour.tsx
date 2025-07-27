@@ -20,7 +20,12 @@ interface GuidedTourProps {
   onSkip?: () => void;
 }
 
-export default function GuidedTour({ tourId, steps, onComplete, onSkip }: GuidedTourProps) {
+export default function GuidedTour({
+  tourId,
+  steps,
+  onComplete,
+  onSkip,
+}: GuidedTourProps) {
   const { state, actions } = useUserJourney();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(state.showTour);
@@ -35,17 +40,19 @@ export default function GuidedTour({ tourId, steps, onComplete, onSkip }: Guided
   }, [currentStepIndex, isVisible]);
 
   const updateTooltipPosition = () => {
-    const targetElement = document.querySelector(`[data-tour-target="${currentStep.target}"]`);
+    const targetElement = document.querySelector(
+      `[data-tour-target="${currentStep.target}"]`
+    );
     if (targetElement) {
       const rect = targetElement.getBoundingClientRect();
       setTargetPosition({
         top: rect.top + window.scrollY,
-        left: rect.left + window.scrollX
+        left: rect.left + window.scrollX,
       });
 
       // Highlight the target element
       targetElement.classList.add('tour-highlight');
-      
+
       // Scroll to element if needed
       targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
@@ -73,7 +80,7 @@ export default function GuidedTour({ tourId, steps, onComplete, onSkip }: Guided
     setIsVisible(false);
     actions.trackFeatureUsage(`tour_completed_${tourId}`);
     onComplete?.();
-    
+
     // Remove highlights
     document.querySelectorAll('.tour-highlight').forEach(el => {
       el.classList.remove('tour-highlight');
@@ -84,7 +91,7 @@ export default function GuidedTour({ tourId, steps, onComplete, onSkip }: Guided
     setIsVisible(false);
     actions.trackFeatureUsage(`tour_skipped_${tourId}`);
     onSkip?.();
-    
+
     // Remove highlights
     document.querySelectorAll('.tour-highlight').forEach(el => {
       el.classList.remove('tour-highlight');
@@ -97,7 +104,7 @@ export default function GuidedTour({ tourId, steps, onComplete, onSkip }: Guided
     const baseStyle = {
       position: 'absolute' as const,
       zIndex: 1000,
-      maxWidth: '300px'
+      maxWidth: '300px',
     };
 
     switch (currentStep.position) {
@@ -106,26 +113,26 @@ export default function GuidedTour({ tourId, steps, onComplete, onSkip }: Guided
           ...baseStyle,
           top: targetPosition.top - 10,
           left: targetPosition.left,
-          transform: 'translateY(-100%)'
+          transform: 'translateY(-100%)',
         };
       case 'bottom':
         return {
           ...baseStyle,
           top: targetPosition.top + 40,
-          left: targetPosition.left
+          left: targetPosition.left,
         };
       case 'left':
         return {
           ...baseStyle,
           top: targetPosition.top,
           left: targetPosition.left - 10,
-          transform: 'translateX(-100%)'
+          transform: 'translateX(-100%)',
         };
       case 'right':
         return {
           ...baseStyle,
           top: targetPosition.top,
-          left: targetPosition.left + 200
+          left: targetPosition.left + 200,
         };
       default:
         return baseStyle;
@@ -135,29 +142,29 @@ export default function GuidedTour({ tourId, steps, onComplete, onSkip }: Guided
   return (
     <>
       {/* Overlay */}
-      <div className="fixed inset-0 bg-black bg-opacity-30 z-[999]" />
-      
+      <div className='fixed inset-0 bg-black bg-opacity-30 z-[999]' />
+
       {/* Tooltip */}
       <div style={getTooltipStyle()}>
-        <Card className="shadow-xl border-2 border-blue-200">
-          <CardContent className="p-4">
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <HelpCircle className="h-4 w-4 text-blue-500" />
-                <span className="text-sm font-medium text-blue-600">
+        <Card className='shadow-xl border-2 border-blue-200'>
+          <CardContent className='p-4'>
+            <div className='flex items-start justify-between mb-3'>
+              <div className='flex items-center gap-2'>
+                <HelpCircle className='h-4 w-4 text-blue-500' />
+                <span className='text-sm font-medium text-blue-600'>
                   {currentStepIndex + 1} of {steps.length}
                 </span>
               </div>
-              <Button variant="ghost" size="sm" onClick={handleSkip}>
-                <X className="h-4 w-4" />
+              <Button variant='ghost' size='sm' onClick={handleSkip}>
+                <X className='h-4 w-4' />
               </Button>
             </div>
-            
-            <h3 className="font-semibold mb-2">{currentStep.title}</h3>
-            <p className="text-sm text-gray-600 mb-4">{currentStep.content}</p>
-            
-            <div className="flex justify-between items-center">
-              <div className="flex gap-1">
+
+            <h3 className='font-semibold mb-2'>{currentStep.title}</h3>
+            <p className='text-sm text-gray-600 mb-4'>{currentStep.content}</p>
+
+            <div className='flex justify-between items-center'>
+              <div className='flex gap-1'>
                 {steps.map((_, index) => (
                   <div
                     key={index}
@@ -167,16 +174,16 @@ export default function GuidedTour({ tourId, steps, onComplete, onSkip }: Guided
                   />
                 ))}
               </div>
-              
-              <div className="flex gap-2">
+
+              <div className='flex gap-2'>
                 {currentStepIndex > 0 && (
-                  <Button variant="outline" size="sm" onClick={handlePrevious}>
+                  <Button variant='outline' size='sm' onClick={handlePrevious}>
                     Previous
                   </Button>
                 )}
-                <Button size="sm" onClick={handleNext}>
+                <Button size='sm' onClick={handleNext}>
                   {currentStepIndex === steps.length - 1 ? 'Finish' : 'Next'}
-                  <ArrowRight className="h-3 w-3 ml-1" />
+                  <ArrowRight className='h-3 w-3 ml-1' />
                 </Button>
               </div>
             </div>

@@ -1,11 +1,13 @@
 # Subscription Management System Documentation
 
 ## Overview
+
 The YUTHUB platform now includes a comprehensive subscription management system that handles SaaS billing completely separate from government housing benefit billing. This system supports tiered subscription plans (Starter/Professional/Enterprise) with usage-based billing and feature controls.
 
 ## Architecture Overview
 
 ### Separation of Billing Systems
+
 - **SaaS Subscription Billing**: Managed through subscription management tables
 - **Government Housing Benefit Billing**: Managed through existing government billing tables
 - **Complete Isolation**: No overlap between the two billing systems
@@ -13,6 +15,7 @@ The YUTHUB platform now includes a comprehensive subscription management system 
 ### Subscription Tiers
 
 #### Starter Plan
+
 - **Monthly Price**: £49/month
 - **Annual Price**: £499/year (15% discount)
 - **Max Residents**: 25
@@ -21,6 +24,7 @@ The YUTHUB platform now includes a comprehensive subscription management system 
 - **Features**: Basic reporting, standard support
 
 #### Professional Plan
+
 - **Monthly Price**: £149/month
 - **Annual Price**: £1,499/year (15% discount)
 - **Max Residents**: 100
@@ -29,6 +33,7 @@ The YUTHUB platform now includes a comprehensive subscription management system 
 - **Features**: Advanced reporting, priority support, API access
 
 #### Enterprise Plan
+
 - **Monthly Price**: £299/month
 - **Annual Price**: £2,999/year (15% discount)
 - **Max Residents**: Unlimited
@@ -41,14 +46,18 @@ The YUTHUB platform now includes a comprehensive subscription management system 
 ### Core Subscription Tables
 
 #### 1. subscription_plans
+
 Defines available subscription tiers with pricing and limits:
+
 - Plan details (name, description, pricing)
 - Usage limits (residents, properties, users, API calls)
 - Feature configurations
 - Trial period settings
 
 #### 2. organization_subscriptions
+
 Tracks which organizations have which plans:
+
 - Organization-to-plan mapping
 - Billing cycle management (monthly/annual)
 - Subscription status tracking
@@ -56,34 +65,44 @@ Tracks which organizations have which plans:
 - Trial period management
 
 #### 3. subscription_features
+
 Maps available features to each subscription tier:
+
 - Feature enablement per plan
 - Usage limits for specific features
 - Feature metadata configuration
 
 #### 4. usage_tracking
+
 Monitors current usage against plan limits:
+
 - Real-time usage counters
 - Period-based tracking (daily/monthly/annual)
 - Overage amount calculation
 - Automatic reset mechanisms
 
 #### 5. billing_cycles
+
 Manages payment schedules and billing periods:
+
 - Cycle start/end dates
 - Discount application (15% annual discount)
 - Payment due dates
 - Billing status tracking
 
 #### 6. payment_methods
+
 Stores customer payment information securely:
+
 - Payment method types (card, bank transfer, PayPal)
 - Stripe payment method integration
 - Billing address information
 - Default payment method designation
 
 #### 7. subscription_invoices
+
 Handles SaaS billing invoices (separate from government billing):
+
 - Invoice generation and numbering
 - Period-based billing
 - Tax and discount calculations
@@ -93,14 +112,18 @@ Handles SaaS billing invoices (separate from government billing):
 ### Feature Management Tables
 
 #### 8. feature_toggles
+
 Enables/disables functionality based on subscription tier:
+
 - Organization-specific feature enablement
 - Real-time feature control
 - Feature metadata storage
 - Administrative override capabilities
 
 #### 9. feature_entitlements
+
 Granular permission control per subscription tier:
+
 - Feature usage limits
 - Current usage tracking
 - Expiration management
@@ -109,14 +132,18 @@ Granular permission control per subscription tier:
 ### Trial and Conversion Management
 
 #### 10. trial_periods
+
 Manages free trials and conversions:
+
 - Trial start/end dates
 - Conversion tracking
 - Trial extensions
 - Status management (active/expired/converted)
 
 #### 11. subscription_changes
+
 Tracks upgrades/downgrades between plans:
+
 - Plan change history
 - Proration calculations
 - Effective date management
@@ -125,14 +152,18 @@ Tracks upgrades/downgrades between plans:
 ### Usage Control and Limits
 
 #### 12. usage_limits
+
 Enforces tier restrictions:
+
 - Hard and soft limits
 - Blocking mechanisms
 - Warning thresholds
 - Automatic reset scheduling
 
 #### 13. overage_charges
+
 Handles usage beyond plan limits:
+
 - Overage calculation
 - Per-unit pricing
 - Billing integration
@@ -141,7 +172,9 @@ Handles usage beyond plan limits:
 ### Pricing and Discounts
 
 #### 14. subscription_discounts
+
 Promotional pricing and long-term contracts:
+
 - Discount codes and campaigns
 - Percentage and fixed-amount discounts
 - Usage limits and expiration
@@ -150,14 +183,18 @@ Promotional pricing and long-term contracts:
 ### Payment Processing
 
 #### 15. payment_transactions
+
 Tracks all payment attempts and results:
+
 - Transaction status tracking
 - Stripe payment integration
 - Failure reason logging
 - Refund management
 
 #### 16. subscription_renewals
+
 Automatic billing management:
+
 - Renewal scheduling
 - Retry logic for failed payments
 - Prorated billing
@@ -166,7 +203,9 @@ Automatic billing management:
 ### Cancellation Management
 
 #### 17. cancellation_requests
+
 Manages subscription terminations:
+
 - Cancellation types (immediate/end-of-period)
 - Feedback collection
 - Refund processing
@@ -175,7 +214,9 @@ Manages subscription terminations:
 ### Multi-Tenancy Support
 
 #### 18. multi_tenant_settings
+
 Organization-specific configuration:
+
 - Tenant isolation settings
 - Inherited configurations
 - Setting overrides
@@ -184,7 +225,9 @@ Organization-specific configuration:
 ### Analytics and Reporting
 
 #### 19. subscription_analytics
+
 Revenue, churn, and upgrade pattern tracking:
+
 - Monthly Recurring Revenue (MRR)
 - Churn rate calculations
 - Lifetime Value (LTV) tracking
@@ -193,18 +236,21 @@ Revenue, churn, and upgrade pattern tracking:
 ## Feature Control Implementation
 
 ### Usage Monitoring
+
 - Real-time tracking of resident counts, API calls, and feature usage
 - Automatic limit enforcement with upgrade prompts
 - Soft warnings before hard limits
 - Grace period management for overages
 
 ### Feature Toggles
+
 - Dynamic feature enablement based on subscription tier
 - Instant feature activation/deactivation
 - Administrative override capabilities
 - Audit trail for feature changes
 
 ### Tier-Specific Limits
+
 - **Starter**: 25 residents, 5 properties, 3 users
 - **Professional**: 100 residents, 20 properties, 10 users
 - **Enterprise**: Unlimited usage with full feature access
@@ -212,18 +258,21 @@ Revenue, churn, and upgrade pattern tracking:
 ## Billing Separation
 
 ### SaaS Subscription Billing
+
 - Handles platform subscription fees
 - Stripe integration for automated billing
 - Dunning management for failed payments
 - Proration for plan changes
 
 ### Government Housing Benefit Billing
+
 - Completely separate billing system
 - Handles housing benefit claims and payments
 - Local authority invoicing
 - Compliance with government billing requirements
 
 ### No Cross-Contamination
+
 - Separate invoice sequences
 - Different payment methods
 - Isolated reporting systems
@@ -232,6 +281,7 @@ Revenue, churn, and upgrade pattern tracking:
 ## Integration Points
 
 ### Stripe Integration
+
 - Subscription management
 - Payment processing
 - Webhook handling
@@ -239,12 +289,14 @@ Revenue, churn, and upgrade pattern tracking:
 - Customer management
 
 ### Usage Tracking Integration
+
 - Resident count monitoring
 - API call tracking
 - Feature usage analytics
 - Automated limit enforcement
 
 ### Notification System
+
 - Billing reminders
 - Usage limit warnings
 - Upgrade prompts
@@ -253,12 +305,14 @@ Revenue, churn, and upgrade pattern tracking:
 ## Security Considerations
 
 ### Data Protection
+
 - Secure storage of payment information
 - PCI DSS compliance considerations
 - Encrypted sensitive data
 - Access control and audit logging
 
 ### Multi-Tenant Security
+
 - Organization data isolation
 - Role-based access control
 - Secure tenant switching
@@ -267,12 +321,14 @@ Revenue, churn, and upgrade pattern tracking:
 ## Performance Optimization
 
 ### Database Indexing
+
 - Optimized queries for billing operations
 - Efficient usage tracking lookups
 - Fast feature entitlement checks
 - Scalable analytics queries
 
 ### Caching Strategy
+
 - Feature entitlement caching
 - Usage limit caching
 - Subscription status caching
@@ -281,6 +337,7 @@ Revenue, churn, and upgrade pattern tracking:
 ## Monitoring and Alerting
 
 ### Key Metrics
+
 - Monthly Recurring Revenue (MRR)
 - Churn rate
 - Upgrade/downgrade rates
@@ -288,6 +345,7 @@ Revenue, churn, and upgrade pattern tracking:
 - Usage limit violations
 
 ### Automated Alerts
+
 - Failed payment notifications
 - Usage limit warnings
 - Subscription expiration alerts
@@ -296,24 +354,28 @@ Revenue, churn, and upgrade pattern tracking:
 ## Implementation Roadmap
 
 ### Phase 1: Core Infrastructure ✅
+
 - Database schema implementation
 - Basic subscription management
 - Tier-based feature control
 - Usage tracking foundation
 
 ### Phase 2: Billing Integration
+
 - Stripe payment processing
 - Automated billing cycles
 - Invoice generation
 - Payment failure handling
 
 ### Phase 3: Advanced Features
+
 - Advanced analytics dashboard
 - Automated upgrade prompts
 - Dunning management
 - Custom enterprise features
 
 ### Phase 4: Optimization
+
 - Performance optimization
 - Advanced caching
 - Monitoring enhancement
@@ -322,24 +384,28 @@ Revenue, churn, and upgrade pattern tracking:
 ## API Endpoints
 
 ### Subscription Management
+
 - `GET /api/subscriptions` - List organization subscriptions
 - `POST /api/subscriptions` - Create new subscription
 - `PUT /api/subscriptions/:id` - Update subscription
 - `DELETE /api/subscriptions/:id` - Cancel subscription
 
 ### Usage Tracking
+
 - `GET /api/usage` - Get current usage statistics
 - `POST /api/usage/track` - Track feature usage
 - `GET /api/usage/limits` - Get usage limits
 - `POST /api/usage/reset` - Reset usage counters
 
 ### Feature Management
+
 - `GET /api/features` - List available features
 - `POST /api/features/toggle` - Toggle feature status
 - `GET /api/features/entitlements` - Get feature entitlements
 - `POST /api/features/check` - Check feature access
 
 ### Billing Operations
+
 - `GET /api/billing/invoices` - List subscription invoices
 - `POST /api/billing/payment` - Process payment
 - `GET /api/billing/methods` - List payment methods
@@ -348,18 +414,21 @@ Revenue, churn, and upgrade pattern tracking:
 ## Testing Strategy
 
 ### Unit Tests
+
 - Subscription creation and updates
 - Usage tracking accuracy
 - Feature entitlement validation
 - Billing calculation correctness
 
 ### Integration Tests
+
 - Stripe payment processing
 - Webhook handling
 - Database transaction integrity
 - Multi-tenant isolation
 
 ### Performance Tests
+
 - High-volume usage tracking
 - Concurrent subscription operations
 - Large-scale analytics queries
@@ -368,12 +437,14 @@ Revenue, churn, and upgrade pattern tracking:
 ## Compliance and Auditing
 
 ### Audit Trail
+
 - All subscription changes logged
 - Payment transaction history
 - Feature usage tracking
 - Administrative actions
 
 ### Compliance Requirements
+
 - PCI DSS for payment processing
 - GDPR for data protection
 - SOC 2 for security controls
@@ -394,6 +465,6 @@ This foundation enables the platform to scale effectively while maintaining prop
 
 ---
 
-*Last Updated: July 14, 2025*  
-*Implementation Status: Schema Complete, Integration Pending*  
-*Tables Added: 19 Subscription Management Tables*
+_Last Updated: July 14, 2025_  
+_Implementation Status: Schema Complete, Integration Pending_  
+_Tables Added: 19 Subscription Management Tables_

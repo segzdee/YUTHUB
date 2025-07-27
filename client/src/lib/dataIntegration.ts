@@ -1,8 +1,7 @@
-import { queryClient } from "./queryClient";
+import { queryClient } from './queryClient';
 
 // Cross-module data integration utilities
 export class DataIntegration {
-  
   // Invalidate related query keys when data changes
   static invalidateRelatedQueries(entityType: string, entityId?: number) {
     const relatedKeys = this.getRelatedQueryKeys(entityType, entityId);
@@ -12,7 +11,10 @@ export class DataIntegration {
   }
 
   // Get all related query keys for cross-module updates
-  static getRelatedQueryKeys(entityType: string, entityId?: number): string[][] {
+  static getRelatedQueryKeys(
+    entityType: string,
+    entityId?: number
+  ): string[][] {
     const keys: string[][] = [];
 
     switch (entityType) {
@@ -137,10 +139,7 @@ export class DataIntegration {
         break;
 
       case 'activity':
-        keys.push(
-          ['/api/activities'],
-          ['/api/dashboard/metrics']
-        );
+        keys.push(['/api/activities'], ['/api/dashboard/metrics']);
         break;
     }
 
@@ -156,7 +155,12 @@ export class DataIntegration {
   // Cross-module notifications for real-time updates
   static notifyModules(entityType: string, action: string, entityId?: number) {
     const event = new CustomEvent('dataIntegrationUpdate', {
-      detail: { entityType, action, entityId, timestamp: new Date().toISOString() }
+      detail: {
+        entityType,
+        action,
+        entityId,
+        timestamp: new Date().toISOString(),
+      },
     });
     window.dispatchEvent(event);
   }
@@ -164,49 +168,51 @@ export class DataIntegration {
   // Get related entities for a specific entity
   static getRelatedEntities(entityType: string, entityId: number) {
     const related: { [key: string]: any } = {};
-    
+
     switch (entityType) {
       case 'resident':
-        related.supportPlans = queryClient.getQueryData(['/api/support-plans'])?.filter(
-          (plan: any) => plan.residentId === entityId
-        );
-        related.progressTracking = queryClient.getQueryData(['/api/progress-tracking'])?.filter(
-          (progress: any) => progress.residentId === entityId
-        );
-        related.incidents = queryClient.getQueryData(['/api/incidents'])?.filter(
-          (incident: any) => incident.residentId === entityId
-        );
-        related.billingPeriods = queryClient.getQueryData(['/api/billing-periods'])?.filter(
-          (period: any) => period.residentId === entityId
-        );
+        related.supportPlans = queryClient
+          .getQueryData(['/api/support-plans'])
+          ?.filter((plan: any) => plan.residentId === entityId);
+        related.progressTracking = queryClient
+          .getQueryData(['/api/progress-tracking'])
+          ?.filter((progress: any) => progress.residentId === entityId);
+        related.incidents = queryClient
+          .getQueryData(['/api/incidents'])
+          ?.filter((incident: any) => incident.residentId === entityId);
+        related.billingPeriods = queryClient
+          .getQueryData(['/api/billing-periods'])
+          ?.filter((period: any) => period.residentId === entityId);
         break;
 
       case 'property':
-        related.residents = queryClient.getQueryData(['/api/residents'])?.filter(
-          (resident: any) => resident.propertyId === entityId
-        );
-        related.incidents = queryClient.getQueryData(['/api/incidents'])?.filter(
-          (incident: any) => incident.propertyId === entityId
-        );
-        related.maintenanceRequests = queryClient.getQueryData(['/api/maintenance-requests'])?.filter(
-          (request: any) => request.propertyId === entityId
-        );
-        related.rooms = queryClient.getQueryData(['/api/property-rooms'])?.filter(
-          (room: any) => room.propertyId === entityId
-        );
+        related.residents = queryClient
+          .getQueryData(['/api/residents'])
+          ?.filter((resident: any) => resident.propertyId === entityId);
+        related.incidents = queryClient
+          .getQueryData(['/api/incidents'])
+          ?.filter((incident: any) => incident.propertyId === entityId);
+        related.maintenanceRequests = queryClient
+          .getQueryData(['/api/maintenance-requests'])
+          ?.filter((request: any) => request.propertyId === entityId);
+        related.rooms = queryClient
+          .getQueryData(['/api/property-rooms'])
+          ?.filter((room: any) => room.propertyId === entityId);
         break;
 
       case 'support-plan':
-        const supportPlan = queryClient.getQueryData(['/api/support-plans'])?.find(
-          (plan: any) => plan.id === entityId
-        );
+        const supportPlan = queryClient
+          .getQueryData(['/api/support-plans'])
+          ?.find((plan: any) => plan.id === entityId);
         if (supportPlan) {
-          related.resident = queryClient.getQueryData(['/api/residents'])?.find(
-            (resident: any) => resident.id === supportPlan.residentId
-          );
-          related.progressTracking = queryClient.getQueryData(['/api/progress-tracking'])?.filter(
-            (progress: any) => progress.residentId === supportPlan.residentId
-          );
+          related.resident = queryClient
+            .getQueryData(['/api/residents'])
+            ?.find((resident: any) => resident.id === supportPlan.residentId);
+          related.progressTracking = queryClient
+            .getQueryData(['/api/progress-tracking'])
+            ?.filter(
+              (progress: any) => progress.residentId === supportPlan.residentId
+            );
         }
         break;
     }
@@ -221,34 +227,52 @@ export class DataIntegration {
     const incidents = queryClient.getQueryData(['/api/incidents']) || [];
     const supportPlans = queryClient.getQueryData(['/api/support-plans']) || [];
     const invoices = queryClient.getQueryData(['/api/invoices']) || [];
-    const financialRecords = queryClient.getQueryData(['/api/financial-records']) || [];
+    const financialRecords =
+      queryClient.getQueryData(['/api/financial-records']) || [];
 
     return {
       // Cross-module occupancy metrics
-      occupancyRate: properties.length > 0 ? 
-        (residents.length / properties.reduce((sum: number, p: any) => sum + p.capacity, 0)) * 100 : 0,
-      
+      occupancyRate:
+        properties.length > 0
+          ? (residents.length /
+              properties.reduce((sum: number, p: any) => sum + p.capacity, 0)) *
+            100
+          : 0,
+
       // Cross-module risk assessment
-      highRiskResidents: residents.filter((r: any) => r.riskLevel === 'high').length,
-      
+      highRiskResidents: residents.filter((r: any) => r.riskLevel === 'high')
+        .length,
+
       // Cross-module incident rate
-      incidentRate: residents.length > 0 ? incidents.length / residents.length : 0,
-      
+      incidentRate:
+        residents.length > 0 ? incidents.length / residents.length : 0,
+
       // Cross-module support effectiveness
-      activeSupportPlans: supportPlans.filter((sp: any) => sp.status === 'active').length,
-      
+      activeSupportPlans: supportPlans.filter(
+        (sp: any) => sp.status === 'active'
+      ).length,
+
       // Cross-module financial health
       monthlyRevenue: financialRecords
-        .filter((fr: any) => fr.type === 'income' && 
-          new Date(fr.date).getMonth() === new Date().getMonth())
+        .filter(
+          (fr: any) =>
+            fr.type === 'income' &&
+            new Date(fr.date).getMonth() === new Date().getMonth()
+        )
         .reduce((sum: number, fr: any) => sum + fr.amount, 0),
-      
+
       // Cross-module billing efficiency
-      pendingInvoices: invoices.filter((inv: any) => inv.status === 'pending').length,
-      
+      pendingInvoices: invoices.filter((inv: any) => inv.status === 'pending')
+        .length,
+
       // Cross-module outcomes
-      independenceProgressAverage: residents.length > 0 ?
-        residents.reduce((sum: number, r: any) => sum + r.independenceLevel, 0) / residents.length : 0
+      independenceProgressAverage:
+        residents.length > 0
+          ? residents.reduce(
+              (sum: number, r: any) => sum + r.independenceLevel,
+              0
+            ) / residents.length
+          : 0,
     };
   }
 }
@@ -260,6 +284,6 @@ export function useCrossModuleIntegration() {
     notifyModules: DataIntegration.notifyModules,
     updateDashboard: DataIntegration.updateDashboardMetrics,
     getRelatedEntities: DataIntegration.getRelatedEntities,
-    calculateMetrics: DataIntegration.calculateCrossModuleMetrics
+    calculateMetrics: DataIntegration.calculateCrossModuleMetrics,
   };
 }

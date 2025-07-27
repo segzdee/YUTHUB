@@ -11,6 +11,7 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### Technology Stack
+
 - **Frontend**: React 18 with TypeScript, Vite for development server and build
 - **Backend**: Node.js with Express.js
 - **Database**: PostgreSQL via Neon Database with Drizzle ORM
@@ -20,20 +21,25 @@ Preferred communication style: Simple, everyday language.
 - **Routing**: Wouter for client-side routing
 
 ### Architecture Pattern
+
 The application follows a full-stack monorepo architecture with:
+
 - **Client**: React SPA in `/client` directory
-- **Server**: Express API server in `/server` directory  
+- **Server**: Express API server in `/server` directory
 - **Shared**: Common schemas and types in `/shared` directory
 
 ## Key Components
 
 ### Authentication & Session Management
+
 - **Replit OIDC Integration**: Uses Replit's authentication system for secure login
 - **Session Storage**: PostgreSQL-backed sessions with connect-pg-simple
 - **User Management**: Mandatory user storage for Replit Auth compliance
 
 ### Database Schema
+
 The system uses a comprehensive PostgreSQL schema with the following core entities:
+
 - **Users**: Staff authentication and profile management
 - **Properties**: Housing units with capacity tracking
 - **Residents**: Young people in the system with support needs
@@ -43,12 +49,14 @@ The system uses a comprehensive PostgreSQL schema with the following core entiti
 - **Financial Records**: Cost tracking and budget management
 
 ### API Architecture
+
 - **RESTful API**: Express.js with structured route handlers
 - **Storage Layer**: Abstracted database operations via storage interface
 - **Error Handling**: Centralized error handling middleware
 - **Request Logging**: Structured logging for API requests
 
 ### Frontend Architecture
+
 - **Component Structure**: Modular React components with TypeScript
 - **UI Components**: Radix UI primitives with shadcn/ui styling
 - **Design System**: Comprehensive design tokens with centralized CSS variables
@@ -62,6 +70,7 @@ The system uses a comprehensive PostgreSQL schema with the following core entiti
 ## Data Flow
 
 ### Authentication Flow
+
 1. User accesses the application
 2. Replit OIDC redirects to authentication provider
 3. Successful authentication creates/updates user session
@@ -69,17 +78,20 @@ The system uses a comprehensive PostgreSQL schema with the following core entiti
 5. Protected routes verify authentication status
 
 ### Dashboard Data Flow
+
 1. Dashboard loads with authentication check
 2. Parallel API calls fetch metrics, properties, residents, activities
 3. TanStack Query manages caching and error states
 4. Components render with loading states and error handling
 
 ### Crisis Connect System
+
 - **Emergency Response**: Immediate escalation to emergency services
 - **Support Worker Contact**: Direct connection to on-call support
 - **Incident Reporting**: Structured incident documentation
 
 ### Cross-Module Data Integration System
+
 - **DataIntegration Class**: Centralized utility for managing cross-module data relationships and automatic cache invalidation
 - **Real-Time Updates**: useRealTimeUpdates hook for bidirectional data synchronization across all modules
 - **Cross-Module Search**: Universal search component accessible from header, searches across all modules simultaneously
@@ -89,6 +101,7 @@ The system uses a comprehensive PostgreSQL schema with the following core entiti
 - **Event-Driven Updates**: Custom events notify all modules when data changes occur
 
 ### Platform Admin Real-Time Data Aggregation
+
 - **PlatformDataAggregator**: Comprehensive class for aggregating data across all organizations with optimized queries
 - **Real-Time Metrics**: Live data synchronization with 30-second refresh intervals for platform admin dashboard
 - **Organization Breakdowns**: Detailed analytics per organization including residents, properties, revenue, and occupancy rates
@@ -101,14 +114,16 @@ The system uses a comprehensive PostgreSQL schema with the following core entiti
 ## External Dependencies
 
 ### Core Dependencies
+
 - **@neondatabase/serverless**: PostgreSQL connection for serverless environment
 - **drizzle-orm**: Type-safe database operations
 - **@tanstack/react-query**: Server state management
-- **@radix-ui/react-***: Accessible UI component primitives
+- **@radix-ui/react-\***: Accessible UI component primitives
 - **express**: Web application framework
 - **passport**: Authentication middleware
 
 ### Development Dependencies
+
 - **Vite**: Fast development server and build tool
 - **TypeScript**: Type safety across the application
 - **Tailwind CSS**: Utility-first CSS framework
@@ -117,21 +132,25 @@ The system uses a comprehensive PostgreSQL schema with the following core entiti
 ## Deployment Strategy
 
 ### Development Environment
+
 - **Vite Dev Server**: Hot module replacement for rapid development
 - **Express Middleware**: Vite integration for full-stack development
 - **Environment Variables**: Database URL and session secrets
 
 ### Production Build
+
 - **Vite Build**: Optimized client bundle generation
 - **ESBuild**: Server-side bundling for Node.js deployment
 - **Static Asset Serving**: Express serves built client files
 
 ### Database Management
+
 - **Drizzle Kit**: Database schema migrations and management
 - **Environment-based Configuration**: Different database URLs for dev/prod
 - **Session Table**: Automatic session cleanup with TTL
 
 ### Error Handling & Monitoring
+
 - **Structured Logging**: Request/response logging with timing
 - **Error Boundaries**: React error boundaries for graceful failure
 - **Toast Notifications**: User-friendly error messaging
@@ -141,13 +160,15 @@ The application is designed for deployment on Replit with integrated authenticat
 ## Current Status
 
 The application is fully functional with:
+
 - Complete database schema with sample data
 - Working authentication system via Replit OIDC
 - Comprehensive dashboard with real-time metrics
 - Crisis Connect emergency response system
 - Full API endpoints for all features
 
-**Application URLs**: 
+**Application URLs**:
+
 - Primary: https://yuthub.replit.app
 - Custom: https://yuthub.com
 - With WWW: https://www.yuthub.com
@@ -324,7 +345,7 @@ The application is fully functional with:
 - **July 14, 2025**: Enhanced footer responsiveness with landscape-first layout, stacking only on very small screens
 - **July 14, 2025**: Added touch-optimized social media icons and progressive disclosure for footer content
 - **July 14, 2025**: Implemented proper touch targets and active feedback for all interactive elements
-- **July 14, 2025**: Implemented comprehensive Platform Admin interface with protected routing at /platform-admin/*
+- **July 14, 2025**: Implemented comprehensive Platform Admin interface with protected routing at /platform-admin/\*
 - **July 14, 2025**: Created platform admin authentication system with role-based access control separate from organization admins
 - **July 14, 2025**: Built subscription management dashboard with organization overview, plan management, and usage tracking
 - **July 14, 2025**: Implemented system monitoring dashboard with real-time database performance, API metrics, and health statistics

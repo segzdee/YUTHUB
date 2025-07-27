@@ -9,11 +9,11 @@ interface ResponsiveContainerProps {
 }
 
 const maxWidthStyles = {
-  sm: 'max-w-sm',      // 24rem (384px)
-  md: 'max-w-md',      // 28rem (448px)
-  lg: 'max-w-4xl',     // 56rem (896px)
-  xl: 'max-w-6xl',     // 72rem (1152px)
-  '2xl': 'max-w-7xl',  // 80rem (1280px)
+  sm: 'max-w-sm', // 24rem (384px)
+  md: 'max-w-md', // 28rem (448px)
+  lg: 'max-w-4xl', // 56rem (896px)
+  xl: 'max-w-6xl', // 72rem (1152px)
+  '2xl': 'max-w-7xl', // 80rem (1280px)
   full: 'max-w-full',
 };
 
@@ -31,12 +31,14 @@ export function ResponsiveContainer({
   children,
 }: ResponsiveContainerProps) {
   return (
-    <div className={cn(
-      'mx-auto w-full',
-      maxWidthStyles[maxWidth],
-      paddingStyles[padding],
-      className
-    )}>
+    <div
+      className={cn(
+        'mx-auto w-full',
+        maxWidthStyles[maxWidth],
+        paddingStyles[padding],
+        className
+      )}
+    >
       {children}
     </div>
   );
@@ -44,7 +46,9 @@ export function ResponsiveContainer({
 
 // Responsive breakpoint utilities
 export const useBreakpoint = () => {
-  const [breakpoint, setBreakpoint] = React.useState<'sm' | 'md' | 'lg' | 'xl' | '2xl'>('lg');
+  const [breakpoint, setBreakpoint] = React.useState<
+    'sm' | 'md' | 'lg' | 'xl' | '2xl'
+  >('lg');
 
   React.useEffect(() => {
     const updateBreakpoint = () => {

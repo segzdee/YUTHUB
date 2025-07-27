@@ -30,7 +30,7 @@ export default function ConfirmationDialog({
   confirmText = 'Confirm',
   requireReason = true,
   requireConfirmation = true,
-  confirmationWord = 'CONFIRM'
+  confirmationWord = 'CONFIRM',
 }: ConfirmationDialogProps) {
   const [reason, setReason] = useState('');
   const [confirmation, setConfirmation] = useState('');
@@ -40,7 +40,7 @@ export default function ConfirmationDialog({
     if (requireReason && !reason.trim()) {
       return;
     }
-    
+
     if (requireConfirmation && confirmation !== confirmationWord) {
       return;
     }
@@ -87,38 +87,38 @@ export default function ConfirmationDialog({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-md">
+    <div className='fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4'>
+      <Card className='w-full max-w-md'>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-warning" />
+          <div className='flex items-center justify-between'>
+            <CardTitle className='flex items-center gap-2'>
+              <AlertTriangle className='h-5 w-5 text-warning' />
               {title}
             </CardTitle>
             <Button
-              variant="ghost"
-              size="sm"
+              variant='ghost'
+              size='sm'
               onClick={handleClose}
               disabled={isLoading}
             >
-              <X className="h-4 w-4" />
+              <X className='h-4 w-4' />
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className='space-y-4'>
           <Alert className={getActionColor()}>
-            <AlertTriangle className="h-4 w-4" />
+            <AlertTriangle className='h-4 w-4' />
             <AlertDescription>{description}</AlertDescription>
           </Alert>
 
           {requireReason && (
-            <div className="space-y-2">
-              <Label htmlFor="reason">Reason for this action *</Label>
+            <div className='space-y-2'>
+              <Label htmlFor='reason'>Reason for this action *</Label>
               <Textarea
-                id="reason"
-                placeholder="Please provide a detailed reason..."
+                id='reason'
+                placeholder='Please provide a detailed reason...'
                 value={reason}
-                onChange={(e) => setReason(e.target.value)}
+                onChange={e => setReason(e.target.value)}
                 rows={3}
                 disabled={isLoading}
                 required
@@ -127,27 +127,27 @@ export default function ConfirmationDialog({
           )}
 
           {requireConfirmation && (
-            <div className="space-y-2">
-              <Label htmlFor="confirmation">
+            <div className='space-y-2'>
+              <Label htmlFor='confirmation'>
                 Type "{confirmationWord}" to confirm *
               </Label>
               <Input
-                id="confirmation"
+                id='confirmation'
                 placeholder={confirmationWord}
                 value={confirmation}
-                onChange={(e) => setConfirmation(e.target.value)}
+                onChange={e => setConfirmation(e.target.value)}
                 disabled={isLoading}
                 required
               />
             </div>
           )}
 
-          <div className="flex gap-2 pt-4">
+          <div className='flex gap-2 pt-4'>
             <Button
-              variant="outline"
+              variant='outline'
               onClick={handleClose}
               disabled={isLoading}
-              className="flex-1"
+              className='flex-1'
             >
               Cancel
             </Button>
@@ -159,7 +159,7 @@ export default function ConfirmationDialog({
                 (requireReason && !reason.trim()) ||
                 (requireConfirmation && confirmation !== confirmationWord)
               }
-              className="flex-1"
+              className='flex-1'
             >
               {isLoading ? 'Processing...' : confirmText}
             </Button>

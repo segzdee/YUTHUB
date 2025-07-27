@@ -1,11 +1,11 @@
-import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { QueryClient, QueryFunction } from '@tanstack/react-query';
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
     const error = new Error(`${res.status}: ${text}`);
     error.name = `HttpError${res.status}`;
-    
+
     // Log structured error information in development
     if (process.env.NODE_ENV === 'development') {
       console.error('API Error:', {
@@ -16,7 +16,7 @@ async function throwIfResNotOk(res: Response) {
         timestamp: new Date().toISOString(),
       });
     }
-    
+
     throw error;
   }
 }
@@ -24,13 +24,13 @@ async function throwIfResNotOk(res: Response) {
 export async function apiRequest(
   method: string,
   url: string,
-  data?: unknown | undefined,
+  data?: unknown | undefined
 ): Promise<Response> {
   const res = await fetch(url, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
+    headers: data ? { 'Content-Type': 'application/json' } : {},
     body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
+    credentials: 'include',
   });
 
   // If we get a 401, try to refresh the session by making a simple request
@@ -40,17 +40,17 @@ export async function apiRequest(
       const refreshRes = await fetch('/api/auth/user', {
         credentials: 'include',
       });
-      
+
       if (refreshRes.ok) {
         // Session refreshed, retry the original request
         console.log('Session refreshed, retrying original request...');
         const retryRes = await fetch(url, {
           method,
-          headers: data ? { "Content-Type": "application/json" } : {},
+          headers: data ? { 'Content-Type': 'application/json' } : {},
           body: data ? JSON.stringify(data) : undefined,
-          credentials: "include",
+          credentials: 'include',
         });
-        
+
         if (retryRes.ok) {
           return retryRes;
         }
@@ -64,20 +64,20 @@ export async function apiRequest(
   return res;
 }
 
-type UnauthorizedBehavior = "returnNull" | "throw";
+type UnauthorizedBehavior = 'returnNull' | 'throw';
 export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const url = queryKey.join("/") as string;
+    const url = queryKey.join('/') as string;
     const res = await fetch(url, {
-      credentials: "include",
+      credentials: 'include',
     });
 
     // Handle 401 with potential token refresh
     if (res.status === 401) {
-      if (unauthorizedBehavior === "returnNull") {
+      if (unauthorizedBehavior === 'returnNull') {
         return null;
       }
 
@@ -86,13 +86,13 @@ export const getQueryFn: <T>(options: {
         const refreshRes = await fetch('/api/auth/user', {
           credentials: 'include',
         });
-        
+
         if (refreshRes.ok) {
           // Session refreshed, retry the original request
           const retryRes = await fetch(url, {
-            credentials: "include",
+            credentials: 'include',
           });
-          
+
           if (retryRes.ok) {
             return await retryRes.json();
           }
@@ -118,7 +118,7 @@ export const queryClient = new QueryClient({
 
 // API request helper with proper error handling
 export async function apiRequest(
-  endpoint: string | RequestInfo, 
+  endpoint: string | RequestInfo,
   options: RequestInit = {}
 ): Promise<any> {
   let url: string;
@@ -127,16 +127,17 @@ export async function apiRequest(
   // Handle different call patterns
   if (typeof endpoint === 'string') {
     // Pattern: apiRequest('/api/endpoint', options)
-    const baseUrl = process.env.NODE_ENV === 'production' 
-      ? window.location.origin 
-      : 'http://localhost:3000';
-    
+    const baseUrl =
+      process.env.NODE_ENV === 'production'
+        ? window.location.origin
+        : 'http://localhost:3000';
+
     url = endpoint.startsWith('http') ? endpoint : `${baseUrl}${endpoint}`;
     requestOptions = {
       headers: {
         'Content-Type': 'application/json',
         ...(localStorage.getItem('auth-token') && {
-          'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
+          Authorization: `Bearer ${localStorage.getItem('auth-token')}`,
         }),
         ...options.headers,
       },
@@ -150,26 +151,28 @@ export async function apiRequest(
 
   try {
     const response = await fetch(url, requestOptions);
-    
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      throw new Error(
+        errorData.message || `HTTP ${response.status}: ${response.statusText}`
+      );
     }
 
     const contentType = response.headers.get('content-type');
     if (contentType && contentType.includes('application/json')) {
       return await response.json();
     }
-    
+
     return response;
   } catch (error) {
     console.error('API Request failed:', error);
-    
+
     // Return mock data for development when API is not available
     if (process.env.NODE_ENV === 'development') {
       return getMockData(typeof endpoint === 'string' ? endpoint : url);
     }
-    
+
     throw error;
   }
 }

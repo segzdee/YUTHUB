@@ -13,14 +13,14 @@ interface DashboardState {
   // Layout management
   layouts: DashboardLayout[];
   isGridLocked: boolean;
-  
+
   // Widget visibility
   visibleWidgets: string[];
-  
+
   // User preferences
   theme: 'light' | 'dark';
   refreshInterval: number;
-  
+
   // Notification settings
   notifications: {
     enabled: boolean;
@@ -28,14 +28,16 @@ interface DashboardState {
     desktop: boolean;
     types: string[];
   };
-  
+
   // Actions
   setLayouts: (layouts: DashboardLayout[]) => void;
   toggleGridLock: () => void;
   toggleWidget: (widgetId: string) => void;
   setTheme: (theme: 'light' | 'dark') => void;
   setRefreshInterval: (interval: number) => void;
-  updateNotificationSettings: (settings: Partial<DashboardState['notifications']>) => void;
+  updateNotificationSettings: (
+    settings: Partial<DashboardState['notifications']>
+  ) => void;
   resetToDefault: () => void;
 }
 
@@ -75,35 +77,39 @@ export const useDashboardStore = create<DashboardState>()(
         desktop: true,
         types: ['incident', 'maintenance', 'financial', 'support'],
       },
-      
-      setLayouts: (layouts) => set({ layouts }),
-      
-      toggleGridLock: () => set((state) => ({ isGridLocked: !state.isGridLocked })),
-      
-      toggleWidget: (widgetId) => set((state) => ({
-        visibleWidgets: state.visibleWidgets.includes(widgetId)
-          ? state.visibleWidgets.filter(id => id !== widgetId)
-          : [...state.visibleWidgets, widgetId],
-      })),
-      
-      setTheme: (theme) => set({ theme }),
-      
-      setRefreshInterval: (refreshInterval) => set({ refreshInterval }),
-      
-      updateNotificationSettings: (settings) => set((state) => ({
-        notifications: { ...state.notifications, ...settings },
-      })),
-      
-      resetToDefault: () => set({
-        layouts: defaultLayouts,
-        visibleWidgets: defaultVisibleWidgets,
-        isGridLocked: false,
-        refreshInterval: 30000,
-      }),
+
+      setLayouts: layouts => set({ layouts }),
+
+      toggleGridLock: () =>
+        set(state => ({ isGridLocked: !state.isGridLocked })),
+
+      toggleWidget: widgetId =>
+        set(state => ({
+          visibleWidgets: state.visibleWidgets.includes(widgetId)
+            ? state.visibleWidgets.filter(id => id !== widgetId)
+            : [...state.visibleWidgets, widgetId],
+        })),
+
+      setTheme: theme => set({ theme }),
+
+      setRefreshInterval: refreshInterval => set({ refreshInterval }),
+
+      updateNotificationSettings: settings =>
+        set(state => ({
+          notifications: { ...state.notifications, ...settings },
+        })),
+
+      resetToDefault: () =>
+        set({
+          layouts: defaultLayouts,
+          visibleWidgets: defaultVisibleWidgets,
+          isGridLocked: false,
+          refreshInterval: 30000,
+        }),
     }),
     {
       name: 'dashboard-storage',
-      partialize: (state) => ({
+      partialize: state => ({
         layouts: state.layouts,
         visibleWidgets: state.visibleWidgets,
         theme: state.theme,

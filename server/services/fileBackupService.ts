@@ -23,7 +23,7 @@ export class FileBackupService {
 
   static async createBackup(options: BackupOptions): Promise<void> {
     this.ensureBackupDirectory();
-    
+
     const startTime = Date.now();
     const backupDate = new Date().toISOString().split('T')[0];
     const backupFileName = `backup_${options.type}_${backupDate}_${Date.now()}`;
@@ -37,14 +37,18 @@ export class FileBackupService {
         backupLocation: backupPath,
         totalFiles: 0,
         totalSize: 0,
-        backupStatus: 'in_progress'
+        backupStatus: 'in_progress',
       });
 
       // Count files and calculate size
       const { fileCount, totalSize } = await this.getBackupStats();
 
       // Create compressed backup
-      await this.compressFiles(UPLOAD_BASE_PATH, backupPath, options.compression);
+      await this.compressFiles(
+        UPLOAD_BASE_PATH,
+        backupPath,
+        options.compression
+      );
 
       // Verify backup integrity
       const verificationResult = await this.verifyBackup(backupPath);
@@ -56,7 +60,7 @@ export class FileBackupService {
         backupStatus: 'completed',
         backupDuration: Math.floor((Date.now() - startTime) / 1000),
         verificationStatus: verificationResult ? 'verified' : 'failed',
-        completedAt: new Date()
+        completedAt: new Date(),
       });
 
       console.log(`Backup completed successfully: ${backupPath}`);
@@ -66,8 +70,11 @@ export class FileBackupService {
     }
   }
 
-  private static async getBackupStats(): Promise<{ fileCount: number; totalSize: number }> {
-    const scanDirectory = (dir: string): { files: string[], size: number } => {
+  private static async getBackupStats(): Promise<{
+    fileCount: number;
+    totalSize: number;
+  }> {
+    const scanDirectory = (dir: string): { files: string[]; size: number } => {
       let files: string[] = [];
       let size = 0;
 
@@ -76,11 +83,11 @@ export class FileBackupService {
       }
 
       const items = fs.readdirSync(dir);
-      
+
       for (const item of items) {
         const fullPath = path.join(dir, item);
         const stat = fs.statSync(fullPath);
-        
+
         if (stat.isDirectory()) {
           const subResult = scanDirectory(fullPath);
           files = files.concat(subResult.files);
@@ -90,7 +97,7 @@ export class FileBackupService {
           size += stat.size;
         }
       }
-      
+
       return { files, size };
     };
 
@@ -98,16 +105,26 @@ export class FileBackupService {
     return { fileCount: result.files.length, totalSize: result.size };
   }
 
-  private static async compressFiles(sourcePath: string, destinationPath: string, compression: boolean = true): Promise<void> {
+  private static async compressFiles(
+    sourcePath: string,
+    destinationPath: string,
+    compression: boolean = true
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
       const command = compression ? 'tar' : 'cp';
-      const args = compression 
-        ? ['-czf', destinationPath + '.tar.gz', '-C', path.dirname(sourcePath), path.basename(sourcePath)]
+      const args = compression
+        ? [
+            '-czf',
+            destinationPath + '.tar.gz',
+            '-C',
+            path.dirname(sourcePath),
+            path.basename(sourcePath),
+          ]
         : ['-r', sourcePath, destinationPath];
 
       const process = spawn(command, args);
-      
-      process.on('close', (code) => {
+
+      process.on('close', code => {
         if (code === 0) {
           resolve();
         } else {
@@ -115,7 +132,7 @@ export class FileBackupService {
         }
       });
 
-      process.on('error', (error) => {
+      process.on('error', error => {
         reject(error);
       });
     });
@@ -147,7 +164,7 @@ export class FileBackupService {
           type,
           destination: BACKUP_BASE_PATH,
           compression: true,
-          encryption: false
+          encryption: false,
         });
       } catch (error) {
         console.error(`Scheduled ${type} backup failed:`, error);
@@ -175,7 +192,7 @@ export class FileBackupService {
       }
 
       const backupPath = backup.backupLocation + '.tar.gz';
-      
+
       if (!fs.existsSync(backupPath)) {
         throw new Error('Backup file not found');
       }
@@ -194,11 +211,14 @@ export class FileBackupService {
     }
   }
 
-  private static async extractBackup(backupPath: string, destinationPath: string): Promise<void> {
+  private static async extractBackup(
+    backupPath: string,
+    destinationPath: string
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
       const process = spawn('tar', ['-xzf', backupPath, '-C', destinationPath]);
-      
-      process.on('close', (code) => {
+
+      process.on('close', code => {
         if (code === 0) {
           resolve();
         } else {
@@ -206,7 +226,7 @@ export class FileBackupService {
         }
       });
 
-      process.on('error', (error) => {
+      process.on('error', error => {
         reject(error);
       });
     });
@@ -218,7 +238,7 @@ export class FileBackupService {
       cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
 
       const backupRecords = await storage.getBackupRecords();
-      
+
       for (const backup of backupRecords) {
         if (backup.createdAt < cutoffDate) {
           // Delete backup file
@@ -229,7 +249,7 @@ export class FileBackupService {
 
           // Update record to mark as deleted
           await storage.updateBackupRecord(backup.id, {
-            backupStatus: 'deleted'
+            backupStatus: 'deleted',
           });
         }
       }
@@ -246,13 +266,16 @@ export function initializeBackupService(): void {
   // Schedule daily full backup at 2 AM
   const dailyBackupTime = new Date();
   dailyBackupTime.setHours(2, 0, 0, 0);
-  
+
   const msUntilDailyBackup = dailyBackupTime.getTime() - Date.now();
   const msInDay = 24 * 60 * 60 * 1000;
-  
-  setTimeout(() => {
-    FileBackupService.scheduleBackup('full', msInDay);
-  }, msUntilDailyBackup > 0 ? msUntilDailyBackup : msInDay + msUntilDailyBackup);
+
+  setTimeout(
+    () => {
+      FileBackupService.scheduleBackup('full', msInDay);
+    },
+    msUntilDailyBackup > 0 ? msUntilDailyBackup : msInDay + msUntilDailyBackup
+  );
 
   // Schedule incremental backup every 6 hours
   FileBackupService.scheduleBackup('incremental', 6 * 60 * 60 * 1000);

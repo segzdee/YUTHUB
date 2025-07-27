@@ -1,11 +1,17 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { ChevronLeft, ChevronRight, Save, Check } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import { useAuth } from "@/hooks/useAuth";
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { ChevronLeft, ChevronRight, Save, Check } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
+import { useAuth } from '@/hooks/useAuth';
 
 interface FormStep {
   id: string;
@@ -32,7 +38,7 @@ export default function FormWizard({
   steps,
   onComplete,
   initialData = {},
-  allowSaveAndContinue = true
+  allowSaveAndContinue = true,
 }: FormWizardProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState(initialData);
@@ -50,7 +56,7 @@ export default function FormWizard({
 
   const loadSavedDraft = async () => {
     try {
-      const response = await apiRequest("GET", `/api/forms/draft/${formType}`);
+      const response = await apiRequest('GET', `/api/forms/draft/${formType}`);
       if (response.ok) {
         const draft = await response.json();
         if (draft) {
@@ -60,7 +66,7 @@ export default function FormWizard({
         }
       }
     } catch (error) {
-      console.error("Failed to load saved draft:", error);
+      console.error('Failed to load saved draft:', error);
     }
   };
 
@@ -69,23 +75,23 @@ export default function FormWizard({
 
     setIsLoading(true);
     try {
-      const response = await apiRequest("POST", "/api/forms/draft", {
+      const response = await apiRequest('POST', '/api/forms/draft', {
         formType,
         formData,
         step: currentStep + 1,
-        completed: false
+        completed: false,
       });
 
       if (response.ok) {
         const draft = await response.json();
         setSavedDraftId(draft.id);
         toast({
-          title: "Progress Saved",
-          description: "Your form progress has been saved automatically.",
+          title: 'Progress Saved',
+          description: 'Your form progress has been saved automatically.',
         });
       }
     } catch (error) {
-      console.error("Failed to save draft:", error);
+      console.error('Failed to save draft:', error);
     } finally {
       setIsLoading(false);
     }
@@ -110,19 +116,20 @@ export default function FormWizard({
     setIsLoading(true);
     try {
       await onComplete(formData);
-      
+
       // Mark draft as completed if it exists
       if (savedDraftId && allowSaveAndContinue) {
-        await apiRequest("PATCH", `/api/forms/draft/${savedDraftId}`, {
-          completed: true
+        await apiRequest('PATCH', `/api/forms/draft/${savedDraftId}`, {
+          completed: true,
         });
       }
     } catch (error) {
-      console.error("Form submission failed:", error);
+      console.error('Form submission failed:', error);
       toast({
-        title: "Submission Failed",
-        description: "There was an error submitting your form. Please try again.",
-        variant: "destructive",
+        title: 'Submission Failed',
+        description:
+          'There was an error submitting your form. Please try again.',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -132,7 +139,7 @@ export default function FormWizard({
   const updateFormData = (stepData: any) => {
     setFormData(prev => ({
       ...prev,
-      ...stepData
+      ...stepData,
     }));
   };
 
@@ -148,42 +155,42 @@ export default function FormWizard({
   const CurrentStepComponent = steps[currentStep]?.component;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+    <div className='min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8'>
+      <div className='max-w-4xl mx-auto'>
+        <div className='mb-8'>
+          <h1 className='text-2xl sm:text-3xl font-bold text-gray-900 mb-2'>
             {title}
           </h1>
-          <p className="text-gray-600 mb-4">{description}</p>
-          
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm text-gray-600">
-              <span>Step {currentStep + 1} of {steps.length}</span>
+          <p className='text-gray-600 mb-4'>{description}</p>
+
+          <div className='space-y-2'>
+            <div className='flex justify-between text-sm text-gray-600'>
+              <span>
+                Step {currentStep + 1} of {steps.length}
+              </span>
               <span>{Math.round(progress)}% Complete</span>
             </div>
-            <Progress value={progress} className="h-2" />
+            <Progress value={progress} className='h-2' />
           </div>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
+            <CardTitle className='flex items-center justify-between'>
               <span>{steps[currentStep]?.title}</span>
               {allowSaveAndContinue && (
                 <Button
-                  variant="outline"
-                  size="sm"
+                  variant='outline'
+                  size='sm'
                   onClick={saveDraft}
                   disabled={isLoading}
                 >
-                  <Save className="w-4 h-4 mr-2" />
+                  <Save className='w-4 h-4 mr-2' />
                   Save Progress
                 </Button>
               )}
             </CardTitle>
-            <CardDescription>
-              {steps[currentStep]?.description}
-            </CardDescription>
+            <CardDescription>{steps[currentStep]?.description}</CardDescription>
           </CardHeader>
           <CardContent>
             {CurrentStepComponent && (
@@ -196,17 +203,17 @@ export default function FormWizard({
           </CardContent>
         </Card>
 
-        <div className="mt-8 flex justify-between">
+        <div className='mt-8 flex justify-between'>
           <Button
-            variant="outline"
+            variant='outline'
             onClick={prevStep}
             disabled={currentStep === 0}
           >
-            <ChevronLeft className="w-4 h-4 mr-2" />
+            <ChevronLeft className='w-4 h-4 mr-2' />
             Previous
           </Button>
 
-          <div className="flex space-x-4">
+          <div className='flex space-x-4'>
             {currentStep === steps.length - 1 ? (
               <Button
                 onClick={handleSubmit}
@@ -214,23 +221,20 @@ export default function FormWizard({
               >
                 {isLoading ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2'></div>
                     Submitting...
                   </>
                 ) : (
                   <>
-                    <Check className="w-4 h-4 mr-2" />
+                    <Check className='w-4 h-4 mr-2' />
                     Complete Form
                   </>
                 )}
               </Button>
             ) : (
-              <Button
-                onClick={nextStep}
-                disabled={!canProceed()}
-              >
+              <Button onClick={nextStep} disabled={!canProceed()}>
                 Next
-                <ChevronRight className="w-4 h-4 ml-2" />
+                <ChevronRight className='w-4 h-4 ml-2' />
               </Button>
             )}
           </div>

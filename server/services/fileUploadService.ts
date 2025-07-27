@@ -21,7 +21,7 @@ const ALLOWED_MIME_TYPES = [
   'application/vnd.ms-excel',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   'text/plain',
-  'text/csv'
+  'text/csv',
 ];
 
 // Ensure upload directories exist
@@ -35,7 +35,7 @@ export function initializeFileUploadService(): void {
     path.join(UPLOAD_BASE_PATH, 'certificates'),
     path.join(UPLOAD_BASE_PATH, 'forms'),
     path.join(UPLOAD_BASE_PATH, 'receipts'),
-    path.join(UPLOAD_BASE_PATH, 'reports')
+    path.join(UPLOAD_BASE_PATH, 'reports'),
   ];
 
   directories.forEach(dir => {
@@ -50,22 +50,22 @@ const storage_config = multer.diskStorage({
   destination: (req, file, cb) => {
     const documentType = req.body.documentType || 'documents';
     const uploadPath = path.join(UPLOAD_BASE_PATH, documentType);
-    
+
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
     }
-    
+
     cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
     // Generate unique filename
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     const extension = path.extname(file.originalname);
     const baseName = path.basename(file.originalname, extension);
     const safeName = baseName.replace(/[^a-zA-Z0-9]/g, '_');
-    
+
     cb(null, `${safeName}_${uniqueSuffix}${extension}`);
-  }
+  },
 });
 
 const fileFilter = (req: any, file: any, cb: any) => {
@@ -80,17 +80,20 @@ export const upload = multer({
   storage: storage_config,
   limits: {
     fileSize: MAX_FILE_SIZE,
-    files: 10
+    files: 10,
   },
-  fileFilter
+  fileFilter,
 });
 
 // Generate thumbnail for images
-export async function generateThumbnail(filePath: string, filename: string): Promise<string | null> {
+export async function generateThumbnail(
+  filePath: string,
+  filename: string
+): Promise<string | null> {
   try {
     const ext = path.extname(filename).toLowerCase();
     const isImage = ['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext);
-    
+
     if (!isImage) {
       return null;
     }
@@ -101,7 +104,7 @@ export async function generateThumbnail(filePath: string, filename: string): Pro
     await sharp(filePath)
       .resize(300, 300, {
         fit: 'inside',
-        withoutEnlargement: true
+        withoutEnlargement: true,
       })
       .jpeg({ quality: 80 })
       .toFile(thumbnailPath);
@@ -118,16 +121,14 @@ export async function compressImage(filePath: string): Promise<void> {
   try {
     const ext = path.extname(filePath).toLowerCase();
     const isImage = ['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext);
-    
+
     if (!isImage) {
       return;
     }
 
     const tempPath = filePath + '.tmp';
-    
-    await sharp(filePath)
-      .jpeg({ quality: 85 })
-      .toFile(tempPath);
+
+    await sharp(filePath).jpeg({ quality: 85 }).toFile(tempPath);
 
     // Replace original with compressed version
     fs.renameSync(tempPath, filePath);
@@ -143,8 +144,8 @@ export async function compressImage(filePath: string): Promise<void> {
 
 // Check file access permissions
 export async function checkFileAccess(
-  userId: string, 
-  documentId: number, 
+  userId: string,
+  documentId: number,
   organizationId: number
 ): Promise<boolean> {
   try {
@@ -161,7 +162,7 @@ export async function checkFileAccess(
     // Check if file is shared with user
     const shares = await storage.getFileShares(documentId);
     const userShare = shares.find(share => share.sharedWith === userId);
-    
+
     if (userShare && !userShare.isRevoked) {
       // Check if share hasn't expired
       if (userShare.expiresAt && userShare.expiresAt < new Date()) {
@@ -180,24 +181,24 @@ export async function checkFileAccess(
 
 // Check storage quota
 export async function checkStorageQuota(
-  organizationId: number, 
+  organizationId: number,
   additionalSize: number
 ): Promise<{ allowed: boolean; currentUsage: number; limit: number }> {
   try {
     const analytics = await getStorageAnalytics(organizationId);
     const newUsage = analytics.totalSize + additionalSize;
-    
+
     return {
       allowed: newUsage <= analytics.limit,
       currentUsage: analytics.totalSize,
-      limit: analytics.limit
+      limit: analytics.limit,
     };
   } catch (error) {
     console.error('Storage quota check failed:', error);
     return {
       allowed: false,
       currentUsage: 0,
-      limit: 0
+      limit: 0,
     };
   }
 }
@@ -212,20 +213,20 @@ export async function getStorageAnalytics(organizationId: number): Promise<{
   try {
     // Get all documents for organization
     const documents = await storage.getDocuments({});
-    
+
     // Filter by organization (would need to add organization filtering to storage)
     const totalFiles = documents.length;
     const totalSize = documents.reduce((sum, doc) => sum + doc.fileSize, 0);
-    
+
     // Storage limits based on subscription tier
     const limit = 10 * 1024 * 1024 * 1024; // 10GB default
     const usagePercentage = (totalSize / limit) * 100;
-    
+
     return {
       totalFiles,
       totalSize,
       limit,
-      usagePercentage
+      usagePercentage,
     };
   } catch (error) {
     console.error('Storage analytics failed:', error);
@@ -233,7 +234,7 @@ export async function getStorageAnalytics(organizationId: number): Promise<{
       totalFiles: 0,
       totalSize: 0,
       limit: 0,
-      usagePercentage: 0
+      usagePercentage: 0,
     };
   }
 }
@@ -243,17 +244,17 @@ export async function cleanupOrphanedFiles(): Promise<void> {
   try {
     const documents = await storage.getDocuments({});
     const documentPaths = new Set(documents.map(doc => doc.filePath));
-    
+
     // Scan upload directories
     const scanDir = (dirPath: string) => {
       if (!fs.existsSync(dirPath)) return;
-      
+
       const files = fs.readdirSync(dirPath);
-      
+
       for (const file of files) {
         const fullPath = path.join(dirPath, file);
         const stat = fs.statSync(fullPath);
-        
+
         if (stat.isDirectory()) {
           scanDir(fullPath);
         } else {
@@ -266,7 +267,7 @@ export async function cleanupOrphanedFiles(): Promise<void> {
         }
       }
     };
-    
+
     scanDir(UPLOAD_BASE_PATH);
   } catch (error) {
     console.error('Cleanup failed:', error);
@@ -284,23 +285,25 @@ export function generateFileChecksum(filePath: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const hash = crypto.createHash('md5');
     const stream = fs.createReadStream(filePath);
-    
-    stream.on('data', (data) => {
+
+    stream.on('data', data => {
       hash.update(data);
     });
-    
+
     stream.on('end', () => {
       resolve(hash.digest('hex'));
     });
-    
-    stream.on('error', (error) => {
+
+    stream.on('error', error => {
       reject(error);
     });
   });
 }
 
 // Validate file integrity
-export async function validateFileIntegrity(documentId: number): Promise<boolean> {
+export async function validateFileIntegrity(
+  documentId: number
+): Promise<boolean> {
   try {
     const document = await storage.getDocument(documentId);
     if (!document) {

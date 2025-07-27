@@ -8,7 +8,7 @@ const closeDatabaseConnections = async () => {
 const backgroundJobScheduler = {
   stop: async () => {
     console.log('Stopping background jobs...');
-  }
+  },
 };
 
 export class ComputeLifecycleManager {
@@ -62,7 +62,9 @@ export class ComputeLifecycleManager {
       console.log('1. Stopping new request acceptance...');
 
       // 2. Wait for active requests to complete
-      console.log(`2. Waiting for ${this.activeRequests.size} active requests to complete...`);
+      console.log(
+        `2. Waiting for ${this.activeRequests.size} active requests to complete...`
+      );
       while (this.activeRequests.size > 0) {
         console.log(`   ${this.activeRequests.size} requests still active...`);
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -105,7 +107,7 @@ export class ComputeLifecycleManager {
     });
 
     // Handle uncaught exceptions
-    process.on('uncaughtException', async (error) => {
+    process.on('uncaughtException', async error => {
       console.error('Uncaught exception:', error);
       await this.gracefulShutdown('uncaughtException');
     });
@@ -134,22 +136,26 @@ export class ComputeLifecycleManager {
 }
 
 // Request tracking middleware
-export const requestTrackingMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const requestTrackingMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const requestId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   const lifecycle = ComputeLifecycleManager.getInstance();
-  
+
   // Track the request
   lifecycle.trackRequest(requestId);
-  
+
   // Store request ID for reference
   (req as any).requestId = requestId;
-  
+
   // Untrack when request completes
   const originalEnd = res.end;
-  res.end = function(...args: any[]) {
+  res.end = function (...args: any[]) {
     lifecycle.untrackRequest(requestId);
     return originalEnd.apply(res, args);
   };
-  
+
   next();
 };

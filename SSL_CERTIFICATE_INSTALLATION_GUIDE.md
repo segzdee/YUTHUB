@@ -1,6 +1,7 @@
 # SSL Certificate Installation Guide for yuthub.com
 
 ## Current SSL Status
+
 - **Database SSL**: Disabled (ssl=off)
 - **Application SSL**: Not configured
 - **Domain**: yuthub.com, www.yuthub.com, yuthub.replit.app
@@ -14,6 +15,7 @@ Let's Encrypt provides free SSL certificates that auto-renew. This is the most c
 #### Steps to Install Let's Encrypt Certificate:
 
 1. **Install Certbot**
+
 ```bash
 # Install certbot for SSL certificate management
 sudo apt update
@@ -21,18 +23,21 @@ sudo apt install certbot python3-certbot-nginx
 ```
 
 2. **Generate Certificate for yuthub.com**
+
 ```bash
 # Generate SSL certificate for your domain
 sudo certbot certonly --standalone -d yuthub.com -d www.yuthub.com
 ```
 
 3. **Certificate Files Location**
-After successful generation, certificates will be stored at:
+   After successful generation, certificates will be stored at:
+
 - Certificate: `/etc/letsencrypt/live/yuthub.com/fullchain.pem`
 - Private Key: `/etc/letsencrypt/live/yuthub.com/privkey.pem`
 - Chain: `/etc/letsencrypt/live/yuthub.com/chain.pem`
 
 4. **Copy Certificates to Project**
+
 ```bash
 # Copy certificates to your project directory
 sudo cp /etc/letsencrypt/live/yuthub.com/fullchain.pem ./ssl/server.crt
@@ -48,14 +53,17 @@ If you have a custom SSL certificate from a Certificate Authority (CA):
 #### Steps for Custom Certificate:
 
 1. **Create SSL Directory**
+
 ```bash
 mkdir -p ssl
 ```
 
 2. **Place Certificate Files**
+
 - Place your certificate file as `ssl/server.crt`
 - Place your private key file as `ssl/server.key`
 - Ensure proper permissions:
+
 ```bash
 chmod 600 ssl/server.key
 chmod 644 ssl/server.crt
@@ -165,7 +173,10 @@ Add security headers for HTTPS:
 ```javascript
 // Enhanced security headers
 app.use((req, res, next) => {
-  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  res.setHeader(
+    'Strict-Transport-Security',
+    'max-age=31536000; includeSubDomains; preload'
+  );
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
@@ -179,14 +190,16 @@ Update cookie settings for HTTPS:
 
 ```javascript
 // Update session cookie settings
-app.use(session({
-  cookie: {
-    secure: true,        // Require HTTPS
-    httpOnly: true,      // Prevent XSS
-    sameSite: 'strict',  // CSRF protection
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
-  }
-}));
+app.use(
+  session({
+    cookie: {
+      secure: true, // Require HTTPS
+      httpOnly: true, // Prevent XSS
+      sameSite: 'strict', // CSRF protection
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+  })
+);
 ```
 
 ## Testing SSL Installation
@@ -206,6 +219,7 @@ openssl s_client -connect yuthub.com:443 -servername yuthub.com
 ### 2. Online SSL Testing
 
 Use online tools to verify SSL installation:
+
 - SSL Labs Test: https://www.ssllabs.com/ssltest/
 - SSL Checker: https://www.sslshopper.com/ssl-checker.html
 

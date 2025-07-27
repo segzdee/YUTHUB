@@ -5,6 +5,7 @@
 ## General Development Principles
 
 ### Security First
+
 - Always validate and sanitize user inputs
 - Use parameterized queries to prevent SQL injection
 - Implement proper authentication and authorization
@@ -13,6 +14,7 @@
 - Implement rate limiting for API endpoints
 
 ### Accessibility Standards
+
 - Follow WCAG 2.1 AA guidelines
 - Use semantic HTML elements
 - Include proper ARIA labels and descriptions
@@ -22,6 +24,7 @@
 - Test with screen readers
 
 ### Performance Optimization
+
 - Implement code splitting and lazy loading
 - Optimize images and compress assets
 - Use efficient database queries with proper indexing
@@ -30,6 +33,7 @@
 - Monitor Core Web Vitals
 
 ### Type Safety
+
 - Use TypeScript for all JavaScript projects
 - Define explicit interfaces and types
 - Avoid using 'any' type unless absolutely necessary
@@ -38,6 +42,7 @@
 - Use generic types for reusable components
 
 ### Code Quality
+
 - Write self-documenting code with meaningful names
 - Keep functions small and focused on single responsibility
 - Use consistent code formatting and linting
@@ -46,6 +51,7 @@
 - Follow established design patterns
 
 ### Mobile-First Design
+
 - Design for mobile devices first (320px+)
 - Use responsive design principles
 - Implement touch-friendly interfaces (44px minimum touch targets)
@@ -54,6 +60,7 @@
 - Test on actual mobile devices
 
 ### Database Best Practices
+
 - Use proper normalization and relationships
 - Implement appropriate indexes for query optimization
 - Include created_at and updated_at timestamps
@@ -62,6 +69,7 @@
 - Monitor database performance and query execution
 
 ### API Design
+
 - Follow RESTful principles and conventions
 - Use consistent response formats
 - Implement proper HTTP status codes
@@ -70,6 +78,7 @@
 - Version APIs for backward compatibility
 
 ### Testing Strategy
+
 - Write unit tests for business logic
 - Implement integration tests for API endpoints
 - Use end-to-end tests for critical user workflows
@@ -78,6 +87,7 @@
 - Include performance testing for scalability
 
 ### Documentation
+
 - Write clear and comprehensive README files
 - Document API endpoints with examples
 - Include installation and setup instructions
@@ -88,21 +98,23 @@
 ## Common Patterns
 
 ### Error Handling Pattern
+
 ```typescript
 try {
   const result = await riskyOperation();
   return { success: true, data: result };
 } catch (error) {
   console.error('Operation failed:', error);
-  return { 
-    success: false, 
+  return {
+    success: false,
     error: 'User-friendly error message',
-    code: error.code || 'UNKNOWN_ERROR'
+    code: error.code || 'UNKNOWN_ERROR',
   };
 }
 ```
 
 ### React Component Pattern
+
 ```typescript
 interface ComponentProps {
   // Explicit prop types
@@ -111,11 +123,11 @@ interface ComponentProps {
 const Component: React.FC<ComponentProps> = (props) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Always handle loading and error states
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorBoundary error={error} />;
-  
+
   return (
     <div className="responsive-container">
       {/* Accessible, semantic HTML */}
@@ -125,6 +137,7 @@ const Component: React.FC<ComponentProps> = (props) => {
 ```
 
 ### API Response Pattern
+
 ```typescript
 interface ApiResponse<T> {
   success: boolean;
@@ -140,6 +153,7 @@ interface ApiResponse<T> {
 ## Environment-Specific Guidelines
 
 ### Development
+
 - Use development-specific logging and debugging
 - Implement hot reloading and fast refresh
 - Use development-friendly error messages
@@ -147,6 +161,7 @@ interface ApiResponse<T> {
 - Use mock data and services when appropriate
 
 ### Production
+
 - Minimize bundle sizes and optimize for performance
 - Use production-grade error logging and monitoring
 - Implement proper security headers and HTTPS
@@ -154,6 +169,7 @@ interface ApiResponse<T> {
 - Enable compression and caching
 
 ### Testing
+
 - Use test databases and mock external services
 - Implement proper test isolation and cleanup
 - Use deterministic test data and scenarios
@@ -163,6 +179,7 @@ interface ApiResponse<T> {
 ## Team Collaboration
 
 ### Code Reviews
+
 - Review for security vulnerabilities
 - Check accessibility compliance
 - Verify performance implications
@@ -170,6 +187,7 @@ interface ApiResponse<T> {
 - Validate documentation completeness
 
 ### Git Workflow
+
 - Use descriptive commit messages
 - Create feature branches for new development
 - Implement pull request templates
@@ -177,6 +195,7 @@ interface ApiResponse<T> {
 - Maintain clean commit history
 
 ### Communication
+
 - Document architectural decisions
 - Share knowledge through code comments
 - Use consistent naming conventions

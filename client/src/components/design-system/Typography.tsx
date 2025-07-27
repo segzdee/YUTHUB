@@ -3,11 +3,43 @@ import { Slot } from '@radix-ui/react-slot';
 import React from 'react';
 
 interface TypographyProps {
-  variant?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'body1' | 'body2' | 'caption' | 'overline' | 'lead' | 'large' | 'small' | 'muted';
-  component?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span' | 'div' | 'label';
+  variant?:
+    | 'h1'
+    | 'h2'
+    | 'h3'
+    | 'h4'
+    | 'h5'
+    | 'h6'
+    | 'body1'
+    | 'body2'
+    | 'caption'
+    | 'overline'
+    | 'lead'
+    | 'large'
+    | 'small'
+    | 'muted';
+  component?:
+    | 'h1'
+    | 'h2'
+    | 'h3'
+    | 'h4'
+    | 'h5'
+    | 'h6'
+    | 'p'
+    | 'span'
+    | 'div'
+    | 'label';
   className?: string;
   children: React.ReactNode;
-  color?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info' | 'muted' | 'inherit';
+  color?:
+    | 'primary'
+    | 'secondary'
+    | 'success'
+    | 'warning'
+    | 'error'
+    | 'info'
+    | 'muted'
+    | 'inherit';
   weight?: 'light' | 'normal' | 'medium' | 'semibold' | 'bold' | 'extrabold';
   align?: 'left' | 'center' | 'right' | 'justify';
   truncate?: boolean;
@@ -29,7 +61,8 @@ const variantStyles = {
   small: 'text-sm font-medium leading-none',
   muted: 'text-sm text-muted-foreground',
   caption: 'text-xs text-muted-foreground',
-  overline: 'text-xs uppercase font-medium tracking-wider text-muted-foreground',
+  overline:
+    'text-xs uppercase font-medium tracking-wider text-muted-foreground',
 };
 
 const colorStyles = {
@@ -72,8 +105,8 @@ export function Typography({
   asChild = false,
   ...props
 }: TypographyProps) {
-  const Comp = asChild ? Slot : (component || getDefaultComponent(variant));
-  
+  const Comp = asChild ? Slot : component || getDefaultComponent(variant);
+
   const classes = cn(
     'transition-colors duration-200',
     variantStyles[variant],
@@ -94,39 +127,43 @@ export function Typography({
 
 function getDefaultComponent(variant: string): keyof JSX.IntrinsicElements {
   if (variant.startsWith('h')) return variant as keyof JSX.IntrinsicElements;
-  if (variant === 'lead' || variant === 'body1' || variant === 'body2') return 'p';
+  if (variant === 'lead' || variant === 'body1' || variant === 'body2')
+    return 'p';
   return 'span';
 }
 
 // Convenient component variations
-export const Heading = ({ level = 1, ...props }: { level?: 1 | 2 | 3 | 4 | 5 | 6 } & Omit<TypographyProps, 'variant'>) => (
+export const Heading = ({
+  level = 1,
+  ...props
+}: { level?: 1 | 2 | 3 | 4 | 5 | 6 } & Omit<TypographyProps, 'variant'>) => (
   <Typography variant={`h${level}` as TypographyProps['variant']} {...props} />
 );
 
 export const Text = (props: Omit<TypographyProps, 'variant'>) => (
-  <Typography variant="body1" {...props} />
+  <Typography variant='body1' {...props} />
 );
 
 export const Lead = (props: Omit<TypographyProps, 'variant'>) => (
-  <Typography variant="lead" {...props} />
+  <Typography variant='lead' {...props} />
 );
 
 export const Large = (props: Omit<TypographyProps, 'variant'>) => (
-  <Typography variant="large" {...props} />
+  <Typography variant='large' {...props} />
 );
 
 export const Small = (props: Omit<TypographyProps, 'variant'>) => (
-  <Typography variant="small" {...props} />
+  <Typography variant='small' {...props} />
 );
 
 export const Muted = (props: Omit<TypographyProps, 'variant'>) => (
-  <Typography variant="muted" {...props} />
+  <Typography variant='muted' {...props} />
 );
 
 export const Caption = (props: Omit<TypographyProps, 'variant'>) => (
-  <Typography variant="caption" {...props} />
+  <Typography variant='caption' {...props} />
 );
 
 export const Overline = (props: Omit<TypographyProps, 'variant'>) => (
-  <Typography variant="overline" {...props} />
+  <Typography variant='overline' {...props} />
 );

@@ -7,10 +7,5 @@ export default function SignUp() {
   const urlParams = new URLSearchParams(location.split('?')[1] || '');
   const selectedPlan = urlParams.get('plan') || 'trial';
 
-  return (
-    <AuthLogin 
-      mode="signup" 
-      selectedPlan={selectedPlan}
-    />
-  );
+  return <AuthLogin mode='signup' selectedPlan={selectedPlan} />;
 }

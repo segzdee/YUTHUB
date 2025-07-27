@@ -1,31 +1,57 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { AlertTriangle, Clock, User, MapPin } from "lucide-react";
-import FormWizard from "./FormWizard";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { AlertTriangle, Clock, User, MapPin } from 'lucide-react';
+import FormWizard from './FormWizard';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 
 const incidentBasicSchema = z.object({
-  title: z.string().min(5, "Title must be at least 5 characters"),
-  incidentType: z.enum(["maintenance", "behavioral", "medical", "safety", "other"]),
-  severity: z.enum(["low", "medium", "high", "critical"]),
-  propertyId: z.coerce.number().min(1, "Please select a property"),
+  title: z.string().min(5, 'Title must be at least 5 characters'),
+  incidentType: z.enum([
+    'maintenance',
+    'behavioral',
+    'medical',
+    'safety',
+    'other',
+  ]),
+  severity: z.enum(['low', 'medium', 'high', 'critical']),
+  propertyId: z.coerce.number().min(1, 'Please select a property'),
   residentId: z.coerce.number().optional(),
-  location: z.string().min(1, "Please specify the location"),
-  dateTime: z.string().min(1, "Please specify when the incident occurred"),
+  location: z.string().min(1, 'Please specify the location'),
+  dateTime: z.string().min(1, 'Please specify when the incident occurred'),
 });
 
 const incidentDetailsSchema = z.object({
-  description: z.string().min(10, "Description must be at least 10 characters"),
+  description: z.string().min(10, 'Description must be at least 10 characters'),
   immediateActions: z.string().optional(),
   witnessesPresent: z.boolean().default(false),
   witnessDetails: z.string().optional(),
@@ -49,7 +75,7 @@ const followUpSchema = z.object({
 function IncidentBasicStep({ data, onDataChange }: any) {
   const form = useForm({
     resolver: zodResolver(incidentBasicSchema),
-    defaultValues: data || {}
+    defaultValues: data || {},
   });
 
   const handleSubmit = (values: any) => {
@@ -58,40 +84,46 @@ function IncidentBasicStep({ data, onDataChange }: any) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-6'>
         <FormField
           control={form.control}
-          name="title"
+          name='title'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Incident Title</FormLabel>
               <FormControl>
-                <Input placeholder="Brief description of the incident" {...field} />
+                <Input
+                  placeholder='Brief description of the incident'
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
           <FormField
             control={form.control}
-            name="incidentType"
+            name='incidentType'
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Incident Type</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select incident type" />
+                      <SelectValue placeholder='Select incident type' />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="maintenance">Maintenance</SelectItem>
-                    <SelectItem value="behavioral">Behavioral</SelectItem>
-                    <SelectItem value="medical">Medical</SelectItem>
-                    <SelectItem value="safety">Safety</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                    <SelectItem value='maintenance'>Maintenance</SelectItem>
+                    <SelectItem value='behavioral'>Behavioral</SelectItem>
+                    <SelectItem value='medical'>Medical</SelectItem>
+                    <SelectItem value='safety'>Safety</SelectItem>
+                    <SelectItem value='other'>Other</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -101,38 +133,41 @@ function IncidentBasicStep({ data, onDataChange }: any) {
 
           <FormField
             control={form.control}
-            name="severity"
+            name='severity'
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Severity Level</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select severity" />
+                      <SelectValue placeholder='Select severity' />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="low">
-                      <div className="flex items-center">
-                        <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                    <SelectItem value='low'>
+                      <div className='flex items-center'>
+                        <div className='w-2 h-2 bg-green-500 rounded-full mr-2'></div>
                         Low
                       </div>
                     </SelectItem>
-                    <SelectItem value="medium">
-                      <div className="flex items-center">
-                        <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
+                    <SelectItem value='medium'>
+                      <div className='flex items-center'>
+                        <div className='w-2 h-2 bg-yellow-500 rounded-full mr-2'></div>
                         Medium
                       </div>
                     </SelectItem>
-                    <SelectItem value="high">
-                      <div className="flex items-center">
-                        <div className="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
+                    <SelectItem value='high'>
+                      <div className='flex items-center'>
+                        <div className='w-2 h-2 bg-orange-500 rounded-full mr-2'></div>
                         High
                       </div>
                     </SelectItem>
-                    <SelectItem value="critical">
-                      <div className="flex items-center">
-                        <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+                    <SelectItem value='critical'>
+                      <div className='flex items-center'>
+                        <div className='w-2 h-2 bg-red-500 rounded-full mr-2'></div>
                         Critical
                       </div>
                     </SelectItem>
@@ -144,23 +179,26 @@ function IncidentBasicStep({ data, onDataChange }: any) {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
           <FormField
             control={form.control}
-            name="propertyId"
+            name='propertyId'
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Property</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value?.toString()}
+                >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select property" />
+                      <SelectValue placeholder='Select property' />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="1">Sunrise House</SelectItem>
-                    <SelectItem value="2">Green Valley Residence</SelectItem>
-                    <SelectItem value="3">City Centre Studios</SelectItem>
+                    <SelectItem value='1'>Sunrise House</SelectItem>
+                    <SelectItem value='2'>Green Valley Residence</SelectItem>
+                    <SelectItem value='3'>City Centre Studios</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -170,20 +208,23 @@ function IncidentBasicStep({ data, onDataChange }: any) {
 
           <FormField
             control={form.control}
-            name="residentId"
+            name='residentId'
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Resident Involved (Optional)</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value?.toString()}
+                >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select resident if involved" />
+                      <SelectValue placeholder='Select resident if involved' />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="1">John Smith</SelectItem>
-                    <SelectItem value="2">Emma Johnson</SelectItem>
-                    <SelectItem value="3">Michael Brown</SelectItem>
+                    <SelectItem value='1'>John Smith</SelectItem>
+                    <SelectItem value='2'>Emma Johnson</SelectItem>
+                    <SelectItem value='3'>Michael Brown</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -194,12 +235,15 @@ function IncidentBasicStep({ data, onDataChange }: any) {
 
         <FormField
           control={form.control}
-          name="location"
+          name='location'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Specific Location</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Kitchen, Room 12, Common Area, Garden" {...field} />
+                <Input
+                  placeholder='e.g., Kitchen, Room 12, Common Area, Garden'
+                  {...field}
+                />
               </FormControl>
               <FormDescription>
                 Specify the exact location where the incident occurred
@@ -211,12 +255,12 @@ function IncidentBasicStep({ data, onDataChange }: any) {
 
         <FormField
           control={form.control}
-          name="dateTime"
+          name='dateTime'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Date and Time of Incident</FormLabel>
               <FormControl>
-                <Input type="datetime-local" {...field} />
+                <Input type='datetime-local' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -231,7 +275,7 @@ function IncidentBasicStep({ data, onDataChange }: any) {
 function IncidentDetailsStep({ data, onDataChange }: any) {
   const form = useForm({
     resolver: zodResolver(incidentDetailsSchema),
-    defaultValues: data || {}
+    defaultValues: data || {},
   });
 
   const handleValueChange = (field: string, value: any) => {
@@ -240,16 +284,16 @@ function IncidentDetailsStep({ data, onDataChange }: any) {
 
   return (
     <Form {...form}>
-      <div className="space-y-6">
+      <div className='space-y-6'>
         <FormField
           control={form.control}
-          name="description"
+          name='description'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Detailed Description</FormLabel>
               <FormControl>
-                <Textarea 
-                  placeholder="Provide a detailed description of what happened. Include who was involved, what occurred, and any contributing factors."
+                <Textarea
+                  placeholder='Provide a detailed description of what happened. Include who was involved, what occurred, and any contributing factors.'
                   rows={6}
                   {...field}
                 />
@@ -264,13 +308,13 @@ function IncidentDetailsStep({ data, onDataChange }: any) {
 
         <FormField
           control={form.control}
-          name="immediateActions"
+          name='immediateActions'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Immediate Actions Taken</FormLabel>
               <FormControl>
-                <Textarea 
-                  placeholder="Describe any immediate actions taken to address the incident"
+                <Textarea
+                  placeholder='Describe any immediate actions taken to address the incident'
                   rows={4}
                   {...field}
                 />
@@ -282,29 +326,35 @@ function IncidentDetailsStep({ data, onDataChange }: any) {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Witnesses & Emergency Services</CardTitle>
+            <CardTitle className='text-lg'>
+              Witnesses & Emergency Services
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center space-x-2">
+          <CardContent className='space-y-4'>
+            <div className='flex items-center space-x-2'>
               <input
-                type="checkbox"
-                id="witnessesPresent"
+                type='checkbox'
+                id='witnessesPresent'
                 checked={data?.witnessesPresent || false}
-                onChange={(e) => handleValueChange("witnessesPresent", e.target.checked)}
+                onChange={e =>
+                  handleValueChange('witnessesPresent', e.target.checked)
+                }
               />
-              <Label htmlFor="witnessesPresent">Were there any witnesses present?</Label>
+              <Label htmlFor='witnessesPresent'>
+                Were there any witnesses present?
+              </Label>
             </div>
 
             {data?.witnessesPresent && (
               <FormField
                 control={form.control}
-                name="witnessDetails"
+                name='witnessDetails'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Witness Details</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="List witnesses and their contact information"
+                      <Textarea
+                        placeholder='List witnesses and their contact information'
                         rows={3}
                         {...field}
                       />
@@ -315,38 +365,47 @@ function IncidentDetailsStep({ data, onDataChange }: any) {
               />
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex items-center space-x-2">
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              <div className='flex items-center space-x-2'>
                 <input
-                  type="checkbox"
-                  id="policeInvolved"
+                  type='checkbox'
+                  id='policeInvolved'
                   checked={data?.policeInvolved || false}
-                  onChange={(e) => handleValueChange("policeInvolved", e.target.checked)}
+                  onChange={e =>
+                    handleValueChange('policeInvolved', e.target.checked)
+                  }
                 />
-                <Label htmlFor="policeInvolved">Police involved</Label>
+                <Label htmlFor='policeInvolved'>Police involved</Label>
               </div>
 
-              <div className="flex items-center space-x-2">
+              <div className='flex items-center space-x-2'>
                 <input
-                  type="checkbox"
-                  id="emergencyServicesInvolved"
+                  type='checkbox'
+                  id='emergencyServicesInvolved'
                   checked={data?.emergencyServicesInvolved || false}
-                  onChange={(e) => handleValueChange("emergencyServicesInvolved", e.target.checked)}
+                  onChange={e =>
+                    handleValueChange(
+                      'emergencyServicesInvolved',
+                      e.target.checked
+                    )
+                  }
                 />
-                <Label htmlFor="emergencyServicesInvolved">Emergency services involved</Label>
+                <Label htmlFor='emergencyServicesInvolved'>
+                  Emergency services involved
+                </Label>
               </div>
             </div>
 
             {(data?.policeInvolved || data?.emergencyServicesInvolved) && (
               <FormField
                 control={form.control}
-                name="servicesDetails"
+                name='servicesDetails'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Emergency Services Details</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Provide details about emergency services involvement (reference numbers, officer names, etc.)"
+                      <Textarea
+                        placeholder='Provide details about emergency services involvement (reference numbers, officer names, etc.)'
                         rows={3}
                         {...field}
                       />
@@ -367,7 +426,7 @@ function IncidentDetailsStep({ data, onDataChange }: any) {
 function FollowUpStep({ data, onDataChange }: any) {
   const form = useForm({
     resolver: zodResolver(followUpSchema),
-    defaultValues: data || {}
+    defaultValues: data || {},
   });
 
   const handleValueChange = (field: string, value: any) => {
@@ -376,32 +435,36 @@ function FollowUpStep({ data, onDataChange }: any) {
 
   return (
     <Form {...form}>
-      <div className="space-y-6">
+      <div className='space-y-6'>
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Injuries & Damage</CardTitle>
+            <CardTitle className='text-lg'>Injuries & Damage</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center space-x-2">
+          <CardContent className='space-y-4'>
+            <div className='flex items-center space-x-2'>
               <input
-                type="checkbox"
-                id="injuriesReported"
+                type='checkbox'
+                id='injuriesReported'
                 checked={data?.injuriesReported || false}
-                onChange={(e) => handleValueChange("injuriesReported", e.target.checked)}
+                onChange={e =>
+                  handleValueChange('injuriesReported', e.target.checked)
+                }
               />
-              <Label htmlFor="injuriesReported">Were any injuries reported?</Label>
+              <Label htmlFor='injuriesReported'>
+                Were any injuries reported?
+              </Label>
             </div>
 
             {data?.injuriesReported && (
               <FormField
                 control={form.control}
-                name="injuryDetails"
+                name='injuryDetails'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Injury Details</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Describe any injuries, medical treatment provided, and follow-up required"
+                      <Textarea
+                        placeholder='Describe any injuries, medical treatment provided, and follow-up required'
                         rows={3}
                         {...field}
                       />
@@ -412,26 +475,30 @@ function FollowUpStep({ data, onDataChange }: any) {
               />
             )}
 
-            <div className="flex items-center space-x-2">
+            <div className='flex items-center space-x-2'>
               <input
-                type="checkbox"
-                id="damageReported"
+                type='checkbox'
+                id='damageReported'
                 checked={data?.damageReported || false}
-                onChange={(e) => handleValueChange("damageReported", e.target.checked)}
+                onChange={e =>
+                  handleValueChange('damageReported', e.target.checked)
+                }
               />
-              <Label htmlFor="damageReported">Was any property damage reported?</Label>
+              <Label htmlFor='damageReported'>
+                Was any property damage reported?
+              </Label>
             </div>
 
             {data?.damageReported && (
               <FormField
                 control={form.control}
-                name="damageDetails"
+                name='damageDetails'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Damage Details</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Describe the damage and estimated repair costs"
+                      <Textarea
+                        placeholder='Describe the damage and estimated repair costs'
                         rows={3}
                         {...field}
                       />
@@ -446,29 +513,33 @@ function FollowUpStep({ data, onDataChange }: any) {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Follow-up Actions</CardTitle>
+            <CardTitle className='text-lg'>Follow-up Actions</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center space-x-2">
+          <CardContent className='space-y-4'>
+            <div className='flex items-center space-x-2'>
               <input
-                type="checkbox"
-                id="followUpRequired"
+                type='checkbox'
+                id='followUpRequired'
                 checked={data?.followUpRequired !== false}
-                onChange={(e) => handleValueChange("followUpRequired", e.target.checked)}
+                onChange={e =>
+                  handleValueChange('followUpRequired', e.target.checked)
+                }
               />
-              <Label htmlFor="followUpRequired">Follow-up actions required</Label>
+              <Label htmlFor='followUpRequired'>
+                Follow-up actions required
+              </Label>
             </div>
 
             {data?.followUpRequired !== false && (
               <FormField
                 control={form.control}
-                name="followUpActions"
+                name='followUpActions'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Required Follow-up Actions</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="List specific actions that need to be taken and by when"
+                      <Textarea
+                        placeholder='List specific actions that need to be taken and by when'
                         rows={4}
                         {...field}
                       />
@@ -479,27 +550,31 @@ function FollowUpStep({ data, onDataChange }: any) {
               />
             )}
 
-            <div className="flex items-center space-x-2">
+            <div className='flex items-center space-x-2'>
               <input
-                type="checkbox"
-                id="managerNotified"
+                type='checkbox'
+                id='managerNotified'
                 checked={data?.managerNotified || false}
-                onChange={(e) => handleValueChange("managerNotified", e.target.checked)}
+                onChange={e =>
+                  handleValueChange('managerNotified', e.target.checked)
+                }
               />
-              <Label htmlFor="managerNotified">Manager/supervisor notified</Label>
+              <Label htmlFor='managerNotified'>
+                Manager/supervisor notified
+              </Label>
             </div>
           </CardContent>
         </Card>
 
         <FormField
           control={form.control}
-          name="additionalNotes"
+          name='additionalNotes'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Additional Notes</FormLabel>
               <FormControl>
-                <Textarea 
-                  placeholder="Any additional information that might be relevant"
+                <Textarea
+                  placeholder='Any additional information that might be relevant'
                   rows={4}
                   {...field}
                 />
@@ -518,9 +593,9 @@ export default function IncidentReportForm() {
 
   const steps = [
     {
-      id: "basic",
-      title: "Basic Information",
-      description: "Essential details about the incident",
+      id: 'basic',
+      title: 'Basic Information',
+      description: 'Essential details about the incident',
       component: IncidentBasicStep,
       validation: (data: any) => {
         try {
@@ -529,12 +604,12 @@ export default function IncidentReportForm() {
         } catch {
           return false;
         }
-      }
+      },
     },
     {
-      id: "details",
-      title: "Detailed Description",
-      description: "Comprehensive account of what happened",
+      id: 'details',
+      title: 'Detailed Description',
+      description: 'Comprehensive account of what happened',
       component: IncidentDetailsStep,
       validation: (data: any) => {
         try {
@@ -543,12 +618,12 @@ export default function IncidentReportForm() {
         } catch {
           return false;
         }
-      }
+      },
     },
     {
-      id: "followup",
-      title: "Follow-up Actions",
-      description: "Required actions and next steps",
+      id: 'followup',
+      title: 'Follow-up Actions',
+      description: 'Required actions and next steps',
       component: FollowUpStep,
     },
   ];
@@ -566,24 +641,25 @@ export default function IncidentReportForm() {
         // or as JSON in the existing incidents table
       };
 
-      const response = await apiRequest("POST", "/api/incidents", incidentData);
-      
+      const response = await apiRequest('POST', '/api/incidents', incidentData);
+
       if (response.ok) {
         toast({
-          title: "Incident Report Submitted",
-          description: "The incident report has been successfully submitted and logged.",
+          title: 'Incident Report Submitted',
+          description:
+            'The incident report has been successfully submitted and logged.',
         });
-        
+
         // Redirect to incidents list or dashboard
-        window.location.href = "/incidents";
+        window.location.href = '/incidents';
       } else {
-        throw new Error("Failed to submit incident report");
+        throw new Error('Failed to submit incident report');
       }
     } catch (error) {
       toast({
-        title: "Submission Failed",
-        description: "There was an error submitting the incident report.",
-        variant: "destructive",
+        title: 'Submission Failed',
+        description: 'There was an error submitting the incident report.',
+        variant: 'destructive',
       });
       throw error;
     }
@@ -591,9 +667,9 @@ export default function IncidentReportForm() {
 
   return (
     <FormWizard
-      formType="incident_report"
-      title="Incident Report"
-      description="Report and document incidents for proper management and follow-up"
+      formType='incident_report'
+      title='Incident Report'
+      description='Report and document incidents for proper management and follow-up'
       steps={steps}
       onComplete={handleComplete}
       allowSaveAndContinue={true}

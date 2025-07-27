@@ -1,10 +1,10 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MobileTable } from "@/components/ui/mobile-table";
-import { Skeleton } from "@/components/ui/skeleton";
-import { apiRequest } from "@/lib/queryClient";
-import { useQuery } from "@tanstack/react-query";
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { MobileTable } from '@/components/ui/mobile-table';
+import { Skeleton } from '@/components/ui/skeleton';
+import { apiRequest } from '@/lib/queryClient';
+import { useQuery } from '@tanstack/react-query';
 
 interface Property {
   id: number;
@@ -18,8 +18,8 @@ interface Property {
 
 export default function PropertiesTable() {
   const { data: properties, isLoading } = useQuery<Property[]>({
-    queryKey: ["/api/properties"],
-    queryFn: () => apiRequest("/api/properties"),
+    queryKey: ['/api/properties'],
+    queryFn: () => apiRequest('/api/properties'),
   });
 
   if (isLoading) {
@@ -29,9 +29,9 @@ export default function PropertiesTable() {
           <CardTitle>Properties Overview</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className='space-y-4'>
             {[...Array(3)].map((_, i) => (
-              <Skeleton key={i} className="h-16 w-full" />
+              <Skeleton key={i} className='h-16 w-full' />
             ))}
           </div>
         </CardContent>
@@ -41,19 +41,22 @@ export default function PropertiesTable() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "active":
-        return "bg-success bg-opacity-10 text-success";
-      case "maintenance":
-        return "bg-yellow-100 text-yellow-800";
-      case "inactive":
-        return "bg-gray-100 text-gray-600";
+      case 'active':
+        return 'bg-success bg-opacity-10 text-success';
+      case 'maintenance':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'inactive':
+        return 'bg-gray-100 text-gray-600';
       default:
-        return "bg-gray-100 text-gray-600";
+        return 'bg-gray-100 text-gray-600';
     }
   };
 
   const formatPropertyType = (type: string) => {
-    return type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    return type
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   };
 
   const columns = [
@@ -62,32 +65,35 @@ export default function PropertiesTable() {
       label: 'Property',
       render: (value: string, row: Property) => (
         <div>
-          <p className="font-medium text-slate text-sm">{value}</p>
-          <p className="text-xs text-gray-500 md:hidden">{formatPropertyType(row.propertyType)}</p>
-          <p className="text-xs text-gray-500 truncate max-w-[200px]">{row.address}</p>
+          <p className='font-medium text-slate text-sm'>{value}</p>
+          <p className='text-xs text-gray-500 md:hidden'>
+            {formatPropertyType(row.propertyType)}
+          </p>
+          <p className='text-xs text-gray-500 truncate max-w-[200px]'>
+            {row.address}
+          </p>
         </div>
-      )
+      ),
     },
     {
       key: 'propertyType',
       label: 'Type',
       render: (value: string) => formatPropertyType(value),
-      hideOnMobile: true
+      hideOnMobile: true,
     },
     {
       key: 'occupancy',
       label: 'Occupancy',
-      render: (value: any, row: Property) => `${row.occupiedUnits}/${row.totalUnits}`
+      render: (value: any, row: Property) =>
+        `${row.occupiedUnits}/${row.totalUnits}`,
     },
     {
       key: 'status',
       label: 'Status',
       render: (value: string) => (
-        <Badge className={`${getStatusColor(value)} text-xs`}>
-          {value}
-        </Badge>
-      )
-    }
+        <Badge className={`${getStatusColor(value)} text-xs`}>{value}</Badge>
+      ),
+    },
   ];
 
   const handleViewAll = () => {
@@ -96,14 +102,14 @@ export default function PropertiesTable() {
 
   return (
     <MobileTable
-      title="Properties Overview"
+      title='Properties Overview'
       data={properties?.slice(0, 3) || []}
       columns={columns}
       actions={
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="text-primary hover:text-blue-800 text-sm"
+        <Button
+          variant='ghost'
+          size='sm'
+          className='text-primary hover:text-blue-800 text-sm'
           onClick={handleViewAll}
         >
           View All

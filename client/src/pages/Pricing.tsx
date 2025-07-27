@@ -1,6 +1,13 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Check, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -92,7 +99,7 @@ export default function Pricing() {
   const [isAnnual, setIsAnnual] = useState(true);
   const { isAuthenticated } = useAuth();
 
-  const handleSubscribe = (tier: typeof pricingTiers[0]) => {
+  const handleSubscribe = (tier: (typeof pricingTiers)[0]) => {
     if (isAuthenticated) {
       // Navigate to subscription page
       window.location.href = `/subscribe?tier=${tier.name.toLowerCase()}`;
@@ -103,48 +110,51 @@ export default function Pricing() {
   };
 
   const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    "name": "YUTHUB Youth Housing Management Platform",
-    "description": "Comprehensive software solution for youth housing organizations in the UK",
-    "offers": pricingTiers.map(tier => ({
-      "@type": "Offer",
-      "name": `${tier.name} Plan`,
-      "price": isAnnual ? tier.annualPrice : tier.monthlyPrice,
-      "priceCurrency": "GBP",
-      "description": tier.description,
-      "eligibleQuantity": {
-        "@type": "QuantitativeValue",
-        "value": tier.maxResidents === 'Unlimited' ? 999999 : tier.maxResidents,
-        "unitText": "residents"
-      }
-    }))
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: 'YUTHUB Youth Housing Management Platform',
+    description:
+      'Comprehensive software solution for youth housing organizations in the UK',
+    offers: pricingTiers.map(tier => ({
+      '@type': 'Offer',
+      name: `${tier.name} Plan`,
+      price: isAnnual ? tier.annualPrice : tier.monthlyPrice,
+      priceCurrency: 'GBP',
+      description: tier.description,
+      eligibleQuantity: {
+        '@type': 'QuantitativeValue',
+        value: tier.maxResidents === 'Unlimited' ? 999999 : tier.maxResidents,
+        unitText: 'residents',
+      },
+    })),
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className='min-h-screen bg-gray-50'>
       <SEOHead
-        title="YUTHUB Pricing Plans | Youth Housing Management Software Costs"
-        description="Choose the perfect YUTHUB plan for your youth housing organization. Starter from £169/month, Professional from £429/month, Enterprise from £1,099/month. 15% discount on annual billing."
-        keywords="youth housing software pricing, UK housing management costs, social care platform pricing, supported housing software plans, council housing system pricing"
-        canonicalUrl="https://www.yuthub.com/pricing"
+        title='YUTHUB Pricing Plans | Youth Housing Management Software Costs'
+        description='Choose the perfect YUTHUB plan for your youth housing organization. Starter from £169/month, Professional from £429/month, Enterprise from £1,099/month. 15% discount on annual billing.'
+        keywords='youth housing software pricing, UK housing management costs, social care platform pricing, supported housing software plans, council housing system pricing'
+        canonicalUrl='https://www.yuthub.com/pricing'
         structuredData={structuredData}
       />
       <UniversalHeader />
-      <div className="max-w-7xl mx-auto py-12 px-4">
+      <div className='max-w-7xl mx-auto py-12 px-4'>
         <Breadcrumbs items={[{ label: 'Pricing' }]} />
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+        <div className='text-center mb-12'>
+          <h1 className='text-4xl font-bold text-gray-900 mb-4'>
             Choose Your YUTHUB Plan
           </h1>
-          <p className="text-xl text-gray-600 mb-8">
+          <p className='text-xl text-gray-600 mb-8'>
             Purpose-built for vulnerable youth housing sector
           </p>
-          
+
           {/* Billing Toggle */}
-          <div className="flex items-center justify-center space-x-4 mb-8">
-            <span className={`text-sm ${!isAnnual ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>
+          <div className='flex items-center justify-center space-x-4 mb-8'>
+            <span
+              className={`text-sm ${!isAnnual ? 'text-gray-900 font-medium' : 'text-gray-500'}`}
+            >
               Monthly
             </span>
             <button
@@ -159,69 +169,78 @@ export default function Pricing() {
                 }`}
               />
             </button>
-            <span className={`text-sm ${isAnnual ? 'text-gray-900 font-medium' : 'text-gray-500'}`}>
+            <span
+              className={`text-sm ${isAnnual ? 'text-gray-900 font-medium' : 'text-gray-500'}`}
+            >
               Annual
             </span>
-            <Badge variant="secondary" className="ml-2">
+            <Badge variant='secondary' className='ml-2'>
               Save 15%
             </Badge>
           </div>
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-          {pricingTiers.map((tier) => (
-            <Card key={tier.name} className={`relative ${tier.popular ? 'border-blue-500 border-2' : ''}`}>
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-8 mb-12'>
+          {pricingTiers.map(tier => (
+            <Card
+              key={tier.name}
+              className={`relative ${tier.popular ? 'border-blue-500 border-2' : ''}`}
+            >
               {tier.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-blue-600 text-white">Most Popular</Badge>
+                <div className='absolute -top-4 left-1/2 transform -translate-x-1/2'>
+                  <Badge className='bg-blue-600 text-white'>Most Popular</Badge>
                 </div>
               )}
-              
+
               <CardHeader>
-                <CardTitle className="text-2xl font-bold">{tier.name}</CardTitle>
-                <CardDescription className="text-gray-600">{tier.description}</CardDescription>
-                
-                <div className="mt-4">
-                  <div className="flex items-baseline">
-                    <span className="text-4xl font-bold text-gray-900">
+                <CardTitle className='text-2xl font-bold'>
+                  {tier.name}
+                </CardTitle>
+                <CardDescription className='text-gray-600'>
+                  {tier.description}
+                </CardDescription>
+
+                <div className='mt-4'>
+                  <div className='flex items-baseline'>
+                    <span className='text-4xl font-bold text-gray-900'>
                       £{isAnnual ? tier.annualPrice : tier.monthlyPrice}
                     </span>
-                    <span className="text-gray-500 ml-2">/month</span>
+                    <span className='text-gray-500 ml-2'>/month</span>
                   </div>
                   {isAnnual && (
-                    <div className="text-sm text-gray-500 mt-1">
+                    <div className='text-sm text-gray-500 mt-1'>
                       Billed annually (£{tier.annualPrice * 12})
                     </div>
                   )}
-                  <div className="text-sm text-gray-600 mt-2">
+                  <div className='text-sm text-gray-600 mt-2'>
                     Max residents: {tier.maxResidents}
                   </div>
                 </div>
               </CardHeader>
-              
+
               <CardContent>
-                <ul className="space-y-3">
+                <ul className='space-y-3'>
                   {tier.features.map((feature, index) => (
-                    <li key={index} className="flex items-start">
-                      <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-700">{feature}</span>
+                    <li key={index} className='flex items-start'>
+                      <Check className='h-5 w-5 text-green-500 mr-3 flex-shrink-0 mt-0.5' />
+                      <span className='text-gray-700'>{feature}</span>
                     </li>
                   ))}
                   {tier.excluded.map((feature, index) => (
-                    <li key={index} className="flex items-start opacity-50">
-                      <X className="h-5 w-5 text-gray-400 mr-3 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-500">{feature}</span>
+                    <li key={index} className='flex items-start opacity-50'>
+                      <X className='h-5 w-5 text-gray-400 mr-3 flex-shrink-0 mt-0.5' />
+                      <span className='text-gray-500'>{feature}</span>
                     </li>
                   ))}
                 </ul>
               </CardContent>
-              
+
               <CardFooter>
-                <Button 
+                <Button
                   onClick={() => handleSubscribe(tier)}
-                  className="w-full"
-                  variant={tier.popular ? "default" : "outline"}
+                  className='w-full'
+                  variant={tier.popular ? 'default' : 'outline'}
                 >
                   {isAuthenticated ? 'Subscribe Now' : 'Get Started'}
                 </Button>
@@ -231,12 +250,16 @@ export default function Pricing() {
         </div>
 
         {/* Additional Info */}
-        <div className="bg-white rounded-lg p-8 mb-8">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6">What's Included</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className='bg-white rounded-lg p-8 mb-8'>
+          <h3 className='text-2xl font-bold text-gray-900 mb-6'>
+            What's Included
+          </h3>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
             <div>
-              <h4 className="font-semibold text-gray-900 mb-3">Setup & Support</h4>
-              <ul className="space-y-2 text-gray-600">
+              <h4 className='font-semibold text-gray-900 mb-3'>
+                Setup & Support
+              </h4>
+              <ul className='space-y-2 text-gray-600'>
                 <li>• Free setup and onboarding</li>
                 <li>• Includes migration, training, configuration</li>
                 <li>• 30-day free trial</li>
@@ -244,8 +267,10 @@ export default function Pricing() {
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold text-gray-900 mb-3">ROI & Benefits</h4>
-              <ul className="space-y-2 text-gray-600">
+              <h4 className='font-semibold text-gray-900 mb-3'>
+                ROI & Benefits
+              </h4>
+              <ul className='space-y-2 text-gray-600'>
                 <li>• 200-400% ROI through efficiency gains</li>
                 <li>• Reduced administrative time</li>
                 <li>• Better outcomes tracking</li>
@@ -256,14 +281,15 @@ export default function Pricing() {
         </div>
 
         {/* CTA Section */}
-        <div className="text-center">
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">
+        <div className='text-center'>
+          <h3 className='text-2xl font-bold text-gray-900 mb-4'>
             Ready to Transform Your Youth Housing Management?
           </h3>
-          <p className="text-gray-600 mb-6">
-            Join hundreds of organizations already using YUTHUB to improve outcomes for vulnerable young people.
+          <p className='text-gray-600 mb-6'>
+            Join hundreds of organizations already using YUTHUB to improve
+            outcomes for vulnerable young people.
           </p>
-          <Button size="lg" className="px-8">
+          <Button size='lg' className='px-8'>
             Start Free Trial
           </Button>
         </div>

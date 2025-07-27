@@ -2,16 +2,16 @@
 
 /**
  * YUTHUB Database Validation Script
- * 
+ *
  * This script validates that all required database tables exist and are properly
  * structured according to the comprehensive audit requirements.
- * 
+ *
  * Usage: node scripts/validate-database-structure.js
  */
 
-import { db } from "../server/db.js";
-import { sql } from "drizzle-orm";
-import * as schema from "../shared/schema.js";
+import { db } from '../server/db.js';
+import { sql } from 'drizzle-orm';
+import * as schema from '../shared/schema.js';
 const { Pool } = require('pg');
 
 const pool = new Pool({
@@ -25,71 +25,72 @@ const colors = {
   yellow: '\x1b[33m',
   blue: '\x1b[34m',
   reset: '\x1b[0m',
-  bold: '\x1b[1m'
+  bold: '\x1b[1m',
 };
 
 // Helper function for colored output
-const log = (color, message) => console.log(`${colors[color]}${message}${colors.reset}`);
+const log = (color, message) =>
+  console.log(`${colors[color]}${message}${colors.reset}`);
 
 // Required table definitions with expected column counts
 const REQUIRED_TABLES = {
   // Core Application Tables
-  'users': { minColumns: 30, category: 'Core Authentication' },
-  'sessions': { minColumns: 3, category: 'Core Authentication' },
-  'properties': { minColumns: 8, category: 'Core Application' },
-  'residents': { minColumns: 15, category: 'Core Application' },
-  'incidents': { minColumns: 11, category: 'Core Application' },
-  'financial_records': { minColumns: 12, category: 'Core Application' },
-  'support_plans': { minColumns: 8, category: 'Core Application' },
-  'maintenance_requests': { minColumns: 18, category: 'Core Application' },
-  'activities': { minColumns: 7, category: 'Core Application' },
-  'invoices': { minColumns: 16, category: 'Core Application' },
-  'audit_logs': { minColumns: 10, category: 'Core Application' },
-  
+  users: { minColumns: 30, category: 'Core Authentication' },
+  sessions: { minColumns: 3, category: 'Core Authentication' },
+  properties: { minColumns: 8, category: 'Core Application' },
+  residents: { minColumns: 15, category: 'Core Application' },
+  incidents: { minColumns: 11, category: 'Core Application' },
+  financial_records: { minColumns: 12, category: 'Core Application' },
+  support_plans: { minColumns: 8, category: 'Core Application' },
+  maintenance_requests: { minColumns: 18, category: 'Core Application' },
+  activities: { minColumns: 7, category: 'Core Application' },
+  invoices: { minColumns: 16, category: 'Core Application' },
+  audit_logs: { minColumns: 10, category: 'Core Application' },
+
   // Platform Admin Tables
-  'subscription_plans': { minColumns: 17, category: 'Platform Admin' },
-  'organizations': { minColumns: 18, category: 'Platform Admin' },
-  'organization_subscriptions': { minColumns: 19, category: 'Platform Admin' },
-  'platform_users': { minColumns: 12, category: 'Platform Admin' },
-  'usage_tracking': { minColumns: 11, category: 'Platform Admin' },
-  'platform_audit_logs': { minColumns: 11, category: 'Platform Admin' },
-  'system_metrics': { minColumns: 6, category: 'Platform Admin' },
-  'feature_toggles': { minColumns: 9, category: 'Platform Admin' },
-  'payment_transactions': { minColumns: 16, category: 'Platform Admin' },
-  
+  subscription_plans: { minColumns: 17, category: 'Platform Admin' },
+  organizations: { minColumns: 18, category: 'Platform Admin' },
+  organization_subscriptions: { minColumns: 19, category: 'Platform Admin' },
+  platform_users: { minColumns: 12, category: 'Platform Admin' },
+  usage_tracking: { minColumns: 11, category: 'Platform Admin' },
+  platform_audit_logs: { minColumns: 11, category: 'Platform Admin' },
+  system_metrics: { minColumns: 6, category: 'Platform Admin' },
+  feature_toggles: { minColumns: 9, category: 'Platform Admin' },
+  payment_transactions: { minColumns: 16, category: 'Platform Admin' },
+
   // Authentication Tables
-  'user_auth_methods': { minColumns: 11, category: 'Authentication' },
-  'user_sessions': { minColumns: 8, category: 'Authentication' },
-  'auth_audit_log': { minColumns: 10, category: 'Authentication' },
-  'api_tokens': { minColumns: 8, category: 'Authentication' },
-  'account_lockouts': { minColumns: 8, category: 'Authentication' },
-  
+  user_auth_methods: { minColumns: 11, category: 'Authentication' },
+  user_sessions: { minColumns: 8, category: 'Authentication' },
+  auth_audit_log: { minColumns: 10, category: 'Authentication' },
+  api_tokens: { minColumns: 8, category: 'Authentication' },
+  account_lockouts: { minColumns: 8, category: 'Authentication' },
+
   // Extended Housing Management
-  'document_storage': { minColumns: 20, category: 'Document Management' },
-  'file_sharing': { minColumns: 9, category: 'Document Management' },
-  'communication_logs': { minColumns: 12, category: 'Communication' },
-  'calendar_events': { minColumns: 17, category: 'Scheduling' },
-  'risk_assessments': { minColumns: 15, category: 'Risk Management' },
-  'emergency_contacts': { minColumns: 13, category: 'Emergency Response' },
-  'move_records': { minColumns: 16, category: 'Tenancy Management' },
-  'rent_payments': { minColumns: 15, category: 'Financial Management' },
-  'contractors': { minColumns: 16, category: 'Maintenance' },
-  'inspections': { minColumns: 15, category: 'Compliance' },
-  'notifications': { minColumns: 14, category: 'System Management' },
-  
+  document_storage: { minColumns: 20, category: 'Document Management' },
+  file_sharing: { minColumns: 9, category: 'Document Management' },
+  communication_logs: { minColumns: 12, category: 'Communication' },
+  calendar_events: { minColumns: 17, category: 'Scheduling' },
+  risk_assessments: { minColumns: 15, category: 'Risk Management' },
+  emergency_contacts: { minColumns: 13, category: 'Emergency Response' },
+  move_records: { minColumns: 16, category: 'Tenancy Management' },
+  rent_payments: { minColumns: 15, category: 'Financial Management' },
+  contractors: { minColumns: 16, category: 'Maintenance' },
+  inspections: { minColumns: 15, category: 'Compliance' },
+  notifications: { minColumns: 14, category: 'System Management' },
+
   // Billing System
-  'government_clients': { minColumns: 11, category: 'Government Billing' },
-  'billing_periods': { minColumns: 13, category: 'Government Billing' },
-  'invoice_line_items': { minColumns: 8, category: 'Government Billing' },
-  
+  government_clients: { minColumns: 11, category: 'Government Billing' },
+  billing_periods: { minColumns: 13, category: 'Government Billing' },
+  invoice_line_items: { minColumns: 8, category: 'Government Billing' },
+
   // Additional Management Tables
-  'property_rooms': { minColumns: 11, category: 'Property Management' },
-  'staff_members': { minColumns: 15, category: 'Staff Management' },
-  'tenancy_agreements': { minColumns: 15, category: 'Legal Documentation' },
-  'assessment_forms': { minColumns: 10, category: 'Assessment' },
-  'progress_tracking': { minColumns: 12, category: 'Progress Monitoring' },
-  'referrals': { minColumns: 15, category: 'External Services' },
-  'outcomes_tracking': { minColumns: 16, category: 'Performance Metrics' }
+  property_rooms: { minColumns: 11, category: 'Property Management' },
+  staff_members: { minColumns: 15, category: 'Staff Management' },
+  tenancy_agreements: { minColumns: 15, category: 'Legal Documentation' },
+  assessment_forms: { minColumns: 10, category: 'Assessment' },
+  progress_tracking: { minColumns: 12, category: 'Progress Monitoring' },
+  referrals: { minColumns: 15, category: 'External Services' },
+  outcomes_tracking: { minColumns: 16, category: 'Performance Metrics' },
 };
 
 // Critical foreign key relationships to verify
@@ -99,23 +100,35 @@ const CRITICAL_FOREIGN_KEYS = [
   { table: 'incidents', column: 'property_id', references: 'properties.id' },
   { table: 'incidents', column: 'resident_id', references: 'residents.id' },
   { table: 'support_plans', column: 'resident_id', references: 'residents.id' },
-  { table: 'financial_records', column: 'property_id', references: 'properties.id' },
-  { table: 'organization_subscriptions', column: 'organization_id', references: 'organizations.id' },
+  {
+    table: 'financial_records',
+    column: 'property_id',
+    references: 'properties.id',
+  },
+  {
+    table: 'organization_subscriptions',
+    column: 'organization_id',
+    references: 'organizations.id',
+  },
   { table: 'platform_users', column: 'user_id', references: 'users.id' },
   { table: 'user_auth_methods', column: 'user_id', references: 'users.id' },
-  { table: 'maintenance_requests', column: 'property_id', references: 'properties.id' }
+  {
+    table: 'maintenance_requests',
+    column: 'property_id',
+    references: 'properties.id',
+  },
 ];
 
 // Critical indexes for performance
 const CRITICAL_INDEXES = [
   'idx_residents_property_id',
-  'idx_residents_key_worker_id', 
+  'idx_residents_key_worker_id',
   'idx_incidents_severity',
   'idx_financial_records_date',
   'idx_organization_subscriptions_organization_id',
   'idx_user_auth_methods_user_id',
   'idx_activities_created_at',
-  'idx_audit_logs_timestamp'
+  'idx_audit_logs_timestamp',
 ];
 
 class DatabaseValidator {
@@ -125,21 +138,21 @@ class DatabaseValidator {
       foreignKeys: { passed: 0, failed: 0, details: [] },
       indexes: { passed: 0, failed: 0, details: [] },
       connectivity: { passed: 0, failed: 0, details: [] },
-      performance: { passed: 0, failed: 0, details: [] }
+      performance: { passed: 0, failed: 0, details: [] },
     };
   }
 
   async validateDatabaseConnectivity() {
     log('blue', '\n🔌 Testing Database Connectivity...');
-    
+
     try {
       const start = Date.now();
       await db.execute(sql`SELECT 1 as test`);
       const duration = Date.now() - start;
-      
+
       log('green', `✅ Database connection successful (${duration}ms)`);
       this.results.connectivity.passed++;
-      
+
       if (duration < 100) {
         log('green', '✅ Excellent response time');
         this.results.performance.passed++;
@@ -150,7 +163,6 @@ class DatabaseValidator {
         log('yellow', '⚠️  Slow response time - consider optimization');
         this.results.performance.failed++;
       }
-      
     } catch (error) {
       log('red', `❌ Database connection failed: ${error.message}`);
       this.results.connectivity.failed++;
@@ -160,7 +172,7 @@ class DatabaseValidator {
 
   async validateTableStructure() {
     log('blue', '\n📋 Validating Table Structure...');
-    
+
     try {
       // Get all tables with column counts
       const tableInfo = await db.execute(sql`
@@ -180,11 +192,12 @@ class DatabaseValidator {
 
       // Check each required table
       const categories = {};
-      
+
       for (const [tableName, requirements] of Object.entries(REQUIRED_TABLES)) {
         const category = requirements.category;
-        if (!categories[category]) categories[category] = { passed: 0, failed: 0 };
-        
+        if (!categories[category])
+          categories[category] = { passed: 0, failed: 0 };
+
         if (existingTables[tableName]) {
           const actualColumns = existingTables[tableName];
           if (actualColumns >= requirements.minColumns) {
@@ -192,7 +205,10 @@ class DatabaseValidator {
             this.results.tables.passed++;
             categories[category].passed++;
           } else {
-            log('yellow', `⚠️  ${tableName} (${actualColumns}/${requirements.minColumns} columns - missing columns)`);
+            log(
+              'yellow',
+              `⚠️  ${tableName} (${actualColumns}/${requirements.minColumns} columns - missing columns)`
+            );
             this.results.tables.failed++;
             categories[category].failed++;
           }
@@ -208,10 +224,13 @@ class DatabaseValidator {
       for (const [category, stats] of Object.entries(categories)) {
         const total = stats.passed + stats.failed;
         const percentage = Math.round((stats.passed / total) * 100);
-        const status = percentage === 100 ? '✅' : percentage >= 80 ? '⚠️' : '❌';
-        log('blue', `${status} ${category}: ${stats.passed}/${total} tables (${percentage}%)`);
+        const status =
+          percentage === 100 ? '✅' : percentage >= 80 ? '⚠️' : '❌';
+        log(
+          'blue',
+          `${status} ${category}: ${stats.passed}/${total} tables (${percentage}%)`
+        );
       }
-
     } catch (error) {
       log('red', `❌ Table structure validation failed: ${error.message}`);
       this.results.tables.failed++;
@@ -220,7 +239,7 @@ class DatabaseValidator {
 
   async validateForeignKeys() {
     log('blue', '\n🔗 Validating Foreign Key Relationships...');
-    
+
     try {
       // Get all foreign key constraints
       const foreignKeys = await db.execute(sql`
@@ -239,8 +258,9 @@ class DatabaseValidator {
         ORDER BY tc.table_name, kcu.column_name
       `);
 
-      const existingFKs = foreignKeys.map(fk => 
-        `${fk.table_name}.${fk.column_name} -> ${fk.foreign_table_name}.${fk.foreign_column_name}`
+      const existingFKs = foreignKeys.map(
+        fk =>
+          `${fk.table_name}.${fk.column_name} -> ${fk.foreign_table_name}.${fk.foreign_column_name}`
       );
 
       // Check critical foreign keys
@@ -255,8 +275,10 @@ class DatabaseValidator {
         }
       }
 
-      log('blue', `\n📊 Foreign Key Summary: ${foreignKeys.length} total relationships found`);
-
+      log(
+        'blue',
+        `\n📊 Foreign Key Summary: ${foreignKeys.length} total relationships found`
+      );
     } catch (error) {
       log('red', `❌ Foreign key validation failed: ${error.message}`);
       this.results.foreignKeys.failed++;
@@ -265,7 +287,7 @@ class DatabaseValidator {
 
   async validateIndexes() {
     log('blue', '\n🚀 Validating Performance Indexes...');
-    
+
     try {
       // Get all indexes
       const indexes = await db.execute(sql`
@@ -279,7 +301,7 @@ class DatabaseValidator {
       `);
 
       const existingIndexes = indexes.map(idx => idx.index_name);
-      
+
       // Check critical indexes
       for (const indexName of CRITICAL_INDEXES) {
         if (existingIndexes.includes(indexName)) {
@@ -292,7 +314,6 @@ class DatabaseValidator {
       }
 
       log('blue', `\n📊 Index Summary: ${indexes.length} total indexes found`);
-
     } catch (error) {
       log('red', `❌ Index validation failed: ${error.message}`);
       this.results.indexes.failed++;
@@ -301,14 +322,28 @@ class DatabaseValidator {
 
   async validateDataIntegrity() {
     log('blue', '\n🔍 Validating Data Integrity...');
-    
+
     try {
       // Test basic queries on core tables
       const coreTableTests = [
-        { name: 'users', query: () => db.execute(sql`SELECT COUNT(*) as count FROM users`) },
-        { name: 'properties', query: () => db.execute(sql`SELECT COUNT(*) as count FROM properties`) },
-        { name: 'residents', query: () => db.execute(sql`SELECT COUNT(*) as count FROM residents`) },
-        { name: 'organizations', query: () => db.execute(sql`SELECT COUNT(*) as count FROM organizations`) }
+        {
+          name: 'users',
+          query: () => db.execute(sql`SELECT COUNT(*) as count FROM users`),
+        },
+        {
+          name: 'properties',
+          query: () =>
+            db.execute(sql`SELECT COUNT(*) as count FROM properties`),
+        },
+        {
+          name: 'residents',
+          query: () => db.execute(sql`SELECT COUNT(*) as count FROM residents`),
+        },
+        {
+          name: 'organizations',
+          query: () =>
+            db.execute(sql`SELECT COUNT(*) as count FROM organizations`),
+        },
       ];
 
       for (const test of coreTableTests) {
@@ -322,7 +357,6 @@ class DatabaseValidator {
           this.results.performance.failed++;
         }
       }
-
     } catch (error) {
       log('red', `❌ Data integrity validation failed: ${error.message}`);
       this.results.performance.failed++;
@@ -330,13 +364,15 @@ class DatabaseValidator {
   }
 
   calculateOverallScore() {
-    const total = Object.values(this.results).reduce((sum, category) => 
-      sum + category.passed + category.failed, 0
+    const total = Object.values(this.results).reduce(
+      (sum, category) => sum + category.passed + category.failed,
+      0
     );
-    const passed = Object.values(this.results).reduce((sum, category) => 
-      sum + category.passed, 0
+    const passed = Object.values(this.results).reduce(
+      (sum, category) => sum + category.passed,
+      0
     );
-    
+
     return total > 0 ? Math.round((passed / total) * 100) : 0;
   }
 
@@ -350,26 +386,36 @@ class DatabaseValidator {
       { name: 'Table Structure', ...this.results.tables },
       { name: 'Foreign Keys', ...this.results.foreignKeys },
       { name: 'Performance Indexes', ...this.results.indexes },
-      { name: 'Data Integrity', ...this.results.performance }
+      { name: 'Data Integrity', ...this.results.performance },
     ];
 
     categories.forEach(category => {
       const total = category.passed + category.failed;
-      const percentage = total > 0 ? Math.round((category.passed / total) * 100) : 0;
+      const percentage =
+        total > 0 ? Math.round((category.passed / total) * 100) : 0;
       const status = percentage === 100 ? '✅' : percentage >= 80 ? '⚠️' : '❌';
-      
-      log('blue', `${status} ${category.name}: ${category.passed}/${total} (${percentage}%)`);
+
+      log(
+        'blue',
+        `${status} ${category.name}: ${category.passed}/${total} (${percentage}%)`
+      );
     });
 
     const overallScore = this.calculateOverallScore();
     log('blue', '\n' + '='.repeat(60));
-    
+
     if (overallScore >= 95) {
       log('green', `🎉 EXCELLENT: Database validation score ${overallScore}%`);
-      log('green', '✅ Database is production-ready with excellent configuration');
+      log(
+        'green',
+        '✅ Database is production-ready with excellent configuration'
+      );
     } else if (overallScore >= 90) {
       log('green', `✅ VERY GOOD: Database validation score ${overallScore}%`);
-      log('green', '✅ Database is production-ready with minor optimizations needed');
+      log(
+        'green',
+        '✅ Database is production-ready with minor optimizations needed'
+      );
     } else if (overallScore >= 80) {
       log('yellow', `⚠️  GOOD: Database validation score ${overallScore}%`);
       log('yellow', '⚠️  Database needs some improvements before production');
@@ -383,7 +429,10 @@ class DatabaseValidator {
 
   async run() {
     log('bold', '🔍 YUTHUB Database Validation');
-    log('blue', 'Validating database structure, relationships, and performance...\n');
+    log(
+      'blue',
+      'Validating database structure, relationships, and performance...\n'
+    );
 
     try {
       await this.validateDatabaseConnectivity();
@@ -391,12 +440,11 @@ class DatabaseValidator {
       await this.validateForeignKeys();
       await this.validateIndexes();
       await this.validateDataIntegrity();
-      
+
       this.printSummary();
-      
+
       const overallScore = this.calculateOverallScore();
       process.exit(overallScore >= 80 ? 0 : 1);
-      
     } catch (error) {
       log('red', `\n❌ Validation failed: ${error.message}`);
       process.exit(1);
@@ -407,7 +455,10 @@ class DatabaseValidator {
 // Handle environment check
 if (!process.env.DATABASE_URL) {
   log('red', '❌ DATABASE_URL environment variable is not set');
-  log('yellow', 'Please ensure your database is configured before running validation');
+  log(
+    'yellow',
+    'Please ensure your database is configured before running validation'
+  );
   process.exit(1);
 }
 
@@ -436,7 +487,7 @@ async function validateDatabaseStructure() {
     `;
 
     const { rows: coreColumns } = await pool.query(coreTableQuery);
-    
+
     // Group by table
     const tableStructure = {};
     coreColumns.forEach(row => {
@@ -446,7 +497,7 @@ async function validateDatabaseStructure() {
       tableStructure[row.table_name].push({
         column: row.column_name,
         type: row.data_type,
-        nullable: row.is_nullable === 'YES'
+        nullable: row.is_nullable === 'YES',
       });
     });
 
@@ -505,8 +556,12 @@ async function validateDatabaseStructure() {
       OR table_name IN ('organizations', 'platform_users', 'usage_tracking');
     `;
 
-    const { rows: subscriptionTables } = await pool.query(subscriptionTablesQuery);
-    console.log(`\n✅ Subscription Management Tables: ${subscriptionTables.length} found`);
+    const { rows: subscriptionTables } = await pool.query(
+      subscriptionTablesQuery
+    );
+    console.log(
+      `\n✅ Subscription Management Tables: ${subscriptionTables.length} found`
+    );
 
     // Check authentication tables
     const authTablesQuery = `
@@ -524,7 +579,6 @@ async function validateDatabaseStructure() {
     console.log('✅ Foreign key relationships intact');
     console.log('✅ Performance indexes configured');
     console.log('✅ Multi-tenant architecture ready');
-
   } catch (error) {
     console.error('❌ Database validation failed:', error.message);
     process.exit(1);

@@ -7,6 +7,7 @@ All application components have been successfully migrated to **www.yuthub.com**
 ## Updated Components
 
 ### Frontend Updates
+
 - ✅ All SEO meta tags updated to use www.yuthub.com
 - ✅ Canonical URLs updated across all pages
 - ✅ Structured data markup updated
@@ -15,12 +16,14 @@ All application components have been successfully migrated to **www.yuthub.com**
 - ✅ All static pages (Privacy, Terms, Cookies, Accessibility) updated
 
 ### Backend Updates
+
 - ✅ CORS configuration updated for production and development
 - ✅ OAuth callback URLs configured with dynamic domain support
 - ✅ Session cookie domain properly configured
 - ✅ Authentication system updated for production
 
 ### Configuration Files
+
 - ✅ `.env.production` created with production settings
 - ✅ `deploy.sh` script created for production deployment
 - ✅ Dynamic environment-based configuration implemented
@@ -39,14 +42,17 @@ COOKIE_SAME_SITE=lax
 ## OAuth Provider Configuration Required
 
 ### Google OAuth Console
+
 - Update redirect URI: `https://www.yuthub.com/auth/google/callback`
 - Authorized domains: `yuthub.com`
 
 ### Microsoft Azure AD
+
 - Update redirect URI: `https://www.yuthub.com/auth/microsoft/callback`
 - Authorized domains: `yuthub.com`
 
 ### Apple Sign-In
+
 - Update redirect URI: `https://www.yuthub.com/auth/apple/callback`
 - Authorized domains: `yuthub.com`
 

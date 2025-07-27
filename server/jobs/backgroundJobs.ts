@@ -13,40 +13,64 @@ class BackgroundJobScheduler {
 
   start(): void {
     if (this.isRunning) return;
-    
+
     this.isRunning = true;
     console.log('Starting background job scheduler...');
 
     // Schedule maintenance notifications check every 15 minutes
-    this.scheduleJob('maintenanceNotifications', 15 * 60 * 1000, this.checkMaintenanceNotifications);
+    this.scheduleJob(
+      'maintenanceNotifications',
+      15 * 60 * 1000,
+      this.checkMaintenanceNotifications
+    );
 
     // Schedule incident escalation check every 5 minutes
-    this.scheduleJob('incidentEscalation', 5 * 60 * 1000, this.checkIncidentEscalation);
+    this.scheduleJob(
+      'incidentEscalation',
+      5 * 60 * 1000,
+      this.checkIncidentEscalation
+    );
 
     // Schedule daily report generation at 2 AM
     this.scheduleDailyJob('dailyReports', 2, 0, this.generateDailyReports);
 
     // Schedule session cleanup every hour
-    this.scheduleJob('sessionCleanup', 60 * 60 * 1000, this.cleanupExpiredSessions);
+    this.scheduleJob(
+      'sessionCleanup',
+      60 * 60 * 1000,
+      this.cleanupExpiredSessions
+    );
 
     // Schedule metric aggregation every 30 minutes
-    this.scheduleJob('metricAggregation', 30 * 60 * 1000, this.aggregateMetrics);
+    this.scheduleJob(
+      'metricAggregation',
+      30 * 60 * 1000,
+      this.aggregateMetrics
+    );
 
     // Schedule data backup every 6 hours
     this.scheduleJob('dataBackup', 6 * 60 * 60 * 1000, this.performDataBackup);
 
     // Schedule data integrity check every 2 hours
-    this.scheduleJob('dataIntegrityCheck', 2 * 60 * 60 * 1000, this.performDataIntegrityCheck);
+    this.scheduleJob(
+      'dataIntegrityCheck',
+      2 * 60 * 60 * 1000,
+      this.performDataIntegrityCheck
+    );
   }
 
   stop(): void {
     this.isRunning = false;
-    this.intervals.forEach((interval) => clearInterval(interval));
+    this.intervals.forEach(interval => clearInterval(interval));
     this.intervals.clear();
     console.log('Background job scheduler stopped');
   }
 
-  private scheduleJob(name: string, interval: number, job: () => Promise<void>): void {
+  private scheduleJob(
+    name: string,
+    interval: number,
+    job: () => Promise<void>
+  ): void {
     const intervalId = setInterval(async () => {
       try {
         console.log(`Running background job: ${name}`);
@@ -61,7 +85,12 @@ class BackgroundJobScheduler {
     console.log(`Scheduled job: ${name} (every ${interval}ms)`);
   }
 
-  private scheduleDailyJob(name: string, hour: number, minute: number, job: () => Promise<void>): void {
+  private scheduleDailyJob(
+    name: string,
+    hour: number,
+    minute: number,
+    job: () => Promise<void>
+  ): void {
     const scheduleNextRun = () => {
       const now = new Date();
       const targetTime = new Date();
@@ -82,7 +111,7 @@ class BackgroundJobScheduler {
         } catch (error) {
           console.error(`Error in daily job ${name}:`, error);
         }
-        
+
         // Schedule next run
         scheduleNextRun();
       }, timeToWait);
@@ -184,16 +213,13 @@ class BackgroundJobScheduler {
 
     // Get daily metrics
     const metrics = await storage.getDashboardMetrics();
-    
+
     // Get new incidents from yesterday
     const newIncidents = await db
       .select()
       .from(incidents)
       .where(
-        and(
-          gt(incidents.createdAt, yesterday),
-          lt(incidents.createdAt, today)
-        )
+        and(gt(incidents.createdAt, yesterday), lt(incidents.createdAt, today))
       );
 
     // Get resolved incidents from yesterday
@@ -214,8 +240,8 @@ class BackgroundJobScheduler {
       incidents: {
         new: newIncidents.length,
         resolved: resolvedIncidents.length,
-        breakdown: this.categorizeIncidents(newIncidents)
-      }
+        breakdown: this.categorizeIncidents(newIncidents),
+      },
     };
 
     // Store daily summary (you might want to save this to a reports table)
@@ -231,7 +257,9 @@ class BackgroundJobScheduler {
       const result = await db.execute(
         sql`DELETE FROM sessions WHERE expire < NOW()`
       );
-      console.log(`Cleaned up expired sessions: ${result.rowCount || 0} sessions removed`);
+      console.log(
+        `Cleaned up expired sessions: ${result.rowCount || 0} sessions removed`
+      );
     } catch (error) {
       console.error('Error cleaning up expired sessions:', error);
     }
@@ -249,18 +277,17 @@ class BackgroundJobScheduler {
   private performDataBackup = async (): Promise<void> => {
     try {
       console.log('🔄 Enhanced backup initiated at:', new Date().toISOString());
-      
+
       // Create comprehensive backup
       const result = await backupManager.createBackup('full');
-      
+
       console.log('✅ Enhanced backup completed:', result);
-      
+
       // Clean up old backups
       await backupManager.cleanupOldBackups();
-      
     } catch (error) {
       console.error('❌ Enhanced backup failed:', error);
-      
+
       // Send alert to administrators
       console.error('🚨 ALERT: Enhanced backup failed - notify administrators');
     }
@@ -269,22 +296,28 @@ class BackgroundJobScheduler {
   // Perform data integrity check
   private performDataIntegrityCheck = async (): Promise<void> => {
     try {
-      console.log('Data integrity check initiated at:', new Date().toISOString());
-      
-      const integrityResult = await DataIntegrityChecker.runFullIntegrityCheck();
-      
+      console.log(
+        'Data integrity check initiated at:',
+        new Date().toISOString()
+      );
+
+      const integrityResult =
+        await DataIntegrityChecker.runFullIntegrityCheck();
+
       // Check for critical issues
-      const hasCriticalIssues = 
+      const hasCriticalIssues =
         integrityResult.orphanedRecords.orphanedResidents > 0 ||
         integrityResult.orphanedRecords.orphanedIncidents > 0 ||
         integrityResult.dataConsistency.dateInconsistencies > 0;
-      
+
       if (hasCriticalIssues) {
         console.warn('Data integrity issues detected:', integrityResult);
-        
+
         // Send alert to administrators
         // Note: In a real implementation, you would use a proper notification system
-        console.warn('ALERT: Data integrity issues detected - notify administrators');
+        console.warn(
+          'ALERT: Data integrity issues detected - notify administrators'
+        );
         console.warn('Details:', integrityResult);
       } else {
         console.log('Data integrity check passed:', integrityResult);
@@ -295,9 +328,12 @@ class BackgroundJobScheduler {
   };
 
   // Send maintenance notification
-  private sendMaintenanceNotification = async (request: any, type: string): Promise<void> => {
+  private sendMaintenanceNotification = async (
+    request: any,
+    type: string
+  ): Promise<void> => {
     const wsManager = WebSocketManager.getInstance();
-    
+
     const notification = {
       type: 'maintenance_notification',
       data: {
@@ -306,18 +342,25 @@ class BackgroundJobScheduler {
         priority: request.priority,
         notificationType: type,
         message: this.getMaintenanceMessage(request, type),
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     };
 
     // Broadcast to facility managers and maintenance staff
-    wsManager.broadcastToRoles(notification, ['admin', 'manager', 'maintenance_staff']);
+    wsManager.broadcastToRoles(notification, [
+      'admin',
+      'manager',
+      'maintenance_staff',
+    ]);
   };
 
   // Send incident escalation
-  private sendIncidentEscalation = async (incident: any, type: string): Promise<void> => {
+  private sendIncidentEscalation = async (
+    incident: any,
+    type: string
+  ): Promise<void> => {
     const wsManager = WebSocketManager.getInstance();
-    
+
     const escalation = {
       type: 'incident_escalation',
       data: {
@@ -326,24 +369,28 @@ class BackgroundJobScheduler {
         severity: incident.severity,
         escalationType: type,
         message: this.getEscalationMessage(incident, type),
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     };
 
     // Broadcast to management and safeguarding officers
-    wsManager.broadcastToRoles(escalation, ['admin', 'manager', 'safeguarding_officer']);
+    wsManager.broadcastToRoles(escalation, [
+      'admin',
+      'manager',
+      'safeguarding_officer',
+    ]);
   };
 
   // Send daily summary
   private sendDailySummary = async (summary: any): Promise<void> => {
     const wsManager = WebSocketManager.getInstance();
-    
+
     const summaryNotification = {
       type: 'daily_summary',
       data: {
         summary,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     };
 
     // Send to administrators
@@ -375,9 +422,10 @@ class BackgroundJobScheduler {
 
   private categorizeIncidents(incidents: any[]): Record<string, number> {
     const categories: Record<string, number> = {};
-    
+
     incidents.forEach(incident => {
-      categories[incident.incidentType] = (categories[incident.incidentType] || 0) + 1;
+      categories[incident.incidentType] =
+        (categories[incident.incidentType] || 0) + 1;
     });
 
     return categories;

@@ -5,6 +5,7 @@ A comprehensive SaaS platform for youth housing organizations, providing advance
 ## 🚀 Features
 
 ### Core Functionality
+
 - **Housing Management**: Property tracking, resident management, occupancy monitoring
 - **Support Services**: Individual support plans, progress tracking, outcome monitoring
 - **Safeguarding**: Incident reporting, risk assessment, crisis response
@@ -13,6 +14,7 @@ A comprehensive SaaS platform for youth housing organizations, providing advance
 - **Crisis Connect**: Emergency response system with 24/7 support access
 
 ### Technical Features
+
 - **Multi-tenant Architecture**: Organization-level data isolation
 - **Role-based Access Control**: Staff, coordinators, managers, admin roles
 - **Real-time Updates**: WebSocket integration for live data synchronization
@@ -23,6 +25,7 @@ A comprehensive SaaS platform for youth housing organizations, providing advance
 ## 🏗️ Architecture
 
 ### Technology Stack
+
 - **Frontend**: React 18 with TypeScript, Vite
 - **Backend**: Node.js with Express.js
 - **Database**: PostgreSQL via Neon Database with Drizzle ORM
@@ -32,6 +35,7 @@ A comprehensive SaaS platform for youth housing organizations, providing advance
 - **Routing**: Wouter for client-side routing
 
 ### Project Structure
+
 ```
 ├── client/                 # React frontend application
 │   ├── src/
@@ -51,11 +55,13 @@ A comprehensive SaaS platform for youth housing organizations, providing advance
 ## 🛠️ Installation & Setup
 
 ### Prerequisites
-- Node.js 20+ 
+
+- Node.js 20+
 - PostgreSQL database
 - Environment variables configured
 
 ### Quick Start
+
 ```bash
 # Clone the repository
 git clone <repository-url>
@@ -76,6 +82,7 @@ npm run dev
 ```
 
 ### Environment Variables
+
 ```env
 DATABASE_URL=your_postgresql_connection_string
 SESSION_SECRET=your_session_secret
@@ -87,6 +94,7 @@ NODE_ENV=development
 ## 📊 Database Schema
 
 ### Core Entities
+
 - **Users**: Staff authentication and profiles
 - **Organizations**: Multi-tenant organization management
 - **Properties**: Housing units with capacity tracking
@@ -97,6 +105,7 @@ NODE_ENV=development
 - **Financial Records**: Billing and cost tracking
 
 ### Features
+
 - **Comprehensive Indexing**: Optimized for performance
 - **Foreign Key Relationships**: Data integrity enforcement
 - **Audit Trails**: Complete change tracking
@@ -105,12 +114,14 @@ NODE_ENV=development
 ## 🔐 Security Features
 
 ### Authentication
+
 - **Multi-method Authentication**: OIDC, OAuth, email/password
 - **Session Management**: Secure PostgreSQL-backed sessions
 - **MFA Support**: Time-based OTP authentication
 - **Account Security**: Lockout protection, password policies
 
 ### Authorization
+
 - **Role-based Access Control**: Granular permissions system
 - **Data Isolation**: Organization-level security boundaries
 - **API Protection**: Rate limiting, input validation
@@ -119,6 +130,7 @@ NODE_ENV=development
 ## 🚀 Deployment
 
 ### Production Checklist
+
 - [ ] SSL certificates configured
 - [ ] Environment variables set
 - [ ] Database migrations applied
@@ -127,6 +139,7 @@ NODE_ENV=development
 - [ ] Backup procedures established
 
 ### Deployment Options
+
 - **Replit Deployments**: One-click deployment with automatic scaling
 - **Self-hosted**: Deploy to your own infrastructure
 - **Cloud Providers**: AWS, Google Cloud, Azure compatible
@@ -134,6 +147,7 @@ NODE_ENV=development
 ## 📈 Performance
 
 ### Optimizations
+
 - **Connection Pooling**: Optimized database connections
 - **Memory Management**: Real-time monitoring and cleanup
 - **Caching**: LRU caching for frequently accessed data
@@ -141,6 +155,7 @@ NODE_ENV=development
 - **Query Optimization**: Indexed queries and performance monitoring
 
 ### Monitoring
+
 - Health check endpoints
 - Memory usage tracking
 - Request performance metrics
@@ -150,6 +165,7 @@ NODE_ENV=development
 ## 🤝 Contributing
 
 ### Development Guidelines
+
 - Follow TypeScript best practices
 - Use Prettier for code formatting
 - Write tests for critical functionality
@@ -157,6 +173,7 @@ NODE_ENV=development
 - Follow semantic versioning
 
 ### Code Style
+
 - Use consistent naming conventions
 - Keep functions focused and testable
 - Implement proper error handling
@@ -165,11 +182,13 @@ NODE_ENV=development
 ## 📝 API Documentation
 
 ### Authentication Endpoints
+
 - `GET /api/auth/user` - Get current user
 - `POST /api/auth/login` - Email/password login
 - `GET /api/auth/callback` - OAuth callback
 
 ### Core API Routes
+
 - `GET /api/dashboard/metrics` - Dashboard statistics
 - `GET /api/properties` - Property management
 - `GET /api/residents` - Resident management
@@ -179,12 +198,14 @@ NODE_ENV=development
 ## 🆘 Support
 
 ### Documentation
+
 - [Setup Guide](docs/SETUP.md)
 - [API Reference](docs/API.md)
 - [Deployment Guide](docs/DEPLOYMENT.md)
 - [Security Guide](docs/SECURITY.md)
 
 ### Help Resources
+
 - Issue tracking via GitHub Issues
 - Community discussions
 - Documentation wiki

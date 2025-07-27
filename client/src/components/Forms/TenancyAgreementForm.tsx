@@ -1,23 +1,39 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import { insertTenancyAgreementSchema } from "@shared/schema";
-import { FileText, Home, User, DollarSign, Calendar } from "lucide-react";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
+import { insertTenancyAgreementSchema } from '@shared/schema';
+import { FileText, Home, User, DollarSign, Calendar } from 'lucide-react';
 
 interface TenancyAgreementFormProps {
   onSuccess?: () => void;
   initialData?: any;
 }
 
-export default function TenancyAgreementForm({ onSuccess, initialData }: TenancyAgreementFormProps) {
+export default function TenancyAgreementForm({
+  onSuccess,
+  initialData,
+}: TenancyAgreementFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -36,25 +52,26 @@ export default function TenancyAgreementForm({ onSuccess, initialData }: Tenancy
   const form = useForm({
     resolver: zodResolver(insertTenancyAgreementSchema),
     defaultValues: initialData || {
-      residentId: "",
-      propertyId: "",
-      agreementType: "",
-      startDate: "",
-      endDate: "",
-      monthlyRent: "",
-      deposit: "",
-      serviceCharge: "",
-      witnessedBy: "",
-      terms: "",
+      residentId: '',
+      propertyId: '',
+      agreementType: '',
+      startDate: '',
+      endDate: '',
+      monthlyRent: '',
+      deposit: '',
+      serviceCharge: '',
+      witnessedBy: '',
+      terms: '',
     },
   });
 
   const createAgreementMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("POST", "/api/tenancy-agreements", data),
+    mutationFn: (data: any) =>
+      apiRequest('POST', '/api/tenancy-agreements', data),
     onSuccess: () => {
       toast({
-        title: "Success",
-        description: "Tenancy agreement has been created successfully.",
+        title: 'Success',
+        description: 'Tenancy agreement has been created successfully.',
       });
       queryClient.invalidateQueries({ queryKey: ['/api/tenancy-agreements'] });
       form.reset();
@@ -62,9 +79,9 @@ export default function TenancyAgreementForm({ onSuccess, initialData }: Tenancy
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to create tenancy agreement.",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to create tenancy agreement.',
+        variant: 'destructive',
       });
     },
   });
@@ -84,35 +101,41 @@ export default function TenancyAgreementForm({ onSuccess, initialData }: Tenancy
   };
 
   return (
-    <Card className="w-full max-w-2xl">
+    <Card className='w-full max-w-2xl'>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <FileText className="h-5 w-5" />
+        <CardTitle className='flex items-center gap-2'>
+          <FileText className='h-5 w-5' />
           Tenancy Agreement
         </CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+            <div className='grid grid-cols-2 gap-4'>
               <FormField
                 control={form.control}
-                name="residentId"
+                name='residentId'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="flex items-center gap-2">
-                      <User className="h-4 w-4" />
+                    <FormLabel className='flex items-center gap-2'>
+                      <User className='h-4 w-4' />
                       Resident
                     </FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select resident" />
+                          <SelectValue placeholder='Select resident' />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {residents.map((resident: any) => (
-                          <SelectItem key={resident.id} value={resident.id.toString()}>
+                          <SelectItem
+                            key={resident.id}
+                            value={resident.id.toString()}
+                          >
                             {resident.firstName} {resident.lastName}
                           </SelectItem>
                         ))}
@@ -125,22 +148,28 @@ export default function TenancyAgreementForm({ onSuccess, initialData }: Tenancy
 
               <FormField
                 control={form.control}
-                name="propertyId"
+                name='propertyId'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="flex items-center gap-2">
-                      <Home className="h-4 w-4" />
+                    <FormLabel className='flex items-center gap-2'>
+                      <Home className='h-4 w-4' />
                       Property
                     </FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select property" />
+                          <SelectValue placeholder='Select property' />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {properties.map((property: any) => (
-                          <SelectItem key={property.id} value={property.id.toString()}>
+                          <SelectItem
+                            key={property.id}
+                            value={property.id.toString()}
+                          >
                             {property.name}
                           </SelectItem>
                         ))}
@@ -154,20 +183,27 @@ export default function TenancyAgreementForm({ onSuccess, initialData }: Tenancy
 
             <FormField
               control={form.control}
-              name="agreementType"
+              name='agreementType'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Agreement Type</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select agreement type" />
+                        <SelectValue placeholder='Select agreement type' />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="license">License Agreement</SelectItem>
-                      <SelectItem value="assured_shorthold">Assured Shorthold Tenancy</SelectItem>
-                      <SelectItem value="supported_living">Supported Living Agreement</SelectItem>
+                      <SelectItem value='license'>License Agreement</SelectItem>
+                      <SelectItem value='assured_shorthold'>
+                        Assured Shorthold Tenancy
+                      </SelectItem>
+                      <SelectItem value='supported_living'>
+                        Supported Living Agreement
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -175,18 +211,18 @@ export default function TenancyAgreementForm({ onSuccess, initialData }: Tenancy
               )}
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className='grid grid-cols-2 gap-4'>
               <FormField
                 control={form.control}
-                name="startDate"
+                name='startDate'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
+                    <FormLabel className='flex items-center gap-2'>
+                      <Calendar className='h-4 w-4' />
                       Start Date
                     </FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input type='date' {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -195,15 +231,15 @@ export default function TenancyAgreementForm({ onSuccess, initialData }: Tenancy
 
               <FormField
                 control={form.control}
-                name="endDate"
+                name='endDate'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
+                    <FormLabel className='flex items-center gap-2'>
+                      <Calendar className='h-4 w-4' />
                       End Date
                     </FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input type='date' {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -211,21 +247,21 @@ export default function TenancyAgreementForm({ onSuccess, initialData }: Tenancy
               />
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className='grid grid-cols-3 gap-4'>
               <FormField
                 control={form.control}
-                name="monthlyRent"
+                name='monthlyRent'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="flex items-center gap-2">
-                      <DollarSign className="h-4 w-4" />
+                    <FormLabel className='flex items-center gap-2'>
+                      <DollarSign className='h-4 w-4' />
                       Monthly Rent (£)
                     </FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
+                        type='number'
+                        step='0.01'
+                        placeholder='0.00'
                         {...field}
                       />
                     </FormControl>
@@ -236,15 +272,15 @@ export default function TenancyAgreementForm({ onSuccess, initialData }: Tenancy
 
               <FormField
                 control={form.control}
-                name="deposit"
+                name='deposit'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Security Deposit (£)</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
+                        type='number'
+                        step='0.01'
+                        placeholder='0.00'
                         {...field}
                       />
                     </FormControl>
@@ -255,15 +291,15 @@ export default function TenancyAgreementForm({ onSuccess, initialData }: Tenancy
 
               <FormField
                 control={form.control}
-                name="serviceCharge"
+                name='serviceCharge'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Service Charge (£)</FormLabel>
                     <FormControl>
                       <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
+                        type='number'
+                        step='0.01'
+                        placeholder='0.00'
                         {...field}
                       />
                     </FormControl>
@@ -275,14 +311,17 @@ export default function TenancyAgreementForm({ onSuccess, initialData }: Tenancy
 
             <FormField
               control={form.control}
-              name="witnessedBy"
+              name='witnessedBy'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Witnessed By</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select witness" />
+                        <SelectValue placeholder='Select witness' />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -300,14 +339,14 @@ export default function TenancyAgreementForm({ onSuccess, initialData }: Tenancy
 
             <FormField
               control={form.control}
-              name="terms"
+              name='terms'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Terms and Conditions</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Enter specific terms and conditions for this agreement"
-                      className="min-h-[120px]"
+                      placeholder='Enter specific terms and conditions for this agreement'
+                      className='min-h-[120px]'
                       {...field}
                     />
                   </FormControl>
@@ -316,12 +355,21 @@ export default function TenancyAgreementForm({ onSuccess, initialData }: Tenancy
               )}
             />
 
-            <div className="flex justify-end space-x-2">
-              <Button type="button" variant="outline" onClick={() => form.reset()}>
+            <div className='flex justify-end space-x-2'>
+              <Button
+                type='button'
+                variant='outline'
+                onClick={() => form.reset()}
+              >
                 Reset
               </Button>
-              <Button type="submit" disabled={createAgreementMutation.isPending}>
-                {createAgreementMutation.isPending ? "Creating..." : "Create Agreement"}
+              <Button
+                type='submit'
+                disabled={createAgreementMutation.isPending}
+              >
+                {createAgreementMutation.isPending
+                  ? 'Creating...'
+                  : 'Create Agreement'}
               </Button>
             </div>
           </form>

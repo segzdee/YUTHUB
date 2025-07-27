@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 
 // Global auth state cache to prevent multiple simultaneous requests
 let authCache: {
@@ -43,7 +43,7 @@ export function useAuth(): AuthState {
     const checkAuth = async () => {
       try {
         // Check if we have valid cached data
-        if (authCache && (Date.now() - authCache.timestamp) < CACHE_DURATION) {
+        if (authCache && Date.now() - authCache.timestamp < CACHE_DURATION) {
           if (mounted.current) {
             setAuthState({
               user: authCache.user,
@@ -136,7 +136,7 @@ export function useAuth(): AuthState {
     // Set a timeout to prevent infinite loading
     timeoutId = setTimeout(() => {
       if (mounted.current && authState.isLoading) {
-        setAuthState((prev) => ({ ...prev, isLoading: false }));
+        setAuthState(prev => ({ ...prev, isLoading: false }));
       }
     }, 3000); // 3 seconds timeout
 

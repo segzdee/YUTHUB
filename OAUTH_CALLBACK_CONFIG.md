@@ -5,6 +5,7 @@
 The application now supports stable production domains for OAuth callbacks:
 
 ### Primary Domains
+
 - **Primary Replit Domain**: `yuthub.replit.app`
 - **Custom Domain**: `yuthub.com` ✅
 - **Custom Domain with WWW**: `www.yuthub.com` (verifying...)
@@ -20,6 +21,7 @@ Configure these callback URLs in your OAuth provider's console:
 ### OAuth Provider Configuration Steps
 
 #### For Replit OIDC Provider:
+
 1. Go to your Replit OAuth settings
 2. Remove the old development callback URL:
    - `https://27891fa9-b276-4e4e-a11a-60ce998c53b2-00-2uromwtwyow5n.janeway.replit.dev/api/callback`
@@ -29,6 +31,7 @@ Configure these callback URLs in your OAuth provider's console:
    - `https://www.yuthub.com/api/callback`
 
 #### For Other OAuth Providers (Google, Microsoft, etc.):
+
 1. Update redirect URIs in each provider's console
 2. Use the same callback URLs as above
 3. Test each provider after configuration
@@ -36,6 +39,7 @@ Configure these callback URLs in your OAuth provider's console:
 ### Authentication Flow Changes
 
 The application now automatically:
+
 - Registers authentication strategies for all production domains
 - Handles domain detection for callbacks
 - Provides proper error messages for misconfigured domains
@@ -44,6 +48,7 @@ The application now automatically:
 ### CORS Configuration
 
 Updated CORS origins to include all production domains:
+
 - `https://yuthub.replit.app`
 - `https://yuthub.com`
 - `https://www.yuthub.com`
@@ -53,6 +58,7 @@ Updated CORS origins to include all production domains:
 ### Session Cookie Configuration
 
 Production session cookies are configured with:
+
 - **HttpOnly**: true (XSS protection)
 - **Secure**: true (HTTPS only in production)
 - **SameSite**: lax (CSRF protection)
@@ -61,7 +67,7 @@ Production session cookies are configured with:
 ### Testing Authentication
 
 1. Visit `https://yuthub.com`
-2. Click "Sign In" 
+2. Click "Sign In"
 3. OAuth should redirect to provider
 4. After authentication, should redirect back to `https://yuthub.com/api/callback`
 5. Session should persist across page refreshes
@@ -77,6 +83,7 @@ Production session cookies are configured with:
 ### Troubleshooting
 
 If authentication fails:
+
 1. Check OAuth provider console for correct callback URLs
 2. Verify domain is properly configured in DNS
 3. Check browser developer tools for cookie issues

@@ -7,10 +7,5 @@ export default function Login() {
   const mode = urlParams.get('signup') === 'true' ? 'signup' : 'signin';
   const selectedPlan = urlParams.get('plan');
 
-  return (
-    <AuthLogin 
-      mode={mode} 
-      selectedPlan={selectedPlan || undefined}
-    />
-  );
+  return <AuthLogin mode={mode} selectedPlan={selectedPlan || undefined} />;
 }

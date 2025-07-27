@@ -14,28 +14,30 @@ export class MultiAuthManager {
   async handleEmailLogin(email: string, password: string) {
     try {
       // Mock login for development
-      const user = await storage.getUser('dev-user-1') || await storage.upsertUser({
-        id: 'dev-user-1',
-        email: email,
-        firstName: 'Development',
-        lastName: 'User',
-        role: 'admin',
-        subscriptionTier: 'professional',
-        subscriptionStatus: 'active',
-        maxResidents: 100,
-        mfaEnabled: false,
-        lastLogin: new Date(),
-      });
+      const user =
+        (await storage.getUser('dev-user-1')) ||
+        (await storage.upsertUser({
+          id: 'dev-user-1',
+          email: email,
+          firstName: 'Development',
+          lastName: 'User',
+          role: 'admin',
+          subscriptionTier: 'professional',
+          subscriptionStatus: 'active',
+          maxResidents: 100,
+          mfaEnabled: false,
+          lastLogin: new Date(),
+        }));
 
       return {
         success: true,
         user,
-        token: 'mock-jwt-token'
+        token: 'mock-jwt-token',
       };
     } catch (error) {
       return {
         success: false,
-        error: 'Login failed'
+        error: 'Login failed',
       };
     }
   }
@@ -65,12 +67,12 @@ export class MultiAuthManager {
         success: true,
         user,
         token: 'mock-jwt-token',
-        needsEmailVerification: false
+        needsEmailVerification: false,
       };
     } catch (error) {
       return {
         success: false,
-        error: 'Registration failed'
+        error: 'Registration failed',
       };
     }
   }
@@ -79,7 +81,7 @@ export class MultiAuthManager {
     return {
       success: true,
       user: { id: 'oauth-user' },
-      token: 'oauth-token'
+      token: 'oauth-token',
     };
   }
 
@@ -87,7 +89,7 @@ export class MultiAuthManager {
     return {
       success: true,
       user: { id: 'microsoft-user' },
-      token: 'microsoft-token'
+      token: 'microsoft-token',
     };
   }
 

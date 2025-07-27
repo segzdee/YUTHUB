@@ -1,12 +1,29 @@
 import { desc, eq, sql } from 'drizzle-orm';
 import { Request, Response } from 'express';
-import { auditLogs, organizations, organizationSubscriptions, users } from '../shared/schema';
+import {
+  auditLogs,
+  organizations,
+  organizationSubscriptions,
+  users,
+} from '../shared/schema';
 import { db } from './db';
-import { AggregatedDataValidator, PlatformDataAggregator, SecureDataExporter } from './platformAdminAggregation';
-import { DataIntegrityValidator, PerformanceMonitor, PlatformAdminValidator } from './platformAdminValidation';
+import {
+  AggregatedDataValidator,
+  PlatformDataAggregator,
+  SecureDataExporter,
+} from './platformAdminAggregation';
+import {
+  DataIntegrityValidator,
+  PerformanceMonitor,
+  PlatformAdminValidator,
+} from './platformAdminValidation';
 
 // Platform Admin Authentication Middleware
-export async function verifyPlatformAdmin(req: Request, res: Response, next: any) {
+export async function verifyPlatformAdmin(
+  req: Request,
+  res: Response,
+  next: any
+) {
   try {
     // Check if user is authenticated
     if (!req.user) {
@@ -15,11 +32,13 @@ export async function verifyPlatformAdmin(req: Request, res: Response, next: any
 
     // Check if user has platform admin role
     const user = await db.query.users.findFirst({
-      where: eq(users.id, req.user.id)
+      where: eq(users.id, req.user.id),
     });
 
     if (!user || user.role !== 'platform_admin') {
-      return res.status(403).json({ message: 'Platform admin access required' });
+      return res
+        .status(403)
+        .json({ message: 'Platform admin access required' });
     }
 
     // Platform admin verification completed
@@ -34,32 +53,39 @@ export async function verifyPlatformAdmin(req: Request, res: Response, next: any
 export async function checkPlatformAdminAuth(req: Request, res: Response) {
   try {
     if (!req.user) {
-      return res.json({ isPlatformAdmin: false, mfaRequired: false, ipWhitelisted: false });
+      return res.json({
+        isPlatformAdmin: false,
+        mfaRequired: false,
+        ipWhitelisted: false,
+      });
     }
 
     const user = await db.query.users.findFirst({
-      where: eq(users.id, req.user.id)
+      where: eq(users.id, req.user.id),
     });
 
     const isPlatformAdmin = user && user.role === 'platform_admin';
-    
+
     // Check MFA status
     const mfaRequired = user?.mfaEnabled || false;
-    
+
     // Check IP whitelist
     const clientIP = req.ip || req.connection.remoteAddress || 'unknown';
-    const ipWhitelisted = await PlatformAdminValidator.validateIPWhitelist(clientIP);
+    const ipWhitelisted =
+      await PlatformAdminValidator.validateIPWhitelist(clientIP);
 
     res.json({
       isPlatformAdmin,
       mfaRequired,
       ipWhitelisted,
-      user: isPlatformAdmin ? {
-        id: user.id,
-        email: user.email,
-        name: user.firstName + ' ' + user.lastName,
-        role: user.role
-      } : null
+      user: isPlatformAdmin
+        ? {
+            id: user.id,
+            email: user.email,
+            name: user.firstName + ' ' + user.lastName,
+            role: user.role,
+          }
+        : null,
     });
   } catch (error) {
     console.error('Platform admin auth check error:', error);
@@ -72,18 +98,19 @@ export async function getPlatformOverview(req: Request, res: Response) {
   try {
     // Get comprehensive aggregated platform data
     const platformData = await PlatformDataAggregator.getPlatformOverview();
-    
+
     // Get real-time metrics
     const realTimeMetrics = await PlatformDataAggregator.getRealTimeMetrics();
-    
+
     // Validate data consistency
-    const dataConsistency = await AggregatedDataValidator.validateDataConsistency();
-    
+    const dataConsistency =
+      await AggregatedDataValidator.validateDataConsistency();
+
     // Get recent activity from audit logs
     const recentActivity = await db.query.auditLogs.findMany({
       limit: 5,
       orderBy: [desc(auditLogs.timestamp)],
-      where: sql`${auditLogs.action} NOT LIKE '%login%'`
+      where: sql`${auditLogs.action} NOT LIKE '%login%'`,
     });
 
     const platformOverview = {
@@ -91,15 +118,16 @@ export async function getPlatformOverview(req: Request, res: Response) {
       realTimeMetrics,
       dataConsistency: {
         valid: dataConsistency.valid,
-        issues: dataConsistency.issues
+        issues: dataConsistency.issues,
       },
       recentActivity: recentActivity.map(activity => ({
         action: activity.action,
-        timestamp: activity.timestamp?.toISOString() || new Date().toISOString(),
+        timestamp:
+          activity.timestamp?.toISOString() || new Date().toISOString(),
         userId: activity.userId,
-        riskLevel: activity.riskLevel
+        riskLevel: activity.riskLevel,
       })),
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
     };
 
     res.json(platformOverview);
@@ -112,17 +140,19 @@ export async function getPlatformOverview(req: Request, res: Response) {
 // Subscription Management
 export async function getPlatformSubscriptions(req: Request, res: Response) {
   try {
-    const subscriptionsData = await db.query.organizationSubscriptions.findMany({
-      with: {
-        organization: {
-          columns: {
-            name: true,
-            contactEmail: true
-          }
-        }
-      },
-      orderBy: [desc(organizationSubscriptions.updatedAt)]
-    });
+    const subscriptionsData = await db.query.organizationSubscriptions.findMany(
+      {
+        with: {
+          organization: {
+            columns: {
+              name: true,
+              contactEmail: true,
+            },
+          },
+        },
+        orderBy: [desc(organizationSubscriptions.updatedAt)],
+      }
+    );
 
     const formattedSubscriptions = subscriptionsData.map(sub => ({
       id: sub.id,
@@ -133,7 +163,7 @@ export async function getPlatformSubscriptions(req: Request, res: Response) {
       monthlyRevenue: parseFloat(sub.amount.toString()),
       residents: 0, // This would be calculated from usage tracking
       maxResidents: 100, // This would come from the plan
-      usagePercent: 0 // This would be calculated from usage tracking
+      usagePercent: 0, // This would be calculated from usage tracking
     }));
 
     res.json(formattedSubscriptions);
@@ -147,7 +177,7 @@ export async function getPlatformSubscriptions(req: Request, res: Response) {
 export async function getPlatformOrganizations(req: Request, res: Response) {
   try {
     const orgsData = await db.query.organizations.findMany({
-      orderBy: [desc(organizations.createdAt)]
+      orderBy: [desc(organizations.createdAt)],
     });
 
     const formattedOrgs = orgsData.map(org => ({
@@ -157,7 +187,7 @@ export async function getPlatformOrganizations(req: Request, res: Response) {
       subscriptionPlan: 'Professional', // This would come from subscription relationship
       residents: 0, // This would be calculated from actual data
       createdAt: org.createdAt?.toISOString().split('T')[0] || 'Unknown',
-      primaryContact: org.contactEmail || 'No contact'
+      primaryContact: org.contactEmail || 'No contact',
     }));
 
     res.json(formattedOrgs);
@@ -174,25 +204,25 @@ export async function getSystemMonitoring(req: Request, res: Response) {
     const [databaseMetrics, apiMetrics, systemMetrics] = await Promise.all([
       PerformanceMonitor.getDatabaseMetrics(),
       PerformanceMonitor.getAPIMetrics(),
-      PerformanceMonitor.getSystemMetrics()
+      PerformanceMonitor.getSystemMetrics(),
     ]);
 
     const monitoringData = {
       database: {
         avgQueryTime: databaseMetrics.queryTime,
         connections: databaseMetrics.connections,
-        cacheHitRate: databaseMetrics.cacheHitRate
+        cacheHitRate: databaseMetrics.cacheHitRate,
       },
       api: {
         avgResponseTime: apiMetrics.avgResponseTime,
         errorRate: apiMetrics.errorRate,
-        requestsPerMinute: apiMetrics.requestsPerMinute
+        requestsPerMinute: apiMetrics.requestsPerMinute,
       },
       system: {
         uptime: systemMetrics.uptime,
         memoryUsage: systemMetrics.memoryUsage,
-        cpuUsage: systemMetrics.cpuUsage
-      }
+        cpuUsage: systemMetrics.cpuUsage,
+      },
     };
 
     res.json(monitoringData);
@@ -205,67 +235,80 @@ export async function getSystemMonitoring(req: Request, res: Response) {
 // Platform Analytics
 export async function getPlatformAnalytics(req: Request, res: Response) {
   try {
-    const timeRange = req.query.timeRange as string || '30d';
-    
+    const timeRange = (req.query.timeRange as string) || '30d';
+
     // Get comprehensive analytics data
     const [
       organizationBreakdowns,
       historicalTrends,
       realTimeMetrics,
-      performanceCheck
+      performanceCheck,
     ] = await Promise.all([
       PlatformDataAggregator.getOrganizationBreakdowns(timeRange),
       PlatformDataAggregator.getHistoricalTrends(12),
       PlatformDataAggregator.getRealTimeMetrics(),
-      AggregatedDataValidator.checkAggregationPerformance()
+      AggregatedDataValidator.checkAggregationPerformance(),
     ]);
 
     // Calculate analytics metrics
-    const totalRevenue = organizationBreakdowns.reduce((sum, org) => sum + org.revenue, 0);
-    const averageOccupancy = organizationBreakdowns.reduce((sum, org) => sum + org.occupancyRate, 0) / organizationBreakdowns.length;
-    const averageResponseTime = organizationBreakdowns.reduce((sum, org) => sum + org.responseTime, 0) / organizationBreakdowns.length;
+    const totalRevenue = organizationBreakdowns.reduce(
+      (sum, org) => sum + org.revenue,
+      0
+    );
+    const averageOccupancy =
+      organizationBreakdowns.reduce((sum, org) => sum + org.occupancyRate, 0) /
+      organizationBreakdowns.length;
+    const averageResponseTime =
+      organizationBreakdowns.reduce((sum, org) => sum + org.responseTime, 0) /
+      organizationBreakdowns.length;
 
     const analyticsData = {
       revenue: {
         total: totalRevenue,
         byOrganization: organizationBreakdowns.map(org => ({
           name: org.organizationName,
-          revenue: org.revenue
+          revenue: org.revenue,
         })),
-        trends: historicalTrends.revenueTrends
+        trends: historicalTrends.revenueTrends,
       },
       occupancy: {
         average: Math.round(averageOccupancy * 100) / 100,
         byOrganization: organizationBreakdowns.map(org => ({
           name: org.organizationName,
-          occupancy: org.occupancyRate
+          occupancy: org.occupancyRate,
         })),
-        trends: historicalTrends.occupancyTrends
+        trends: historicalTrends.occupancyTrends,
       },
       incidents: {
-        total: organizationBreakdowns.reduce((sum, org) => sum + org.incidents, 0),
+        total: organizationBreakdowns.reduce(
+          (sum, org) => sum + org.incidents,
+          0
+        ),
         averageResponseTime: Math.round(averageResponseTime),
         byOrganization: organizationBreakdowns.map(org => ({
           name: org.organizationName,
           incidents: org.incidents,
-          responseTime: org.responseTime
+          responseTime: org.responseTime,
         })),
-        trends: historicalTrends.incidentTrends
+        trends: historicalTrends.incidentTrends,
       },
       residents: {
-        total: organizationBreakdowns.reduce((sum, org) => sum + org.residents, 0),
+        total: organizationBreakdowns.reduce(
+          (sum, org) => sum + org.residents,
+          0
+        ),
         byOrganization: organizationBreakdowns.map(org => ({
           name: org.organizationName,
-          residents: org.residents
+          residents: org.residents,
         })),
-        trends: historicalTrends.residentTrends
+        trends: historicalTrends.residentTrends,
       },
       performance: {
         aggregationPerformance: performanceCheck.performant,
         slowQueries: performanceCheck.slowQueries,
-        realTimeMetrics
+        realTimeMetrics,
       },
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
     };
 
     res.json(analyticsData);
@@ -283,18 +326,18 @@ export async function getBillingOversight(req: Request, res: Response) {
       payments: {
         successRate: 96.8,
         failed: 23,
-        volume: 485000
+        volume: 485000,
       },
       invoices: {
         generated: 156,
         paid: 142,
-        overdue: 8
+        overdue: 8,
       },
       revenue: {
         monthly: 125000,
         annual: 1400000,
-        growth: 18.5
-      }
+        growth: 18.5,
+      },
     };
 
     res.json(billingData);
@@ -312,27 +355,28 @@ export async function getFeatureFlags(req: Request, res: Response) {
       {
         id: 'crisis-connect-v2',
         name: 'Crisis Connect V2',
-        description: 'Enhanced crisis response system with AI-powered escalation',
-        enabled: true
+        description:
+          'Enhanced crisis response system with AI-powered escalation',
+        enabled: true,
       },
       {
         id: 'mobile-app-beta',
         name: 'Mobile App Beta',
         description: 'Beta version of the mobile application',
-        enabled: false
+        enabled: false,
       },
       {
         id: 'advanced-analytics',
         name: 'Advanced Analytics',
         description: 'Machine learning powered analytics and predictions',
-        enabled: true
+        enabled: true,
       },
       {
         id: 'multi-language',
         name: 'Multi-Language Support',
         description: 'Support for multiple languages in the interface',
-        enabled: false
-      }
+        enabled: false,
+      },
     ];
 
     res.json(featureFlags);
@@ -343,7 +387,11 @@ export async function getFeatureFlags(req: Request, res: Response) {
 }
 
 // Log platform admin action
-export async function logPlatformAdminAction(userId: string, action: string, details: any) {
+export async function logPlatformAdminAction(
+  userId: string,
+  action: string,
+  details: any
+) {
   try {
     await db.insert(auditLogs).values({
       id: crypto.randomUUID(),
@@ -354,8 +402,8 @@ export async function logPlatformAdminAction(userId: string, action: string, det
       riskLevel: 'high', // Platform admin actions are high risk
       metadata: {
         source: 'platform_admin',
-        userAgent: 'platform_admin_interface'
-      }
+        userAgent: 'platform_admin_interface',
+      },
     });
   } catch (error) {
     console.error('Platform admin action logging error:', error);
@@ -369,8 +417,8 @@ export async function handleEmergencyAction(req: Request, res: Response) {
 
     // Validate emergency action authorization
     const validation = await PlatformAdminValidator.validateEmergencyAction(
-      req.user.id, 
-      action, 
+      req.user.id,
+      action,
       targetId
     );
 
@@ -384,51 +432,63 @@ export async function handleEmergencyAction(req: Request, res: Response) {
       reason,
       timestamp: new Date(),
       userAgent: req.headers['user-agent'],
-      ip: req.ip || req.connection.remoteAddress
+      ip: req.ip || req.connection.remoteAddress,
     });
 
     // Handle different emergency actions with additional validation
     switch (action) {
       case 'disable_organization':
         // Validate organization data before disabling
-        const orgValidation = await DataIntegrityValidator.validateOrganizationData(parseInt(targetId));
+        const orgValidation =
+          await DataIntegrityValidator.validateOrganizationData(
+            parseInt(targetId)
+          );
         if (!orgValidation.valid) {
-          return res.status(400).json({ message: 'Organization validation failed', issues: orgValidation.issues });
+          return res
+            .status(400)
+            .json({
+              message: 'Organization validation failed',
+              issues: orgValidation.issues,
+            });
         }
-        
-        await db.update(organizations)
+
+        await db
+          .update(organizations)
           .set({ status: 'disabled' })
           .where(eq(organizations.id, parseInt(targetId)));
         break;
-      
+
       case 'reset_password':
         // Emergency password reset with additional security
         const targetUser = await db.query.users.findFirst({
-          where: eq(users.id, targetId)
+          where: eq(users.id, targetId),
         });
-        
+
         if (!targetUser) {
           return res.status(404).json({ message: 'User not found' });
         }
-        
+
         // Generate secure reset token and send notification
         break;
-      
+
       case 'maintenance_mode':
         // Enable maintenance mode with system-wide notification
         // This would update system configuration and notify all users
         break;
-      
+
       case 'system_notification':
         // Send system-wide notification with delivery tracking
         // This would use the notification system with delivery confirmation
         break;
-      
+
       default:
         return res.status(400).json({ message: 'Invalid emergency action' });
     }
 
-    res.json({ success: true, message: `Emergency ${action} executed successfully` });
+    res.json({
+      success: true,
+      message: `Emergency ${action} executed successfully`,
+    });
   } catch (error) {
     console.error('Emergency action error:', error);
     res.status(500).json({ message: 'Internal server error' });
@@ -438,21 +498,27 @@ export async function handleEmergencyAction(req: Request, res: Response) {
 // Organization Breakdown Analytics
 export async function getOrganizationBreakdowns(req: Request, res: Response) {
   try {
-    const timeRange = req.query.timeRange as string || '30d';
-    
-    const breakdowns = await PlatformDataAggregator.getOrganizationBreakdowns(timeRange);
-    
+    const timeRange = (req.query.timeRange as string) || '30d';
+
+    const breakdowns =
+      await PlatformDataAggregator.getOrganizationBreakdowns(timeRange);
+
     res.json({
       timeRange,
       organizations: breakdowns,
       summary: {
         totalOrganizations: breakdowns.length,
         totalResidents: breakdowns.reduce((sum, org) => sum + org.residents, 0),
-        totalProperties: breakdowns.reduce((sum, org) => sum + org.properties, 0),
-        averageOccupancy: breakdowns.reduce((sum, org) => sum + org.occupancyRate, 0) / breakdowns.length,
-        totalIncidents: breakdowns.reduce((sum, org) => sum + org.incidents, 0)
+        totalProperties: breakdowns.reduce(
+          (sum, org) => sum + org.properties,
+          0
+        ),
+        averageOccupancy:
+          breakdowns.reduce((sum, org) => sum + org.occupancyRate, 0) /
+          breakdowns.length,
+        totalIncidents: breakdowns.reduce((sum, org) => sum + org.incidents, 0),
       },
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
     });
   } catch (error) {
     console.error('Organization breakdowns error:', error);
@@ -464,13 +530,13 @@ export async function getOrganizationBreakdowns(req: Request, res: Response) {
 export async function getHistoricalTrends(req: Request, res: Response) {
   try {
     const months = parseInt(req.query.months as string) || 12;
-    
+
     const trends = await PlatformDataAggregator.getHistoricalTrends(months);
-    
+
     res.json({
       months,
       trends,
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
     });
   } catch (error) {
     console.error('Historical trends error:', error);
@@ -482,10 +548,10 @@ export async function getHistoricalTrends(req: Request, res: Response) {
 export async function getRealTimeDashboardMetrics(req: Request, res: Response) {
   try {
     const metrics = await PlatformDataAggregator.getRealTimeMetrics();
-    
+
     res.json({
       metrics,
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
     });
   } catch (error) {
     console.error('Real-time dashboard metrics error:', error);
@@ -496,7 +562,7 @@ export async function getRealTimeDashboardMetrics(req: Request, res: Response) {
 // Export Aggregated Data
 export async function exportAggregatedData(req: Request, res: Response) {
   try {
-    const format = req.query.format as 'csv' | 'json' || 'json';
+    const format = (req.query.format as 'csv' | 'json') || 'json';
     const userId = req.user?.id;
 
     if (!userId) {
@@ -506,14 +572,20 @@ export async function exportAggregatedData(req: Request, res: Response) {
     // Log the export action
     await logPlatformAdminAction(userId, 'data_export', {
       format,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     const exportData = await SecureDataExporter.exportAggregatedReport(format);
-    
-    res.setHeader('Content-Type', format === 'csv' ? 'text/csv' : 'application/json');
-    res.setHeader('Content-Disposition', `attachment; filename="${exportData.filename}"`);
-    
+
+    res.setHeader(
+      'Content-Type',
+      format === 'csv' ? 'text/csv' : 'application/json'
+    );
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${exportData.filename}"`
+    );
+
     if (format === 'csv') {
       // Convert JSON to CSV format
       const csvData = convertJSONToCSV(exportData.data);
@@ -531,12 +603,13 @@ export async function exportAggregatedData(req: Request, res: Response) {
 export async function validateDataConsistency(req: Request, res: Response) {
   try {
     const validation = await AggregatedDataValidator.validateDataConsistency();
-    const performanceCheck = await AggregatedDataValidator.checkAggregationPerformance();
-    
+    const performanceCheck =
+      await AggregatedDataValidator.checkAggregationPerformance();
+
     res.json({
       dataConsistency: validation,
       performanceCheck,
-      lastChecked: new Date().toISOString()
+      lastChecked: new Date().toISOString(),
     });
   } catch (error) {
     console.error('Data consistency validation error:', error);
@@ -547,7 +620,7 @@ export async function validateDataConsistency(req: Request, res: Response) {
 // Helper function to convert JSON to CSV
 function convertJSONToCSV(data: any): string {
   const organizations = data.organizationBreakdowns || [];
-  
+
   const headers = [
     'Organization Name',
     'Residents',
@@ -555,21 +628,23 @@ function convertJSONToCSV(data: any): string {
     'Incidents',
     'Occupancy Rate',
     'Response Time',
-    'Satisfaction Score'
+    'Satisfaction Score',
   ];
-  
+
   const csvRows = [
     headers.join(','),
-    ...organizations.map((org: any) => [
-      org.organizationName,
-      org.residents,
-      org.properties,
-      org.incidents,
-      org.occupancyRate,
-      org.responseTime,
-      org.satisfactionScore
-    ].join(','))
+    ...organizations.map((org: any) =>
+      [
+        org.organizationName,
+        org.residents,
+        org.properties,
+        org.incidents,
+        org.occupancyRate,
+        org.responseTime,
+        org.satisfactionScore,
+      ].join(',')
+    ),
   ];
-  
+
   return csvRows.join('\n');
 }

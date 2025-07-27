@@ -1,23 +1,36 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Layout } from './components/Layout';
-import { Dashboard } from './pages/Dashboard';
-import { Housing } from './pages/Housing';
-import { Support } from './pages/Support';
-import { Independence } from './pages/Independence';
-import { Analytics } from './pages/Analytics';
-import { Safeguarding } from './pages/Safeguarding';
-import { Crisis } from './pages/Crisis';
-import { Financials } from './pages/Financials';
-import { Billing } from './pages/Billing';
-import { Forms } from './pages/Forms';
-import { Reports } from './pages/Reports';
-import { Settings } from './pages/Settings';
-import { Help } from './pages/Help';
-import { PageLoader } from './components/common/PageLoader';
+import { Suspense, lazy } from 'react';
+import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import PublicRoute from './components/auth/PublicRoute';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
+import { PageLoader } from './components/common/PageLoader';
+import { Layout } from './components/Layout';
+import { AccessibilityProvider } from './components/providers/AccessibilityProvider';
+import { AuthProvider } from './components/providers/AuthProvider';
+import { LanguageProvider } from './components/providers/LanguageProvider';
+import { ThemeProvider } from './components/providers/ThemeProvider';
 import { Toaster } from './components/ui/toaster';
+import { TooltipProvider } from './components/ui/tooltip';
+
+// Lazy load components for better performance
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Housing = lazy(() => import('./pages/Housing'));
+const Support = lazy(() => import('./pages/Support'));
+const Independence = lazy(() => import('./pages/Independence'));
+const Analytics = lazy(() => import('./pages/Analytics'));
+const Safeguarding = lazy(() => import('./pages/Safeguarding'));
+const Crisis = lazy(() => import('./pages/Crisis'));
+const Financials = lazy(() => import('./pages/Financials'));
+const Billing = lazy(() => import('./pages/Billing'));
+const Forms = lazy(() => import('./pages/Forms'));
+const Reports = lazy(() => import('./pages/Reports'));
+const Settings = lazy(() => import('./pages/Settings'));
+const Help = lazy(() => import('./pages/Help'));
+const PlatformAdmin = lazy(() => import('./pages/PlatformAdmin'));
+const Landing = lazy(() => import('./pages/Landing'));
+const AuthLogin = lazy(() => import('./pages/AuthLogin'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,77 +38,10 @@ const queryClient = new QueryClient({
       retry: 3,
       staleTime: 5 * 60 * 1000, // 5 minutes
       refetchOnWindowFocus: false,
+      suspense: false,
     },
   },
 });
-
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <ErrorBoundary>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/housing" element={<Housing />} />
-              <Route path="/support" element={<Support />} />
-              <Route path="/independence" element={<Independence />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/safeguarding" element={<Safeguarding />} />
-              <Route path="/crisis" element={<Crisis />} />
-              <Route path="/financials" element={<Financials />} />
-              <Route path="/billing" element={<Billing />} />
-              <Route path="/forms" element={<Forms />} />
-              <Route path="/reports" element={<Reports />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/help" element={<Help />} />
-              <Route path="*" element={<div>Page not found</div>} />
-            </Routes>
-          </Layout>
-          <Toaster />
-        </ErrorBoundary>
-      </Router>
-    </QueryClientProvider>
-  );
-}
-
-export default App;
-              <Route path="/independence" element={<Independence />} />
-              <Route path="/crisis" element={<Crisis />} />
-              <Route path="/reports" element={<Reports />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/forms" element={<Forms />} />
-              <Route path="/help" element={<Help />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/financials" element={<Financials />} />
-              <Route path="/billing" element={<Billing />} />
-              <Route path="/platform-admin" element={<PlatformAdmin />} />
-
-              {/* Catch all route */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <Toaster />
-          </div>
-        </Router>
-      </AuthProvider>
-    </QueryClientProvider>
-  );
-}
-
-export default App;
-          <Route path="/forms/incident-report" component={IncidentReport} />
-          <Route path="/forms/progress-tracking" component={ProgressTracking} />
-          <Route path="/forms/support-plan" component={SupportPlan} />
-          <Route path="/privacy" component={Privacy} />
-          <Route path="/terms" component={Terms} />
-          <Route path="/cookies" component={Cookies} />
-          <Route path="/accessibility" component={Accessibility} />
-        </>
-      )}
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
 
 function App() {
   return (
@@ -104,15 +50,76 @@ function App() {
         <ThemeProvider>
           <AccessibilityProvider>
             <QueryClientProvider client={queryClient}>
-              <TooltipProvider>
-                <a href="#main-content" className="absolute left-[-10000px] top-auto w-1 h-1 overflow-hidden focus:left-4 focus:top-4 focus:w-auto focus:h-auto focus:overflow-visible bg-primary text-primary-foreground px-4 py-2 rounded-md z-50 focus:outline-none focus:ring-2 focus:ring-primary-foreground">
-                  Skip to main content
-                </a>
-                <Toaster />
-                <div id="main-content" tabIndex={-1}>
-                  <Router />
-                </div>
-              </TooltipProvider>
+              <AuthProvider>
+                <TooltipProvider>
+                  <Router>
+                    {/* Skip link for accessibility */}
+                    <a 
+                      href="#main-content" 
+                      className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-primary-foreground px-4 py-2 rounded-md z-50 focus:outline-none focus:ring-2 focus:ring-primary-foreground"
+                    >
+                      Skip to main content
+                    </a>
+                    
+                    <div id="main-content" tabIndex={-1}>
+                      <Suspense fallback={<PageLoader message="Loading application..." />}>
+                        <Routes>
+                          {/* Public routes */}
+                          <Route path="/" element={
+                            <PublicRoute>
+                              <Landing />
+                            </PublicRoute>
+                          } />
+                          <Route path="/login" element={
+                            <PublicRoute>
+                              <AuthLogin mode="signin" />
+                            </PublicRoute>
+                          } />
+                          <Route path="/signup" element={
+                            <PublicRoute>
+                              <AuthLogin mode="signup" />
+                            </PublicRoute>
+                          } />
+                          
+                          {/* Protected application routes */}
+                          <Route path="/app" element={
+                            <ProtectedRoute>
+                              <Layout />
+                            </ProtectedRoute>
+                          }>
+                            <Route index element={<Navigate to="/app/dashboard" replace />} />
+                            <Route path="dashboard" element={<Dashboard />} />
+                            <Route path="housing" element={<Housing />} />
+                            <Route path="support" element={<Support />} />
+                            <Route path="independence" element={<Independence />} />
+                            <Route path="analytics" element={<Analytics />} />
+                            <Route path="safeguarding" element={<Safeguarding />} />
+                            <Route path="crisis" element={<Crisis />} />
+                            <Route path="financials" element={<Financials />} />
+                            <Route path="billing" element={<Billing />} />
+                            <Route path="forms/*" element={<Forms />} />
+                            <Route path="reports" element={<Reports />} />
+                            <Route path="settings/*" element={<Settings />} />
+                            <Route path="help" element={<Help />} />
+                          </Route>
+                          
+                          {/* Platform admin routes */}
+                          <Route path="/platform-admin/*" element={
+                            <ProtectedRoute requiredRole="platform-admin">
+                              <PlatformAdmin />
+                            </ProtectedRoute>
+                          } />
+                          
+                          {/* Catch all route */}
+                          <Route path="*" element={<NotFound />} />
+                        </Routes>
+                      </Suspense>
+                    </div>
+                    
+                    <Toaster />
+                  </Router>
+                </TooltipProvider>
+              </AuthProvider>
             </QueryClientProvider>
           </AccessibilityProvider>
         </ThemeProvider>

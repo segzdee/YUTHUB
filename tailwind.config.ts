@@ -2,16 +2,17 @@ import type { Config } from "tailwindcss";
 
 export default {
   darkMode: ["class"],
-  content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
+  content: [
+    "./client/index.html", 
+    "./client/src/**/*.{js,jsx,ts,tsx}"
+  ],
   theme: {
-    screens: {
-      // Mobile-first breakpoints using min-width
-      'xs': '320px',
-      'sm': '375px',
-      'md': '768px',
-      'lg': '1024px',
-      'xl': '1280px',
-      '2xl': '1536px',
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
     },
     extend: {
       fontFamily: {
@@ -28,164 +29,72 @@ export default {
         "3xl": "var(--font-size-3xl)",
         "4xl": "var(--font-size-4xl)",
         "5xl": "var(--font-size-5xl)",
+        "6xl": "var(--font-size-6xl)",
       },
       lineHeight: {
+        none: "var(--line-height-none)",
         tight: "var(--line-height-tight)",
         snug: "var(--line-height-snug)",
         normal: "var(--line-height-normal)",
         relaxed: "var(--line-height-relaxed)",
         loose: "var(--line-height-loose)",
       },
-      fontWeight: {
-        light: "var(--font-weight-light)",
-        normal: "var(--font-weight-normal)",
-        medium: "var(--font-weight-medium)",
-        semibold: "var(--font-weight-semibold)",
-        bold: "var(--font-weight-bold)",
-        extrabold: "var(--font-weight-extrabold)",
-      },
-      spacing: {
-        1: "var(--spacing-1)",
-        2: "var(--spacing-2)",
-        3: "var(--spacing-3)",
-        4: "var(--spacing-4)",
-        5: "var(--spacing-5)",
-        6: "var(--spacing-6)",
-        8: "var(--spacing-8)",
-        10: "var(--spacing-10)",
-        12: "var(--spacing-12)",
-        16: "var(--spacing-16)",
-        20: "var(--spacing-20)",
-        24: "var(--spacing-24)",
-        // Touch target sizes
-        'touch-sm': '44px',
-        'touch-md': '48px',
-        'touch-lg': '56px',
-      },
-      borderRadius: {
-        sm: "var(--radius-sm)",
-        DEFAULT: "var(--radius)",
-        md: "var(--radius-md)",
-        lg: "var(--radius-lg)",
-        xl: "var(--radius-xl)",
-        full: "var(--radius-full)",
-      },
-      boxShadow: {
-        sm: "var(--shadow-sm)",
-        DEFAULT: "var(--shadow)",
-        md: "var(--shadow-md)",
-        lg: "var(--shadow-lg)",
-        xl: "var(--shadow-xl)",
+      letterSpacing: {
+        tighter: "var(--letter-spacing-tighter)",
+        tight: "var(--letter-spacing-tight)",
+        normal: "var(--letter-spacing-normal)",
+        wide: "var(--letter-spacing-wide)",
+        wider: "var(--letter-spacing-wider)",
+        widest: "var(--letter-spacing-widest)",
       },
       colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
-        },
-        popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
-        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
-          50: "hsl(var(--primary-50))",
-          100: "hsl(var(--primary-100))",
-          200: "hsl(var(--primary-200))",
-          300: "hsl(var(--primary-300))",
-          400: "hsl(var(--primary-400))",
-          500: "hsl(var(--primary-500))",
-          600: "hsl(var(--primary-600))",
-          700: "hsl(var(--primary-700))",
-          800: "hsl(var(--primary-800))",
-          900: "hsl(var(--primary-900))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
-          50: "hsl(var(--secondary-50))",
-          100: "hsl(var(--secondary-100))",
-          200: "hsl(var(--secondary-200))",
-          300: "hsl(var(--secondary-300))",
-          400: "hsl(var(--secondary-400))",
-          500: "hsl(var(--secondary-500))",
-          600: "hsl(var(--secondary-600))",
-          700: "hsl(var(--secondary-700))",
-          800: "hsl(var(--secondary-800))",
-          900: "hsl(var(--secondary-900))",
         },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
-          50: "hsl(var(--accent-50))",
-          100: "hsl(var(--accent-100))",
-          200: "hsl(var(--accent-200))",
-          300: "hsl(var(--accent-300))",
-          400: "hsl(var(--accent-400))",
-          500: "hsl(var(--accent-500))",
-          600: "hsl(var(--accent-600))",
-          700: "hsl(var(--accent-700))",
-          800: "hsl(var(--accent-800))",
-          900: "hsl(var(--accent-900))",
-        },
-        success: {
-          DEFAULT: "hsl(var(--success))",
-          foreground: "hsl(var(--success-foreground))",
-        },
-        warning: {
-          DEFAULT: "hsl(var(--warning))",
-          foreground: "hsl(var(--warning-foreground))",
-        },
-        error: {
-          DEFAULT: "hsl(var(--error))",
-          foreground: "hsl(var(--error-foreground))",
-        },
-        info: {
-          DEFAULT: "hsl(var(--info))",
-          foreground: "hsl(var(--info-foreground))",
-        },
-        neutral: {
-          50: "hsl(var(--neutral-50))",
-          100: "hsl(var(--neutral-100))",
-          200: "hsl(var(--neutral-200))",
-          300: "hsl(var(--neutral-300))",
-          400: "hsl(var(--neutral-400))",
-          500: "hsl(var(--neutral-500))",
-          600: "hsl(var(--neutral-600))",
-          700: "hsl(var(--neutral-700))",
-          800: "hsl(var(--neutral-800))",
-          900: "hsl(var(--neutral-900))",
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
         },
-        destructive: {
-          DEFAULT: "hsl(var(--error))",
-          foreground: "hsl(var(--error-foreground))",
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
         },
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
       },
       animation: {
@@ -194,5 +103,8 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
+  plugins: [
+    require("tailwindcss-animate"),
+    require("@tailwindcss/typography"),
+  ],
 } satisfies Config;

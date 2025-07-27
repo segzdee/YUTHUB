@@ -1,39 +1,46 @@
-import React from 'react';
 import { cn } from '@/lib/utils';
+import { Slot } from '@radix-ui/react-slot';
+import React from 'react';
 
 interface TypographyProps {
-  variant?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'body1' | 'body2' | 'caption' | 'overline';
-  component?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span' | 'div';
+  variant?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'body1' | 'body2' | 'caption' | 'overline' | 'lead' | 'large' | 'small' | 'muted';
+  component?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span' | 'div' | 'label';
   className?: string;
   children: React.ReactNode;
-  color?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info' | 'muted';
-  weight?: 'light' | 'normal' | 'medium' | 'semibold' | 'bold';
-  align?: 'left' | 'center' | 'right';
+  color?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info' | 'muted' | 'inherit';
+  weight?: 'light' | 'normal' | 'medium' | 'semibold' | 'bold' | 'extrabold';
+  align?: 'left' | 'center' | 'right' | 'justify';
   truncate?: boolean;
   noWrap?: boolean;
+  asChild?: boolean;
 }
 
 const variantStyles = {
-  h1: 'text-3xl md:text-4xl lg:text-5xl font-bold leading-tight tracking-tight',
-  h2: 'text-2xl md:text-3xl lg:text-4xl font-semibold leading-tight tracking-tight',
-  h3: 'text-xl md:text-2xl lg:text-3xl font-semibold leading-snug',
-  h4: 'text-lg md:text-xl lg:text-2xl font-medium leading-snug',
-  h5: 'text-base md:text-lg lg:text-xl font-medium leading-normal',
-  h6: 'text-sm md:text-base lg:text-lg font-medium leading-normal',
-  body1: 'text-base leading-relaxed',
-  body2: 'text-sm leading-relaxed',
-  caption: 'text-xs leading-normal',
-  overline: 'text-xs uppercase font-medium tracking-wide leading-normal',
+  h1: 'scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl',
+  h2: 'scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0',
+  h3: 'scroll-m-20 text-2xl font-semibold tracking-tight',
+  h4: 'scroll-m-20 text-xl font-semibold tracking-tight',
+  h5: 'scroll-m-20 text-lg font-semibold tracking-tight',
+  h6: 'scroll-m-20 text-base font-semibold tracking-tight',
+  body1: 'leading-7',
+  body2: 'text-sm leading-6',
+  lead: 'text-xl text-muted-foreground',
+  large: 'text-lg font-semibold',
+  small: 'text-sm font-medium leading-none',
+  muted: 'text-sm text-muted-foreground',
+  caption: 'text-xs text-muted-foreground',
+  overline: 'text-xs uppercase font-medium tracking-wider text-muted-foreground',
 };
 
 const colorStyles = {
   primary: 'text-primary',
-  secondary: 'text-secondary',
+  secondary: 'text-secondary-foreground',
   success: 'text-success',
-  warning: 'text-yellow-600 dark:text-yellow-400',
+  warning: 'text-warning',
   error: 'text-destructive',
-  info: 'text-blue-600 dark:text-blue-400',
+  info: 'text-info',
   muted: 'text-muted-foreground',
+  inherit: 'text-inherit',
 };
 
 const weightStyles = {
@@ -42,12 +49,14 @@ const weightStyles = {
   medium: 'font-medium',
   semibold: 'font-semibold',
   bold: 'font-bold',
+  extrabold: 'font-extrabold',
 };
 
 const alignStyles = {
   left: 'text-left',
   center: 'text-center',
   right: 'text-right',
+  justify: 'text-justify',
 };
 
 export function Typography({
@@ -60,9 +69,10 @@ export function Typography({
   align,
   truncate,
   noWrap,
+  asChild = false,
   ...props
 }: TypographyProps) {
-  const Component = component || (variant.startsWith('h') ? variant : 'p') as keyof JSX.IntrinsicElements;
+  const Comp = asChild ? Slot : (component || getDefaultComponent(variant));
   
   const classes = cn(
     'transition-colors duration-200',
@@ -76,10 +86,16 @@ export function Typography({
   );
 
   return (
-    <Component className={classes} {...props}>
+    <Comp className={classes} {...props}>
       {children}
-    </Component>
+    </Comp>
   );
+}
+
+function getDefaultComponent(variant: string): keyof JSX.IntrinsicElements {
+  if (variant.startsWith('h')) return variant as keyof JSX.IntrinsicElements;
+  if (variant === 'lead' || variant === 'body1' || variant === 'body2') return 'p';
+  return 'span';
 }
 
 // Convenient component variations
@@ -89,6 +105,22 @@ export const Heading = ({ level = 1, ...props }: { level?: 1 | 2 | 3 | 4 | 5 | 6
 
 export const Text = (props: Omit<TypographyProps, 'variant'>) => (
   <Typography variant="body1" {...props} />
+);
+
+export const Lead = (props: Omit<TypographyProps, 'variant'>) => (
+  <Typography variant="lead" {...props} />
+);
+
+export const Large = (props: Omit<TypographyProps, 'variant'>) => (
+  <Typography variant="large" {...props} />
+);
+
+export const Small = (props: Omit<TypographyProps, 'variant'>) => (
+  <Typography variant="small" {...props} />
+);
+
+export const Muted = (props: Omit<TypographyProps, 'variant'>) => (
+  <Typography variant="muted" {...props} />
 );
 
 export const Caption = (props: Omit<TypographyProps, 'variant'>) => (

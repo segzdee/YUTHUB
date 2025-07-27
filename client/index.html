@@ -1,87 +1,269 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     
-    <!-- Security -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://replit.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self';" />
+    <!-- Critical Performance Optimizations -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://replit.com" />
+    
+    <!-- Viewport and Display -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, viewport-fit=cover" />
+    <meta name="format-detection" content="telephone=no, date=no, email=no, address=no" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
+    
+    <!-- Enhanced Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://replit.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https:; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests;" />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+    <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()" />
     
-    <!-- Canonical URL -->
-    <link rel="canonical" href="https://yuthub.com/" />
+    <!-- Favicon and Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#000000" />
     
-    <!-- PWA Manifest -->
+    <!-- PWA Configuration -->
     <link rel="manifest" href="/manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="YUTHUB" />
+    <meta name="application-name" content="YUTHUB" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="msapplication-TileColor" content="#ffffff" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
     
+    <!-- SEO and Content -->
     <title>YUTHUB - Youth Housing Management Platform | UK Housing Software</title>
     <meta name="description" content="Comprehensive SaaS platform for youth housing organizations in the UK. Manage residents, track outcomes, and guide young people toward independent living with specialized housing management software." />
-    <meta name="keywords" content="youth housing management, UK housing software, social care platform, supported housing system, council housing management, housing association software, young people accommodation" />
+    <meta name="keywords" content="youth housing management, UK housing software, social care platform, supported housing system, council housing management, housing association software, young people accommodation, housing management system, social housing software" />
     <meta name="author" content="YUTHUB Team" />
-    <meta name="robots" content="index, follow" />
-    <meta name="language" content="en" />
-    <meta name="theme-color" content="#ffffff" />
-    <meta name="color-scheme" content="light dark" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="language" content="en-GB" />
+    <link rel="canonical" href="https://yuthub.com/" />
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://yuthub.com/" />
     <meta property="og:title" content="YUTHUB - Youth Housing Management Platform | UK Housing Software" />
     <meta property="og:description" content="Comprehensive SaaS platform for youth housing organizations in the UK. Manage residents, track outcomes, and guide young people toward independent living." />
-    <meta property="og:image" content="/og-image.jpg" />
+    <meta property="og:image" content="https://yuthub.com/og-image.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="YUTHUB Youth Housing Management Platform Dashboard" />
     <meta property="og:locale" content="en_GB" />
     <meta property="og:site_name" content="YUTHUB" />
+    <meta property="article:author" content="YUTHUB Team" />
     
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://yuthub.com/" />
-    <meta property="twitter:title" content="YUTHUB - Youth Housing Management Platform | UK Housing Software" />
-    <meta property="twitter:description" content="Comprehensive SaaS platform for youth housing organizations in the UK. Manage residents, track outcomes, and guide young people toward independent living." />
-    <meta property="twitter:image" content="/og-image.jpg" />
-    <meta property="twitter:image:alt" content="YUTHUB Youth Housing Management Platform Dashboard" />
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://yuthub.com/" />
+    <meta name="twitter:title" content="YUTHUB - Youth Housing Management Platform" />
+    <meta name="twitter:description" content="Comprehensive SaaS platform for youth housing organizations in the UK. Manage residents, track outcomes, and guide young people toward independent living." />
+    <meta name="twitter:image" content="https://yuthub.com/og-image.jpg" />
+    <meta name="twitter:image:alt" content="YUTHUB Youth Housing Management Platform Dashboard" />
+    <meta name="twitter:creator" content="@yuthub" />
+    <meta name="twitter:site" content="@yuthub" />
     
-    <!-- Accessibility -->
-    <meta name="format-detection" content="telephone=no" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="YUTHUB" />
+    <!-- Resource Hints and Preloading -->
+    <link rel="preload" href="/src/main.tsx" as="script" crossorigin />
+    <link rel="prefetch" href="/manifest.json" />
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" /></noscript>
     
-    <!-- Performance: DNS prefetch and preload hints -->
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-    <link rel="preload" href="/src/main.tsx" as="script" />
+    <!-- Accessibility and User Preferences -->
+    <meta name="supported-color-schemes" content="light dark" />
+    <style>
+      /* Critical CSS for immediate rendering */
+      :root {
+        --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      }
+      
+      * {
+        box-sizing: border-box;
+      }
+      
+      html {
+        height: 100%;
+        font-family: var(--font-family);
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+      }
+      
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        font-family: var(--font-family);
+        background-color: #ffffff;
+        color: #1a1a1a;
+        line-height: 1.6;
+        font-feature-settings: 'kern' 1, 'liga' 1;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      
+      @media (prefers-color-scheme: dark) {
+        body {
+          background-color: #1a1a1a;
+          color: #ffffff;
+        }
+      }
+      
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+      
+      #root {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      /* Loading state */
+      .loading {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+      }
+      
+      @media (prefers-color-scheme: dark) {
+        .loading {
+          background: #1a1a1a;
+        }
+      }
+    </style>
     
-    <!-- Preload critical fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    
-    <!-- Structured data -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
       "name": "YUTHUB",
-      "description": "Comprehensive youth housing management platform",
+      "alternateName": "Youth Housing Management Platform",
+      "description": "Comprehensive youth housing management platform for UK organizations",
       "url": "https://yuthub.com",
+      "sameAs": [
+        "https://twitter.com/yuthub",
+        "https://linkedin.com/company/yuthub"
+      ],
       "applicationCategory": "BusinessApplication",
+      "applicationSubCategory": "Housing Management Software",
       "operatingSystem": "Web",
+      "browserRequirements": "Requires JavaScript. Requires HTML5.",
+      "softwareVersion": "1.0",
+      "releaseNotes": "Initial release of YUTHUB platform",
+      "screenshot": "https://yuthub.com/screenshot.jpg",
+      "featureList": [
+        "Resident Management",
+        "Outcome Tracking",
+        "Independent Living Guidance",
+        "Housing Association Integration"
+      ],
       "offers": {
         "@type": "Offer",
         "price": "0",
-        "priceCurrency": "GBP"
+        "priceCurrency": "GBP",
+        "availability": "https://schema.org/InStock",
+        "validFrom": "2024-01-01"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "YUTHUB Team",
+        "url": "https://yuthub.com"
+      },
+      "maintainer": {
+        "@type": "Organization",
+        "name": "YUTHUB Team"
+      }
+    }
+    </script>
+    
+    <!-- Additional Schema for Organization -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "YUTHUB",
+      "url": "https://yuthub.com",
+      "logo": "https://yuthub.com/logo.png",
+      "description": "Leading provider of youth housing management software in the UK",
+      "foundingDate": "2024",
+      "knowsAbout": [
+        "Youth Housing",
+        "Social Care",
+        "Housing Management",
+        "UK Housing Policy"
+      ],
+      "serviceArea": {
+        "@type": "Country",
+        "name": "United Kingdom"
       }
     }
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- Skip to main content for accessibility -->
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded">
+      Skip to main content
+    </a>
+    
+    <!-- Loading indicator -->
+    <div id="loading" class="loading" aria-hidden="true">
+      <div role="status" aria-label="Loading application">
+        <span class="sr-only">Loading YUTHUB...</span>
+      </div>
+    </div>
+    
+    <!-- Main application root -->
+    <div id="root" role="main"></div>
+    
+    <!-- Application scripts -->
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Remove loading indicator once app loads -->
+    <script>
+      window.addEventListener('load', function() {
+        const loading = document.getElementById('loading');
+        if (loading) {
+          loading.style.opacity = '0';
+          setTimeout(() => loading.remove(), 300);
+        }
+      });
+    </script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js')
+            .then(function(registration) {
+              console.log('SW registered: ', registration);
+            })
+            .catch(function(registrationError) {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
   </body>
 </html>

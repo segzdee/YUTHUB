@@ -335,3 +335,23 @@ export const performanceOptimization = {
   monitor: performanceMonitor,
   cache: responseCache,
 };
+
+export const enhancedPerformanceMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  const start = process.hrtime.bigint();
+  
+  res.on('finish', () => {
+    const duration = Number(process.hrtime.bigint() - start) / 1000000; // Convert to ms
+    
+    // Log slow requests
+    if (duration > 1000) {
+      console.warn(`Slow request: ${req.method} ${req.path} took ${duration.toFixed(2)}ms`);
+    }
+    
+    // Track API performance
+    if (req.path.startsWith('/api/')) {
+      performanceTracker.trackRequest(req.path, duration, res.statusCode);
+    }
+  });
+  
+  next();
+};

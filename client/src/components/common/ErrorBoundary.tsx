@@ -1,6 +1,6 @@
-import React, { Component, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { AlertTriangle, RefreshCw } from 'lucide-react';
+import React, { Component, ReactNode } from 'react';
 
 interface Props {
   children: ReactNode;
@@ -22,7 +22,23 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error boundary caught an error:', error, errorInfo);
+    // Enhanced error logging
+    console.error('Error boundary caught an error:', {
+      error: {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+      },
+      errorInfo,
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      url: window.location.href,
+    });
+    
+    // Send to monitoring service in production
+    if (process.env.NODE_ENV === 'production') {
+      // Analytics.track('error_boundary_triggered', { error: error.message });
+    }
   }
 
   handleRetry = () => {

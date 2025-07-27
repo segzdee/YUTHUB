@@ -1,8 +1,8 @@
 import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import { sql } from 'drizzle-orm';
-import ws from "ws";
 import * as schema from "@shared/schema";
+import { sql } from 'drizzle-orm';
+import { drizzle } from 'drizzle-orm/neon-serverless';
+import ws from "ws";
 
 neonConfig.webSocketConstructor = ws;
 
@@ -15,14 +15,14 @@ if (!process.env.DATABASE_URL) {
 // Configure connection pool for optimal performance and compute lifecycle
 export const pool = new Pool({ 
   connectionString: process.env.DATABASE_URL,
-  max: 15, // Maximum number of connections in the pool (reduced for better resource management)
-  min: 2,  // Minimum number of connections in the pool (reduced for compute efficiency)
-  idleTimeoutMillis: 20000, // Close connections after 20 seconds of inactivity (optimized for serverless)
-  connectionTimeoutMillis: 5000, // Wait up to 5 seconds for a connection (increased for reliability)
-  maxUses: 5000, // Close connections after 5000 uses to prevent memory leaks (reduced for freshness)
-  allowExitOnIdle: true, // Allow process to exit when all connections are idle
-  keepAlive: true, // Enable TCP keepalive
-  keepAliveInitialDelayMillis: 10000, // Initial delay before keepalive probes
+  max: 20, // Increased for better concurrency
+  min: 5,  // Higher minimum for faster response
+  idleTimeoutMillis: 30000, // Longer idle timeout
+  connectionTimeoutMillis: 10000, // Longer connection timeout
+  maxUses: 7500, // Higher max uses
+  allowExitOnIdle: true,
+  keepAlive: true,
+  keepAliveInitialDelayMillis: 0, // Immediate keepalive
 });
 
 export const db = drizzle({ client: pool, schema });

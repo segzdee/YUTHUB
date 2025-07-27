@@ -1,9 +1,10 @@
-import { storage } from '../storage';
+import { incidents, maintenanceRequests } from '@shared/schema';
+import { and, eq, gt, lt, sql } from 'drizzle-orm';
 import { db } from '../db';
-import { incidents, maintenanceRequests, users, residents } from '@shared/schema';
-import { eq, and, lt, gt, sql } from 'drizzle-orm';
+import { backupManager } from '../services/backupManager';
+import { storage } from '../storage';
+import { DataIntegrityChecker } from '../utils/dataIntegrity';
 import { WebSocketManager } from '../websocket';
-import { DataIntegrityChecker, DatabaseBackupManager } from '../utils/dataIntegrity';
 
 // Background job scheduler
 class BackgroundJobScheduler {
@@ -244,28 +245,24 @@ class BackgroundJobScheduler {
     console.log('Metrics aggregated:', metrics);
   };
 
-  // Perform data backup
+  // Enhanced backup job
   private performDataBackup = async (): Promise<void> => {
     try {
-      console.log('Data backup initiated at:', new Date().toISOString());
+      console.log('🔄 Enhanced backup initiated at:', new Date().toISOString());
       
-      // Create backup snapshot
-      const snapshot = await DatabaseBackupManager.createBackupSnapshot();
+      // Create comprehensive backup
+      const result = await backupManager.createBackup('full');
       
-      // Verify backup integrity
-      const integrity = await DatabaseBackupManager.verifyBackupIntegrity();
+      console.log('✅ Enhanced backup completed:', result);
       
-      if (!integrity.isValid) {
-        console.error('Backup integrity check failed:', integrity.errors);
-        // Send alert to administrators
-        // Note: In a real implementation, you would use a proper notification system
-        console.error('ALERT: Database backup integrity check failed - notify administrators');
-        console.error('Errors:', integrity.errors);
-      } else {
-        console.log('Backup completed successfully:', snapshot);
-      }
+      // Clean up old backups
+      await backupManager.cleanupOldBackups();
+      
     } catch (error) {
-      console.error('Backup process failed:', error);
+      console.error('❌ Enhanced backup failed:', error);
+      
+      // Send alert to administrators
+      console.error('🚨 ALERT: Enhanced backup failed - notify administrators');
     }
   };
 

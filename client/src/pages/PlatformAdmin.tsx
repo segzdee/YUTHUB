@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import PlatformAdminGuard from '@/components/PlatformAdmin/PlatformAdminGuard';
 import ConfirmationDialog from '@/components/PlatformAdmin/ConfirmationDialog';
+import MonitoringDashboard from './MonitoringDashboard';
 
 // Platform Admin Dashboard Component
 export default function PlatformAdmin() {

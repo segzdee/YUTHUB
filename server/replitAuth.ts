@@ -293,91 +293,9 @@ export async function setupAuth(app: Express) {
     })(req, res, next);
   });
 
-  // Test endpoint to verify session persistence fix
-  app.get('/api/test-session', (req, res) => {
-    console.log('🧪 Session test endpoint called');
-    console.log('🧪 Session ID:', req.sessionID);
-    console.log('🧪 Session data:', req.session);
-    console.log('🧪 User authenticated:', req.isAuthenticated());
-    console.log('🧪 User object:', req.user);
-
-    res.json({
-      sessionId: req.sessionID,
-      authenticated: req.isAuthenticated(),
-      user: req.user,
-      sessionData: req.session,
-    });
-  });
-
-  // Development test login endpoint to verify session persistence fix
-  app.get('/api/test-login', async (req, res) => {
-    if (process.env.NODE_ENV !== 'development') {
-      return res.status(404).json({ error: 'Not found' });
-    }
-
-    console.log('🧪 Test login endpoint called');
-
-    const testUser = {
-      id: 'test-user-session-fix',
-      email: 'sessiontest@example.com',
-      firstName: 'Session',
-      lastName: 'Test',
-      profileImageUrl: 'https://example.com/test-avatar.jpg',
-    };
-
-    // Ensure test user exists in database
-    try {
-      await upsertUser({
-        sub: testUser.id,
-        email: testUser.email,
-        first_name: testUser.firstName,
-        last_name: testUser.lastName,
-        profile_image_url: testUser.profileImageUrl,
-      });
-      console.log('✅ Test user created/updated in database');
-    } catch (error) {
-      console.error('❌ Failed to create test user:', error);
-    }
-
-    // Simulate the fixed authentication flow
-    req.logIn(testUser, err => {
-      if (err) {
-        console.error('🔴 Test login error:', err);
-        return res.status(500).json({ error: 'Login failed' });
-      }
-
-      console.log('🧪 TEST LOGIN - req.user:', req.user);
-      console.log(
-        '🧪 TEST LOGIN - req.isAuthenticated():',
-        req.isAuthenticated()
-      );
-      console.log('🧪 TEST LOGIN - session:', req.session);
-
-      // Apply the exact same session save fix from the real callback
-      req.session.save(err => {
-        if (err) {
-          console.log('❌ Session save error:', err);
-          return res.status(500).json({ error: 'Session save failed' });
-        }
-
-        console.log('✅ Session saved successfully');
-        console.log('🔄 Session ID:', req.sessionID);
-        console.log('🔄 Cookie will be set to:', req.session.cookie);
-
-        // Ensure cookie is properly set before redirect
-        res.setHeader(
-          'Set-Cookie',
-          `connect.sid=${req.sessionID}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${req.session.cookie.maxAge}`
-        );
-
-        // Add small delay to ensure cookie is properly set in browser
-        setTimeout(() => {
-          console.log('🔄 Redirecting to dashboard after session save');
-          res.redirect('/');
-        }, 100);
-      });
-    });
-  });
+  // Debug endpoints removed for production security
+  // These endpoints were previously used for testing but have been removed
+  // to prevent potential security vulnerabilities in production
 
   app.get('/api/logout', (req, res) => {
     req.logout(() => {

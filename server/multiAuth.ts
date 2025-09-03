@@ -32,7 +32,7 @@ export class MultiAuthManager {
       return {
         success: true,
         user,
-        token: 'mock-jwt-token',
+        token: process.env.NODE_ENV === 'development' ? 'dev-jwt-token' : undefined, // Production should use real JWT
       };
     } catch (error) {
       return {
@@ -66,7 +66,7 @@ export class MultiAuthManager {
       return {
         success: true,
         user,
-        token: 'mock-jwt-token',
+        token: process.env.NODE_ENV === 'development' ? 'dev-jwt-token' : undefined, // Production should use real JWT
         needsEmailVerification: false,
       };
     } catch (error) {
@@ -81,7 +81,7 @@ export class MultiAuthManager {
     return {
       success: true,
       user: { id: 'oauth-user' },
-      token: 'oauth-token',
+      token: process.env.NODE_ENV === 'development' ? 'dev-oauth-token' : undefined, // Production should use real OAuth
     };
   }
 
@@ -89,7 +89,7 @@ export class MultiAuthManager {
     return {
       success: true,
       user: { id: 'microsoft-user' },
-      token: 'microsoft-token',
+      token: process.env.NODE_ENV === 'development' ? 'dev-microsoft-token' : undefined, // Production should use real Microsoft OAuth
     };
   }
 

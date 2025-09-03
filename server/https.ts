@@ -72,6 +72,7 @@ export function setupSecurityHeaders(app: Express): void {
   // Add security headers for HTTPS
   app.use((req, res, next) => {
     const isSSLEnabled = process.env.HTTPS_ENABLED === 'true';
+    const isDevelopment = process.env.NODE_ENV === 'development';
 
     if (isSSLEnabled) {
       // Strict Transport Security
@@ -90,6 +91,33 @@ export function setupSecurityHeaders(app: Express): void {
       'Permissions-Policy',
       'geolocation=(), microphone=(), camera=()'
     );
+
+    // Content Security Policy (CSP) - Added for enhanced XSS protection
+    const cspDirectives = [
+      "default-src 'self'",
+      `script-src 'self' ${isDevelopment ? "'unsafe-inline' 'unsafe-eval'" : ""} https://cdn.jsdelivr.net https://fonts.googleapis.com`,
+      `style-src 'self' ${isDevelopment ? "'unsafe-inline'" : ""} https://fonts.googleapis.com`,
+      "img-src 'self' data: https: blob:",
+      "font-src 'self' data: https://fonts.gstatic.com",
+      "connect-src 'self' https://api.yuthub.com wss://yuthub.com wss://localhost https://*.stripe.com",
+      "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'none'",
+      !isDevelopment && "upgrade-insecure-requests",
+      !isDevelopment && "block-all-mixed-content",
+      "report-uri /api/security/csp-report"
+    ].filter(Boolean).join('; ');
+
+    res.setHeader('Content-Security-Policy', cspDirectives);
+
+    // Additional security headers
+    res.setHeader('X-Permitted-Cross-Domain-Policies', 'none');
+    res.setHeader('Expect-CT', 'max-age=86400, enforce');
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+    res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+    res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
 
     next();
   });

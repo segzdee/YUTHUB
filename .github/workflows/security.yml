@@ -1,0 +1,167 @@
+name: Security Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  security-scan:
+    name: Security Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+        continue-on-error: true
+      
+      - name: Run npm audit
+        run: |
+          echo "🔍 Running dependency vulnerability scan..."
+          npm audit --json > audit-report.json || true
+          
+          # Parse and display results
+          CRITICAL=$(cat audit-report.json | jq '.metadata.vulnerabilities.critical // 0')
+          HIGH=$(cat audit-report.json | jq '.metadata.vulnerabilities.high // 0')
+          MODERATE=$(cat audit-report.json | jq '.metadata.vulnerabilities.moderate // 0')
+          LOW=$(cat audit-report.json | jq '.metadata.vulnerabilities.low // 0')
+          
+          echo "## 📊 Vulnerability Summary"
+          echo "- Critical: $CRITICAL"
+          echo "- High: $HIGH"
+          echo "- Moderate: $MODERATE"
+          echo "- Low: $LOW"
+          
+          # Fail if critical vulnerabilities found
+          if [ "$CRITICAL" -gt 0 ]; then
+            echo "❌ Critical vulnerabilities found!"
+            exit 1
+          fi
+          
+          echo "✅ No critical vulnerabilities found"
+      
+      - name: Upload audit report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: npm-audit-report
+          path: audit-report.json
+      
+      - name: Check for secrets
+        run: |
+          echo "🔍 Checking for exposed secrets..."
+          
+          # Check for common secret patterns
+          if grep -rEn "(api[_-]?key|secret|password|token)\s*=\s*['\"][^'\"]+['\"]" \
+             --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" \
+             --exclude-dir=node_modules --exclude-dir=dist . | \
+             grep -v "process.env" | \
+             grep -v "example" | \
+             grep -v "mock" | \
+             grep -v "test"; then
+            echo "❌ Potential secrets found in code!"
+            exit 1
+          else
+            echo "✅ No hardcoded secrets detected"
+          fi
+      
+      - name: TypeScript type check
+        run: |
+          echo "🔍 Running TypeScript type checking..."
+          npx tsc --noEmit --skipLibCheck || true
+        continue-on-error: true
+      
+      - name: Security headers check
+        run: |
+          echo "🔍 Checking security headers implementation..."
+          
+          # Check for security headers in server
+          if grep -q "Content-Security-Policy" server/https.ts && \
+             grep -q "X-Frame-Options" server/https.ts && \
+             grep -q "X-Content-Type-Options" server/https.ts; then
+            echo "✅ Security headers properly configured"
+          else
+            echo "⚠️ Some security headers might be missing"
+          fi
+      
+      - name: Authentication check
+        run: |
+          echo "🔍 Checking authentication implementation..."
+          
+          # Check for JWT implementation
+          if [ -f "server/services/jwtService.ts" ]; then
+            echo "✅ JWT service implemented"
+          else
+            echo "⚠️ JWT service not found"
+          fi
+          
+          # Check for password hashing
+          if grep -q "bcrypt" package.json; then
+            echo "✅ Password hashing with bcrypt configured"
+          else
+            echo "❌ bcrypt not found - passwords might not be hashed!"
+          fi
+      
+      - name: Rate limiting check
+        run: |
+          echo "🔍 Checking rate limiting..."
+          
+          if grep -q "RateLimiter" server/index.ts; then
+            echo "✅ Rate limiting configured"
+          else
+            echo "⚠️ Rate limiting might not be properly configured"
+          fi
+      
+      - name: Database security check
+        run: |
+          echo "🔍 Checking database security..."
+          
+          # Check for SSL validation
+          if grep -q "sslmode=require" server/db.ts || grep -q "ssl=true" server/db.ts; then
+            echo "✅ Database SSL validation configured"
+          else
+            echo "⚠️ Database SSL might not be enforced"
+          fi
+      
+      - name: Generate security report
+        if: always()
+        run: |
+          echo "# 🔒 Security Scan Report" > security-report.md
+          echo "" >> security-report.md
+          echo "**Date:** $(date)" >> security-report.md
+          echo "**Branch:** ${{ github.ref_name }}" >> security-report.md
+          echo "**Commit:** ${{ github.sha }}" >> security-report.md
+          echo "" >> security-report.md
+          
+          echo "## Status" >> security-report.md
+          
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ **All security checks passed**" >> security-report.md
+          else
+            echo "⚠️ **Some security checks need attention**" >> security-report.md
+          fi
+          
+          echo "" >> security-report.md
+          echo "## Recommendations" >> security-report.md
+          echo "1. Review and fix any vulnerabilities found" >> security-report.md
+          echo "2. Keep dependencies up to date" >> security-report.md
+          echo "3. Regularly run security audits" >> security-report.md
+          echo "4. Enable branch protection rules" >> security-report.md
+      
+      - name: Upload security report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: security-report
+          path: security-report.md

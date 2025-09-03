@@ -108,8 +108,8 @@ export default function CrossModuleSearch() {
     });
 
     // Search support plans
-    supportPlans.forEach(plan => {
-      const resident = residents.find(r => r.id === plan.residentId);
+    supportPlans.forEach((plan: any) => {
+      const resident = residents.find((r: any) => r.id === plan.residentId);
       const residentName = resident
         ? `${resident.firstName} ${resident.lastName}`
         : 'Unknown';
@@ -132,7 +132,7 @@ export default function CrossModuleSearch() {
     });
 
     // Search incidents
-    incidents.forEach(incident => {
+    incidents.forEach((incident: any) => {
       const relevance =
         calculateRelevance(incident.title, term) +
         calculateRelevance(incident.description, term) +
@@ -153,7 +153,7 @@ export default function CrossModuleSearch() {
     });
 
     // Search financial records
-    financialRecords.forEach(record => {
+    financialRecords.forEach((record: any) => {
       const relevance =
         calculateRelevance(record.description, term) +
         calculateRelevance(record.category, term);
@@ -173,7 +173,7 @@ export default function CrossModuleSearch() {
     });
 
     // Search invoices
-    invoices.forEach(invoice => {
+    invoices.forEach((invoice: any) => {
       const relevance =
         calculateRelevance(invoice.invoiceNumber, term) +
         calculateRelevance(invoice.description || '', term);

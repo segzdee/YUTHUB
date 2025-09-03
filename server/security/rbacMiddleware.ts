@@ -269,7 +269,7 @@ export function requirePermission(permission: Permission) {
         });
       }
 
-      next();
+      return next();
     } catch (error) {
       console.error('Permission check error:', error);
       return res.status(500).json({ message: 'Internal server error' });
@@ -331,7 +331,7 @@ export function requireRole(requiredRole: Role) {
         });
       }
 
-      next();
+      return next();
     } catch (error) {
       console.error('Role check error:', error);
       return res.status(500).json({ message: 'Internal server error' });

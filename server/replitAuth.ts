@@ -8,9 +8,8 @@ import memoize from 'memoizee';
 import passport from 'passport';
 import { storage } from './storage';
 
-if (!process.env.REPLIT_DOMAINS) {
-  throw new Error('Environment variable REPLIT_DOMAINS not provided');
-}
+// Make Replit auth optional for local development
+const isReplitAuthEnabled = !!process.env.REPLIT_DOMAINS;
 
 const getOidcConfig = memoize(
   async () => {
@@ -68,6 +67,12 @@ async function upsertUser(claims: any) {
 }
 
 export async function setupAuth(app: Express) {
+  // If Replit auth is not enabled, skip setup
+  if (!isReplitAuthEnabled) {
+    console.log('🔧 Replit auth disabled - REPLIT_DOMAINS not set');
+    return;
+  }
+
   app.set('trust proxy', 1);
   app.use(getSession());
   app.use(passport.initialize());
@@ -449,18 +454,6 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 };
-
-export function isAuthenticated(
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) {
-  if (req.isAuthenticated && req.isAuthenticated()) {
-    return next();
-  }
-
-  res.status(401).json({ message: 'Unauthorized' });
-}
 
 export function requireAuth(
   req: AuthenticatedRequest,

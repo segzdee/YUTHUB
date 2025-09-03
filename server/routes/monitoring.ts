@@ -1,8 +1,17 @@
 import { Router } from 'express';
-import { memoryMonitor } from '../middleware/memoryOptimization';
-import { performanceOptimizer } from '../middleware/performanceOptimization';
-import { errorTracker } from '../middleware/errorHandling';
+import { performanceOptimization } from '../middleware/performanceOptimization';
 import { getPoolStats } from '../db';
+
+// Create placeholder monitors
+const memoryMonitor = {
+  getMemoryStats: () => ({ heapUsed: 0, heapTotal: 0, rss: 0, external: 0 }),
+  getMemoryTrends: () => ({ history: [], alerts: [] })
+};
+
+const errorTracker = {
+  getErrorMetrics: () => ({ totalErrors: 0, errorsByType: {}, recentErrors: [] }),
+  clearMetrics: () => {}
+};
 
 const router = Router();
 

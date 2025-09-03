@@ -21,48 +21,6 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-export async function apiRequest(
-  method: string,
-  url: string,
-  data?: unknown  
-): Promise<Response> {
-  const res = await fetch(url, {
-    method,
-    headers: data ? { 'Content-Type': 'application/json' } : {},
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: 'include',
-  });
-
-  // If we get a 401, try to refresh the session by making a simple request
-  if (res.status === 401) {
-    console.log('Received 401, attempting to refresh session...');
-    try {
-      const refreshRes = await fetch('/api/auth/user', {
-        credentials: 'include',
-      });
-
-      if (refreshRes.ok) {
-        // Session refreshed, retry the original request
-        console.log('Session refreshed, retrying original request...');
-        const retryRes = await fetch(url, {
-          method,
-          headers: data ? { 'Content-Type': 'application/json' } : {},
-          body: data ? JSON.stringify(data) : undefined,
-          credentials: 'include',
-        });
-
-        if (retryRes.ok) {
-          return retryRes;
-        }
-      }
-    } catch (refreshError) {
-      console.error('Session refresh failed:', refreshError);
-    }
-  }
-
-  await throwIfResNotOk(res);
-  return res;
-}
 
 type UnauthorizedBehavior = 'returnNull' | 'throw';
 export const getQueryFn: <T>(options: {

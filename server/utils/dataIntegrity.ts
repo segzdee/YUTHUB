@@ -1,5 +1,13 @@
-import { sql } from 'drizzle-orm';
+import { sql, count } from 'drizzle-orm';
 import { db } from '../db';
+import {
+  users,
+  properties,
+  residents,
+  incidents,
+  activities,
+  financialRecords,
+} from '../../shared/schema';
 
 // Database integrity checks
 export class DataIntegrityChecker {
@@ -151,31 +159,35 @@ export class DatabaseBackupManager {
   }> {
     const timestamp = new Date().toISOString();
 
-    // Remove unused tableChecks, dbSize, storage variables
-    const tables = {
-      users: await db.select({ count: count() }).from(users),
-      properties: await db.select({ count: count() }).from(properties),
-      residents: await db.select({ count: count() }).from(residents),
-      incidents: await db.select({ count: count() }).from(incidents),
-      activities: await db.select({ count: count() }).from(activities),
-      financialRecords: await db
-        .select({ count: count() })
-        .from(financialRecords),
+    // Get counts for each table
+    const [usersCount] = await db.select({ count: count() }).from(users);
+    const [propertiesCount] = await db.select({ count: count() }).from(properties);
+    const [residentsCount] = await db.select({ count: count() }).from(residents);
+    const [incidentsCount] = await db.select({ count: count() }).from(incidents);
+    const [activitiesCount] = await db.select({ count: count() }).from(activities);
+    const [financialRecordsCount] = await db
+      .select({ count: count() })
+      .from(financialRecords);
+
+    const tables: Record<string, number> = {
+      users: usersCount?.count ?? 0,
+      properties: propertiesCount?.count ?? 0,
+      residents: residentsCount?.count ?? 0,
+      incidents: incidentsCount?.count ?? 0,
+      activities: activitiesCount?.count ?? 0,
+      financialRecords: financialRecordsCount?.count ?? 0,
     };
 
     const totalRecords = Object.values(tables).reduce(
-      (sum, table) => sum + (table[0]?.count || 0),
+      (sum, tableCount) => sum + tableCount,
       0
     );
 
-    const snapshot = {
+    return {
       timestamp,
       tables,
       totalRecords,
-      version: '1.0.0',
     };
-
-    return snapshot;
   }
 
   // Verify backup integrity
@@ -185,6 +197,7 @@ export class DatabaseBackupManager {
     lastSnapshot: any;
   }> {
     const errors: string[] = [];
+    const startTime = Date.now();
 
     try {
       // Check if critical tables exist
@@ -205,7 +218,7 @@ export class DatabaseBackupManager {
       // storage.getProperties(),
       // storage.getResidents(),
       // storage.getDashboardMetrics(),
-      const avgQueryTime = (Date.now() - start) / 3;
+      const avgQueryTime = (Date.now() - startTime) / 3;
 
       // Check for slow queries
       const slowQueries = await db.execute(sql`
@@ -224,9 +237,9 @@ export class DatabaseBackupManager {
       }
 
       return {
-        success: errors.length === 0,
+        isValid: errors.length === 0,
         errors,
-        performance,
+        lastSnapshot: { performance },
       };
     } catch (error) {
       errors.push(
@@ -234,11 +247,13 @@ export class DatabaseBackupManager {
       );
 
       return {
-        success: false,
+        isValid: false,
         errors,
-        performance: {
-          avgQueryTime: 0,
-          slowQueries: 0,
+        lastSnapshot: {
+          performance: {
+            avgQueryTime: 0,
+            slowQueries: 0,
+          },
         },
       };
     }

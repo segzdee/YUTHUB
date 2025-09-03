@@ -35,14 +35,14 @@ interface Notification {
 }
 
 interface NotificationCenterProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 export default function NotificationCenter({
-  isOpen,
-  onClose,
-}: NotificationCenterProps) {
+  isOpen = false,
+  onClose = () => {},
+}: NotificationCenterProps = {}) {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
 

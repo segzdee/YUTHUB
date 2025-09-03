@@ -20,7 +20,7 @@ interface EmailTemplate {
 }
 
 class EmailService {
-  private transporter: nodemailer.Transporter;
+  private transporter: nodemailer.Transporter | null = null;
   private isConfigured: boolean = false;
 
   constructor() {
@@ -39,7 +39,7 @@ class EmailService {
     };
 
     if (emailConfig.auth.user && emailConfig.auth.pass) {
-      this.transporter = nodemailer.createTransporter(emailConfig);
+      this.transporter = nodemailer.createTransport(emailConfig);
       this.isConfigured = true;
     } else {
       console.warn(
@@ -49,7 +49,7 @@ class EmailService {
   }
 
   async sendEmail(to: string, template: EmailTemplate): Promise<boolean> {
-    if (!this.isConfigured) {
+    if (!this.isConfigured || !this.transporter) {
       console.error('Email service not configured');
       return false;
     }

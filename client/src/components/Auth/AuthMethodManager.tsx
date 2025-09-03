@@ -133,7 +133,7 @@ export default function AuthMethodManager() {
 
   const methods = authMethods || [];
   const availableProviders = ['GOOGLE', 'MICROSOFT', 'APPLE'].filter(
-    provider => !methods.find(m => m.provider === provider)
+    provider => !methods.find((m: any) => m.provider === provider)
   );
 
   return (

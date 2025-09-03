@@ -4,6 +4,17 @@ import { sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import ws from 'ws';
 
+// Load environment variables if not already loaded
+if (!process.env.DATABASE_URL) {
+  // Try loading from dotenv for local development
+  try {
+    const dotenv = await import('dotenv');
+    dotenv.config();
+  } catch (e) {
+    // Dotenv might not be available in production
+  }
+}
+
 neonConfig.webSocketConstructor = ws;
 
 if (!process.env.DATABASE_URL) {

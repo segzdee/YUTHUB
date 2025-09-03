@@ -194,6 +194,9 @@ export const rateLimiters = {
   }),
 };
 
+// Export aliases for backward compatibility
+export const createAccountLimiter = rateLimiters.auth.middleware.bind(rateLimiters.auth);
+
 // Advanced rate limiter with sliding window
 export class SlidingWindowRateLimiter {
   private windowSize: number;

@@ -71,7 +71,7 @@ export default function CrisisModal({ isOpen, onClose }: CrisisModalProps) {
       setSelectedType('');
       setMessage('');
     },
-    onError: error => {
+    onError: () => {
       toast({
         title: 'Error',
         description: 'Failed to send crisis alert. Please try again.',

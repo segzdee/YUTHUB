@@ -1,10 +1,10 @@
 {
   "include": [
-    "client/src/**/*",
-    "shared/**/*",
-    "server/**/*",
-    "*.ts",
-    "*.js",
+    "client/src/**/*", 
+    "shared/**/*", 
+    "server/**/*", 
+    "*.ts", 
+    "*.js", 
     "tests/**/*",
     "scripts/**/*"
   ],

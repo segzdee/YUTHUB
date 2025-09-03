@@ -135,9 +135,9 @@ export default function CrossModuleWidget({
         );
 
       case 'risk-assessment':
-        const riskResidents = residents.filter(r => r.riskLevel === 'high');
+        const riskResidents = residents.filter((r: any) => r.riskLevel === 'high');
         const recentIncidents = incidents.filter(
-          i =>
+          (i: any) =>
             new Date(i.createdAt).getTime() >
             Date.now() - 7 * 24 * 60 * 60 * 1000
         );

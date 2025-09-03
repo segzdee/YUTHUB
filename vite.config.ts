@@ -1,8 +1,8 @@
 /// <reference types="node" />
-import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import { defineConfig } from 'vite';
+import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
 
 export default defineConfig({
   plugins: [
@@ -33,6 +33,16 @@ export default defineConfig({
     fs: {
       strict: true,
       deny: ['**/.*'],
+    },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+      '/auth': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
     },
   },
 });

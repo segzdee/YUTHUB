@@ -459,3 +459,34 @@ export const memoryOptimization = {
   stats: memoryStatsHandler,
   forceGC: forceGCHandler,
 };
+
+// Export individual functions for backward compatibility
+export const memoryLimitMiddleware = (maxMemory?: number) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    // Check memory usage if limit is specified
+    if (maxMemory) {
+      const memoryUsage = process.memoryUsage();
+      if (memoryUsage.heapUsed > maxMemory) {
+        return res.status(503).json({
+          error: 'Service temporarily unavailable - memory limit exceeded'
+        });
+      }
+    }
+    // Apply standard memory optimization
+    return memoryOptimizationMiddleware(req, res, next);
+  };
+};
+export const memoryTrackingMiddleware = memoryLeakDetectionMiddleware;
+export const startMemoryMonitoring = () => {
+  // Memory monitoring is started automatically by memoryManager
+  return memoryManager;
+};
+export const cleanupMemory = () => {
+  // Trigger garbage collection if available
+  if (global.gc) {
+    global.gc();
+  }
+  // Clear buffer pools
+  bufferPool.clear();
+  requestDataPool.clear();
+};

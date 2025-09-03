@@ -61,4 +61,113 @@ export interface IStorage {
   getResidents(): Promise<Resident[]>;
   getDashboardMetrics(): Promise<DashboardMetrics>;
   getBillingAnalytics(): Promise<BillingAnalytics>;
+  
+  // Document management
+  getDocument(id: string): Promise<any>;
+  getDocuments(filters?: any): Promise<any[]>;
+  createDocument(doc: any): Promise<any>;
+  updateDocument(id: string, doc: any): Promise<any>;
+  deleteDocument(id: string): Promise<boolean>;
+  
+  // File shares
+  getFileShares(documentId: string): Promise<any[]>;
+  createFileShare(share: any): Promise<any>;
+  
+  // Backup management
+  createBackupRecord(backup: any): Promise<any>;
+  updateBackupRecord(id: string, data: any): Promise<any>;
+  getBackupRecords(filters?: any): Promise<any[]>;
 }
+
+
+// Export a placeholder storage instance
+// This should be implemented with actual database operations
+export const storage: IStorage = {
+  async getUser(id: string) {
+    // Implementation should query from database
+    return undefined;
+  },
+  
+  async upsertUser(user) {
+    // Implementation should upsert to database
+    return user as any;
+  },
+  
+  async updateUserSubscription(id, subscription) {
+    // Implementation should update in database
+    return {} as any;
+  },
+  
+  async getProperties() {
+    return [];
+  },
+  
+  async getResidents() {
+    return [];
+  },
+  
+  async getDashboardMetrics() {
+    return {
+      totalProperties: 0,
+      totalResidents: 0,
+      occupancyRate: 0,
+      maintenanceRequests: 0,
+      recentActivity: [],
+    };
+  },
+  
+  async getBillingAnalytics() {
+    return {
+      totalRevenue: 0,
+      monthlyRevenue: 0,
+      outstandingAmount: 0,
+      paidInvoices: 0,
+      pendingInvoices: 0,
+      overdueInvoices: 0,
+      topClients: [],
+    };
+  },
+  
+  // Document management
+  async getDocument(id: string) {
+    return null;
+  },
+  
+  async getDocuments(filters?: any) {
+    return [];
+  },
+  
+  async createDocument(doc: any) {
+    return doc;
+  },
+  
+  async updateDocument(id: string, doc: any) {
+    return doc;
+  },
+  
+  async deleteDocument(id: string) {
+    return true;
+  },
+  
+  // File shares
+  async getFileShares(documentId: string) {
+    return [];
+  },
+  
+  async createFileShare(share: any) {
+    return share;
+  },
+  
+  // Backup management
+  async createBackupRecord(backup: any) {
+    return backup;
+  },
+  
+  async updateBackupRecord(id: string, data: any) {
+    return data;
+  },
+  
+  async getBackupRecords(filters?: any) {
+    return [];
+  },
+};

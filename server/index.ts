@@ -230,11 +230,8 @@ app.use((req, res, next) => {
   );
 
   server.listen(
-    {
-      port: finalPort,
-      host: '0.0.0.0',
-      reusePort: true,
-    },
+    finalPort,
+    process.env.NODE_ENV === 'development' ? 'localhost' : '0.0.0.0',
     () => {
       log(`serving on port ${finalPort} (${isSSL ? 'HTTPS' : 'HTTP'} mode)`);
     }

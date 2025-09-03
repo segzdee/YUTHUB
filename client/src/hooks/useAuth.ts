@@ -15,6 +15,7 @@ interface User {
   name: string;
   email: string;
   role: string;
+  permissions?: string[];
   maxResidents?: number;
   subscriptionTier?: string;
   subscriptionStatus?: string;

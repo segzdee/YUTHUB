@@ -166,8 +166,8 @@ export const responseTimeMiddleware = (
       );
     }
 
-    // Add response time header
-    res.set('X-Response-Time', `${responseTime}ms`);
+    // Note: Cannot set headers after response is sent
+    // The X-Response-Time header should be set before sending the response
   });
 
   next();
@@ -355,8 +355,11 @@ export const performanceOptimization = {
   queryOptimization: queryOptimizationMiddleware,
   resourceCleanup: resourceCleanupMiddleware,
   monitor: performanceMonitor,
-  cache: responseCache,
+  responseCache: responseCache,
 };
+
+// Export alias for backward compatibility
+export const performanceTrackingMiddleware = responseTimeMiddleware;
 
 export const enhancedPerformanceMiddleware = (
   req: Request,

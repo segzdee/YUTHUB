@@ -235,27 +235,6 @@ export class WebSocketManager {
   }
 
   // Platform admin specific methods
-  // Add type definitions at the top of the file
-  interface PlatformUpdateData {
-    type: string;
-    data: Record<string, unknown>;
-    timestamp?: number;
-  }
-  
-  interface OrganizationUpdateData {
-    organizationId: string;
-    type: string;
-    data: Record<string, unknown>;
-    timestamp?: number;
-  }
-  
-  interface SystemAlertData {
-    level: 'info' | 'warning' | 'error' | 'critical';
-    message: string;
-    details?: Record<string, unknown>;
-    timestamp?: number;
-  }
-
   async broadcastPlatformUpdate(updateType: string, data: any) {
     const message = {
       type: 'platform_update',

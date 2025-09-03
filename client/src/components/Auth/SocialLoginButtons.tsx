@@ -43,7 +43,7 @@ export default function SocialLoginButtons({
           variant: 'destructive',
         });
       }
-    } catch (error) {
+    } catch (_error) {
       const errorMsg = `Failed to initialize ${provider} authentication`;
       onError?.(errorMsg);
       toast({
@@ -53,8 +53,6 @@ export default function SocialLoginButtons({
       });
     }
   };
-
-  const actionText = mode === 'signin' ? 'Sign in with' : 'Sign up with';
 
   return (
     <div className='space-y-3'>

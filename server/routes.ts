@@ -1,5 +1,10 @@
 import {
   auditLogs,
+  users,
+  properties,
+  residents,
+  incidents,
+  organizationInvitations,
   insertAssessmentFormSchema,
   insertFinancialRecordSchema,
   insertGovernmentClientSchema,
@@ -24,6 +29,7 @@ import {
   readinessCheck,
 } from './middleware/healthCheck';
 import { validateInput } from './middleware/inputSanitization';
+import { createAccountLimiter } from './middleware/rateLimiter';
 import { multiAuthManager, setupMultiAuth } from './multiAuth';
 import {
   checkPlatformAdminAuth,
@@ -42,7 +48,7 @@ import {
   validateDataConsistency,
 } from './platformAdmin';
 import { enhancedPlatformAdminAuth } from './platformAdminValidation';
-import { isAuthenticated, setupAuth } from './replitAuth';
+import { isAuthenticated, requireAuth, setupAuth } from './replitAuth';
 import fileManagementRoutes from './routes/fileManagement';
 import monitoringRoutes from './routes/monitoring';
 import {

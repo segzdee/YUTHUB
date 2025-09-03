@@ -3,12 +3,9 @@ import { Loader2 } from 'lucide-react';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // This component provides comprehensive loading states for pages
@@ -25,8 +22,6 @@ interface PageLoaderProps {
 }
 
 export default function PageLoader({
-  title = 'Loading...',
-  description = 'Please wait while we load your data',
   showTabs = false,
   tabCount = 3,
   cardCount = 4,

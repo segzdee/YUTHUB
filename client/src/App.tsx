@@ -6,13 +6,13 @@ import {
   BrowserRouter as Router,
   Routes,
 } from 'react-router-dom';
-import ProtectedRoute from './components/auth/ProtectedRoute';
-import PublicRoute from './components/auth/PublicRoute';
+import ProtectedRoute from './components/Auth/ProtectedRoute';
+import PublicRoute from './components/Auth/PublicRoute';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
-import { PageLoader } from './components/common/PageLoader';
+import PageLoader from './components/common/PageLoader';
 import { Layout } from './components/Layout';
 import { AccessibilityProvider } from './components/providers/AccessibilityProvider';
-import { AuthProvider } from './components/providers/AuthProvider';
+// AuthProvider is no longer needed as we use Zustand for auth state
 import { LanguageProvider } from './components/providers/LanguageProvider';
 import { ThemeProvider } from './components/providers/ThemeProvider';
 import { Toaster } from './components/ui/toaster';
@@ -35,7 +35,15 @@ const Help = lazy(() => import('./pages/Help'));
 const PlatformAdmin = lazy(() => import('./pages/PlatformAdmin'));
 const Landing = lazy(() => import('./pages/Landing'));
 const AuthLogin = lazy(() => import('./pages/AuthLogin'));
-const NotFound = lazy(() => import('./pages/NotFound'));
+// NotFound page will be created if needed
+const NotFound = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="text-center">
+      <h1 className="text-4xl font-bold text-gray-900">404</h1>
+      <p className="mt-2 text-gray-600">Page not found</p>
+    </div>
+  </div>
+);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -43,7 +51,7 @@ const queryClient = new QueryClient({
       retry: 3,
       staleTime: 5 * 60 * 1000, // 5 minutes
       refetchOnWindowFocus: false,
-      suspense: false,
+      // suspense: false, // removed as not valid option
     },
   },
 });
@@ -55,8 +63,7 @@ function App() {
         <ThemeProvider>
           <AccessibilityProvider>
             <QueryClientProvider client={queryClient}>
-              <AuthProvider>
-                <TooltipProvider>
+              <TooltipProvider>
                   <Router>
                     {/* Skip link for accessibility */}
                     <a
@@ -152,7 +159,6 @@ function App() {
                     <Toaster />
                   </Router>
                 </TooltipProvider>
-              </AuthProvider>
             </QueryClientProvider>
           </AccessibilityProvider>
         </ThemeProvider>

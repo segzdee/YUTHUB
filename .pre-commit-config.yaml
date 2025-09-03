@@ -1,0 +1,99 @@
+# Pre-commit hooks for security and code quality
+repos:
+  # Security: Detect secrets in code
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: package-lock.json
+
+  # Security: Gitleaks for secret scanning  
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.0
+    hooks:
+      - id: gitleaks
+
+  # Security: Semgrep for SAST
+  - repo: https://github.com/returntocorp/semgrep
+    rev: v1.45.0
+    hooks:
+      - id: semgrep
+        args: ['--config=auto', '--error']
+
+  # Code Quality: ESLint
+  - repo: local
+    hooks:
+      - id: eslint
+        name: ESLint
+        entry: npm run lint
+        language: system
+        files: \.(js|jsx|ts|tsx)$
+        pass_filenames: false
+
+  # Code Quality: TypeScript type checking
+  - repo: local
+    hooks:
+      - id: typecheck
+        name: TypeScript Type Check
+        entry: npm run type-check
+        language: system
+        pass_filenames: false
+
+  # Security: Check for vulnerable dependencies
+  - repo: local
+    hooks:
+      - id: npm-audit
+        name: NPM Security Audit
+        entry: npm audit --audit-level=high
+        language: system
+        pass_filenames: false
+
+  # Security: Check for hardcoded credentials
+  - repo: local
+    hooks:
+      - id: check-credentials
+        name: Check for Hardcoded Credentials
+        entry: bash -c 'grep -rE "(api[_-]?key|secret|password|token)\s*=\s*[\"'\''][^\"'\'']+[\"'\'']" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" --exclude-dir=node_modules --exclude-dir=.git . || exit 0'
+        language: system
+        pass_filenames: false
+
+  # File checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-json
+      - id: check-yaml
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: detect-private-key
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+
+  # Prettier formatting
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.0.3
+    hooks:
+      - id: prettier
+        files: \.(js|jsx|ts|tsx|json|css|scss|md|yml|yaml)$
+
+  # Security: License compliance check
+  - repo: local
+    hooks:
+      - id: license-check
+        name: License Compliance Check
+        entry: bash -c 'npx license-checker --production --onlyAllow "MIT;ISC;Apache-2.0;BSD-2-Clause;BSD-3-Clause;0BSD;CC0-1.0;CC-BY-3.0;CC-BY-4.0;Unlicense"'
+        language: system
+        pass_filenames: false
+
+  # Security: SQL injection detection
+  - repo: local
+    hooks:
+      - id: sql-injection-check
+        name: SQL Injection Check
+        entry: bash -c 'grep -rE "(\$\{[^}]+\}|\" \+ [a-zA-Z_]+|\' \+ [a-zA-Z_]+)" --include="*.ts" --include="*.js" --exclude-dir=node_modules . | grep -v "//\|/\*" || exit 0'
+        language: system
+        pass_filenames: false

@@ -230,6 +230,10 @@ export async function registerRoutes(
           .json({ error: 'You must accept the Terms of Service to register' });
       }
 
+      // Hash the password before storing
+      const bcrypt = await import('bcrypt');
+      const hashedPassword = await bcrypt.hash(password, 12);
+
       const verificationToken = crypto.randomBytes(32).toString('hex');
 
       const newUser = await db

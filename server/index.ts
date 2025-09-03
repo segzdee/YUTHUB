@@ -25,6 +25,7 @@ import {
   notFoundHandler,
 } from './middleware/errorHandling';
 import { sanitizeInput } from './middleware/inputSanitization';
+import { RateLimiter, rateLimiters } from './middleware/rateLimiter';
 import {
   cleanupMemory,
   memoryLimitMiddleware,
@@ -94,8 +95,41 @@ app.use(
 );
 
 // Security middleware
-// Temporarily disable global rate limiting for development
-// app.use(apiRateLimit);
+// Rate limiting configuration - enabled for all environments
+const rateLimitConfig = {
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes default
+  maxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'), // 100 requests default
+  skipFailedRequests: false,
+  skipSuccessfulRequests: false,
+  message: 'Too many requests from this IP, please try again later.',
+};
+
+// Apply appropriate rate limits based on environment
+if (process.env.NODE_ENV === 'production') {
+  // Strict rate limiting in production
+  app.use('/api/auth', rateLimiters.auth.middleware());
+  app.use('/api/password-reset', rateLimiters.passwordReset.middleware());
+  app.use('/api/upload', rateLimiters.upload.middleware());
+  app.use('/api', new RateLimiter({
+    windowMs: rateLimitConfig.windowMs,
+    maxRequests: rateLimitConfig.maxRequests,
+    message: rateLimitConfig.message,
+  }).middleware());
+} else {
+  // More lenient rate limiting in development/staging
+  app.use('/api/auth', new RateLimiter({
+    windowMs: 5 * 60 * 1000, // 5 minutes
+    maxRequests: 20, // More attempts allowed in dev
+    message: 'Too many authentication attempts',
+  }).middleware());
+  app.use('/api', new RateLimiter({
+    windowMs: 60 * 1000, // 1 minute window
+    maxRequests: 60, // 1 req/sec average
+    message: 'Rate limit exceeded in development',
+  }).middleware());
+}
+
+console.log(`🛡️ Rate limiting enabled (${process.env.NODE_ENV} mode)`);
 app.use(sanitizeInput);
 
 app.use(express.json({ limit: '10mb' }));

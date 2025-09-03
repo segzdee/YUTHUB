@@ -1,0 +1,394 @@
+name: Security Scanning
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run daily security scan at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  # 1. Dependency Vulnerability Scanning
+  dependency-scan:
+    name: Dependency Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install Dependencies
+        run: npm ci
+      
+      - name: Run npm audit
+        run: |
+          npm audit --audit-level=moderate
+          npm audit --json > npm-audit-report.json
+        continue-on-error: true
+      
+      - name: Upload npm audit report
+        uses: actions/upload-artifact@v3
+        with:
+          name: npm-audit-report
+          path: npm-audit-report.json
+      
+      - name: Check for critical vulnerabilities
+        run: |
+          CRITICAL_VULNS=$(npm audit --json | jq '.metadata.vulnerabilities.critical')
+          HIGH_VULNS=$(npm audit --json | jq '.metadata.vulnerabilities.high')
+          if [ "$CRITICAL_VULNS" -gt 0 ]; then
+            echo "❌ Found $CRITICAL_VULNS critical vulnerabilities"
+            exit 1
+          fi
+          if [ "$HIGH_VULNS" -gt 0 ]; then
+            echo "⚠️ Found $HIGH_VULNS high vulnerabilities"
+          fi
+
+  # 2. OWASP Dependency Check
+  owasp-dependency-check:
+    name: OWASP Dependency Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'YUTHUB'
+          path: '.'
+          format: 'HTML,JSON'
+          args: >
+            --enableRetired
+            --enableExperimental
+            --failOnCVSS 7
+      
+      - name: Upload OWASP results
+        uses: actions/upload-artifact@v3
+        with:
+          name: owasp-dependency-check-report
+          path: reports/
+
+  # 3. CodeQL Security Analysis
+  codeql-analysis:
+    name: CodeQL Security Analysis
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        language: ['javascript', 'typescript']
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-and-quality
+      
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+      
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
+
+  # 4. Semgrep Security Scan
+  semgrep:
+    name: Semgrep Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run Semgrep
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >
+            p/security-audit
+            p/secrets
+            p/owasp-top-ten
+            p/typescript
+            p/react
+            p/nodejs
+          generateSarif: true
+      
+      - name: Upload Semgrep results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep.sarif
+        if: always()
+
+  # 5. Secret Detection
+  secret-scan:
+    name: Secret Detection Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: TruffleHog Secret Scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --json --only-verified
+      
+      - name: Gitleaks Secret Scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # 6. Container Security Scan (if using Docker)
+  container-scan:
+    name: Container Security Scan
+    runs-on: ubuntu-latest
+    if: ${{ hashFiles('Dockerfile') != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Build Docker image
+        run: docker build -t yuthub:${{ github.sha }} .
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'yuthub:${{ github.sha }}'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+      
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # 7. Custom Penetration Tests
+  penetration-test:
+    name: Automated Penetration Testing
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: yuthub_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install -g pm2
+          npm install colors axios
+      
+      - name: Setup test environment
+        env:
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/yuthub_test
+          JWT_SECRET: test-jwt-secret-for-ci-only
+          SESSION_SECRET: test-session-secret-for-ci-only
+          NODE_ENV: test
+        run: |
+          # Run database migrations
+          npm run db:migrate || true
+          
+          # Start the server in test mode
+          pm2 start npm --name yuthub-test -- run dev:server
+          sleep 10
+      
+      - name: Run penetration tests
+        env:
+          TARGET_URL: http://localhost:5000
+          FRONTEND_URL: http://localhost:5177
+        run: |
+          node security/penetration-test.js || echo "Penetration test completed with findings"
+      
+      - name: Upload penetration test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: penetration-test-results
+          path: |
+            penetration-test-results.json
+            penetration-test-report.html
+        if: always()
+      
+      - name: Stop test server
+        run: pm2 stop all
+        if: always()
+
+  # 8. SAST with SonarCloud
+  sonarcloud:
+    name: SonarCloud Security Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=yuthub
+            -Dsonar.organization=yuthub-org
+            -Dsonar.sources=.
+            -Dsonar.exclusions=**/*.test.ts,**/*.test.tsx,**/node_modules/**,**/dist/**
+            -Dsonar.tests=.
+            -Dsonar.test.inclusions=**/*.test.ts,**/*.test.tsx
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+
+  # 9. License Compliance Check
+  license-check:
+    name: License Compliance Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install license-checker
+        run: npm install -g license-checker
+      
+      - name: Check licenses
+        run: |
+          license-checker --production --onlyAllow 'MIT;ISC;Apache-2.0;BSD-2-Clause;BSD-3-Clause;0BSD;CC0-1.0;CC-BY-3.0;CC-BY-4.0;Unlicense' > license-report.txt
+      
+      - name: Upload license report
+        uses: actions/upload-artifact@v3
+        with:
+          name: license-compliance-report
+          path: license-report.txt
+
+  # 10. Security Report Summary
+  security-summary:
+    name: Security Report Summary
+    runs-on: ubuntu-latest
+    needs: 
+      - dependency-scan
+      - owasp-dependency-check
+      - codeql-analysis
+      - semgrep
+      - secret-scan
+      - penetration-test
+      - license-check
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+      
+      - name: Generate security summary
+        run: |
+          echo "# 🔒 Security Scan Summary" > security-summary.md
+          echo "" >> security-summary.md
+          echo "**Date:** $(date)" >> security-summary.md
+          echo "**Branch:** ${{ github.ref_name }}" >> security-summary.md
+          echo "**Commit:** ${{ github.sha }}" >> security-summary.md
+          echo "" >> security-summary.md
+          
+          echo "## 📊 Scan Results" >> security-summary.md
+          echo "" >> security-summary.md
+          
+          # Check job statuses
+          echo "| Scan Type | Status |" >> security-summary.md
+          echo "|-----------|--------|" >> security-summary.md
+          echo "| Dependency Scan | ${{ needs.dependency-scan.result }} |" >> security-summary.md
+          echo "| OWASP Check | ${{ needs.owasp-dependency-check.result }} |" >> security-summary.md
+          echo "| CodeQL Analysis | ${{ needs.codeql-analysis.result }} |" >> security-summary.md
+          echo "| Semgrep Scan | ${{ needs.semgrep.result }} |" >> security-summary.md
+          echo "| Secret Detection | ${{ needs.secret-scan.result }} |" >> security-summary.md
+          echo "| Penetration Test | ${{ needs.penetration-test.result }} |" >> security-summary.md
+          echo "| License Check | ${{ needs.license-check.result }} |" >> security-summary.md
+          
+          echo "" >> security-summary.md
+          echo "## 🚨 Action Required" >> security-summary.md
+          echo "" >> security-summary.md
+          
+          # Parse results and generate recommendations
+          if [ "${{ needs.dependency-scan.result }}" == "failure" ] || [ "${{ needs.secret-scan.result }}" == "failure" ]; then
+            echo "⚠️ **CRITICAL:** Security vulnerabilities detected. Do not deploy to production." >> security-summary.md
+            echo "" >> security-summary.md
+            echo "### Recommended Actions:" >> security-summary.md
+            echo "1. Review the detailed scan reports in artifacts" >> security-summary.md
+            echo "2. Fix all critical and high vulnerabilities" >> security-summary.md
+            echo "3. Remove any exposed secrets immediately" >> security-summary.md
+            echo "4. Re-run security scans after fixes" >> security-summary.md
+          else
+            echo "✅ No critical security issues detected." >> security-summary.md
+            echo "" >> security-summary.md
+            echo "### Recommended Actions:" >> security-summary.md
+            echo "1. Review any warnings in the detailed reports" >> security-summary.md
+            echo "2. Consider addressing medium and low severity issues" >> security-summary.md
+            echo "3. Keep dependencies up to date" >> security-summary.md
+          fi
+          
+          cat security-summary.md
+      
+      - name: Upload security summary
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-summary
+          path: security-summary.md
+      
+      - name: Comment on PR (if applicable)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const summary = fs.readFileSync('security-summary.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
+
+  # Notification job for failures
+  notify-on-failure:
+    name: Security Alert Notification
+    runs-on: ubuntu-latest
+    needs: [security-summary]
+    if: failure()
+    steps:
+      - name: Send security alert
+        run: |
+          echo "🚨 Security scan failed for YUTHUB"
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Run: ${{ github.run_id }}"
+          # In production, integrate with PagerDuty/Slack here

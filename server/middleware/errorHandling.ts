@@ -383,25 +383,41 @@ export const errorHandlingMiddleware = (
       requestId,
     };
 
-    // Include stack trace in development
-    if (process.env.NODE_ENV === 'development') {
+    // Never include stack trace in production to prevent information disclosure
+    // Only include in development for debugging
+    if (process.env.NODE_ENV === 'development' && process.env.SHOW_STACK_TRACES !== 'false') {
       errorResponse.stack = error.stack;
+      errorResponse.details = error;
     }
   }
 
-  // Log error details
+  // Log error details (sanitized for production)
   const logLevel = statusCode >= 500 ? 'error' : 'warn';
-  console[logLevel](
-    `${logLevel.toUpperCase()} ${statusCode} on ${req.method} ${req.path}:`,
-    {
-      message: error.message,
+  
+  // Sanitize error details for logging
+  const sanitizedError = {
+    message: error.message,
+    code: errorResponse.code,
+    statusCode,
+    user: (req as any).user?.id || 'anonymous',
+    path: req.path,
+    method: req.method,
+    requestId,
+  };
+  
+  // Only include sensitive details in development
+  if (process.env.NODE_ENV !== 'production') {
+    Object.assign(sanitizedError, {
       stack: error.stack,
-      user: (req as any).user?.id || 'anonymous',
       userAgent: req.get('User-Agent'),
       ip: req.ip,
-      requestId,
-    }
-  );
+      body: req.body ? '[REDACTED]' : undefined, // Never log request body
+      query: req.query,
+      params: req.params,
+    });
+  }
+  
+  console[logLevel](`${logLevel.toUpperCase()} ${statusCode}:`, sanitizedError);
 
   // Send error response
   res.status(statusCode).json(errorResponse);

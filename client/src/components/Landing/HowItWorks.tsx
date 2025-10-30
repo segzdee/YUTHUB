@@ -10,7 +10,7 @@ export default function HowItWorks() {
       title: 'Quick Setup',
       description:
         'Sign up and configure your organization settings in minutes. Import existing resident data or start fresh with our guided setup wizard.',
-      color: 'bg-primary-100 text-primary-600',
+      color: 'bg-blue-100 text-blue-600',
     },
     {
       number: 2,
@@ -18,7 +18,7 @@ export default function HowItWorks() {
       title: 'Customize & Configure',
       description:
         "Tailor the platform to your organization's specific needs. Set up workflows, configure alerts, and integrate with existing systems.",
-      color: 'bg-success/20 text-success',
+      color: 'bg-green-100 text-green-600',
     },
     {
       number: 3,
@@ -26,7 +26,7 @@ export default function HowItWorks() {
       title: 'Track & Monitor',
       description:
         'Monitor resident progress, track outcomes, and manage support services. Use real-time dashboards to stay informed about your properties.',
-      color: 'bg-accent-100 text-accent-600',
+      color: 'bg-teal-100 text-teal-600',
     },
     {
       number: 4,
@@ -34,7 +34,7 @@ export default function HowItWorks() {
       title: 'Analyze & Improve',
       description:
         'Generate comprehensive reports, analyze trends, and make data-driven decisions to improve your support services and outcomes.',
-      color: 'bg-warning/20 text-warning',
+      color: 'bg-amber-100 text-amber-600',
     },
   ];
 
@@ -68,7 +68,7 @@ export default function HowItWorks() {
                       <Icon className='h-8 w-8' aria-hidden='true' />
                     </div>
                   </div>
-                  <div className='absolute -top-3 -right-3 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-bold text-sm'>
+                  <div className='absolute -top-3 -right-3 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-md'>
                     {step.number}
                   </div>
                   <h3 className='text-xl font-semibold text-slate-900 mb-3'>

@@ -107,7 +107,7 @@ export default function Features() {
               >
                 <CardHeader>
                   <div className='flex items-center gap-3'>
-                    <div className={`p-2 rounded-lg bg-gray-100`}>
+                    <div className={`p-3 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100`}>
                       <Icon
                         className={`h-6 w-6 ${feature.color}`}
                         aria-hidden='true'

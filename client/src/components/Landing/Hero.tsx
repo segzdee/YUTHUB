@@ -17,8 +17,8 @@ export default function Hero() {
     <section className='relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-teal-50 py-16 sm:py-20 lg:py-24'>
       {/* Background decoration */}
       <div className='absolute inset-0 bg-grid-pattern opacity-5' />
-      <div className='absolute top-0 right-0 -translate-y-12 translate-x-12 w-96 h-96 bg-primary-100 rounded-full blur-3xl opacity-20' />
-      <div className='absolute bottom-0 left-0 translate-y-12 -translate-x-12 w-96 h-96 bg-accent-100 rounded-full blur-3xl opacity-20' />
+      <div className='absolute top-0 right-0 -translate-y-12 translate-x-12 w-96 h-96 bg-blue-200 rounded-full blur-3xl opacity-30' />
+      <div className='absolute bottom-0 left-0 translate-y-12 -translate-x-12 w-96 h-96 bg-teal-200 rounded-full blur-3xl opacity-30' />
 
       <div className='relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='text-center'>
@@ -88,9 +88,9 @@ export default function Hero() {
 
           {/* Value propositions */}
           <div className='grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-2xl mx-auto'>
-            <div className='flex items-center justify-center gap-3 p-4 rounded-lg bg-white/50 backdrop-blur-sm border border-primary-100'>
-              <div className='flex-shrink-0 w-8 h-8 bg-success rounded-full flex items-center justify-center'>
-                <span className='text-success-foreground text-sm font-bold'>
+            <div className='flex items-center justify-center gap-3 p-4 rounded-lg bg-white/80 backdrop-blur-sm border border-blue-200'>
+              <div className='flex-shrink-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center'>
+                <span className='text-white text-sm font-bold'>
                   ✓
                 </span>
               </div>
@@ -99,9 +99,9 @@ export default function Hero() {
               </Typography>
             </div>
 
-            <div className='flex items-center justify-center gap-3 p-4 rounded-lg bg-white/50 backdrop-blur-sm border border-primary-100'>
-              <div className='flex-shrink-0 w-8 h-8 bg-success rounded-full flex items-center justify-center'>
-                <span className='text-success-foreground text-sm font-bold'>
+            <div className='flex items-center justify-center gap-3 p-4 rounded-lg bg-white/80 backdrop-blur-sm border border-blue-200'>
+              <div className='flex-shrink-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center'>
+                <span className='text-white text-sm font-bold'>
                   ✓
                 </span>
               </div>
@@ -110,9 +110,9 @@ export default function Hero() {
               </Typography>
             </div>
 
-            <div className='flex items-center justify-center gap-3 p-4 rounded-lg bg-white/50 backdrop-blur-sm border border-primary-100'>
-              <div className='flex-shrink-0 w-8 h-8 bg-success rounded-full flex items-center justify-center'>
-                <span className='text-success-foreground text-sm font-bold'>
+            <div className='flex items-center justify-center gap-3 p-4 rounded-lg bg-white/80 backdrop-blur-sm border border-blue-200'>
+              <div className='flex-shrink-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center'>
+                <span className='text-white text-sm font-bold'>
                   ✓
                 </span>
               </div>
@@ -123,7 +123,7 @@ export default function Hero() {
           </div>
 
           {/* Social proof */}
-          <div className='mt-16 pt-8 border-t border-primary-100'>
+          <div className='mt-16 pt-8 border-t border-slate-200'>
             <p className='text-xs uppercase tracking-wide mb-6 text-slate-600'>
               Trusted by leading organisations
             </p>

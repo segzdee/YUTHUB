@@ -76,15 +76,42 @@ export const queryClient = new QueryClient({
 
 // API request helper with proper error handling
 export async function apiRequest(
-  endpoint: string | RequestInfo,
-  options: RequestInit = {}
+  methodOrEndpoint: string,
+  endpointOrOptions?: string | RequestInit,
+  dataOrOptions?: any
 ): Promise<any> {
   let url: string;
   let requestOptions: RequestInit;
 
   // Handle different call patterns
-  if (typeof endpoint === 'string') {
+  if (endpointOrOptions && typeof endpointOrOptions === 'string') {
+    // Pattern: apiRequest('POST', '/api/endpoint', data) - legacy support
+    const method = methodOrEndpoint;
+    const endpoint = endpointOrOptions;
+    const data = dataOrOptions;
+
+    const baseUrl =
+      process.env.NODE_ENV === 'production'
+        ? window.location.origin
+        : 'http://localhost:3000';
+
+    url = endpoint.startsWith('http') ? endpoint : `${baseUrl}${endpoint}`;
+    requestOptions = {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(localStorage.getItem('auth-token') && {
+          Authorization: `Bearer ${localStorage.getItem('auth-token')}`,
+        }),
+      },
+      credentials: 'include',
+      ...(data && { body: JSON.stringify(data) }),
+    };
+  } else {
     // Pattern: apiRequest('/api/endpoint', options)
+    const endpoint = methodOrEndpoint;
+    const options = (endpointOrOptions as RequestInit) || {};
+
     const baseUrl =
       process.env.NODE_ENV === 'production'
         ? window.location.origin
@@ -99,12 +126,9 @@ export async function apiRequest(
         }),
         ...options.headers,
       },
+      credentials: 'include',
       ...options,
     };
-  } else {
-    // Pattern: apiRequest('POST', '/api/endpoint', data) - legacy support
-    url = endpoint as string;
-    requestOptions = options;
   }
 
   try {

@@ -172,24 +172,23 @@ interface ToastOptions {
 }
 
 function useToast() {
-  const toast = (options: ToastOptions) => {
-    // Simple console log for development - in real app would show actual toast
-    console.log(
-      `Toast (${options.variant || 'default'}):`,
-      options.title,
-      options.description
-    );
+  const [state, setState] = React.useState<State>(memoryState);
 
-    // You could also use browser's native notification here
-    if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification(options.title, {
-        body: options.description,
-        icon: '/favicon.ico',
-      });
-    }
+  React.useEffect(() => {
+    listeners.push(setState);
+    return () => {
+      const index = listeners.indexOf(setState);
+      if (index > -1) {
+        listeners.splice(index, 1);
+      }
+    };
+  }, [state]);
+
+  return {
+    ...state,
+    toast,
+    dismiss: (toastId?: string) => dispatch({ type: 'DISMISS_TOAST', ...(toastId ? { toastId } : {}) }),
   };
-
-  return { toast };
 }
 
 export { toast, useToast };

@@ -1,19 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Navbar } from '../components/Navbar';
-import { Footer } from '../components/Footer';
+import { PublicPageLayout } from '../components/PageLayout';
 import { Button } from '../components/Button';
 import { Card, FeatureCard, PricingCard } from '../components/Card';
 import { Badge } from '../components/Badge';
 
 const Landing: React.FC = () => {
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      {/* Navigation */}
-      <Navbar transparent />
+    <PublicPageLayout>
 
-      {/* Main Content */}
-      <div className="flex-1">
         {/* Hero Section */}
         <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-32 max-w-7xl mx-auto">
           <div className="text-center space-y-6">
@@ -264,11 +259,7 @@ const Landing: React.FC = () => {
             </p>
           </div>
         </section>
-      </div>
-
-      {/* Footer */}
-      <Footer />
-    </div>
+    </PublicPageLayout>
   );
 };
 

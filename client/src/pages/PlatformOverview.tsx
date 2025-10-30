@@ -2,8 +2,7 @@ import React from 'react';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { Badge } from '../components/Badge';
-import { Navbar } from '../components/Navbar';
-import { Footer } from '../components/Footer';
+import { PublicPageLayout } from '../components/PageLayout';
 import { MODULE_DESCRIPTIONS } from '../config/pricing';
 
 type ModuleKey = keyof typeof MODULE_DESCRIPTIONS;
@@ -21,10 +20,7 @@ const PlatformOverview: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <Navbar />
-
-      <div className="flex-1">
+    <PublicPageLayout>
         {/* Hero */}
         <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-32 max-w-7xl mx-auto">
           <div className="text-center space-y-8">
@@ -163,10 +159,7 @@ const PlatformOverview: React.FC = () => {
             </div>
           </div>
         </section>
-      </div>
-
-      <Footer />
-    </div>
+    </PublicPageLayout>
   );
 };
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { PublicPageLayout } from '@/components/PageLayout';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Card,

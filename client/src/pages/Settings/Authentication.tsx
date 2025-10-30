@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { AppPageLayout } from '@/components/PageLayout';
 import AuthMethodManager from '@/components/Auth/AuthMethodManager';
 import { Shield, Key, Users, AlertTriangle } from 'lucide-react';
 

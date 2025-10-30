@@ -1,173 +1,264 @@
-import UniversalHeader from '@/components/Layout/UniversalHeader';
-import SEOHead from '@/components/SEO/SEOHead';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Play, Shield, Users, Star } from 'lucide-react';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from '../components/Button';
+import { Card, FeatureCard, PricingCard } from '../components/Card';
+import { Badge } from '../components/Badge';
 
-export default function Landing() {
-  const structuredData = {
-    '@context': 'https://schema.org',
-    '@type': 'SoftwareApplication',
-    name: 'YUTHUB',
-    description:
-      'Comprehensive youth housing management platform for UK housing associations, local authorities, and social care organizations',
-    url: 'https://www.yuthub.com',
-    applicationCategory: 'BusinessApplication',
-    operatingSystem: 'Web',
-    offers: [
-      {
-        '@type': 'Offer',
-        name: 'Starter Plan',
-        price: '169',
-        priceCurrency: 'GBP',
-        priceSpecification: {
-          '@type': 'UnitPriceSpecification',
-          price: '169',
-          priceCurrency: 'GBP',
-          unitText: 'MONTH',
-        },
-      },
-      {
-        '@type': 'Offer',
-        name: 'Professional Plan',
-        price: '429',
-        priceCurrency: 'GBP',
-        priceSpecification: {
-          '@type': 'UnitPriceSpecification',
-          price: '429',
-          priceCurrency: 'GBP',
-          unitText: 'MONTH',
-        },
-      },
-      {
-        '@type': 'Offer',
-        name: 'Enterprise Plan',
-        price: '1099',
-        priceCurrency: 'GBP',
-        priceSpecification: {
-          '@type': 'UnitPriceSpecification',
-          price: '1099',
-          priceCurrency: 'GBP',
-          unitText: 'MONTH',
-        },
-      },
-    ],
-    creator: {
-      '@type': 'Organization',
-      name: 'YUTHUB',
-      url: 'https://www.yuthub.com',
-      address: {
-        '@type': 'PostalAddress',
-        addressCountry: 'GB',
-      },
-    },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.8',
-      ratingCount: '127',
-    },
-  };
-
-  const handleGetStarted = () => {
-    window.location.href = '/signup';
-  };
-
-  const handleWatchDemo = () => {
-    console.log('Watch demo clicked');
-  };
-
+const Landing: React.FC = () => {
   return (
-    <div className='h-screen overflow-hidden bg-gradient-to-br from-blue-50 via-white to-teal-50'>
-      <SEOHead
-        title='YUTHUB - Youth Housing Management Platform | UK Housing Software'
-        description='Comprehensive SaaS platform for youth housing organizations in the UK. Manage residents, track outcomes, and guide young people toward independent living with our specialized housing management software.'
-        keywords='youth housing management, UK housing software, social care platform, supported housing system, council housing management, housing association software, young people accommodation'
-        canonicalUrl='https://www.yuthub.com'
-        structuredData={structuredData}
-      />
-      <UniversalHeader />
-
-      <section className='h-[calc(100vh-4rem)] flex items-center justify-center relative overflow-hidden'>
-        <div className='absolute inset-0 bg-grid-pattern opacity-5' />
-        <div className='absolute top-0 right-0 -translate-y-12 translate-x-12 w-96 h-96 bg-blue-200 rounded-full blur-3xl opacity-30' />
-        <div className='absolute bottom-0 left-0 translate-y-12 -translate-x-12 w-96 h-96 bg-teal-200 rounded-full blur-3xl opacity-30' />
-
-        <div className='relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <div className='text-center'>
-            <div className='flex justify-center items-center gap-6 mb-8 flex-wrap'>
-              <Badge variant='secondary' className='flex items-center gap-2'>
-                <Shield className='h-4 w-4' />
-                <span>GDPR Compliant</span>
-              </Badge>
-              <Badge variant='secondary' className='flex items-center gap-2'>
-                <Users className='h-4 w-4' />
-                <span>500+ Organisations</span>
-              </Badge>
-              <Badge variant='secondary' className='flex items-center gap-2'>
-                <Star className='h-4 w-4' />
-                <span>4.8/5 Rating</span>
-              </Badge>
-            </div>
-
-            <h1 className='text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 max-w-5xl mx-auto text-slate-900 leading-tight'>
-              Transform Young Lives Through
-              <span className='block bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent mt-2'>
-                Smarter Housing Support
-              </span>
+    <div className="min-h-screen bg-white">
+      {/* Hero Section */}
+      <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-32 max-w-7xl mx-auto">
+        <div className="text-center space-y-8">
+          <div>
+            <Badge variant="secondary" size="md" className="mb-4">
+              Now recruiting beta users
+            </Badge>
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-700 text-black leading-tight">
+              Youth housing,
+              <br />
+              simplified.
             </h1>
+          </div>
 
-            <p className='text-lg sm:text-xl md:text-2xl max-w-3xl mx-auto mb-10 leading-relaxed text-slate-700'>
-              YUTHUB is the comprehensive platform for youth housing organizations.
-              Streamline support services, track independence pathways, and ensure
-              safeguarding compliance - all in one powerful system.
+          <p className="text-xl sm:text-2xl font-400 text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            The platform that brings together housing managers, support teams, and safeguarding specialists to deliver exceptional care for young people.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link to="/app">
+              <Button variant="primary" size="lg">
+                Get started free
+              </Button>
+            </Link>
+            <Link to="/how-it-works">
+              <Button variant="tertiary" size="lg">
+                See how it works
+              </Button>
+            </Link>
+          </div>
+
+          <div className="pt-8 border-t border-gray-200">
+            <p className="text-sm font-500 text-gray-500 mb-4">
+              Trusted by leading UK youth housing organizations
             </p>
-
-            <div className='flex flex-col sm:flex-row justify-center items-center gap-4 mb-12'>
-              <Button
-                size='lg'
-                onClick={handleGetStarted}
-                className='w-full sm:w-auto px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-blue-500 hover:bg-blue-600'
-              >
-                Start Free Trial
-                <ArrowRight className='ml-2 h-5 w-5' />
-              </Button>
-
-              <Button
-                variant='outline'
-                size='lg'
-                onClick={handleWatchDemo}
-                className='w-full sm:w-auto px-8 py-6 text-lg font-semibold border-2 border-slate-300 hover:bg-slate-100 transition-all duration-300'
-              >
-                <Play className='mr-2 h-5 w-5' />
-                Watch Demo
-              </Button>
-            </div>
-
-            <div className='grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-2xl mx-auto'>
-              <div className='flex items-center justify-center gap-3 p-4 rounded-lg bg-white/80 backdrop-blur-sm border border-blue-200'>
-                <div className='flex-shrink-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center'>
-                  <span className='text-white text-sm font-bold'>✓</span>
-                </div>
-                <span className='text-sm font-medium text-slate-700'>30-day free trial</span>
-              </div>
-
-              <div className='flex items-center justify-center gap-3 p-4 rounded-lg bg-white/80 backdrop-blur-sm border border-blue-200'>
-                <div className='flex-shrink-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center'>
-                  <span className='text-white text-sm font-bold'>✓</span>
-                </div>
-                <span className='text-sm font-medium text-slate-700'>No setup fees</span>
-              </div>
-
-              <div className='flex items-center justify-center gap-3 p-4 rounded-lg bg-white/80 backdrop-blur-sm border border-blue-200'>
-                <div className='flex-shrink-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center'>
-                  <span className='text-white text-sm font-bold'>✓</span>
-                </div>
-                <span className='text-sm font-medium text-slate-700'>Cancel anytime</span>
-              </div>
+            <div className="flex justify-center items-center gap-8 opacity-60">
+              {['Organization A', 'Organization B', 'Organization C', 'Organization D'].map((org) => (
+                <span key={org} className="text-sm font-500 text-gray-400">
+                  {org}
+                </span>
+              ))}
             </div>
           </div>
         </div>
       </section>
+
+      {/* Value Propositions */}
+      <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-32 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl font-600 text-black mb-4">
+              Everything you need
+            </h2>
+            <p className="text-xl font-400 text-gray-600">
+              Comprehensive tools designed for modern youth housing organizations
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <FeatureCard
+              icon="🏠"
+              title="Property Management"
+              description="Track properties, maintenance schedules, and occupancy with a single interface"
+            />
+            <FeatureCard
+              icon="👥"
+              title="Resident Profiles"
+              description="Comprehensive resident records with support plans and progress tracking"
+            />
+            <FeatureCard
+              icon="🛡️"
+              title="Safeguarding"
+              description="Integrated safeguarding tools and incident management for compliance"
+            />
+            <FeatureCard
+              icon="💰"
+              title="Financial Management"
+              description="Budget tracking, expense management, and financial reporting"
+            />
+            <FeatureCard
+              icon="📊"
+              title="Analytics & Insights"
+              description="Real-time dashboards and reports to measure organizational impact"
+            />
+            <FeatureCard
+              icon="🔄"
+              title="Seamless Collaboration"
+              description="Built-in communication tools connecting all team members"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Preview */}
+      <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-32">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl font-600 text-black mb-4">
+              Simple, transparent pricing
+            </h2>
+            <p className="text-xl font-400 text-gray-600">
+              Choose the plan that fits your organization
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-6">
+            <PricingCard
+              tier="starter"
+              name="Starter"
+              price={99}
+              description="For small teams"
+              features={[
+                'Up to 5 properties',
+                '50 residents',
+                'Basic analytics',
+                'Email support',
+                'Community access',
+              ]}
+              cta="Start free"
+              onCtaClick={() => console.log('Starter clicked')}
+            />
+
+            <PricingCard
+              tier="professional"
+              name="Professional"
+              price={299}
+              description="For growing organizations"
+              features={[
+                'Unlimited properties',
+                'Unlimited residents',
+                'Advanced analytics',
+                'Priority support',
+                'API access',
+                'Custom integrations',
+              ]}
+              cta="Start free"
+              onCtaClick={() => console.log('Professional clicked')}
+              isPopular
+            />
+
+            <PricingCard
+              tier="enterprise"
+              name="Enterprise"
+              description="Custom solutions"
+              features={[
+                'Everything in Professional',
+                'Custom features',
+                'Dedicated support',
+                'SLA guarantee',
+                'On-premise options',
+                'Training & onboarding',
+              ]}
+              cta="Contact sales"
+              onCtaClick={() => console.log('Enterprise clicked')}
+            />
+          </div>
+
+          <div className="text-center mt-12">
+            <Link to="/pricing">
+              <Button variant="secondary" size="md">
+                View full pricing
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-32 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl font-600 text-black mb-4">
+              Loved by the community
+            </h2>
+            <p className="text-xl font-400 text-gray-600">
+              Hear from housing managers transforming their organizations
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                quote:
+                  'YUTHUB has transformed how we manage our properties and track resident progress. The safeguarding tools alone have saved us hours each week.',
+                author: 'Sarah Chen',
+                role: 'Housing Manager',
+                org: 'East London Youth Housing',
+              },
+              {
+                quote:
+                  'Finally, a platform built specifically for youth housing organizations. The financial reporting features help us make better decisions.',
+                author: 'James Wilson',
+                role: 'Finance Director',
+                org: 'Northern Youth Alliance',
+              },
+              {
+                quote:
+                  'Our entire team loves the simplicity. We went from juggling spreadsheets to having everything in one place. Highly recommend.',
+                author: 'Emma Rodriguez',
+                role: 'Director of Operations',
+                org: 'South Coast Housing Trust',
+              },
+            ].map((testimonial, idx) => (
+              <Card key={idx} padded="lg" hoverable={false}>
+                <div className="space-y-4">
+                  <p className="text-base font-400 text-gray-700 leading-relaxed">
+                    "{testimonial.quote}"
+                  </p>
+                  <div className="border-t border-gray-200 pt-4">
+                    <p className="text-sm font-600 text-black">{testimonial.author}</p>
+                    <p className="text-sm font-400 text-gray-600">{testimonial.role}</p>
+                    <p className="text-xs font-400 text-gray-500 mt-1">{testimonial.org}</p>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-32">
+        <div className="max-w-4xl mx-auto text-center space-y-8">
+          <div>
+            <h2 className="text-4xl sm:text-5xl font-600 text-black mb-4">
+              Ready to get started?
+            </h2>
+            <p className="text-xl font-400 text-gray-600">
+              Join leading youth housing organizations using YUTHUB to transform their operations.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link to="/app">
+              <Button variant="primary" size="lg">
+                Get started free
+              </Button>
+            </Link>
+            <Link to="/contact">
+              <Button variant="secondary" size="lg">
+                Schedule a demo
+              </Button>
+            </Link>
+          </div>
+
+          <p className="text-sm font-400 text-gray-500">
+            No credit card required. Set up takes less than 5 minutes.
+          </p>
+        </div>
+      </section>
     </div>
   );
-}
+};
+
+export default Landing;

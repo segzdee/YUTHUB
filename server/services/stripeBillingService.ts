@@ -1,1 +1,135 @@
-/**\n * Stripe Billing Service\n * Handles subscription lifecycle, webhooks, and billing events\n */\n\nimport Stripe from 'stripe';\nimport { db } from '../db';\nimport { organizations } from '@shared/schema';\nimport { eq, sql } from 'drizzle-orm';\nimport { SUBSCRIPTION_TIERS, SubscriptionTier } from '../constants/subscriptionTiers';\n\nconst stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {\n  apiVersion: '2024-04-10',\n});\n\nexport class StripeBillingService {\n  /**\n   * Create a new customer in Stripe and link to organization\n   */\n  static async createStripeCustomer(\n    organizationId: number,\n    organizationName: string,\n    email: string\n  ): Promise<string> {\n    const customer = await stripe.customers.create({\n      name: organizationName,\n      email,\n      metadata: {\n        organizationId: organizationId.toString(),\n      },\n    });\n\n    // Update organization with Stripe customer ID\n    await db\n      .update(organizations)\n      .set({ stripeCustomerId: customer.id })\n      .where(eq(organizations.id, organizationId));\n\n    return customer.id;\n  }\n\n  /**\n   * Create a subscription in Stripe\n   */\n  static async createSubscription(\n    organizationId: number,\n    stripeCustomerId: string,\n    tier: SubscriptionTier,\n    billingCycle: 'monthly' | 'annual',\n    trialDays?: number\n  ): Promise<{ subscriptionId: string; clientSecret?: string }> {\n    const tierConfig = SUBSCRIPTION_TIERS[tier];\n    const priceId =\n      billingCycle === 'annual'\n        ? tierConfig.stripePriceIdAnnual\n        : tierConfig.stripePriceIdMonthly;\n\n    if (!priceId) {\n      throw new Error(`No Stripe price ID configured for ${tier} ${billingCycle}`);\n    }\n\n    const subscriptionParams: Stripe.SubscriptionCreateParams = {\n      customer: stripeCustomerId,\n      items: [{ price: priceId }],\n      metadata: {\n        organizationId: organizationId.toString(),\n        tier,\n        billingCycle,\n      },\n      default_payment_method: (await stripe.customers.retrieve(stripeCustomerId))\n        .default_source as string,\n    };\n\n    // Add trial period if provided\n    if (trialDays) {\n      subscriptionParams.trial_period_days = trialDays;\n    }\n\n    const subscription = await stripe.subscriptions.create(subscriptionParams);\n\n    // Update organization with Stripe subscription ID\n    await db\n      .update(organizations)\n      .set({\n        stripeSubscriptionId: subscription.id,\n        stripePriceId: priceId,\n        subscriptionTier: tier,\n        subscriptionStatus: 'active',\n        subscriptionStartDate: new Date(subscription.created * 1000),\n        subscriptionEndDate: new Date(\n          (subscription.current_period_end as number) * 1000\n        ),\n        nextBillingDate: new Date(\n          (subscription.current_period_end as number) * 1000\n        ),\n      })\n      .where(eq(organizations.id, organizationId));\n\n    return { subscriptionId: subscription.id };\n  }\n\n  /**\n   * Handle Stripe webhook: subscription.created\n   */\n  static async handleSubscriptionCreated(event: Stripe.Event): Promise<void> {\n    const subscription = event.data.object as Stripe.Subscription;\n    const organizationId = parseInt(\n      subscription.metadata?.organizationId || '0'\n    );\n    const tier = (subscription.metadata?.tier || 'starter') as SubscriptionTier;\n    const billingCycle = (subscription.metadata?.billingCycle || 'monthly') as\n      | 'monthly'\n      | 'annual';\n\n    if (!organizationId) return;\n\n    const tierConfig = SUBSCRIPTION_TIERS[tier];\n\n    await db\n      .update(organizations)\n      .set({\n        stripeSubscriptionId: subscription.id,\n        subscriptionTier: tier,\n        subscriptionStatus: 'active',\n        billingCycle,\n        subscriptionStartDate: new Date(subscription.created * 1000),\n        subscriptionEndDate: new Date(\n          (subscription.current_period_end as number) * 1000\n        ),\n        maxResidents: tierConfig.limits.maxResidents,\n        maxProperties: tierConfig.limits.maxProperties,\n        nextBillingDate: new Date(\n          (subscription.current_period_end as number) * 1000\n        ),\n      })\n      .where(eq(organizations.id, organizationId));\n\n    console.log(`✅ Subscription created for organization ${organizationId}`);\n  }\n\n  /**\n   * Handle Stripe webhook: subscription.updated\n   */\n  static async handleSubscriptionUpdated(event: Stripe.Event): Promise<void> {\n    const subscription = event.data.object as Stripe.Subscription;\n    const organizationId = parseInt(\n      subscription.metadata?.organizationId || '0'\n    );\n\n    if (!organizationId) return;\n\n    let subscriptionStatus = 'active';\n    if (subscription.status === 'past_due') subscriptionStatus = 'past_due';\n    else if (subscription.status === 'canceled') subscriptionStatus = 'cancelled';\n    else if (subscription.status === 'paused') subscriptionStatus = 'paused';\n\n    await db\n      .update(organizations)\n      .set({\n        subscriptionStatus,\n        subscriptionEndDate: new Date(\n          (subscription.current_period_end as number) * 1000\n        ),\n        nextBillingDate: new Date(\n          (subscription.current_period_end as number) * 1000\n        ),\n      })\n      .where(eq(organizations.id, organizationId));\n\n    console.log(\n      `📝 Subscription updated for organization ${organizationId}: ${subscriptionStatus}`\n    );\n  }\n\n  /**\n   * Handle Stripe webhook: subscription.deleted / canceled\n   */\n  static async handleSubscriptionDeleted(event: Stripe.Event): Promise<void> {\n    const subscription = event.data.object as Stripe.Subscription;\n    const organizationId = parseInt(\n      subscription.metadata?.organizationId || '0'\n    );\n\n    if (!organizationId) return;\n\n    await db\n      .update(organizations)\n      .set({\n        subscriptionStatus: 'cancelled',\n        stripeSubscriptionId: null,\n      })\n      .where(eq(organizations.id, organizationId));\n\n    console.log(\n      `❌ Subscription cancelled for organization ${organizationId}`\n    );\n  }\n\n  /**\n   * Handle Stripe webhook: invoice.paid\n   */\n  static async handleInvoicePaid(event: Stripe.Event): Promise<void> {\n    const invoice = event.data.object as Stripe.Invoice;\n    const customerId = invoice.customer as string;\n\n    // Find organization by Stripe customer ID\n    const orgs = await db\n      .select()\n      .from(organizations)\n      .where(eq(organizations.stripeCustomerId, customerId));\n\n    if (orgs.length === 0) return;\n\n    const org = orgs[0];\n\n    // Update last payment date and ensure subscription is active\n    await db\n      .update(organizations)\n      .set({\n        lastPaymentDate: new Date(),\n        subscriptionStatus: 'active',\n      })\n      .where(eq(organizations.id, org.id));\n\n    console.log(`💳 Invoice paid for organization ${org.id}`);\n  }\n\n  /**\n   * Handle Stripe webhook: invoice.payment_failed\n   */\n  static async handleInvoicePaymentFailed(\n    event: Stripe.Event\n  ): Promise<void> {\n    const invoice = event.data.object as Stripe.Invoice;\n    const customerId = invoice.customer as string;\n\n    // Find organization by Stripe customer ID\n    const orgs = await db\n      .select()\n      .from(organizations)\n      .where(eq(organizations.stripeCustomerId, customerId));\n\n    if (orgs.length === 0) return;\n\n    const org = orgs[0];\n\n    // Mark subscription as past due\n    await db\n      .update(organizations)\n      .set({\n        subscriptionStatus: 'past_due',\n      })\n      .where(eq(organizations.id, org.id));\n\n    console.log(`⚠️ Invoice payment failed for organization ${org.id}`);\n    // TODO: Send email notification to organization admin\n  }\n\n  /**\n   * Upgrade organization to higher tier\n   */\n  static async upgradeSubscription(\n    organizationId: number,\n    newTier: SubscriptionTier,\n    billingCycle: 'monthly' | 'annual'\n  ): Promise<void> {\n    const org = (await db.query.organizations.findFirst({\n      where: eq(organizations.id, organizationId),\n    })) as any;\n\n    if (!org?.stripeSubscriptionId) {\n      throw new Error('Organization has no active Stripe subscription');\n    }\n\n    const tierConfig = SUBSCRIPTION_TIERS[newTier];\n    const newPriceId =\n      billingCycle === 'annual'\n        ? tierConfig.stripePriceIdAnnual\n        : tierConfig.stripePriceIdMonthly;\n\n    if (!newPriceId) {\n      throw new Error(`No Stripe price ID configured for ${newTier}`);\n    }\n\n    // Update subscription in Stripe\n    const subscription = await stripe.subscriptions.retrieve(\n      org.stripeSubscriptionId\n    );\n\n    const items = subscription.items.data;\n    if (items.length > 0) {\n      await stripe.subscriptionItems.update(items[0].id, {\n        price: newPriceId,\n      });\n    }\n\n    // Update organization\n    await db\n      .update(organizations)\n      .set({\n        subscriptionTier: newTier,\n        billingCycle,\n        stripePriceId: newPriceId,\n        maxResidents: tierConfig.limits.maxResidents,\n        maxProperties: tierConfig.limits.maxProperties,\n      })\n      .where(eq(organizations.id, organizationId));\n\n    console.log(\n      `⬆️ Organization ${organizationId} upgraded to ${newTier} tier`\n    );\n  }\n\n  /**\n   * Downgrade organization to lower tier\n   */\n  static async downgradeSubscription(\n    organizationId: number,\n    newTier: SubscriptionTier,\n    billingCycle: 'monthly' | 'annual'\n  ): Promise<void> {\n    const org = (await db.query.organizations.findFirst({\n      where: eq(organizations.id, organizationId),\n    })) as any;\n\n    if (!org?.stripeSubscriptionId) {\n      throw new Error('Organization has no active Stripe subscription');\n    }\n\n    const tierConfig = SUBSCRIPTION_TIERS[newTier];\n    const newPriceId =\n      billingCycle === 'annual'\n        ? tierConfig.stripePriceIdAnnual\n        : tierConfig.stripePriceIdMonthly;\n\n    if (!newPriceId) {\n      throw new Error(`No Stripe price ID configured for ${newTier}`);\n    }\n\n    // Update subscription in Stripe\n    const subscription = await stripe.subscriptions.retrieve(\n      org.stripeSubscriptionId\n    );\n\n    const items = subscription.items.data;\n    if (items.length > 0) {\n      await stripe.subscriptionItems.update(items[0].id, {\n        price: newPriceId,\n      });\n    }\n\n    // Update organization\n    const tierData = SUBSCRIPTION_TIERS[newTier];\n    await db\n      .update(organizations)\n      .set({\n        subscriptionTier: newTier,\n        billingCycle,\n        stripePriceId: newPriceId,\n        maxResidents: tierData.limits.maxResidents,\n        maxProperties: tierData.limits.maxProperties,\n      })\n      .where(eq(organizations.id, organizationId));\n\n    console.log(\n      `⬇️ Organization ${organizationId} downgraded to ${newTier} tier`\n    );\n  }\n\n  /**\n   * Create Stripe billing portal session for organization admin\n   */\n  static async createBillingPortalSession(\n    organizationId: number,\n    returnUrl: string\n  ): Promise<string> {\n    const org = (await db.query.organizations.findFirst({\n      where: eq(organizations.id, organizationId),\n    })) as any;\n\n    if (!org?.stripeCustomerId) {\n      throw new Error('Organization has no Stripe customer ID');\n    }\n\n    const session = await stripe.billingPortal.sessions.create({\n      customer: org.stripeCustomerId,\n      return_url: returnUrl,\n    });\n\n    return session.url;\n  }\n\n  /**\n   * Verify Stripe webhook signature\n   */\n  static verifyWebhookSignature(\n    body: Buffer | string,\n    signature: string\n  ): Stripe.Event {\n    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';\n\n    return stripe.webhooks.constructEvent(body, signature, webhookSecret) as Stripe.Event;\n  }\n}\n"
+/**
+ * Stripe Billing Service
+ * Handles subscription management and billing operations
+ */
+
+import Stripe from 'stripe';
+import { db } from '../db';
+import { organizations } from '@shared/schema';
+import { eq } from 'drizzle-orm';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+  apiVersion: '2024-04-10',
+});
+
+export class StripeBillingService {
+  static async createStripeCustomer(
+    organizationId: number,
+    organizationName: string,
+    email: string
+  ) {
+    try {
+      const customer = await stripe.customers.create({
+        name: organizationName,
+        email,
+        metadata: {
+          organizationId: organizationId.toString(),
+        },
+      });
+
+      await db
+        .update(organizations)
+        .set({ stripeCustomerId: customer.id })
+        .where(eq(organizations.id, organizationId));
+
+      console.log(`✅ Stripe customer created: ${customer.id}`);
+      return customer;
+    } catch (error) {
+      console.error('Error creating Stripe customer:', error);
+      throw error;
+    }
+  }
+
+  static async createSubscription(
+    organizationId: number,
+    stripeCustomerId: string,
+    priceId: string,
+    billingCycle: 'monthly' | 'annual' = 'monthly'
+  ) {
+    try {
+      const subscription = await stripe.subscriptions.create({
+        customer: stripeCustomerId,
+        items: [{ price: priceId }],
+        metadata: {
+          organizationId: organizationId.toString(),
+        },
+      });
+
+      console.log(`✅ Subscription created: ${subscription.id}`);
+      return subscription;
+    } catch (error) {
+      console.error('Error creating subscription:', error);
+      throw error;
+    }
+  }
+
+  static async handleSubscriptionCreated(subscription: Stripe.Subscription) {
+    const organizationId = parseInt(subscription.metadata?.organizationId || '0');
+    if (!organizationId) return;
+
+    try {
+      await db
+        .update(organizations)
+        .set({
+          stripeSubscriptionId: subscription.id,
+          subscriptionStatus: 'active',
+          subscriptionStartDate: new Date(subscription.current_period_start * 1000),
+          subscriptionEndDate: new Date(subscription.current_period_end * 1000),
+        })
+        .where(eq(organizations.id, organizationId));
+
+      console.log(`✅ Subscription activated for org ${organizationId}`);
+    } catch (error) {
+      console.error('Error handling subscription creation:', error);
+    }
+  }
+
+  static async handleSubscriptionUpdated(subscription: Stripe.Subscription) {
+    const organizationId = parseInt(subscription.metadata?.organizationId || '0');
+    if (!organizationId) return;
+
+    try {
+      const status = subscription.status === 'active' ? 'active' : 'past_due';
+
+      await db
+        .update(organizations)
+        .set({
+          subscriptionStatus: status,
+          subscriptionEndDate: new Date(subscription.current_period_end * 1000),
+        })
+        .where(eq(organizations.id, organizationId));
+
+      console.log(`✅ Subscription updated for org ${organizationId}`);
+    } catch (error) {
+      console.error('Error handling subscription update:', error);
+    }
+  }
+
+  static async handleSubscriptionDeleted(subscription: Stripe.Subscription) {
+    const organizationId = parseInt(subscription.metadata?.organizationId || '0');
+    if (!organizationId) return;
+
+    try {
+      await db
+        .update(organizations)
+        .set({
+          subscriptionStatus: 'cancelled',
+          stripeSubscriptionId: null,
+        })
+        .where(eq(organizations.id, organizationId));
+
+      console.log(`✅ Subscription cancelled for org ${organizationId}`);
+    } catch (error) {
+      console.error('Error handling subscription deletion:', error);
+    }
+  }
+
+  static verifyWebhookSignature(body: string, signature: string): Stripe.Event {
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    if (!webhookSecret) throw new Error('STRIPE_WEBHOOK_SECRET not configured');
+
+    return stripe.webhooks.constructEvent(body, signature, webhookSecret);
+  }
+}
+
+export default StripeBillingService;

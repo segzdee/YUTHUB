@@ -45,10 +45,10 @@ export default function HowItWorks() {
           <Badge variant='outline' className='mb-4 px-4 py-2'>
             Simple Process
           </Badge>
-          <h2 className='text-3xl md:text-4xl font-bold text-high-contrast mb-4'>
+          <h2 className='text-3xl md:text-4xl font-bold text-slate-900 mb-4'>
             How YUTHUB Works
           </h2>
-          <p className='text-xl text-medium-contrast max-w-3xl mx-auto'>
+          <p className='text-xl text-slate-700 max-w-3xl mx-auto'>
             Get started with YUTHUB in four simple steps and transform your
             youth housing support services.
           </p>
@@ -71,10 +71,10 @@ export default function HowItWorks() {
                   <div className='absolute -top-3 -right-3 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-bold text-sm'>
                     {step.number}
                   </div>
-                  <h3 className='text-xl font-semibold text-high-contrast mb-3'>
+                  <h3 className='text-xl font-semibold text-slate-900 mb-3'>
                     {step.title}
                   </h3>
-                  <p className='text-medium-contrast leading-relaxed'>
+                  <p className='text-slate-700 leading-relaxed'>
                     {step.description}
                   </p>
                 </CardContent>
@@ -88,7 +88,7 @@ export default function HowItWorks() {
             <span className='text-primary font-semibold text-sm sm:text-base'>
               Ready to get started?
             </span>
-            <span className='text-medium-contrast text-sm sm:text-base'>
+            <span className='text-slate-700 text-sm sm:text-base'>
               Setup takes less than 10 minutes
             </span>
           </div>

@@ -155,11 +155,16 @@ export default function PricingSection() {
 
               <CardFooter className='pt-6'>
                 <Button
-                  className={`w-full interactive-element ${tier.popular ? 'bg-primary hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                  className={`w-full interactive-element ${tier.popular ? 'bg-primary hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'} focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
                   onClick={() =>
                     tier.name === 'Enterprise'
                       ? (window.location.href = '/contact?inquiry=enterprise')
                       : (window.location.href = `/subscribe?tier=${tier.name.toLowerCase()}`)
+                  }
+                  aria-label={
+                    tier.name === 'Enterprise'
+                      ? `Contact sales team about ${tier.name} plan for £${tier.annualPrice} per month`
+                      : `Start free trial of ${tier.name} plan for £${tier.annualPrice} per month`
                   }
                 >
                   {tier.name === 'Enterprise' ? 'Talk to Sales' : 'Start Free Trial'}

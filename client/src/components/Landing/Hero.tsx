@@ -24,17 +24,17 @@ export default function Hero() {
         <div className='text-center'>
           {/* Trust indicators */}
           <div className='flex justify-center items-center gap-6 mb-8'>
-            <Badge variant='secondary' className='flex items-center gap-2'>
-              <Shield className='h-4 w-4' />
-              GDPR Compliant
+            <Badge variant='secondary' className='flex items-center gap-2' aria-label='GDPR Compliant certification'>
+              <Shield className='h-4 w-4' aria-hidden='true' />
+              <span>GDPR Compliant</span>
             </Badge>
-            <Badge variant='secondary' className='flex items-center gap-2'>
-              <Users className='h-4 w-4' />
-              500+ Organizations
+            <Badge variant='secondary' className='flex items-center gap-2' aria-label='Trusted by over 500 organisations'>
+              <Users className='h-4 w-4' aria-hidden='true' />
+              <span>500+ Organisations</span>
             </Badge>
-            <Badge variant='secondary' className='flex items-center gap-2'>
-              <Star className='h-4 w-4' />
-              4.8/5 Rating
+            <Badge variant='secondary' className='flex items-center gap-2' aria-label='Average rating 4.8 out of 5 stars'>
+              <Star className='h-4 w-4' aria-hidden='true' />
+              <span>4.8/5 Rating</span>
             </Badge>
           </div>
 
@@ -67,19 +67,21 @@ export default function Hero() {
             <Button
               size='lg'
               onClick={handleGetStarted}
-              className='w-full sm:w-auto px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1'
+              className='w-full sm:w-auto px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+              aria-label='Start your free 30-day trial'
             >
               Start Free Trial
-              <ArrowRight className='ml-2 h-5 w-5' />
+              <ArrowRight className='ml-2 h-5 w-5' aria-hidden='true' />
             </Button>
 
             <Button
               variant='outline'
               size='lg'
               onClick={handleWatchDemo}
-              className='w-full sm:w-auto px-8 py-4 text-lg font-semibold border-2 hover:bg-primary-50 transition-all duration-300'
+              className='w-full sm:w-auto px-8 py-4 text-lg font-semibold border-2 hover:bg-primary-50 transition-all duration-300 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+              aria-label='Watch product demonstration video'
             >
-              <Play className='mr-2 h-5 w-5' />
+              <Play className='mr-2 h-5 w-5' aria-hidden='true' />
               Watch Demo
             </Button>
           </div>
@@ -122,19 +124,22 @@ export default function Hero() {
 
           {/* Social proof */}
           <div className='mt-16 pt-8 border-t border-primary-100'>
-            <Typography
-              variant='caption'
-              className='uppercase tracking-wide mb-6'
-              color='muted'
-            >
-              Trusted by leading organizations
-            </Typography>
-            <div className='flex justify-center items-center gap-8 opacity-60'>
-              {/* Add organization logos here */}
-              <div className='h-8 w-24 bg-neutral-200 rounded' />
-              <div className='h-8 w-24 bg-neutral-200 rounded' />
-              <div className='h-8 w-24 bg-neutral-200 rounded' />
-              <div className='h-8 w-24 bg-neutral-200 rounded' />
+            <p className='text-xs uppercase tracking-wide mb-6 text-slate-600'>
+              Trusted by leading organisations
+            </p>
+            <div className='flex justify-center items-center gap-8 flex-wrap'>
+              <div className='h-10 px-4 flex items-center justify-center bg-white rounded border border-slate-200' aria-label='Partner organisation logo'>
+                <span className='text-slate-500 font-semibold text-sm'>LB Hackney</span>
+              </div>
+              <div className='h-10 px-4 flex items-center justify-center bg-white rounded border border-slate-200' aria-label='Partner organisation logo'>
+                <span className='text-slate-500 font-semibold text-sm'>LB Tower Hamlets</span>
+              </div>
+              <div className='h-10 px-4 flex items-center justify-center bg-white rounded border border-slate-200' aria-label='Partner organisation logo'>
+                <span className='text-slate-500 font-semibold text-sm'>Peabody Housing</span>
+              </div>
+              <div className='h-10 px-4 flex items-center justify-center bg-white rounded border border-slate-200' aria-label='Partner organisation logo'>
+                <span className='text-slate-500 font-semibold text-sm'>Look Ahead Care</span>
+              </div>
             </div>
           </div>
         </div>

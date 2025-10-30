@@ -14,7 +14,7 @@ export default function Hero() {
   };
 
   return (
-    <section className='relative overflow-hidden bg-gradient-to-br from-primary-50 via-background to-accent-50 py-16 sm:py-20 lg:py-24'>
+    <section className='relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-teal-50 py-16 sm:py-20 lg:py-24'>
       {/* Background decoration */}
       <div className='absolute inset-0 bg-grid-pattern opacity-5' />
       <div className='absolute top-0 right-0 -translate-y-12 translate-x-12 w-96 h-96 bg-primary-100 rounded-full blur-3xl opacity-20' />

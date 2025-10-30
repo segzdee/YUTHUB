@@ -26,7 +26,7 @@ export default function UniversalHeader() {
   ];
 
   return (
-    <header className='bg-white shadow-sm border-b border-gray-200'>
+    <header className='bg-white/95 backdrop-blur-sm shadow-sm border-b border-slate-200'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='flex justify-between items-center h-16'>
           {/* Logo */}
@@ -36,7 +36,7 @@ export default function UniversalHeader() {
               className='flex items-center space-x-2'
             >
               <Building2 className='h-8 w-8 text-primary' />
-              <span className='text-2xl font-bold text-slate'>YUTHUB</span>
+              <span className='text-2xl font-bold text-slate-800'>YUTHUB</span>
             </a>
           </div>
 
@@ -50,7 +50,7 @@ export default function UniversalHeader() {
               <a
                 key={item.name}
                 href={item.href}
-                className='text-medium-contrast hover:text-primary px-3 py-2 text-sm font-medium transition-colors interactive-element focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring'
+                className='text-slate-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors interactive-element focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring hover:underline'
                 aria-current={
                   window.location.pathname === item.href ? 'page' : undefined
                 }
@@ -127,7 +127,7 @@ export default function UniversalHeader() {
                 <a
                   key={item.name}
                   href={item.href}
-                  className='text-medium-contrast hover:text-primary px-3 py-2 text-sm font-medium transition-colors interactive-element focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring'
+                  className='text-slate-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors interactive-element focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring hover:underline'
                   onClick={() => setIsMenuOpen(false)}
                   aria-current={
                     window.location.pathname === item.href ? 'page' : undefined
@@ -140,7 +140,7 @@ export default function UniversalHeader() {
                 {isAuthenticated ? (
                   <div className='space-y-2'>
                     <div
-                      className='text-sm text-medium-contrast px-3'
+                      className='text-sm text-slate-600 px-3'
                       role='status'
                       aria-live='polite'
                     >

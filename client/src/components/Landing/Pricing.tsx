@@ -75,7 +75,7 @@ export default function PricingSection() {
   ];
 
   return (
-    <section className='py-20 px-4 sm:px-6 lg:px-8 bg-gray-50' id='pricing'>
+    <section className='py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-50 via-blue-50 to-teal-50' id='pricing'>
       <div className='max-w-7xl mx-auto'>
         <div className='text-center mb-16'>
           <Badge variant='outline' className='mb-4 px-4 py-2'>
@@ -155,7 +155,7 @@ export default function PricingSection() {
 
               <CardFooter className='pt-6'>
                 <Button
-                  className={`w-full interactive-element ${tier.popular ? 'bg-primary hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'} focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
+                  className={`w-full interactive-element ${tier.popular ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg hover:shadow-xl' : 'bg-blue-500 hover:bg-blue-600 text-white shadow-md hover:shadow-lg'} focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200`}
                   onClick={() =>
                     tier.name === 'Enterprise'
                       ? (window.location.href = '/contact?inquiry=enterprise')

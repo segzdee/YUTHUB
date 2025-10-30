@@ -1,5 +1,5 @@
 import PageLoader from '@/components/common/PageLoader';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 

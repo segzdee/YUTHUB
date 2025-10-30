@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useRealTimeUpdates } from '@/hooks/useRealTimeUpdates';
 import { useWebSocketConnection } from '@/hooks/useOptimizedWebSocket';

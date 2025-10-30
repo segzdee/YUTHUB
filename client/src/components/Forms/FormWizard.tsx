@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { apiRequest } from '@/lib/queryClient';
 import type { FormStep, FormStepData } from '@shared/types';
 import { Check, ChevronLeft, ChevronRight, Save } from 'lucide-react';

@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Bell, Menu, User, LogOut } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import CrisisModal from '@/components/CrisisConnect/CrisisModal';
 import CrossModuleSearch from '@/components/CrossModule/CrossModuleSearch';

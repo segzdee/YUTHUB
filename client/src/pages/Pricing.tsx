@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Check, X } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { PublicPageLayout } from '@/components/PageLayout';
 import SEOHead from '@/components/SEO/SEOHead';
 import Breadcrumbs from '@/components/SEO/Breadcrumbs';

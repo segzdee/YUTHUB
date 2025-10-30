@@ -14,7 +14,7 @@ import {
   Settings,
   HelpCircle,
 } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: Home },

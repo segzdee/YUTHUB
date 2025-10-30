@@ -12,7 +12,7 @@ import { ErrorBoundary } from './components/common/ErrorBoundary';
 import PageLoader from './components/common/PageLoader';
 import { Layout } from './components/Layout';
 import { AccessibilityProvider } from './components/providers/AccessibilityProvider';
-// AuthProvider is no longer needed as we use Zustand for auth state
+import { AuthProvider } from './contexts/AuthContext';
 import { LanguageProvider } from './components/providers/LanguageProvider';
 import { ThemeProvider } from './components/providers/ThemeProvider';
 import { Toaster } from './components/ui/toaster';
@@ -66,7 +66,8 @@ function App() {
         <ThemeProvider>
           <AccessibilityProvider>
             <QueryClientProvider client={queryClient}>
-              <TooltipProvider>
+              <AuthProvider>
+                <TooltipProvider>
                   <Router>
                     {/* Skip link for accessibility */}
                     <a
@@ -165,6 +166,7 @@ function App() {
                     <Toaster />
                   </Router>
                 </TooltipProvider>
+              </AuthProvider>
             </QueryClientProvider>
           </AccessibilityProvider>
         </ThemeProvider>

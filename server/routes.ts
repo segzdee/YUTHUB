@@ -64,6 +64,13 @@ import {
 } from './security/rbacMiddleware';
 import { emailService } from './services/emailService.js';
 import { storage } from './storage';
+import {
+  requireActiveSubscription,
+  requireFeature,
+  requireTier,
+  checkResidentLimit,
+  checkPropertyLimit,
+} from './middleware/subscriptionMiddleware';
 
 interface AuthenticatedRequest extends Request {
   user?: {

@@ -40,6 +40,8 @@ import {
 import { registerRoutes } from './routes';
 import { log, serveStatic, setupVite } from './vite';
 import { WebSocketManager } from './websocket';
+import { loadSubscriptionInfo } from './middleware/subscriptionMiddleware';
+import billingRoutes from './routes/billing';
 
 const app = express();
 
@@ -138,6 +140,9 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Add request tracking middleware
 app.use(requestTrackingMiddleware);
 
+// Load subscription info for authenticated requests
+app.use(loadSubscriptionInfo);
+
 // Add memory and performance monitoring
 app.use(memoryTrackingMiddleware);
 app.use(performanceTrackingMiddleware);
@@ -159,6 +164,9 @@ app.use('/api', queryOptimizationMiddleware);
 // Setup SSL redirect and security headers
 setupSSLRedirect(app);
 setupSecurityHeaders(app);
+
+// Mount billing routes (before auth to handle Stripe webhooks)
+app.use('/api/billing', billingRoutes);
 
 app.use((req, res, next) => {
   const start = Date.now();

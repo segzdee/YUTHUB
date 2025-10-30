@@ -1,0 +1,11 @@
+{
+  "install": "npm install",
+  "build": "npm run build",
+  "dev": "npm run dev",
+  "start": "npm start",
+  "preview": "npm run preview",
+  "env": {
+    "NODE_ENV": "development",
+    "VITE_API_URL": "http://localhost:5000/api"
+  }
+}

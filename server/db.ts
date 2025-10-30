@@ -1,8 +1,7 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
+import { Pool } from 'pg';
 import * as schema from '@shared/schema';
 import { sql } from 'drizzle-orm';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from 'ws';
+import { drizzle } from 'drizzle-orm/node-postgres';
 
 // Load environment variables if not already loaded
 if (!process.env.DATABASE_URL) {
@@ -14,8 +13,6 @@ if (!process.env.DATABASE_URL) {
     // Dotenv might not be available in production
   }
 }
-
-neonConfig.webSocketConstructor = ws;
 
 if (!process.env.DATABASE_URL) {
   throw new Error(
@@ -101,7 +98,7 @@ pool.on('connect', (client) => {
   client.query('SET idle_in_transaction_session_timeout = 60000'); // 1 minute
 });
 
-export const db = drizzle({ client: pool, schema });
+export const db = drizzle(pool, { schema });
 
 // Enhanced database health monitoring with query timeout
 export const checkDatabaseHealth = async (): Promise<boolean> => {

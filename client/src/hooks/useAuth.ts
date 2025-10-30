@@ -12,8 +12,10 @@ const CACHE_DURATION = 30000; // 30 seconds cache
 
 interface User {
   id: string;
-  name: string;
+  name?: string;
   email: string;
+  firstName?: string;
+  lastName?: string;
   role: string;
   permissions?: string[];
   maxResidents?: number;
@@ -21,6 +23,7 @@ interface User {
   subscriptionStatus?: string;
   subscriptionStartDate?: string;
   subscriptionEndDate?: string;
+  isPlatformAdmin?: boolean;
 }
 
 interface AuthState {

@@ -1,1 +1,245 @@
-import React from 'react';\nimport { Button } from '../components/Button';\nimport { Card } from '../components/Card';\nimport { Badge } from '../components/Badge';\n\ninterface Module {\n  id: string;\n  title: string;\n  description: string;\n  features: string[];\n  icon: string;\n}\n\nconst modules: Module[] = [\n  {\n    id: 'housing',\n    title: 'Housing Management',\n    description: 'Complete property and accommodation management system',\n    features: [\n      'Property inventory tracking',\n      'Maintenance scheduling',\n      'Occupancy management',\n      'Lease document management',\n      'Compliance reporting',\n    ],\n    icon: '🏠',\n  },\n  {\n    id: 'support',\n    title: 'Support Planning',\n    description: 'Integrated support and care planning tools',\n    features: [\n      'Individual support plans',\n      'Goal tracking',\n      'Progress monitoring',\n      'Team collaboration',\n      'Activity logging',\n    ],\n    icon: '👥',\n  },\n  {\n    id: 'safeguarding',\n    title: 'Safeguarding',\n    description: 'Comprehensive safeguarding and risk management',\n    features: [\n      'Incident reporting',\n      'Risk assessment',\n      'Alert systems',\n      'Compliance tracking',\n      'Document management',\n    ],\n    icon: '🛡️',\n  },\n  {\n    id: 'finance',\n    title: 'Financial Management',\n    description: 'Budget and financial tracking tools',\n    features: [\n      'Budget management',\n      'Expense tracking',\n      'Invoice management',\n      'Financial reporting',\n      'Cost analysis',\n    ],\n    icon: '💰',\n  },\n  {\n    id: 'independence',\n    title: 'Independence Pathways',\n    description: 'Track progression toward independent living',\n    features: [\n      'Milestone tracking',\n      'Skills assessment',\n      'Independence levels',\n      'Transition planning',\n      'Progress reports',\n    ],\n    icon: '🚀',\n  },\n  {\n    id: 'crisis',\n    title: 'Crisis Management',\n    description: 'Emergency response and crisis coordination',\n    features: [\n      'Emergency alerts',\n      'Response protocols',\n      'Team coordination',\n      'Communication tools',\n      'Escalation workflows',\n    ],\n    icon: '🚨',\n  },\n];\n\nconst PlatformOverview: React.FC = () => {\n  return (\n    <div className=\"min-h-screen bg-white\">\n      {/* Hero */}\n      <section className=\"px-4 sm:px-6 lg:px-8 py-20 sm:py-32 max-w-7xl mx-auto\">\n        <div className=\"text-center space-y-8\">\n          <Badge variant=\"secondary\" size=\"md\" className=\"mx-auto\">\n            Platform Capabilities\n          </Badge>\n          <h1 className=\"text-5xl sm:text-6xl lg:text-7xl font-700 text-black leading-tight\">\n            Six integrated modules,\n            <br />\n            infinite possibilities.\n          </h1>\n          <p className=\"text-xl sm:text-2xl font-400 text-gray-600 max-w-2xl mx-auto leading-relaxed\">\n            Every tool you need to manage youth housing is built into one unified platform.\n          </p>\n        </div>\n      </section>\n\n      {/* Modules */}\n      <section className=\"px-4 sm:px-6 lg:px-8 py-20 sm:py-32 max-w-7xl mx-auto\">\n        <div className=\"space-y-20\">\n          {modules.map((module, idx) => {\n            const isEven = idx % 2 === 0;\n            return (\n              <div key={module.id} className=\"grid grid-cols-1 lg:grid-cols-2 gap-12 items-center\">\n                {/* Content */}\n                <div className={`space-y-6 ${isEven ? 'lg:order-1' : 'lg:order-2'}`}>\n                  <div>\n                    <span className=\"text-5xl mb-4 block\">{module.icon}</span>\n                    <h2 className=\"text-4xl font-600 text-black mb-2\">{module.title}</h2>\n                    <p className=\"text-lg font-400 text-gray-600\">{module.description}</p>\n                  </div>\n\n                  <div className=\"space-y-3\">\n                    {module.features.map((feature, fidx) => (\n                      <div key={fidx} className=\"flex items-start gap-3\">\n                        <svg className=\"w-5 h-5 text-accent-500 flex-shrink-0 mt-0.5\" fill=\"currentColor\" viewBox=\"0 0 20 20\">\n                          <path fillRule=\"evenodd\" d=\"M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z\" clipRule=\"evenodd\" />\n                        </svg>\n                        <span className=\"text-base font-400 text-gray-700\">{feature}</span>\n                      </div>\n                    ))}\n                  </div>\n\n                  <div>\n                    <Button variant=\"tertiary\" size=\"md\">\n                      Learn more\n                    </Button>\n                  </div>\n                </div>\n\n                {/* Image Placeholder */}\n                <div className={`${isEven ? 'lg:order-2' : 'lg:order-1'}`}>\n                  <div className=\"bg-gradient-to-br from-gray-100 to-gray-50 rounded-2xl border border-gray-200 aspect-square flex items-center justify-center\">\n                    <div className=\"text-center space-y-4\">\n                      <div className=\"text-6xl\">{module.icon}</div>\n                      <p className=\"text-gray-500 font-400\">Interface Preview</p>\n                    </div>\n                  </div>\n                </div>\n              </div>\n            );\n          })}\n        </div>\n      </section>\n\n      {/* Demo Section */}\n      <section className=\"px-4 sm:px-6 lg:px-8 py-20 sm:py-32 bg-gray-50\">\n        <div className=\"max-w-7xl mx-auto\">\n          <div className=\"grid grid-cols-1 lg:grid-cols-2 gap-12 items-center\">\n            {/* Video/Demo Placeholder */}\n            <div>\n              <div className=\"bg-gradient-to-br from-black to-gray-800 rounded-2xl border border-gray-700 aspect-video flex items-center justify-center\">\n                <div className=\"text-center\">\n                  <div className=\"w-16 h-16 mx-auto mb-4 bg-white rounded-full flex items-center justify-center\">\n                    <svg className=\"w-8 h-8 text-black ml-1\" fill=\"currentColor\" viewBox=\"0 0 20 20\">\n                      <path d=\"M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z\" />\n                    </svg>\n                  </div>\n                  <p className=\"text-white text-sm font-500\">Watch 3-minute demo</p>\n                </div>\n              </div>\n            </div>\n\n            {/* Content */}\n            <div className=\"space-y-8\">\n              <div>\n                <h2 className=\"text-4xl font-600 text-black mb-4\">\n                  See it in action\n                </h2>\n                <p className=\"text-xl font-400 text-gray-600 leading-relaxed\">\n                  Get a guided walkthrough of YUTHUB's core features. Watch how our customers streamline their daily operations and improve outcomes for young people.\n                </p>\n              </div>\n\n              <div className=\"space-y-4\">\n                <div className=\"flex items-start gap-4\">\n                  <div className=\"w-10 h-10 rounded-full bg-accent-500/10 flex items-center justify-center flex-shrink-0 mt-1\">\n                    <span className=\"text-accent-600 font-600\">1</span>\n                  </div>\n                  <div>\n                    <h3 className=\"text-lg font-600 text-black mb-1\">Dashboard Overview</h3>\n                    <p className=\"text-base font-400 text-gray-600\">\n                      See all critical information at a glance\n                    </p>\n                  </div>\n                </div>\n\n                <div className=\"flex items-start gap-4\">\n                  <div className=\"w-10 h-10 rounded-full bg-accent-500/10 flex items-center justify-center flex-shrink-0 mt-1\">\n                    <span className=\"text-accent-600 font-600\">2</span>\n                  </div>\n                  <div>\n                    <h3 className=\"text-lg font-600 text-black mb-1\">Resident Management</h3>\n                    <p className=\"text-base font-400 text-gray-600\">\n                      Create and manage comprehensive resident profiles\n                    </p>\n                  </div>\n                </div>\n\n                <div className=\"flex items-start gap-4\">\n                  <div className=\"w-10 h-10 rounded-full bg-accent-500/10 flex items-center justify-center flex-shrink-0 mt-1\">\n                    <span className=\"text-accent-600 font-600\">3</span>\n                  </div>\n                  <div>\n                    <h3 className=\"text-lg font-600 text-black mb-1\">Reporting & Analytics</h3>\n                    <p className=\"text-base font-400 text-gray-600\">\n                      Generate insights and track organizational impact\n                    </p>\n                  </div>\n                </div>\n              </div>\n\n              <Button variant=\"primary\" size=\"lg\">\n                Start 30-day trial\n              </Button>\n            </div>\n          </div>\n        </div>\n      </section>\n\n      {/* CTA */}\n      <section className=\"px-4 sm:px-6 lg:px-8 py-20 sm:py-32\">\n        <div className=\"max-w-4xl mx-auto text-center space-y-8\">\n          <h2 className=\"text-4xl sm:text-5xl font-600 text-black\">\n            Ready to transform your operations?\n          </h2>\n          <p className=\"text-xl font-400 text-gray-600\">\n            All modules are included in every plan. No hidden features or paid add-ons.\n          </p>\n          <div className=\"flex flex-col sm:flex-row items-center justify-center gap-4\">\n            <Button variant=\"primary\" size=\"lg\">\n              Get started\n            </Button>\n            <Button variant=\"secondary\" size=\"lg\">\n              Schedule demo\n            </Button>\n          </div>\n        </div>\n      </section>\n    </div>\n  );\n};\n\nexport default PlatformOverview;\n
+import React from 'react';
+import { Button } from '../components/Button';
+import { Card } from '../components/Card';
+import { Badge } from '../components/Badge';
+import { Navbar } from '../components/Navbar';
+import { Footer } from '../components/Footer';
+
+interface Module {
+  id: string;
+  title: string;
+  description: string;
+  features: string[];
+  icon: string;
+}
+
+const modules: Module[] = [
+  {
+    id: 'housing',
+    title: 'Housing Management',
+    description: 'Complete property and accommodation management system',
+    features: [
+      'Property inventory tracking',
+      'Maintenance scheduling',
+      'Occupancy management',
+      'Lease document management',
+      'Compliance reporting',
+    ],
+    icon: '🏠',
+  },
+  {
+    id: 'support',
+    title: 'Support Planning',
+    description: 'Integrated support and care planning tools',
+    features: [
+      'Individual support plans',
+      'Goal tracking',
+      'Progress monitoring',
+      'Team collaboration',
+      'Activity logging',
+    ],
+    icon: '👥',
+  },
+  {
+    id: 'safeguarding',
+    title: 'Safeguarding',
+    description: 'Comprehensive safeguarding and risk management',
+    features: [
+      'Incident reporting',
+      'Risk assessment',
+      'Alert systems',
+      'Compliance tracking',
+      'Document management',
+    ],
+    icon: '🛡️',
+  },
+  {
+    id: 'finance',
+    title: 'Financial Management',
+    description: 'Budget and financial tracking tools',
+    features: [
+      'Budget management',
+      'Expense tracking',
+      'Invoice management',
+      'Financial reporting',
+      'Cost analysis',
+    ],
+    icon: '💰',
+  },
+  {
+    id: 'independence',
+    title: 'Independence Pathways',
+    description: 'Track progression toward independent living',
+    features: [
+      'Milestone tracking',
+      'Skills assessment',
+      'Independence levels',
+      'Transition planning',
+      'Progress reports',
+    ],
+    icon: '🚀',
+  },
+  {
+    id: 'crisis',
+    title: 'Crisis Management',
+    description: 'Emergency response and crisis coordination',
+    features: [
+      'Emergency alerts',
+      'Response protocols',
+      'Team coordination',
+      'Communication tools',
+      'Escalation workflows',
+    ],
+    icon: '🚨',
+  },
+];
+
+const PlatformOverview: React.FC = () => {
+  return (
+    <div className="min-h-screen bg-white flex flex-col">
+      <Navbar />
+
+      <div className="flex-1">
+        {/* Hero */}
+        <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-32 max-w-7xl mx-auto">
+          <div className="text-center space-y-8">
+            <Badge variant="secondary" size="md" className="mx-auto">
+              Platform Capabilities
+            </Badge>
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-700 text-black leading-tight">
+              Six integrated modules,
+              <br />
+              infinite possibilities.
+            </h1>
+            <p className="text-xl sm:text-2xl font-400 text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              Every tool you need to manage youth housing is built into one unified platform.
+            </p>
+          </div>
+        </section>
+
+        {/* Modules */}
+        <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-32 max-w-7xl mx-auto">
+          <div className="space-y-20">
+            {modules.map((module, idx) => {
+              const isEven = idx % 2 === 0;
+              return (
+                <div key={module.id} className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                  <div className={`space-y-6 ${isEven ? 'lg:order-1' : 'lg:order-2'}`}>
+                    <div>
+                      <span className="text-5xl mb-4 block">{module.icon}</span>
+                      <h2 className="text-4xl font-600 text-black mb-2">{module.title}</h2>
+                      <p className="text-lg font-400 text-gray-600">{module.description}</p>
+                    </div>
+
+                    <div className="space-y-3">
+                      {module.features.map((feature, fidx) => (
+                        <div key={fidx} className="flex items-start gap-3">
+                          <svg className="w-5 h-5 text-accent-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                          <span className="text-base font-400 text-gray-700">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div>
+                      <Button variant="tertiary" size="md">
+                        Learn more
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className={`${isEven ? 'lg:order-2' : 'lg:order-1'}`}>
+                    <div className="bg-gradient-to-br from-gray-100 to-gray-50 rounded-2xl border border-gray-200 aspect-square flex items-center justify-center">
+                      <div className="text-center space-y-4">
+                        <div className="text-6xl">{module.icon}</div>
+                        <p className="text-gray-500 font-400">Interface Preview</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Demo Section */}
+        <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-32 bg-gray-50">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              <div>
+                <div className="bg-gradient-to-br from-black to-gray-800 rounded-2xl border border-gray-700 aspect-video flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-white rounded-full flex items-center justify-center">
+                      <svg className="w-8 h-8 text-black ml-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                      </svg>
+                    </div>
+                    <p className="text-white text-sm font-500">Watch 3-minute demo</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-8">
+                <div>
+                  <h2 className="text-4xl font-600 text-black mb-4">
+                    See it in action
+                  </h2>
+                  <p className="text-xl font-400 text-gray-600 leading-relaxed">
+                    Get a guided walkthrough of YUTHUB's core features. Watch how our customers streamline their daily operations and improve outcomes for young people.
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  {[
+                    { num: '1', title: 'Dashboard Overview', desc: 'See all critical information at a glance' },
+                    { num: '2', title: 'Resident Management', desc: 'Create and manage comprehensive resident profiles' },
+                    { num: '3', title: 'Reporting & Analytics', desc: 'Generate insights and track organizational impact' },
+                  ].map((item) => (
+                    <div key={item.num} className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-full bg-accent-500/10 flex items-center justify-center flex-shrink-0 mt-1">
+                        <span className="text-accent-600 font-600">{item.num}</span>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-600 text-black mb-1">{item.title}</h3>
+                        <p className="text-base font-400 text-gray-600">{item.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <Button variant="primary" size="lg">
+                  Start 30-day trial
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-32">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <h2 className="text-4xl sm:text-5xl font-600 text-black">
+              Ready to transform your operations?
+            </h2>
+            <p className="text-xl font-400 text-gray-600">
+              All modules are included in every plan. No hidden features or paid add-ons.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Button variant="primary" size="lg">
+                Get started
+              </Button>
+              <Button variant="secondary" size="lg">
+                Schedule demo
+              </Button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <Footer />
+    </div>
+  );
+};
+
+export default PlatformOverview;

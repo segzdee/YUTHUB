@@ -16,9 +16,9 @@ const Landing: React.FC = () => {
       <div className="flex-1">
         {/* Hero Section */}
         <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-32 max-w-7xl mx-auto">
-          <div className="text-center space-y-8">
-            <div>
-              <Badge variant="secondary" size="md" className="mb-4">
+          <div className="text-center space-y-6">
+            <div className="space-y-4">
+              <Badge variant="secondary" size="md" className="justify-center">
                 Now recruiting beta users
               </Badge>
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-700 text-black leading-tight">
@@ -28,30 +28,30 @@ const Landing: React.FC = () => {
               </h1>
             </div>
 
-            <p className="text-xl sm:text-2xl font-400 text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xl sm:text-2xl font-400 text-gray-700 max-w-2xl mx-auto leading-relaxed">
               The platform that brings together housing managers, support teams, and safeguarding specialists to deliver exceptional care for young people.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
               <Link to="/signup">
                 <Button variant="primary" size="lg">
                   Get started free
                 </Button>
               </Link>
-              <Link to="/platform">
-                <Button variant="tertiary" size="lg">
+              <Link to="/platform" className="group">
+                <Button variant="tertiary" size="lg" className="group-hover:underline">
                   See how it works
                 </Button>
               </Link>
             </div>
 
             <div className="pt-8 border-t border-gray-200">
-              <p className="text-sm font-500 text-gray-500 mb-4">
+              <p className="text-sm font-500 text-gray-600 mb-4">
                 Trusted by leading UK youth housing organizations
               </p>
-              <div className="flex justify-center items-center gap-8 opacity-60">
+              <div className="flex justify-center items-center gap-8 opacity-40">
                 {['Organization A', 'Organization B', 'Organization C', 'Organization D'].map((org) => (
-                  <span key={org} className="text-sm font-500 text-gray-400">
+                  <span key={org} className="text-sm font-500 text-gray-500">
                     {org}
                   </span>
                 ))}
@@ -235,18 +235,18 @@ const Landing: React.FC = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-32">
+        <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-32 border-t border-gray-100">
           <div className="max-w-4xl mx-auto text-center space-y-8">
-            <div>
-              <h2 className="text-4xl sm:text-5xl font-600 text-black mb-4">
+            <div className="space-y-3">
+              <h2 className="text-4xl sm:text-5xl font-600 text-black">
                 Ready to get started?
               </h2>
-              <p className="text-xl font-400 text-gray-600">
-                Join leading youth housing organizations using YUTHUB to transform their operations.
+              <p className="text-lg font-400 text-gray-700">
+                Join organizations shaping the future of youth housing.
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <Link to="/signup">
                 <Button variant="primary" size="lg">
                   Get started free
@@ -254,12 +254,12 @@ const Landing: React.FC = () => {
               </Link>
               <Link to="/login">
                 <Button variant="secondary" size="lg">
-                  Sign in
+                  Get started
                 </Button>
               </Link>
             </div>
 
-            <p className="text-sm font-400 text-gray-500">
+            <p className="text-sm font-400 text-gray-600">
               No credit card required. Set up takes less than 5 minutes.
             </p>
           </div>

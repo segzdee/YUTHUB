@@ -13,8 +13,8 @@ const variantStyles = {
     outline: 'bg-white text-black border border-black',
   },
   secondary: {
-    solid: 'bg-gray-200 text-black',
-    outline: 'bg-white text-gray-700 border border-gray-300',
+    solid: 'bg-gray-100 text-gray-700 border border-gray-200',
+    outline: 'bg-white text-gray-700 border border-gray-200',
   },
   accent: {
     solid: 'bg-accent-500 text-white',
@@ -53,7 +53,7 @@ export const Badge: React.FC<BadgeProps> = ({
   return (
     <span
       className={`
-        inline-flex items-center rounded-full
+        inline-flex items-center rounded-lg
         transition-all duration-200
         ${variantStyle}
         ${sizeStyles[size]}

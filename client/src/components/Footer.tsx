@@ -6,36 +6,36 @@ export const Footer: React.FC = () => {
 
   return (
     <footer className="bg-black text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-16 mb-16">
           {/* Brand */}
-          <div>
-            <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-white text-black font-700 flex items-center justify-center">
+          <div className="space-y-4">
+            <Link to="/" className="flex items-center gap-2.5 inline-block hover:opacity-80 transition-opacity">
+              <div className="w-7 h-7 rounded-md bg-white text-black font-semibold flex items-center justify-center text-sm">
                 Y
               </div>
-              <span className="text-lg font-700">YUTHUB</span>
+              <span className="text-base font-600 tracking-tight">YUTHUB</span>
             </Link>
-            <p className="text-sm font-400 text-gray-400">
+            <p className="text-sm font-400 text-gray-500 leading-relaxed">
               Comprehensive platform for youth housing organizations.
             </p>
           </div>
 
           {/* Product Links */}
           <div>
-            <h3 className="text-sm font-600 mb-4">Product</h3>
-            <div className="space-y-3">
-              <Link to="/platform" className="text-sm font-400 text-gray-400 hover:text-white transition-colors">
+            <h3 className="text-xs font-700 uppercase tracking-wider text-white mb-6">Product</h3>
+            <div className="space-y-3.5">
+              <Link to="/platform" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200">
                 Features
               </Link>
-              <Link to="/pricing" className="text-sm font-400 text-gray-400 hover:text-white transition-colors">
+              <Link to="/pricing" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200">
                 Pricing
               </Link>
-              <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors">
+              <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200">
                 Security
               </a>
-              <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors">
+              <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200">
                 Status
               </a>
             </div>
@@ -43,18 +43,18 @@ export const Footer: React.FC = () => {
 
           {/* Company Links */}
           <div>
-            <h3 className="text-sm font-600 mb-4">Company</h3>
-            <div className="space-y-3">
-              <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors">
+            <h3 className="text-xs font-700 uppercase tracking-wider text-white mb-6">Company</h3>
+            <div className="space-y-3.5">
+              <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200">
                 About
               </a>
-              <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors">
+              <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200">
                 Blog
               </a>
-              <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors">
+              <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200">
                 Careers
               </a>
-              <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors">
+              <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200">
                 Contact
               </a>
             </div>
@@ -62,18 +62,18 @@ export const Footer: React.FC = () => {
 
           {/* Legal Links */}
           <div>
-            <h3 className="text-sm font-600 mb-4">Legal</h3>
-            <div className="space-y-3">
-              <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors">
+            <h3 className="text-xs font-700 uppercase tracking-wider text-white mb-6">Legal</h3>
+            <div className="space-y-3.5">
+              <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200">
                 Privacy Policy
               </a>
-              <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors">
+              <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200">
                 Terms of Service
               </a>
-              <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors">
+              <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200">
                 Cookie Policy
               </a>
-              <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors">
+              <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200">
                 GDPR
               </a>
             </div>
@@ -84,16 +84,16 @@ export const Footer: React.FC = () => {
         <div className="border-t border-gray-800 py-8"></div>
 
         {/* Bottom Footer */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-sm font-400 text-gray-400">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-8">
+          <p className="text-xs font-400 text-gray-500">
             © {currentYear} YUTHUB. All rights reserved.
           </p>
 
           {/* Social Links */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-5">
             <a
               href="#"
-              className="text-gray-400 hover:text-white transition-colors"
+              className="text-gray-500 hover:text-white transition-colors duration-200"
               aria-label="Twitter"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -102,7 +102,7 @@ export const Footer: React.FC = () => {
             </a>
             <a
               href="#"
-              className="text-gray-400 hover:text-white transition-colors"
+              className="text-gray-500 hover:text-white transition-colors duration-200"
               aria-label="LinkedIn"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -111,7 +111,7 @@ export const Footer: React.FC = () => {
             </a>
             <a
               href="#"
-              className="text-gray-400 hover:text-white transition-colors"
+              className="text-gray-500 hover:text-white transition-colors duration-200"
               aria-label="GitHub"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">

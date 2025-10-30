@@ -26,10 +26,10 @@ export const Navbar: React.FC<NavbarProps> = ({ variant = 'light', transparent =
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 flex-shrink-0">
+          <Link to="/" className="flex items-center gap-2.5 flex-shrink-0 hover:opacity-80 transition-opacity">
             <div
               className={`
-                w-8 h-8 rounded-lg font-700 flex items-center justify-center
+                w-7 h-7 rounded-md font-semibold flex items-center justify-center text-sm
                 ${variant === 'dark' || transparent ? 'bg-white text-black' : 'bg-black text-white'}
               `}
             >
@@ -37,7 +37,7 @@ export const Navbar: React.FC<NavbarProps> = ({ variant = 'light', transparent =
             </div>
             <span
               className={`
-                text-xl font-700 hidden sm:inline
+                text-lg font-600 hidden sm:inline tracking-tight
                 ${variant === 'dark' || transparent ? 'text-white' : 'text-black'}
               `}
             >
@@ -50,10 +50,10 @@ export const Navbar: React.FC<NavbarProps> = ({ variant = 'light', transparent =
             <Link
               to="/"
               className={`
-                text-sm font-500 transition-colors
+                text-sm font-500 transition-colors pb-1 border-b-2 border-transparent hover:border-gray-300
                 ${isActive('/') 
-                  ? (variant === 'dark' || transparent ? 'text-white' : 'text-black')
-                  : (variant === 'dark' || transparent ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-black')
+                  ? (variant === 'dark' || transparent ? 'text-white border-white' : 'text-black border-black')
+                  : (variant === 'dark' || transparent ? 'text-gray-200' : 'text-gray-700')
                 }
               `}
             >
@@ -62,10 +62,10 @@ export const Navbar: React.FC<NavbarProps> = ({ variant = 'light', transparent =
             <Link
               to="/platform"
               className={`
-                text-sm font-500 transition-colors
+                text-sm font-500 transition-colors pb-1 border-b-2 border-transparent hover:border-gray-300
                 ${isActive('/platform')
-                  ? (variant === 'dark' || transparent ? 'text-white' : 'text-black')
-                  : (variant === 'dark' || transparent ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-black')
+                  ? (variant === 'dark' || transparent ? 'text-white border-white' : 'text-black border-black')
+                  : (variant === 'dark' || transparent ? 'text-gray-200' : 'text-gray-700')
                 }
               `}
             >
@@ -74,10 +74,10 @@ export const Navbar: React.FC<NavbarProps> = ({ variant = 'light', transparent =
             <Link
               to="/pricing"
               className={`
-                text-sm font-500 transition-colors
+                text-sm font-500 transition-colors pb-1 border-b-2 border-transparent hover:border-gray-300
                 ${isActive('/pricing')
-                  ? (variant === 'dark' || transparent ? 'text-white' : 'text-black')
-                  : (variant === 'dark' || transparent ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-black')
+                  ? (variant === 'dark' || transparent ? 'text-white border-white' : 'text-black border-black')
+                  : (variant === 'dark' || transparent ? 'text-gray-200' : 'text-gray-700')
                 }
               `}
             >

@@ -1,5 +1,4 @@
-import UniversalHeader from '@/components/Layout/UniversalHeader';
-import UniversalFooter from '@/components/Layout/UniversalFooter';
+import { PublicPageLayout } from '@/components/PageLayout';
 import SEOHead from '@/components/SEO/SEOHead';
 import Breadcrumbs from '@/components/SEO/Breadcrumbs';
 
@@ -19,7 +18,7 @@ export default function Privacy() {
   };
 
   return (
-    <div className='min-h-screen bg-background'>
+    <>
       <SEOHead
         title='Privacy Policy - YUTHUB | Data Protection & GDPR Compliance'
         description='Learn how YUTHUB protects your personal data and complies with GDPR regulations. Our comprehensive privacy policy for youth housing management platform users.'
@@ -27,14 +26,14 @@ export default function Privacy() {
         canonicalUrl='https://www.yuthub.com/privacy'
         structuredData={structuredData}
       />
-      <UniversalHeader />
-      <div className='max-w-4xl mx-auto px-4 py-12'>
-        <Breadcrumbs items={[{ label: 'Privacy Policy' }]} />
-        <h1 className='text-3xl font-bold text-high-contrast mb-8'>
-          Privacy Policy
-        </h1>
+      <PublicPageLayout>
+        <div className='max-w-4xl mx-auto px-4 py-12'>
+          <Breadcrumbs items={[{ label: 'Privacy Policy' }]} />
+          <h1 className='text-3xl font-bold text-high-contrast mb-8'>
+            Privacy Policy
+          </h1>
 
-        <div className='space-y-8 text-medium-contrast'>
+          <div className='space-y-8 text-medium-contrast'>
           <section>
             <h2 className='text-2xl font-semibold text-high-contrast mb-4'>
               Data Protection Officer
@@ -120,9 +119,9 @@ export default function Privacy() {
               </p>
             </div>
           </section>
+          </div>
         </div>
-      </div>
-      <UniversalFooter />
-    </div>
+      </PublicPageLayout>
+    </>
   );
 }

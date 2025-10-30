@@ -1,5 +1,4 @@
-import UniversalHeader from '@/components/Layout/UniversalHeader';
-import UniversalFooter from '@/components/Layout/UniversalFooter';
+import { PublicPageLayout } from '@/components/PageLayout';
 import SEOHead from '@/components/SEO/SEOHead';
 import Breadcrumbs from '@/components/SEO/Breadcrumbs';
 
@@ -19,7 +18,7 @@ export default function Terms() {
   };
 
   return (
-    <div className='min-h-screen bg-background'>
+    <>
       <SEOHead
         title='Terms of Service - YUTHUB | Legal Terms & Conditions'
         description="Read YUTHUB's Terms of Service for our youth housing management platform. Legal terms, conditions, and user responsibilities for UK housing organizations."
@@ -27,14 +26,14 @@ export default function Terms() {
         canonicalUrl='https://www.yuthub.com/terms'
         structuredData={structuredData}
       />
-      <UniversalHeader />
-      <div className='max-w-4xl mx-auto px-4 py-12'>
-        <Breadcrumbs items={[{ label: 'Terms of Service' }]} />
-        <h1 className='text-3xl font-bold text-high-contrast mb-8'>
-          Terms of Service
-        </h1>
+      <PublicPageLayout>
+        <div className='max-w-4xl mx-auto px-4 py-12'>
+          <Breadcrumbs items={[{ label: 'Terms of Service' }]} />
+          <h1 className='text-3xl font-bold text-high-contrast mb-8'>
+            Terms of Service
+          </h1>
 
-        <div className='space-y-8 text-medium-contrast'>
+          <div className='space-y-8 text-medium-contrast'>
           <section>
             <h2 className='text-2xl font-semibold text-high-contrast mb-4'>
               Legal Jurisdiction
@@ -135,9 +134,9 @@ export default function Terms() {
               </p>
             </div>
           </section>
+          </div>
         </div>
-      </div>
-      <UniversalFooter />
-    </div>
+      </PublicPageLayout>
+    </>
   );
 }

@@ -1,5 +1,4 @@
-import UniversalFooter from '@/components/Layout/UniversalFooter';
-import UniversalHeader from '@/components/Layout/UniversalHeader';
+import { PublicPageLayout } from '@/components/PageLayout';
 import Breadcrumbs from '@/components/SEO/Breadcrumbs';
 import SEOHead from '@/components/SEO/SEOHead';
 
@@ -19,7 +18,7 @@ export default function Accessibility() {
   };
 
   return (
-    <div className='min-h-screen bg-background'>
+    <>
       <SEOHead
         title='Accessibility Statement - YUTHUB | WCAG 2.1 AA Compliance'
         description="Learn about YUTHUB's commitment to digital accessibility. Our youth housing management platform meets WCAG 2.1 Level AA standards for all users."
@@ -27,14 +26,14 @@ export default function Accessibility() {
         canonicalUrl='https://www.yuthub.com/accessibility'
         structuredData={structuredData}
       />
-      <UniversalHeader />
-      <div className='max-w-4xl mx-auto px-4 py-12'>
-        <Breadcrumbs items={[{ label: 'Accessibility Statement' }]} />
-        <h1 className='text-3xl font-bold text-high-contrast mb-8'>
-          Accessibility Statement
-        </h1>
+      <PublicPageLayout>
+        <div className='max-w-4xl mx-auto px-4 py-12'>
+          <Breadcrumbs items={[{ label: 'Accessibility Statement' }]} />
+          <h1 className='text-3xl font-bold text-high-contrast mb-8'>
+            Accessibility Statement
+          </h1>
 
-        <div className='space-y-8 text-medium-contrast'>
+          <div className='space-y-8 text-medium-contrast'>
           <section>
             <h2 className='text-2xl font-semibold text-high-contrast mb-4'>
               Our Commitment
@@ -95,9 +94,9 @@ export default function Accessibility() {
               </p>
             </div>
           </section>
+          </div>
         </div>
-      </div>
-      <UniversalFooter />
-    </div>
+      </PublicPageLayout>
+    </>
   );
 }

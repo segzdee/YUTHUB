@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import UniversalHeader from '@/components/Layout/UniversalHeader';
-import UniversalFooter from '@/components/Layout/UniversalFooter';
+import { PublicPageLayout } from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
 import SEOHead from '@/components/SEO/SEOHead';
 import Breadcrumbs from '@/components/SEO/Breadcrumbs';
@@ -52,7 +51,7 @@ export default function Cookies() {
   };
 
   return (
-    <div className='min-h-screen bg-background'>
+    <>
       <SEOHead
         title='Cookie Policy - YUTHUB | Manage Cookie Preferences'
         description='Manage your cookie preferences for YUTHUB youth housing management platform. Control analytics, marketing, and personalization cookies.'
@@ -60,14 +59,14 @@ export default function Cookies() {
         canonicalUrl='https://www.yuthub.com/cookies'
         structuredData={structuredData}
       />
-      <UniversalHeader />
-      <div className='max-w-4xl mx-auto px-4 py-12'>
-        <Breadcrumbs items={[{ label: 'Cookie Policy' }]} />
-        <h1 className='text-3xl font-bold text-high-contrast mb-8'>
-          Cookie Policy
-        </h1>
+      <PublicPageLayout>
+        <div className='max-w-4xl mx-auto px-4 py-12'>
+          <Breadcrumbs items={[{ label: 'Cookie Policy' }]} />
+          <h1 className='text-3xl font-bold text-high-contrast mb-8'>
+            Cookie Policy
+          </h1>
 
-        <div className='space-y-8'>
+          <div className='space-y-8'>
           <section className='text-medium-contrast'>
             <h2 className='text-2xl font-semibold text-high-contrast mb-4'>
               Cookie Management
@@ -249,9 +248,9 @@ export default function Cookies() {
               </p>
             </div>
           </section>
+          </div>
         </div>
-      </div>
-      <UniversalFooter />
-    </div>
+      </PublicPageLayout>
+    </>
   );
 }

@@ -194,7 +194,13 @@ export default function UniversalFooter() {
                 <span className='w-2 h-2 bg-success rounded-full'></span>
                 <span>System OK</span>
               </a>
-              <span className='hidden min-[375px]:inline'>WCAG 2.1 AA</span>
+              <a
+                href='/accessibility'
+                className='hidden min-[375px]:inline hover:text-neutral-300 transition-colors'
+                aria-label='Accessibility Statement'
+              >
+                Accessibility
+              </a>
               <a
                 href='mailto:dpo@yuthub.com'
                 className='hover:text-neutral-300 transition-colors'

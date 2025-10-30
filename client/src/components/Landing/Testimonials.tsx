@@ -68,10 +68,10 @@ export default function Testimonials() {
           <Badge variant='outline' className='mb-4 px-4 py-2'>
             Customer Stories
           </Badge>
-          <h2 className='text-3xl md:text-4xl font-bold text-high-contrast mb-4'>
+          <h2 className='text-3xl md:text-4xl font-bold text-slate-900 mb-4'>
             Trusted by Youth Housing Organizations
           </h2>
-          <p className='text-xl text-medium-contrast max-w-3xl mx-auto'>
+          <p className='text-xl text-slate-700 max-w-3xl mx-auto'>
             See how organizations across the UK are using YUTHUB to improve
             their support services and outcomes.
           </p>
@@ -88,7 +88,7 @@ export default function Testimonials() {
                   className='h-8 w-8 text-primary mb-4'
                   aria-hidden='true'
                 />
-                <blockquote className='text-medium-contrast mb-6 leading-relaxed'>
+                <blockquote className='text-slate-700 mb-6 leading-relaxed'>
                   "{testimonial.quote}"
                 </blockquote>
                 <div className='flex items-center gap-4'>
@@ -100,10 +100,10 @@ export default function Testimonials() {
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className='font-semibold text-high-contrast'>
+                    <div className='font-semibold text-slate-900'>
                       {testimonial.author}
                     </div>
-                    <div className='text-sm text-medium-contrast'>
+                    <div className='text-sm text-slate-600'>
                       {testimonial.role}
                     </div>
                     <div className='text-sm text-primary font-medium'>
@@ -122,14 +122,17 @@ export default function Testimonials() {
               <span className='text-xl sm:text-2xl font-bold text-primary'>
                 500+
               </span>
-              <span className='text-medium-contrast text-sm sm:text-base'>
+              <span className='text-slate-700 text-sm sm:text-base'>
                 Organizations trust YUTHUB
               </span>
             </div>
-            <div className='flex flex-col sm:flex-row items-center gap-4 sm:gap-6 lg:gap-8 text-xs sm:text-sm text-medium-contrast text-center'>
-              <span>📊 98% Customer Satisfaction</span>
-              <span>⚡ 45% Faster Case Management</span>
-              <span>🎯 35% Better Outcomes</span>
+            <div className='flex flex-col sm:flex-row items-center gap-4 sm:gap-6 lg:gap-8 text-xs sm:text-sm text-slate-700 text-center'>
+              <span>📊 98% Customer Satisfaction*</span>
+              <span>⚡ 45% Faster Case Management*</span>
+              <span>🎯 35% Better Outcomes*</span>
+            </div>
+            <div className='text-xs text-slate-500 mt-2 text-center'>
+              *Based on 2024 customer survey (n=127 organizations)
             </div>
           </div>
         </div>

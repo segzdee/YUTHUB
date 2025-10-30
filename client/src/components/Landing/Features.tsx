@@ -88,10 +88,10 @@ export default function Features() {
     <section className='py-20 px-4 sm:px-6 lg:px-8 bg-white' id='features'>
       <div className='max-w-7xl mx-auto'>
         <div className='text-center mb-16'>
-          <h2 className='h2 mb-4'>
+          <h2 className='text-3xl md:text-4xl font-bold text-slate-900 mb-4'>
             Everything You Need to Support Young People
           </h2>
-          <p className='lead max-w-3xl mx-auto'>
+          <p className='text-lg md:text-xl text-slate-700 max-w-3xl mx-auto leading-relaxed'>
             From intake to independence, YUTHUB provides comprehensive tools for
             every aspect of youth housing support.
           </p>
@@ -113,13 +113,13 @@ export default function Features() {
                         aria-hidden='true'
                       />
                     </div>
-                    <CardTitle className='text-lg text-high-contrast'>
+                    <CardTitle className='text-lg text-slate-900'>
                       {feature.title}
                     </CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription className='text-medium-contrast leading-relaxed'>
+                  <CardDescription className='text-slate-600 leading-relaxed'>
                     {feature.description}
                   </CardDescription>
                 </CardContent>

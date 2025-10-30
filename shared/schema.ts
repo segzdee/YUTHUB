@@ -1763,7 +1763,7 @@ export const organizations = pgTable(
     index('idx_organizations_stripe_customer_id').on(table.stripeCustomerId),
     index('idx_organizations_trial_end_date').on(table.trialEndDate),
   ]
-});
+);
 
 // User-Organization Membership (junction table for multi-tenancy)
 export const userOrganizations = pgTable(
@@ -1797,65 +1797,6 @@ export const userOrganizations = pgTable(
     index('idx_user_organizations_status').on(table.status),
     index('idx_user_organizations_is_primary').on(table.isPrimary),
     index('idx_user_organizations_user_org').on(table.userId, table.organizationId),
-  ]
-);
-
-// Subscription Plans Reference (defines available plans)
-export const subscriptionPlans = pgTable(
-  'subscription_plans',
-  {
-    id: serial('id').primaryKey(),
-    name: varchar('name').notNull(), // 'Starter', 'Professional', 'Enterprise'
-    tier: varchar('tier').unique().notNull(), // 'trial', 'starter', 'professional', 'enterprise'
-    description: text('description'),
-    
-    // Pricing
-    monthlyPrice: decimal('monthly_price', { precision: 10, scale: 2 }).notNull(),
-    annualPrice: decimal('annual_price', { precision: 10, scale: 2 }).notNull(),
-    currency: varchar('currency').default('GBP'), // ISO 4217 code
-    
-    // Resource Limits
-    maxResidents: integer('max_residents').notNull(), // 25, 100, -1 (unlimited)
-    maxProperties: integer('max_properties').notNull(), // 1, 5, -1 (unlimited)
-    
-    // Feature Flags
-    features: jsonb('features').notNull(), // {
-    // "basicReporting": true,
-    // "multiProperty": false,
-    // "advancedAnalytics": false,
-    // "crisisConnect": false,
-    // "gamification": false,
-    // "aiPoweredInsights": false,
-    // "apiAccess": false,
-    // "whiteLabelBranding": false,
-    // "dedicatedSupport": false,
-    // "ssoSamlLdap": false
-    // }
-    
-    // Support Level
-    supportLevel: varchar('support_level').notNull(), // 'email', 'priority', '24/7'
-    supportHours: varchar('support_hours'), // e.g., 'business_hours', '24/7'
-    
-    // Trial Configuration
-    trialDays: integer('trial_days'), // Days for trial period (null = no trial available)
-    trialAutoConvertTo: varchar('trial_auto_convert_to'), // Which tier trial converts to
-    
-    // Stripe Configuration
-    stripePriceIdMonthly: varchar('stripe_price_id_monthly'),
-    stripePriceIdAnnual: varchar('stripe_price_id_annual'),
-    stripeProductId: varchar('stripe_product_id'),
-    
-    // Admin Fields
-    displayOrder: integer('display_order').default(0),
-    isActive: boolean('is_active').default(true),
-    isPublic: boolean('is_public').default(true), // Show in pricing page
-    createdAt: timestamp('created_at').defaultNow(),
-    updatedAt: timestamp('updated_at').defaultNow(),
-  },
-  table => [
-    index('idx_subscription_plans_tier').on(table.tier),
-    index('idx_subscription_plans_is_active').on(table.isActive),
-    index('idx_subscription_plans_display_order').on(table.displayOrder),
   ]
 );
 

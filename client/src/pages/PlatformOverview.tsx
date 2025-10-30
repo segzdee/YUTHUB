@@ -4,97 +4,22 @@ import { Card } from '../components/Card';
 import { Badge } from '../components/Badge';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
+import { MODULE_DESCRIPTIONS } from '../config/pricing';
 
-interface Module {
-  id: string;
-  title: string;
-  description: string;
-  features: string[];
-  icon: string;
-}
+type ModuleKey = keyof typeof MODULE_DESCRIPTIONS;
 
-const modules: Module[] = [
-  {
-    id: 'housing',
-    title: 'Housing Management',
-    description: 'Complete property and accommodation management system',
-    features: [
-      'Property inventory tracking',
-      'Maintenance scheduling',
-      'Occupancy management',
-      'Lease document management',
-      'Compliance reporting',
-    ],
-    icon: '🏠',
-  },
-  {
-    id: 'support',
-    title: 'Support Planning',
-    description: 'Integrated support and care planning tools',
-    features: [
-      'Individual support plans',
-      'Goal tracking',
-      'Progress monitoring',
-      'Team collaboration',
-      'Activity logging',
-    ],
-    icon: '👥',
-  },
-  {
-    id: 'safeguarding',
-    title: 'Safeguarding',
-    description: 'Comprehensive safeguarding and risk management',
-    features: [
-      'Incident reporting',
-      'Risk assessment',
-      'Alert systems',
-      'Compliance tracking',
-      'Document management',
-    ],
-    icon: '🛡️',
-  },
-  {
-    id: 'finance',
-    title: 'Financial Management',
-    description: 'Budget and financial tracking tools',
-    features: [
-      'Budget management',
-      'Expense tracking',
-      'Invoice management',
-      'Financial reporting',
-      'Cost analysis',
-    ],
-    icon: '💰',
-  },
-  {
-    id: 'independence',
-    title: 'Independence Pathways',
-    description: 'Track progression toward independent living',
-    features: [
-      'Milestone tracking',
-      'Skills assessment',
-      'Independence levels',
-      'Transition planning',
-      'Progress reports',
-    ],
-    icon: '🚀',
-  },
-  {
-    id: 'crisis',
-    title: 'Crisis Management',
-    description: 'Emergency response and crisis coordination',
-    features: [
-      'Emergency alerts',
-      'Response protocols',
-      'Team coordination',
-      'Communication tools',
-      'Escalation workflows',
-    ],
-    icon: '🚨',
-  },
-];
+const modules: ModuleKey[] = ['housing', 'support', 'safeguarding', 'finance', 'independence', 'crisis'];
 
 const PlatformOverview: React.FC = () => {
+  const moduleIcons: Record<ModuleKey, string> = {
+    housing: '🏠',
+    support: '👥',
+    safeguarding: '🛡️',
+    finance: '💰',
+    independence: '🚀',
+    crisis: '🚨',
+  };
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Navbar />
@@ -120,13 +45,16 @@ const PlatformOverview: React.FC = () => {
         {/* Modules */}
         <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-32 max-w-7xl mx-auto">
           <div className="space-y-20">
-            {modules.map((module, idx) => {
+            {modules.map((moduleKey, idx) => {
+              const module = MODULE_DESCRIPTIONS[moduleKey];
               const isEven = idx % 2 === 0;
+              const icon = moduleIcons[moduleKey];
+
               return (
-                <div key={module.id} className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div key={moduleKey} className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                   <div className={`space-y-6 ${isEven ? 'lg:order-1' : 'lg:order-2'}`}>
                     <div>
-                      <span className="text-5xl mb-4 block">{module.icon}</span>
+                      <span className="text-5xl mb-4 block">{icon}</span>
                       <h2 className="text-4xl font-600 text-black mb-2">{module.title}</h2>
                       <p className="text-lg font-400 text-gray-600">{module.description}</p>
                     </div>
@@ -152,7 +80,7 @@ const PlatformOverview: React.FC = () => {
                   <div className={`${isEven ? 'lg:order-2' : 'lg:order-1'}`}>
                     <div className="bg-gradient-to-br from-gray-100 to-gray-50 rounded-2xl border border-gray-200 aspect-square flex items-center justify-center">
                       <div className="text-center space-y-4">
-                        <div className="text-6xl">{module.icon}</div>
+                        <div className="text-6xl">{icon}</div>
                         <p className="text-gray-500 font-400">Interface Preview</p>
                       </div>
                     </div>

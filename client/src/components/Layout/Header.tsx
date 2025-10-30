@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/components/providers/LanguageProvider';
-import { useLocation } from 'wouter';
+import { useLocation } from 'react-router-dom';
 import { useWebSocketConnection } from '@/hooks/useOptimizedWebSocket';
 import NotificationCenter from '@/components/Dashboard/NotificationCenter';
 import BrandLogo from '@/components/design-system/BrandLogo';

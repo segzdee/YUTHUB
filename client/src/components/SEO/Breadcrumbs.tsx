@@ -1,5 +1,5 @@
 import { ChevronRight, Home } from 'lucide-react';
-import { Link } from 'wouter';
+import { Link } from 'react-router-dom';
 
 interface BreadcrumbItem {
   label: string;

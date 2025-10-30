@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'wouter';
+import { Link } from 'react-router-dom';
 import Sidebar from '@/components/Layout/Sidebar';
 import { AppPageLayout } from '@/components/PageLayout';
 import Header from '@/components/Layout/Header';

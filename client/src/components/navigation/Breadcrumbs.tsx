@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { ChevronRight, Home } from 'lucide-react';
-import { useLocation } from 'wouter';
+import { useLocation } from 'react-router-dom';
 import { useLanguage } from '@/components/providers/LanguageProvider';
 
 interface BreadcrumbItem {

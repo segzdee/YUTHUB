@@ -17,15 +17,23 @@ import {
   Download,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AppPageLayout } from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
+import { AppPageLayout } from '@/components/PageLayout';
 import { Badge } from '@/components/ui/badge';
+import { AppPageLayout } from '@/components/PageLayout';
 import { Input } from '@/components/ui/input';
+import { AppPageLayout } from '@/components/PageLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AppPageLayout } from '@/components/PageLayout';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AppPageLayout } from '@/components/PageLayout';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery } from '@tanstack/react-query';
 import PlatformAdminGuard from '@/components/PlatformAdmin/PlatformAdminGuard';
+import { AppPageLayout } from '@/components/PageLayout';
 import ConfirmationDialog from '@/components/PlatformAdmin/ConfirmationDialog';
+import { AppPageLayout } from '@/components/PageLayout';
 import MonitoringDashboard from './MonitoringDashboard';
 
 // Platform Admin Dashboard Component

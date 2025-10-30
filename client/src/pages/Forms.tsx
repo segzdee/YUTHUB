@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'wouter';
 import Sidebar from '@/components/Layout/Sidebar';
+import { AppPageLayout } from '@/components/PageLayout';
 import Header from '@/components/Layout/Header';
+import { AppPageLayout } from '@/components/PageLayout';
 import {
   Card,
   CardContent,
@@ -11,9 +13,13 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { AppPageLayout } from '@/components/PageLayout';
 import { Badge } from '@/components/ui/badge';
+import { AppPageLayout } from '@/components/PageLayout';
 import { Input } from '@/components/ui/input';
+import { AppPageLayout } from '@/components/PageLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AppPageLayout } from '@/components/PageLayout';
 import {
   FileText,
   Plus,
@@ -26,9 +32,7 @@ import {
 } from 'lucide-react';
 import type { FormDraft } from '@shared/schema';
 
-export default function Forms() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+export default function Forms() {  const [searchTerm, setSearchTerm] = useState('');
 
   const { data: formDrafts = [] } = useQuery<FormDraft[]>({
     queryKey: ['/api/forms/drafts'],
@@ -155,13 +159,8 @@ export default function Forms() {
   ];
 
   return (
-    <div className='flex h-screen bg-background'>
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-
-      <div className='flex-1 lg:ml-64 flex flex-col'>
-        <Header onMenuClick={() => setSidebarOpen(true)} />
-
-        <main className='flex-1 overflow-y-auto p-4 sm:p-6'>
+    <AppPageLayout>
+      <main className='space-y-6'>
           <div className='mb-6 sm:mb-8'>
             <h1 className='text-2xl font-bold text-gray-900 dark:text-white mb-2'>
               Forms
@@ -406,8 +405,7 @@ export default function Forms() {
               </div>
             </TabsContent>
           </Tabs>
-        </main>
-      </div>
-    </div>
+      </main>
+    </AppPageLayout>
   );
 }

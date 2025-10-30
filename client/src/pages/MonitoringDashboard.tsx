@@ -1,6 +1,9 @@
 import { Badge } from '@/components/ui/badge';
+import { AppPageLayout } from '@/components/PageLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AppPageLayout } from '@/components/PageLayout';
 import { Progress } from '@/components/ui/progress';
+import { AppPageLayout } from '@/components/PageLayout';
 import { useQuery } from '@tanstack/react-query';
 import {
   Activity,

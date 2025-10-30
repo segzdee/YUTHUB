@@ -3,8 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useRealTimeUpdates } from '@/hooks/useRealTimeUpdates';
 import { useWebSocketConnection } from '@/hooks/useOptimizedWebSocket';
-import Sidebar from '@/components/Layout/Sidebar';
-import Header from '@/components/Layout/Header';
+import { AppPageLayout } from '@/components/PageLayout';
 import MetricsCards from '@/components/Dashboard/MetricsCards';
 import OccupancyChart from '@/components/Dashboard/OccupancyChart';
 import ActivityFeed from '@/components/Dashboard/ActivityFeed';
@@ -21,7 +20,6 @@ import SubscriptionCard from '@/components/Dashboard/SubscriptionCard';
 export default function Dashboard() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [lastRefresh, setLastRefresh] = useState(Date.now());
   const [expandedWidget, setExpandedWidget] = useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -67,13 +65,8 @@ export default function Dashboard() {
   }
 
   return (
-    <div className='flex h-screen bg-background'>
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-
-      <div className='flex-1 lg:ml-64 flex flex-col'>
-        <Header onMenuClick={() => setSidebarOpen(true)} />
-
-        <main className='flex-1 overflow-y-auto p-4 sm:p-6'>
+    <AppPageLayout>
+      <main className='space-y-6'>
           {/* Connection Status Indicator */}
           {isConnected && (
             <div className='mb-4 text-sm text-green-600 flex items-center gap-2'>
@@ -526,8 +519,7 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
-        </main>
-      </div>
-    </div>
+      </main>
+    </AppPageLayout>
   );
 }

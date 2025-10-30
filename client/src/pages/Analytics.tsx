@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import Sidebar from '@/components/Layout/Sidebar';
-import Header from '@/components/Layout/Header';
+import { AppPageLayout } from '@/components/PageLayout';
 import PageLoader from '@/components/common/PageLoader';
 import {
   Card,
@@ -33,8 +32,6 @@ import type {
 } from '@shared/schema';
 
 export default function Analytics() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
   const { data: properties = [], isLoading: propertiesLoading } = useQuery<
     Property[]
   >({
@@ -74,25 +71,19 @@ export default function Analytics() {
 
   if (isLoading) {
     return (
-      <div className='flex h-screen bg-background'>
-        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-
-        <div className='flex-1 lg:ml-64 flex flex-col'>
-          <Header onMenuClick={() => setSidebarOpen(true)} />
-
-          <main className='flex-1 overflow-y-auto p-4 sm:p-6'>
-            <PageLoader
-              title='Analytics Dashboard'
-              description='Loading analytics data...'
-              showTabs={true}
-              tabCount={4}
-              cardCount={6}
-              showMetrics={true}
-            />
-          </main>
-        </div>
-      </div>
-    );
+    <AppPageLayout>
+      <main className='space-y-6'>
+        <PageLoader
+          title='[PAGE] Dashboard'
+          description='Loading data...'
+          showTabs={true}
+          tabCount={4}
+          cardCount={6}
+          showMetrics={true}
+        />
+      </main>
+    </AppPageLayout>
+  );
   }
 
   // Calculate metrics
@@ -149,13 +140,8 @@ export default function Analytics() {
   ).length;
 
   return (
-    <div className='flex h-screen bg-background'>
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-
-      <div className='flex-1 lg:ml-64 flex flex-col'>
-        <Header onMenuClick={() => setSidebarOpen(true)} />
-
-        <main className='flex-1 overflow-y-auto p-4 sm:p-6'>
+    <AppPageLayout>
+      <main className='space-y-6'>
           <div className='mb-6 sm:mb-8'>
             <h1 className='text-2xl font-bold text-gray-900 dark:text-white mb-2'>
               Analytics & Outcomes
@@ -687,8 +673,7 @@ export default function Analytics() {
               </div>
             </TabsContent>
           </Tabs>
-        </main>
-      </div>
-    </div>
+      </main>
+    </AppPageLayout>
   );
 }

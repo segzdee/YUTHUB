@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import Sidebar from '@/components/Layout/Sidebar';
-import Header from '@/components/Layout/Header';
+import { AppPageLayout } from '@/components/PageLayout';
 import PageLoader from '@/components/common/PageLoader';
 import {
   Card,
@@ -39,9 +38,7 @@ import {
 } from 'lucide-react';
 import type { FinancialRecord, Property } from '@shared/schema';
 
-export default function Financials() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+export default function Financials() {  const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
 
@@ -61,25 +58,19 @@ export default function Financials() {
 
   if (isLoading) {
     return (
-      <div className='flex h-screen bg-background'>
-        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-
-        <div className='flex-1 lg:ml-64 flex flex-col'>
-          <Header onMenuClick={() => setSidebarOpen(true)} />
-
-          <main className='flex-1 overflow-y-auto p-4 sm:p-6'>
-            <PageLoader
-              title='Financial Management'
-              description='Loading financial data and analytics...'
-              showTabs={true}
-              tabCount={4}
-              cardCount={6}
-              showMetrics={true}
-            />
-          </main>
-        </div>
-      </div>
-    );
+    <AppPageLayout>
+      <main className='space-y-6'>
+        <PageLoader
+          title='[PAGE] Dashboard'
+          description='Loading data...'
+          showTabs={true}
+          tabCount={4}
+          cardCount={6}
+          showMetrics={true}
+        />
+      </main>
+    </AppPageLayout>
+  );
   }
 
   // Filter financial records
@@ -220,13 +211,8 @@ export default function Financials() {
   };
 
   return (
-    <div className='flex h-screen bg-background'>
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-
-      <div className='flex-1 lg:ml-64 flex flex-col'>
-        <Header onMenuClick={() => setSidebarOpen(true)} />
-
-        <main className='flex-1 overflow-y-auto p-4 sm:p-6'>
+    <AppPageLayout>
+      <main className='space-y-6'>
           <div className='mb-6 sm:mb-8'>
             <h1 className='text-2xl font-bold text-gray-900 dark:text-white mb-2'>
               Financials
@@ -781,8 +767,7 @@ export default function Financials() {
               </div>
             </TabsContent>
           </Tabs>
-        </main>
-      </div>
-    </div>
+      </main>
+    </AppPageLayout>
   );
 }

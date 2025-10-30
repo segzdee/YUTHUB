@@ -34,6 +34,9 @@ const Settings = lazy(() => import('./pages/Settings'));
 const Help = lazy(() => import('./pages/Help'));
 const PlatformAdmin = lazy(() => import('./pages/PlatformAdmin'));
 const Landing = lazy(() => import('./pages/Landing'));
+const Features = lazy(() => import('./pages/Features'));
+const HowItWorks = lazy(() => import('./pages/HowItWorks'));
+const TestimonialsPage = lazy(() => import('./pages/Testimonials'));
 const AuthLogin = lazy(() => import('./pages/AuthLogin'));
 // NotFound page will be created if needed
 const NotFound = () => (
@@ -105,6 +108,9 @@ function App() {
                               </PublicRoute>
                             }
                           />
+                          <Route path='/features' element={<Features />} />
+                          <Route path='/how-it-works' element={<HowItWorks />} />
+                          <Route path='/testimonials' element={<TestimonialsPage />} />
 
                           {/* Protected application routes */}
                           <Route

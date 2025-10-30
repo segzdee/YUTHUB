@@ -140,6 +140,9 @@ export const properties = pgTable(
   'properties',
   {
     id: serial('id').primaryKey(),
+    organizationId: integer('organization_id')
+      .references(() => organizations.id)
+      .notNull(),
     name: varchar('name').notNull(),
     address: text('address').notNull(),
     propertyType: varchar('property_type').notNull(), // 'shared_housing', 'studio_units', 'transition_units'
@@ -150,8 +153,10 @@ export const properties = pgTable(
     updatedAt: timestamp('updated_at').defaultNow(),
   },
   table => [
+    index('idx_properties_organization_id').on(table.organizationId),
     index('idx_properties_status').on(table.status),
     index('idx_properties_property_type').on(table.propertyType),
+    index('idx_properties_organization_status').on(table.organizationId, table.status),
     index('idx_properties_created_at').on(table.createdAt),
   ]
 );
@@ -161,9 +166,12 @@ export const residents = pgTable(
   'residents',
   {
     id: serial('id').primaryKey(),
+    organizationId: integer('organization_id')
+      .references(() => organizations.id)
+      .notNull(),
     firstName: varchar('first_name').notNull(),
     lastName: varchar('last_name').notNull(),
-    email: varchar('email').unique(),
+    email: varchar('email'),
     phone: varchar('phone'),
     dateOfBirth: date('date_of_birth'),
     propertyId: integer('property_id').references(() => properties.id),
@@ -178,33 +186,49 @@ export const residents = pgTable(
     updatedAt: timestamp('updated_at').defaultNow(),
   },
   table => [
+    index('idx_residents_organization_id').on(table.organizationId),
     index('idx_residents_property_id').on(table.propertyId),
     index('idx_residents_key_worker_id').on(table.keyWorkerId),
     index('idx_residents_status').on(table.status),
     index('idx_residents_risk_level').on(table.riskLevel),
     index('idx_residents_move_in_date').on(table.moveInDate),
+    index('idx_residents_organization_status').on(table.organizationId, table.status),
     index('idx_residents_name').on(table.firstName, table.lastName),
   ]
 );
 
 // Support Plans table
-export const supportPlans = pgTable('support_plans', {
-  id: serial('id').primaryKey(),
-  residentId: integer('resident_id').references(() => residents.id),
-  keyWorkerId: varchar('key_worker_id').references(() => users.id),
-  goals: text('goals').notNull(),
-  objectives: text('objectives').notNull(),
-  reviewDate: date('review_date').notNull(),
-  status: varchar('status').default('active'), // 'active', 'completed', 'paused'
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-});
+export const supportPlans = pgTable(
+  'support_plans',
+  {
+    id: serial('id').primaryKey(),
+    organizationId: integer('organization_id')
+      .references(() => organizations.id)
+      .notNull(),
+    residentId: integer('resident_id').references(() => residents.id),
+    keyWorkerId: varchar('key_worker_id').references(() => users.id),
+    goals: text('goals').notNull(),
+    objectives: text('objectives').notNull(),
+    reviewDate: date('review_date').notNull(),
+    status: varchar('status').default('active'), // 'active', 'completed', 'paused'
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+  },
+  table => [
+    index('idx_support_plans_organization_id').on(table.organizationId),
+    index('idx_support_plans_resident_id').on(table.residentId),
+    index('idx_support_plans_status').on(table.status),
+  ]
+);
 
 // Incidents table
 export const incidents = pgTable(
   'incidents',
   {
     id: serial('id').primaryKey(),
+    organizationId: integer('organization_id')
+      .references(() => organizations.id)
+      .notNull(),
     propertyId: integer('property_id').references(() => properties.id),
     residentId: integer('resident_id').references(() => residents.id),
     reportedBy: varchar('reported_by').references(() => users.id),
@@ -218,12 +242,14 @@ export const incidents = pgTable(
     updatedAt: timestamp('updated_at').defaultNow(),
   },
   table => [
+    index('idx_incidents_organization_id').on(table.organizationId),
     index('idx_incidents_property_id').on(table.propertyId),
     index('idx_incidents_resident_id').on(table.residentId),
     index('idx_incidents_reported_by').on(table.reportedBy),
     index('idx_incidents_status').on(table.status),
     index('idx_incidents_severity').on(table.severity),
     index('idx_incidents_incident_type').on(table.incidentType),
+    index('idx_incidents_organization_status').on(table.organizationId, table.status),
     index('idx_incidents_created_at').on(table.createdAt),
     index('idx_incidents_status_severity').on(table.status, table.severity),
   ]
@@ -234,6 +260,9 @@ export const activities = pgTable(
   'activities',
   {
     id: serial('id').primaryKey(),
+    organizationId: integer('organization_id')
+      .references(() => organizations.id)
+      .notNull(),
     userId: varchar('user_id').references(() => users.id),
     activityType: varchar('activity_type').notNull(), // 'placement', 'support_plan', 'incident', 'assessment'
     title: varchar('title').notNull(),
@@ -243,9 +272,11 @@ export const activities = pgTable(
     createdAt: timestamp('created_at').defaultNow(),
   },
   table => [
+    index('idx_activities_organization_id').on(table.organizationId),
     index('idx_activities_user_id').on(table.userId),
     index('idx_activities_activity_type').on(table.activityType),
     index('idx_activities_entity').on(table.entityType, table.entityId),
+    index('idx_activities_organization_created_at').on(table.organizationId, table.createdAt),
     index('idx_activities_created_at').on(table.createdAt),
   ]
 );
@@ -255,6 +286,9 @@ export const financialRecords = pgTable(
   'financial_records',
   {
     id: serial('id').primaryKey(),
+    organizationId: integer('organization_id')
+      .references(() => organizations.id)
+      .notNull(),
     propertyId: integer('property_id').references(() => properties.id),
     residentId: integer('resident_id').references(() => residents.id),
     recordType: varchar('record_type').notNull(), // 'income', 'expense', 'budget', 'rent', 'deposit'
@@ -293,22 +327,32 @@ export const formDrafts = pgTable('form_drafts', {
 });
 
 // Property rooms table for room allocation
-export const propertyRooms = pgTable('property_rooms', {
-  id: serial('id').primaryKey(),
-  propertyId: integer('property_id')
-    .references(() => properties.id)
-    .notNull(),
-  roomNumber: varchar('room_number').notNull(),
-  roomType: varchar('room_type').notNull(), // 'single', 'double', 'studio', 'shared'
-  floor: integer('floor'),
-  capacity: integer('capacity').default(1),
-  currentOccupancy: integer('current_occupancy').default(0),
-  monthlyRent: decimal('monthly_rent', { precision: 10, scale: 2 }),
-  facilities: text('facilities').array(), // ['ensuite', 'kitchenette', 'balcony']
-  status: varchar('status').default('available'), // 'available', 'occupied', 'maintenance', 'reserved'
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-});
+export const propertyRooms = pgTable(
+  'property_rooms',
+  {
+    id: serial('id').primaryKey(),
+    organizationId: integer('organization_id')
+      .references(() => organizations.id)
+      .notNull(),
+    propertyId: integer('property_id')
+      .references(() => properties.id)
+      .notNull(),
+    roomNumber: varchar('room_number').notNull(),
+    roomType: varchar('room_type').notNull(), // 'single', 'double', 'studio', 'shared'
+    floor: integer('floor'),
+    capacity: integer('capacity').default(1),
+    currentOccupancy: integer('current_occupancy').default(0),
+    monthlyRent: decimal('monthly_rent', { precision: 10, scale: 2 }),
+    facilities: text('facilities').array(), // ['ensuite', 'kitchenette', 'balcony']
+    status: varchar('status').default('available'), // 'available', 'occupied', 'maintenance', 'reserved'
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+  },
+  table => [
+    index('idx_property_rooms_organization_id').on(table.organizationId),
+    index('idx_property_rooms_property_id').on(table.propertyId),
+  ]
+);
 
 // Staff management table
 export const staffMembers = pgTable('staff_members', {
@@ -332,56 +376,77 @@ export const staffMembers = pgTable('staff_members', {
 });
 
 // Maintenance requests table
-export const maintenanceRequests = pgTable('maintenance_requests', {
-  id: serial('id').primaryKey(),
-  propertyId: integer('property_id')
-    .references(() => properties.id)
-    .notNull(),
-  roomId: integer('room_id').references(() => propertyRooms.id),
-  residentId: integer('resident_id').references(() => residents.id),
-  reportedBy: varchar('reported_by')
-    .references(() => users.id)
-    .notNull(),
-  title: varchar('title').notNull(),
-  description: text('description').notNull(),
-  priority: varchar('priority').default('medium'), // 'low', 'medium', 'high', 'urgent'
-  category: varchar('category').notNull(), // 'plumbing', 'electrical', 'heating', 'structural', 'appliances'
-  status: varchar('status').default('open'), // 'open', 'in_progress', 'completed', 'cancelled'
-  assignedTo: integer('assigned_to').references(() => staffMembers.id),
-  estimatedCost: decimal('estimated_cost', { precision: 10, scale: 2 }),
-  actualCost: decimal('actual_cost', { precision: 10, scale: 2 }),
-  scheduledDate: timestamp('scheduled_date'),
-  completedDate: timestamp('completed_date'),
-  images: text('images').array(),
-  notes: text('notes'),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-});
+export const maintenanceRequests = pgTable(
+  'maintenance_requests',
+  {
+    id: serial('id').primaryKey(),
+    organizationId: integer('organization_id')
+      .references(() => organizations.id)
+      .notNull(),
+    propertyId: integer('property_id')
+      .references(() => properties.id)
+      .notNull(),
+    roomId: integer('room_id').references(() => propertyRooms.id),
+    residentId: integer('resident_id').references(() => residents.id),
+    reportedBy: varchar('reported_by')
+      .references(() => users.id)
+      .notNull(),
+    title: varchar('title').notNull(),
+    description: text('description').notNull(),
+    priority: varchar('priority').default('medium'), // 'low', 'medium', 'high', 'urgent'
+    category: varchar('category').notNull(), // 'plumbing', 'electrical', 'heating', 'structural', 'appliances'
+    status: varchar('status').default('open'), // 'open', 'in_progress', 'completed', 'cancelled'
+    assignedTo: integer('assigned_to').references(() => staffMembers.id),
+    estimatedCost: decimal('estimated_cost', { precision: 10, scale: 2 }),
+    actualCost: decimal('actual_cost', { precision: 10, scale: 2 }),
+    scheduledDate: timestamp('scheduled_date'),
+    completedDate: timestamp('completed_date'),
+    images: text('images').array(),
+    notes: text('notes'),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+  },
+  table => [
+    index('idx_maintenance_requests_organization_id').on(table.organizationId),
+    index('idx_maintenance_requests_property_id').on(table.propertyId),
+    index('idx_maintenance_requests_status').on(table.status),
+  ]
+);
 
 // Tenancy agreements table
-export const tenancyAgreements = pgTable('tenancy_agreements', {
-  id: serial('id').primaryKey(),
-  residentId: integer('resident_id')
-    .references(() => residents.id)
-    .notNull(),
-  propertyId: integer('property_id')
-    .references(() => properties.id)
-    .notNull(),
-  roomId: integer('room_id').references(() => propertyRooms.id),
-  agreementType: varchar('agreement_type').notNull(), // 'license', 'assured_shorthold', 'supported_living'
-  startDate: date('start_date').notNull(),
-  endDate: date('end_date'),
-  monthlyRent: decimal('monthly_rent', { precision: 10, scale: 2 }).notNull(),
-  deposit: decimal('deposit', { precision: 10, scale: 2 }),
-  serviceCharge: decimal('service_charge', { precision: 10, scale: 2 }),
-  terms: jsonb('terms'), // Flexible terms and conditions
-  status: varchar('status').default('active'), // 'active', 'expired', 'terminated', 'pending'
-  documentPath: varchar('document_path'),
-  signedDate: timestamp('signed_date'),
-  witnessedBy: integer('witnessed_by').references(() => staffMembers.id),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-});
+export const tenancyAgreements = pgTable(
+  'tenancy_agreements',
+  {
+    id: serial('id').primaryKey(),
+    organizationId: integer('organization_id')
+      .references(() => organizations.id)
+      .notNull(),
+    residentId: integer('resident_id')
+      .references(() => residents.id)
+      .notNull(),
+    propertyId: integer('property_id')
+      .references(() => properties.id)
+      .notNull(),
+    roomId: integer('room_id').references(() => propertyRooms.id),
+    agreementType: varchar('agreement_type').notNull(), // 'license', 'assured_shorthold', 'supported_living'
+    startDate: date('start_date').notNull(),
+    endDate: date('end_date'),
+    monthlyRent: decimal('monthly_rent', { precision: 10, scale: 2 }).notNull(),
+    deposit: decimal('deposit', { precision: 10, scale: 2 }),
+    serviceCharge: decimal('service_charge', { precision: 10, scale: 2 }),
+    terms: jsonb('terms'), // Flexible terms and conditions
+    status: varchar('status').default('active'), // 'active', 'expired', 'terminated', 'pending'
+    documentPath: varchar('document_path'),
+    signedDate: timestamp('signed_date'),
+    witnessedBy: integer('witnessed_by').references(() => staffMembers.id),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+  },
+  table => [
+    index('idx_tenancy_agreements_organization_id').on(table.organizationId),
+    index('idx_tenancy_agreements_resident_id').on(table.residentId),
+  ]
+);
 
 // Assessment forms table
 export const assessmentForms = pgTable('assessment_forms', {
@@ -1645,7 +1710,40 @@ export const organizations = pgTable(
     logo: varchar('logo'),
     branding: jsonb('branding'), // Colors, fonts, styling
     settings: jsonb('settings'), // Organization-specific settings
-    subscription: jsonb('subscription'), // Subscription details
+    
+    // Subscription Management Fields
+    subscriptionTier: varchar('subscription_tier').default('trial'), // 'trial', 'starter', 'professional', 'enterprise'
+    subscriptionStatus: varchar('subscription_status').default('trial'), // 'trial', 'active', 'past_due', 'cancelled', 'paused'
+    billingCycle: varchar('billing_cycle').default('monthly'), // 'monthly', 'annual'
+    subscriptionStartDate: timestamp('subscription_start_date'),
+    subscriptionEndDate: timestamp('subscription_end_date'),
+    trialEndDate: timestamp('trial_end_date'),
+    
+    // Resource Limits
+    maxResidents: integer('max_residents').default(25), // Starter: 25, Professional: 100, Enterprise: unlimited
+    maxProperties: integer('max_properties').default(1), // Starter: 1, Professional: 5, Enterprise: unlimited
+    currentResidentCount: integer('current_resident_count').default(0),
+    currentPropertyCount: integer('current_property_count').default(0),
+    
+    // Feature Access (granular control beyond tier)
+    featuresEnabled: jsonb('features_enabled').default('{}'), // { "analytics": true, "crisisConnect": true, etc. }
+    
+    // Stripe Integration
+    stripeCustomerId: varchar('stripe_customer_id'),
+    stripeSubscriptionId: varchar('stripe_subscription_id'),
+    stripePriceId: varchar('stripe_price_id'),
+    stripePaymentMethodId: varchar('stripe_payment_method_id'),
+    
+    // Billing Information
+    billingEmail: varchar('billing_email'),
+    lastPaymentDate: timestamp('last_payment_date'),
+    nextBillingDate: timestamp('next_billing_date'),
+    mrr: decimal('mrr', { precision: 10, scale: 2 }), // Monthly Recurring Revenue
+    
+    // Usage Tracking
+    usageAlertSent: boolean('usage_alert_sent').default(false), // Sent when approaching limits
+    lastUsageAlertDate: timestamp('last_usage_alert_date'),
+    
     parentOrganizationId: integer('parent_organization_id').references(
       (): any => organizations.id,
       { onDelete: 'set null' }
@@ -1660,6 +1758,104 @@ export const organizations = pgTable(
     index('idx_organizations_parent_organization_id').on(
       table.parentOrganizationId
     ),
+    index('idx_organizations_subscription_tier').on(table.subscriptionTier),
+    index('idx_organizations_subscription_status').on(table.subscriptionStatus),
+    index('idx_organizations_stripe_customer_id').on(table.stripeCustomerId),
+    index('idx_organizations_trial_end_date').on(table.trialEndDate),
+  ]
+});
+
+// User-Organization Membership (junction table for multi-tenancy)
+export const userOrganizations = pgTable(
+  'user_organizations',
+  {
+    id: serial('id').primaryKey(),
+    userId: varchar('user_id')
+      .references(() => users.id)
+      .notNull(),
+    organizationId: integer('organization_id')
+      .references(() => organizations.id)
+      .notNull(),
+    role: varchar('role').notNull(), // 'admin', 'manager', 'staff', 'resident', 'support_worker'
+    isPrimary: boolean('is_primary').default(false), // User's primary organization
+    status: varchar('status').default('active'), // 'active', 'inactive', 'invited', 'pending'
+    joinedDate: timestamp('joined_date').defaultNow(),
+    lastActivity: timestamp('last_activity'),
+    invitationToken: varchar('invitation_token'), // For pending invites
+    invitationExpiresAt: timestamp('invitation_expires_at'),
+    invitedBy: varchar('invited_by').references(() => users.id),
+    invitedAt: timestamp('invited_at'),
+    notes: text('notes'), // Admin notes about this user's role
+    isActive: boolean('is_active').default(true),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+  },
+  table => [
+    index('idx_user_organizations_user_id').on(table.userId),
+    index('idx_user_organizations_organization_id').on(table.organizationId),
+    index('idx_user_organizations_role').on(table.role),
+    index('idx_user_organizations_status').on(table.status),
+    index('idx_user_organizations_is_primary').on(table.isPrimary),
+    index('idx_user_organizations_user_org').on(table.userId, table.organizationId),
+  ]
+);
+
+// Subscription Plans Reference (defines available plans)
+export const subscriptionPlans = pgTable(
+  'subscription_plans',
+  {
+    id: serial('id').primaryKey(),
+    name: varchar('name').notNull(), // 'Starter', 'Professional', 'Enterprise'
+    tier: varchar('tier').unique().notNull(), // 'trial', 'starter', 'professional', 'enterprise'
+    description: text('description'),
+    
+    // Pricing
+    monthlyPrice: decimal('monthly_price', { precision: 10, scale: 2 }).notNull(),
+    annualPrice: decimal('annual_price', { precision: 10, scale: 2 }).notNull(),
+    currency: varchar('currency').default('GBP'), // ISO 4217 code
+    
+    // Resource Limits
+    maxResidents: integer('max_residents').notNull(), // 25, 100, -1 (unlimited)
+    maxProperties: integer('max_properties').notNull(), // 1, 5, -1 (unlimited)
+    
+    // Feature Flags
+    features: jsonb('features').notNull(), // {
+    // "basicReporting": true,
+    // "multiProperty": false,
+    // "advancedAnalytics": false,
+    // "crisisConnect": false,
+    // "gamification": false,
+    // "aiPoweredInsights": false,
+    // "apiAccess": false,
+    // "whiteLabelBranding": false,
+    // "dedicatedSupport": false,
+    // "ssoSamlLdap": false
+    // }
+    
+    // Support Level
+    supportLevel: varchar('support_level').notNull(), // 'email', 'priority', '24/7'
+    supportHours: varchar('support_hours'), // e.g., 'business_hours', '24/7'
+    
+    // Trial Configuration
+    trialDays: integer('trial_days'), // Days for trial period (null = no trial available)
+    trialAutoConvertTo: varchar('trial_auto_convert_to'), // Which tier trial converts to
+    
+    // Stripe Configuration
+    stripePriceIdMonthly: varchar('stripe_price_id_monthly'),
+    stripePriceIdAnnual: varchar('stripe_price_id_annual'),
+    stripeProductId: varchar('stripe_product_id'),
+    
+    // Admin Fields
+    displayOrder: integer('display_order').default(0),
+    isActive: boolean('is_active').default(true),
+    isPublic: boolean('is_public').default(true), // Show in pricing page
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+  },
+  table => [
+    index('idx_subscription_plans_tier').on(table.tier),
+    index('idx_subscription_plans_is_active').on(table.isActive),
+    index('idx_subscription_plans_display_order').on(table.displayOrder),
   ]
 );
 

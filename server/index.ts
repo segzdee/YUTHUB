@@ -41,6 +41,10 @@ import { registerRoutes } from './routes';
 import { log, serveStatic, setupVite } from './vite';
 import { WebSocketManager } from './websocket';
 import { loadSubscriptionInfo } from './middleware/subscriptionMiddleware';
+import {
+  extractTokenMiddleware,
+  tenantContextMiddleware,
+} from './middleware/enhancedAuthMiddleware';
 import billingRoutes from './routes/billing';
 
 const app = express();
@@ -142,6 +146,10 @@ app.use(requestTrackingMiddleware);
 
 // Load subscription info for authenticated requests
 app.use(loadSubscriptionInfo);
+
+// Enhanced authentication middleware - extract JWT and tenant context
+app.use(extractTokenMiddleware);
+app.use(tenantContextMiddleware);
 
 // Add memory and performance monitoring
 app.use(memoryTrackingMiddleware);

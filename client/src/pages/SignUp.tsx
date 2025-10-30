@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'wouter';
+import { AuthPageLayout } from '@/components/PageLayout';
 import AuthLogin from './AuthLogin';
 
 export default function SignUp() {
@@ -7,5 +8,9 @@ export default function SignUp() {
   const urlParams = new URLSearchParams(location.split('?')[1] || '');
   const selectedPlan = urlParams.get('plan') || 'trial';
 
-  return <AuthLogin mode='signup' selectedPlan={selectedPlan} />;
+  return (
+    <AuthPageLayout>
+      <AuthLogin mode='signup' selectedPlan={selectedPlan} />
+    </AuthPageLayout>
+  );
 }

@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { AuthPageLayout } from '@/components/PageLayout';
 import AuthLogin from './AuthLogin';
 
 export default function Login() {
@@ -7,5 +8,9 @@ export default function Login() {
   const mode = urlParams.get('signup') === 'true' ? 'signup' : 'signin';
   const selectedPlan = urlParams.get('plan');
 
-  return <AuthLogin mode={mode} selectedPlan={selectedPlan || undefined} />;
+  return (
+    <AuthPageLayout>
+      <AuthLogin mode={mode} selectedPlan={selectedPlan || undefined} />
+    </AuthPageLayout>
+  );
 }

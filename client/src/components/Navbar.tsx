@@ -19,26 +19,18 @@ export const Navbar: React.FC<NavbarProps> = ({ variant = 'light', transparent =
     <nav
       className={`
         sticky top-0 z-50 transition-all duration-300
-        ${transparent ? 'bg-transparent' : variant === 'dark' ? 'bg-black' : 'bg-white'}
-        border-b ${transparent ? 'border-transparent' : 'border-gray-200'}
+        ${transparent ? 'bg-white/90 backdrop-blur-md' : variant === 'dark' ? 'bg-black' : 'bg-white'}
+        border-b ${transparent ? 'border-gray-200/50' : 'border-gray-200'}
       `}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 flex-shrink-0 hover:opacity-80 transition-opacity">
-            <div
-              className={`
-                w-7 h-7 rounded-md font-semibold flex items-center justify-center text-sm
-                ${variant === 'dark' || transparent ? 'bg-white text-black' : 'bg-black text-white'}
-              `}
-            >
-              Y
-            </div>
             <span
               className={`
-                text-lg font-600 hidden sm:inline tracking-tight
-                ${variant === 'dark' || transparent ? 'text-white' : 'text-black'}
+                text-xl font-700 tracking-tight
+                ${variant === 'dark' || transparent ? 'text-black' : 'text-black'}
               `}
             >
               YUTHUB
@@ -50,10 +42,10 @@ export const Navbar: React.FC<NavbarProps> = ({ variant = 'light', transparent =
             <Link
               to="/"
               className={`
-                text-sm font-500 transition-colors pb-1 border-b-2 border-transparent hover:border-gray-300
-                ${isActive('/') 
-                  ? (variant === 'dark' || transparent ? 'text-white border-white' : 'text-black border-black')
-                  : (variant === 'dark' || transparent ? 'text-gray-200' : 'text-gray-700')
+                text-sm font-600 transition-colors pb-1 border-b-2 border-transparent hover:border-gray-900
+                ${isActive('/')
+                  ? 'text-black border-black'
+                  : 'text-gray-800'
                 }
               `}
             >
@@ -62,10 +54,10 @@ export const Navbar: React.FC<NavbarProps> = ({ variant = 'light', transparent =
             <Link
               to="/platform"
               className={`
-                text-sm font-500 transition-colors pb-1 border-b-2 border-transparent hover:border-gray-300
+                text-sm font-600 transition-colors pb-1 border-b-2 border-transparent hover:border-gray-900
                 ${isActive('/platform')
-                  ? (variant === 'dark' || transparent ? 'text-white border-white' : 'text-black border-black')
-                  : (variant === 'dark' || transparent ? 'text-gray-200' : 'text-gray-700')
+                  ? 'text-black border-black'
+                  : 'text-gray-800'
                 }
               `}
             >
@@ -74,10 +66,10 @@ export const Navbar: React.FC<NavbarProps> = ({ variant = 'light', transparent =
             <Link
               to="/pricing"
               className={`
-                text-sm font-500 transition-colors pb-1 border-b-2 border-transparent hover:border-gray-300
+                text-sm font-600 transition-colors pb-1 border-b-2 border-transparent hover:border-gray-900
                 ${isActive('/pricing')
-                  ? (variant === 'dark' || transparent ? 'text-white border-white' : 'text-black border-black')
-                  : (variant === 'dark' || transparent ? 'text-gray-200' : 'text-gray-700')
+                  ? 'text-black border-black'
+                  : 'text-gray-800'
                 }
               `}
             >

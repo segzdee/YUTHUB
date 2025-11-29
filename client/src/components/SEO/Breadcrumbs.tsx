@@ -26,7 +26,7 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
 
           {item.href && index < allItems.length - 1 ? (
             <Link
-              href={item.href}
+              to={item.href}
               className='hover:text-primary transition-colors'
             >
               {item.label}

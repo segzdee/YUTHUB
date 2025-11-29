@@ -1,6 +1,6 @@
 import React from 'react';
 
-type ButtonVariant = 'primary' | 'secondary' | 'tertiary';
+type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'accent' | 'success' | 'warning' | 'error' | 'outline';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -10,18 +10,23 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
 }
 
-const baseStyles = 'font-500 transition-all duration-150 ease-smooth focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-500 disabled:opacity-50 disabled:cursor-not-allowed';
+const baseStyles = 'inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none';
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: 'bg-gradient-to-r from-accent-500 to-accent-600 text-white hover:opacity-95 active:translate-y-0.5 shadow-none hover:shadow-md',
-  secondary: 'bg-transparent border border-gray-200 text-black hover:bg-gray-50 hover:border-gray-300',
-  tertiary: 'bg-transparent border-none text-gray-600 hover:text-black underline-offset-2 hover:underline',
+  primary: 'bg-primary text-primary-foreground hover:bg-primary/90 shadow',
+  secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-sm',
+  tertiary: 'bg-transparent border-none text-foreground hover:text-primary underline-offset-2 hover:underline',
+  accent: 'bg-accent text-accent-foreground hover:bg-accent/90 shadow',
+  success: 'bg-success text-success-foreground hover:bg-success/90 shadow',
+  warning: 'bg-warning text-warning-foreground hover:bg-warning/90 shadow',
+  error: 'bg-error text-error-foreground hover:bg-error/90 shadow',
+  outline: 'border-2 border-border bg-background hover:bg-accent hover:text-accent-foreground shadow-sm',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
-  sm: 'px-3 py-2 text-sm',
-  md: 'px-6 py-3 text-base',
-  lg: 'px-8 py-4 text-lg',
+  sm: 'h-9 min-h-[36px] rounded-md px-3 text-xs',
+  md: 'h-10 min-h-[44px] rounded-md px-6 text-base',
+  lg: 'h-11 min-h-[48px] rounded-md px-8 text-lg',
 };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(

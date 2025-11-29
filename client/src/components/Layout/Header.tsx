@@ -33,7 +33,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const [showCrisisModal, setShowCrisisModal] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const { t } = useLanguage();
-  const [location] = useLocation();
+  const location = useLocation();
   const { connectionStatus, isConnected } = useWebSocketConnection();
 
   const handleLogout = () => {
@@ -64,7 +64,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                   aria-label='YUTHUB - Youth Housing Management System'
                 />
                 <ContextualHelp
-                  context={location.split('/')[1] || 'dashboard'}
+                  context={location.pathname.split('/')[1] || 'dashboard'}
                 />
               </div>
               <Breadcrumbs className='mb-1' />

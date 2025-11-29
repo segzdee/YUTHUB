@@ -1,10 +1,10 @@
 import React from 'react';
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   label?: string;
   error?: string;
   icon?: React.ReactNode;
-  size?: 'sm' | 'md' | 'lg';
+  inputSize?: 'sm' | 'md' | 'lg';
 }
 
 const sizeStyles = {
@@ -18,7 +18,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     label,
     error,
     icon,
-    size = 'md',
+    inputSize = 'md',
     className = '',
     ...props
   }, ref) => {
@@ -54,7 +54,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               bg-card text-foreground placeholder:text-muted-foreground
               focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
               ${icon ? 'pl-11 pr-4' : 'px-4'}
-              ${sizeStyles[size]}
+              ${sizeStyles[inputSize]}
               ${
                 error
                   ? 'border-error focus:border-error focus-visible:ring-error'

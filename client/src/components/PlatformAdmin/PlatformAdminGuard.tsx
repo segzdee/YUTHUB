@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Shield, AlertTriangle } from 'lucide-react';
@@ -13,7 +13,7 @@ interface PlatformAdminGuardProps {
 export default function PlatformAdminGuard({
   children,
 }: PlatformAdminGuardProps) {
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
 
   const {
     data: adminAuth,

@@ -8,9 +8,9 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 const sizeStyles = {
-  sm: 'px-3 py-2 text-sm',
-  md: 'px-4 py-3 text-base',
-  lg: 'px-4 py-4 text-base',
+  sm: 'px-3 py-2.5 text-sm min-h-[36px]',
+  md: 'px-4 py-3 text-base min-h-[44px]',
+  lg: 'px-4 py-4 text-base min-h-[48px]',
 };
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -22,44 +22,58 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     className = '',
     ...props
   }, ref) => {
+    const inputId = props.id || `input-${Math.random().toString(36).substr(2, 9)}`;
+
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-500 text-black mb-2">
+          <label
+            htmlFor={inputId}
+            className="block text-sm font-medium text-foreground mb-2"
+          >
             {label}
-            {props.required && <span className="text-accent-500 ml-1">*</span>}
+            {props.required && <span className="text-error ml-1" aria-label="required">*</span>}
           </label>
         )}
 
         <div className="relative">
           {icon && (
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" aria-hidden="true">
               {icon}
             </div>
           )}
 
           <input
+            {...props}
             ref={ref}
+            id={inputId}
+            aria-invalid={error ? 'true' : 'false'}
+            aria-describedby={error ? `${inputId}-error` : undefined}
             className={`
               w-full rounded-lg border-2 transition-all duration-200
-              bg-white placeholder-gray-400 text-black
-              focus:outline-none
+              bg-card text-foreground placeholder:text-muted-foreground
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
               ${icon ? 'pl-11 pr-4' : 'px-4'}
               ${sizeStyles[size]}
               ${
                 error
-                  ? 'border-red-500 focus:border-red-600 focus:ring-1 focus:ring-red-200'
-                  : 'border-gray-200 focus:border-accent-500 focus:ring-1 focus:ring-accent-100'
+                  ? 'border-error focus:border-error focus-visible:ring-error'
+                  : 'border-border focus:border-primary focus-visible:ring-primary'
               }
-              disabled:bg-gray-50 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed
+              disabled:bg-muted disabled:text-muted-foreground disabled:border-border disabled:cursor-not-allowed disabled:opacity-60
               ${className}
             `}
-            {...props}
           />
         </div>
 
         {error && (
-          <p className="text-sm font-400 text-red-500 mt-2">{error}</p>
+          <p
+            id={`${inputId}-error`}
+            role="alert"
+            className="text-sm font-normal text-error mt-2"
+          >
+            {error}
+          </p>
         )}
       </div>
     );
@@ -82,36 +96,50 @@ export const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
     className = '',
     ...props
   }, ref) => {
+    const textareaId = props.id || `textarea-${Math.random().toString(36).substr(2, 9)}`;
+
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-500 text-black mb-2">
+          <label
+            htmlFor={textareaId}
+            className="block text-sm font-medium text-foreground mb-2"
+          >
             {label}
-            {props.required && <span className="text-accent-500 ml-1">*</span>}
+            {props.required && <span className="text-error ml-1" aria-label="required">*</span>}
           </label>
         )}
 
         <textarea
+          {...props}
           ref={ref}
+          id={textareaId}
           rows={rows}
+          aria-invalid={error ? 'true' : 'false'}
+          aria-describedby={error ? `${textareaId}-error` : undefined}
           className={`
-            w-full rounded-lg border-2 transition-all duration-200
-            bg-white placeholder-gray-400 text-black
-            focus:outline-none px-4 py-3 text-base
-            resize-none
+            w-full rounded-lg border-2 transition-all duration-200 min-h-[120px]
+            bg-card text-foreground placeholder:text-muted-foreground
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
+            px-4 py-3 text-base resize-y
             ${
               error
-                ? 'border-red-500 focus:border-red-600 focus:ring-1 focus:ring-red-200'
-                : 'border-gray-200 focus:border-accent-500 focus:ring-1 focus:ring-accent-100'
+                ? 'border-error focus:border-error focus-visible:ring-error'
+                : 'border-border focus:border-primary focus-visible:ring-primary'
             }
-            disabled:bg-gray-50 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed
+            disabled:bg-muted disabled:text-muted-foreground disabled:border-border disabled:cursor-not-allowed disabled:opacity-60
             ${className}
           `}
-          {...props}
         />
 
         {error && (
-          <p className="text-sm font-400 text-red-500 mt-2">{error}</p>
+          <p
+            id={`${textareaId}-error`}
+            role="alert"
+            className="text-sm font-normal text-error mt-2"
+          >
+            {error}
+          </p>
         )}
       </div>
     );
@@ -134,31 +162,40 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     className = '',
     ...props
   }, ref) => {
+    const selectId = props.id || `select-${Math.random().toString(36).substr(2, 9)}`;
+
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-500 text-black mb-2">
+          <label
+            htmlFor={selectId}
+            className="block text-sm font-medium text-foreground mb-2"
+          >
             {label}
-            {props.required && <span className="text-accent-500 ml-1">*</span>}
+            {props.required && <span className="text-error ml-1" aria-label="required">*</span>}
           </label>
         )}
 
         <div className="relative">
           <select
+            {...props}
             ref={ref}
+            id={selectId}
+            aria-invalid={error ? 'true' : 'false'}
+            aria-describedby={error ? `${selectId}-error` : undefined}
             className={`
-              w-full rounded-lg border-2 transition-all duration-200
-              bg-white text-black px-4 py-3 text-base
-              focus:outline-none appearance-none cursor-pointer
+              w-full rounded-lg border-2 transition-all duration-200 min-h-[44px]
+              bg-card text-foreground px-4 py-3 text-base pr-10
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
+              appearance-none cursor-pointer
               ${
                 error
-                  ? 'border-red-500 focus:border-red-600 focus:ring-1 focus:ring-red-200'
-                  : 'border-gray-200 focus:border-accent-500 focus:ring-1 focus:ring-accent-100'
+                  ? 'border-error focus:border-error focus-visible:ring-error'
+                  : 'border-border focus:border-primary focus-visible:ring-primary'
               }
-              disabled:bg-gray-50 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed
+              disabled:bg-muted disabled:text-muted-foreground disabled:border-border disabled:cursor-not-allowed disabled:opacity-60
               ${className}
             `}
-            {...props}
           >
             {options.map((option) => (
               <option key={option.value} value={option.value}>
@@ -168,17 +205,24 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           </select>
 
           <svg
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
+            aria-hidden="true"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </div>
 
         {error && (
-          <p className="text-sm font-400 text-red-500 mt-2">{error}</p>
+          <p
+            id={`${selectId}-error`}
+            role="alert"
+            className="text-sm font-normal text-error mt-2"
+          >
+            {error}
+          </p>
         )}
       </div>
     );
@@ -193,22 +237,28 @@ interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
   ({ label, className = '', ...props }, ref) => {
+    const checkboxId = props.id || `checkbox-${Math.random().toString(36).substr(2, 9)}`;
+
     return (
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 min-h-[44px]">
         <input
+          {...props}
           ref={ref}
           type="checkbox"
+          id={checkboxId}
           className={`
-            w-5 h-5 rounded-lg border-2 border-gray-200
-            accent-accent-500 cursor-pointer
-            focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2
-            disabled:bg-gray-50 disabled:cursor-not-allowed
+            w-5 h-5 rounded border-2 border-border
+            text-primary cursor-pointer
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
+            disabled:bg-muted disabled:cursor-not-allowed disabled:opacity-60
             ${className}
           `}
-          {...props}
         />
         {label && (
-          <label className="text-sm font-400 text-gray-700 cursor-pointer">
+          <label
+            htmlFor={checkboxId}
+            className="text-sm font-normal text-foreground cursor-pointer select-none"
+          >
             {label}
           </label>
         )}
@@ -225,22 +275,28 @@ interface RadioProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 export const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
   ({ label, className = '', ...props }, ref) => {
+    const radioId = props.id || `radio-${Math.random().toString(36).substr(2, 9)}`;
+
     return (
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 min-h-[44px]">
         <input
+          {...props}
           ref={ref}
           type="radio"
+          id={radioId}
           className={`
-            w-5 h-5 border-2 border-gray-200
-            accent-accent-500 cursor-pointer
-            focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2
-            disabled:bg-gray-50 disabled:cursor-not-allowed
+            w-5 h-5 border-2 border-border
+            text-primary cursor-pointer
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
+            disabled:bg-muted disabled:cursor-not-allowed disabled:opacity-60
             ${className}
           `}
-          {...props}
         />
         {label && (
-          <label className="text-sm font-400 text-gray-700 cursor-pointer">
+          <label
+            htmlFor={radioId}
+            className="text-sm font-normal text-foreground cursor-pointer select-none"
+          >
             {label}
           </label>
         )}

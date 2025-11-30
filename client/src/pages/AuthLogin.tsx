@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { supabase } from '@/lib/supabase';
 import {
   AlertCircle,
   Building2,
@@ -20,6 +21,7 @@ import {
   Zap,
 } from 'lucide-react';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // Type definitions
 type AuthMode = 'signin' | 'signup';
@@ -146,6 +148,7 @@ const AuthLogin: React.FC<AuthLoginProps> = ({
   mode = 'signin',
   selectedPlan,
 }) => {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [authMode, setAuthMode] = useState<AuthMode>(mode);
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -198,46 +201,34 @@ const AuthLogin: React.FC<AuthLoginProps> = ({
 
     try {
       if (authMode === 'signup') {
-        const response = await fetch('/api/auth/register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+        const { data, error: signUpError } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+          options: {
+            data: {
+              first_name: formData.firstName,
+              last_name: formData.lastName,
+            },
           },
-          credentials: 'include',
-          body: JSON.stringify({
-            email: formData.email,
-            password: formData.password,
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-          }),
         });
 
-        if (response.ok) {
-          window.location.href = '/dashboard';
-        } else {
-          const errorData = await response.json();
-          setError(errorData.message || 'Registration failed. Please try again.');
+        if (signUpError) {
+          setError(signUpError.message || 'Registration failed. Please try again.');
           setIsLoading(false);
+        } else {
+          navigate('/dashboard');
         }
       } else {
-        const response = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            email: formData.email,
-            password: formData.password,
-          }),
+        const { data, error: signInError } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password,
         });
 
-        if (response.ok) {
-          window.location.href = '/dashboard';
-        } else {
-          const errorData = await response.json();
-          setError(errorData.message || 'Login failed. Please check your credentials.');
+        if (signInError) {
+          setError(signInError.message || 'Login failed. Please check your credentials.');
           setIsLoading(false);
+        } else {
+          navigate('/dashboard');
         }
       }
     } catch (err) {
@@ -251,25 +242,16 @@ const AuthLogin: React.FC<AuthLoginProps> = ({
     setError(null);
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          email: 'demo.admin@yuthub.com',
-          password: 'Demo2025!Admin',
-        }),
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: 'demo.admin@yuthub.com',
+        password: 'Demo2025!Admin',
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        window.location.href = '/dashboard';
-      } else {
-        const errorData = await response.json();
-        setError(errorData.message || 'Demo login failed. Please try again.');
+      if (signInError) {
+        setError(signInError.message || 'Demo login failed. Please try again.');
         setIsLoading(false);
+      } else {
+        navigate('/dashboard');
       }
     } catch (err) {
       setError('Network error. Please check your connection and try again.');

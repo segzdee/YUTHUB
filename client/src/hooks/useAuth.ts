@@ -1,3 +1,4 @@
+import { supabase } from '@/lib/supabase';
 import { useEffect, useRef, useState } from 'react';
 
 // Global auth state cache to prevent multiple simultaneous requests
@@ -71,10 +72,8 @@ export function useAuth(): AuthState {
           return;
         }
 
-        // Create new request
-        const authPromise = fetch('/api/auth/user', {
-          credentials: 'include',
-        });
+        // Create new request using Supabase
+        const authPromise = supabase.auth.getSession();
 
         // Cache the promise to prevent duplicate requests
         authCache = {
@@ -84,10 +83,18 @@ export function useAuth(): AuthState {
           promise: authPromise,
         };
 
-        const response = await authPromise;
+        const { data: { session }, error } = await authPromise;
 
-        if (response.ok) {
-          const userData = await response.json();
+        if (session?.user && !error) {
+          const userData = {
+            id: session.user.id,
+            email: session.user.email || '',
+            name: session.user.user_metadata?.name,
+            firstName: session.user.user_metadata?.first_name,
+            lastName: session.user.user_metadata?.last_name,
+            role: session.user.user_metadata?.role || 'user',
+          };
+
           authCache = {
             user: userData,
             status: 'authenticated',

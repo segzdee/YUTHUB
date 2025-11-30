@@ -224,33 +224,33 @@ const Landing: React.FC = () => {
               <PricingCard
                 tier="starter"
                 name="Starter"
-                price={99}
-                description="For small teams"
+                price={199}
+                description="For small charities"
                 features={[
-                  'Up to 5 properties',
-                  '50 residents',
+                  '1 property',
+                  'Up to 10 residents',
                   'Basic analytics',
                   'Email support',
                   'Community access',
                 ]}
-                cta="Start free"
+                cta="Start free trial"
                 onCtaClick={() => console.log('Starter clicked')}
               />
 
               <PricingCard
                 tier="professional"
                 name="Professional"
-                price={299}
+                price={499}
                 description="For growing organizations"
                 features={[
-                  'Unlimited properties',
-                  'Unlimited residents',
+                  'Up to 5 properties',
+                  'Up to 25 residents',
                   'Advanced analytics',
                   'Priority support',
                   'API access',
-                  'Custom integrations',
+                  'All modules included',
                 ]}
-                cta="Start free"
+                cta="Start free trial"
                 onCtaClick={() => console.log('Professional clicked')}
                 isPopular
               />
@@ -258,14 +258,15 @@ const Landing: React.FC = () => {
               <PricingCard
                 tier="enterprise"
                 name="Enterprise"
-                description="Custom solutions"
+                price={999}
+                description="For national providers"
                 features={[
+                  'Unlimited properties',
+                  'Unlimited residents',
                   'Everything in Professional',
-                  'Custom features',
-                  'Dedicated support',
+                  '24/7 dedicated support',
                   'SLA guarantee',
-                  'On-premise options',
-                  'Training & onboarding',
+                  'Custom development',
                 ]}
                 cta="Contact sales"
                 onCtaClick={() => console.log('Enterprise clicked')}

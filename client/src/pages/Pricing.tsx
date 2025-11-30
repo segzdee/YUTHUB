@@ -21,9 +21,9 @@ const pricingTiers = [
     description: 'Perfect for small charities and pilot programs',
     monthlyPrice: 199,
     annualPrice: 169,
-    maxResidents: 25,
+    maxResidents: 10,
     features: [
-      'Basic resident management (25 residents max)',
+      'Basic resident management (10 residents max)',
       'Essential support worker tools',
       'Standard progress tracking',
       'Mobile app for residents',
@@ -45,11 +45,11 @@ const pricingTiers = [
     name: 'Professional',
     description: 'Ideal for medium housing associations and local authorities',
     monthlyPrice: 499,
-    annualPrice: 429,
-    maxResidents: 100,
+    annualPrice: 424,
+    maxResidents: 25,
     features: [
       'Everything in Starter PLUS:',
-      'Up to 100 residents',
+      'Up to 25 residents',
       'Multi-property management (5 locations)',
       'Advanced analytics & outcome tracking',
       'Crisis intervention system',
@@ -72,8 +72,8 @@ const pricingTiers = [
   {
     name: 'Enterprise',
     description: 'For large national providers and multi-program organizations',
-    monthlyPrice: 1299,
-    annualPrice: 1099,
+    monthlyPrice: 999,
+    annualPrice: 849,
     maxResidents: 'Unlimited',
     features: [
       'Everything in Professional PLUS:',
@@ -85,7 +85,7 @@ const pricingTiers = [
       'Multi-tenancy support',
       'Machine learning insights',
       'Custom integrations',
-      'Dedicated technical support',
+      'Dedicated technical support (24/7)',
       'Quarterly business reviews',
       'Custom training programs',
     ],
@@ -132,7 +132,7 @@ export default function Pricing() {
     <>
       <SEOHead
         title='YUTHUB Pricing Plans | Youth Housing Management Software Costs'
-        description='Choose the perfect YUTHUB plan for your youth housing organization. Starter from £169/month, Professional from £429/month, Enterprise from £1,099/month. 15% discount on annual billing.'
+        description='Choose the perfect YUTHUB plan for your youth housing organization. Starter from £169/month, Professional from £424/month, Enterprise from £849/month. 15% discount on annual billing.'
         keywords='youth housing software pricing, UK housing management costs, social care platform pricing, supported housing software plans, council housing system pricing'
         canonicalUrl='https://www.yuthub.com/pricing'
         structuredData={structuredData}

@@ -60,10 +60,10 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionTier, SubscriptionPlan> = {
     description: 'For small charities and pilot projects',
     monthlyPrice: 199,
     annualPrice: 169,
-    maxResidents: 25,
+    maxResidents: 10,
     maxProperties: 1,
     features: [
-      'Up to 25 residents',
+      'Up to 10 residents',
       '1 property location',
       'Basic resident management',
       'Essential support worker tools',
@@ -88,11 +88,11 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionTier, SubscriptionPlan> = {
     name: 'Professional',
     description: 'For growing housing organizations',
     monthlyPrice: 499,
-    annualPrice: 429,
-    maxResidents: 100,
+    annualPrice: 424,
+    maxResidents: 25,
     maxProperties: 5,
     features: [
-      'Up to 100 residents',
+      'Up to 25 residents',
       'Up to 5 properties/locations',
       'Everything in Starter, plus:',
       'Multi-property management',
@@ -115,14 +115,14 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionTier, SubscriptionPlan> = {
       independence: true,
       crisis: true,
     },
-    highlights: ['£429/month (annual)', '£499/month (monthly)', 'Save 14% on annual'],
+    highlights: ['£424/month (annual)', '£499/month (monthly)', 'Save 15% on annual'],
   },
   enterprise: {
     id: 'enterprise',
     name: 'Enterprise',
     description: 'For national providers and large institutions',
-    monthlyPrice: 1299,
-    annualPrice: 1099,
+    monthlyPrice: 999,
+    annualPrice: 849,
     maxResidents: -1, // unlimited
     maxProperties: -1, // unlimited
     features: [
@@ -148,7 +148,7 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionTier, SubscriptionPlan> = {
       independence: true,
       crisis: true,
     },
-    highlights: ['£1,099/month (annual)', '£1,299/month (monthly)', 'Save 15% on annual'],
+    highlights: ['£849/month (annual)', '£999/month (monthly)', 'Save 15% on annual'],
   },
 };
 

@@ -1,13 +1,7 @@
-import Header from '@/components/Layout/Header';
-import { AppPageLayout } from '@/components/PageLayout';
-import Sidebar from '@/components/Layout/Sidebar';
 import { AppPageLayout } from '@/components/PageLayout';
 import { Badge } from '@/components/ui/badge';
-import { AppPageLayout } from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
-import { AppPageLayout } from '@/components/PageLayout';
 import { Calendar } from '@/components/ui/calendar';
-import { AppPageLayout } from '@/components/PageLayout';
 import {
   Card,
   CardContent,

@@ -1,8 +1,5 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import Sidebar from '@/components/Layout/Sidebar';
-import { AppPageLayout } from '@/components/PageLayout';
-import Header from '@/components/Layout/Header';
 import { AppPageLayout } from '@/components/PageLayout';
 import {
   Card,
@@ -12,13 +9,9 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AppPageLayout } from '@/components/PageLayout';
 import { Badge } from '@/components/ui/badge';
-import { AppPageLayout } from '@/components/PageLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AppPageLayout } from '@/components/PageLayout';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AppPageLayout } from '@/components/PageLayout';
 import {
   AlertTriangle,
   Phone,

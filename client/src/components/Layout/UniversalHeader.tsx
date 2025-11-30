@@ -21,6 +21,7 @@ export default function UniversalHeader() {
 
   const navigation = [
     { name: 'Home', href: '/' },
+    { name: 'Platform', href: '/platform' },
     { name: 'Pricing', href: '/pricing' },
     ...(isAuthenticated ? [{ name: 'Dashboard', href: '/dashboard' }] : []),
   ];

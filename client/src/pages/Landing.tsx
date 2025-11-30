@@ -227,11 +227,16 @@ const Landing: React.FC = () => {
                 price={199}
                 description="For small charities"
                 features={[
-                  '1 property',
+                  '1 property location',
                   'Up to 10 residents',
-                  'Basic analytics',
-                  'Email support',
-                  'Community access',
+                  'Resident intake & profiles',
+                  'Support planning tools',
+                  'Progress tracking',
+                  'Mobile app access',
+                  'Basic reporting dashboard',
+                  'Email support (business hours)',
+                  'Community forum access',
+                  '14-day free trial',
                 ]}
                 cta="Start free trial"
                 onCtaClick={() => console.log('Starter clicked')}
@@ -243,12 +248,18 @@ const Landing: React.FC = () => {
                 price={499}
                 description="For growing organizations"
                 features={[
+                  'Everything in Starter, PLUS:',
                   'Up to 5 properties',
                   'Up to 25 residents',
-                  'Advanced analytics',
-                  'Priority support',
-                  'API access',
-                  'All modules included',
+                  'Safeguarding & incident management',
+                  'Financial management module',
+                  'Crisis intervention system',
+                  'Independence skills tracking',
+                  'Advanced analytics & reporting',
+                  'Custom branding options',
+                  'API access & integrations',
+                  'Priority email support',
+                  'Dedicated success manager',
                 ]}
                 cta="Start free trial"
                 onCtaClick={() => console.log('Professional clicked')}
@@ -261,14 +272,21 @@ const Landing: React.FC = () => {
                 price={999}
                 description="For national providers"
                 features={[
+                  'Everything in Professional, PLUS:',
                   'Unlimited properties',
                   'Unlimited residents',
-                  'Everything in Professional',
-                  '24/7 dedicated support',
-                  'SLA guarantee',
-                  'Custom development',
+                  'AI-powered predictive analytics',
+                  'Custom feature development',
+                  'On-premise deployment options',
+                  'Advanced security (SSO, SAML)',
+                  'Multi-tenancy support',
+                  'Custom integrations',
+                  '24/7 dedicated technical support',
+                  'Quarterly business reviews',
+                  'Custom training programs',
+                  'SLA guarantees (99.9% uptime)',
                 ]}
-                cta="Contact sales"
+                cta="Start free trial"
                 onCtaClick={() => console.log('Enterprise clicked')}
               />
             </div>

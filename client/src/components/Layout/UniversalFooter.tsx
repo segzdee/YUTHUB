@@ -152,24 +152,24 @@ export default function UniversalFooter() {
             <div className='flex flex-wrap gap-2 mt-2'>
               <a
                 href='https://twitter.com/yuthub'
-                className='text-slate-500 hover:text-blue-600 transition-colors touch-target min-w-[32px] min-h-[32px] flex items-center justify-center'
-                aria-label='Twitter'
+                className='text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 touch-target min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg border border-slate-200 hover:border-blue-300'
+                aria-label='Follow us on Twitter'
               >
-                <Twitter className='h-3 w-3' />
+                <Twitter className='h-5 w-5' />
               </a>
               <a
                 href='https://linkedin.com/company/yuthub'
-                className='text-slate-500 hover:text-blue-600 transition-colors touch-target min-w-[32px] min-h-[32px] flex items-center justify-center'
-                aria-label='LinkedIn'
+                className='text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 touch-target min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg border border-slate-200 hover:border-blue-300'
+                aria-label='Follow us on LinkedIn'
               >
-                <Linkedin className='h-3 w-3' />
+                <Linkedin className='h-5 w-5' />
               </a>
               <a
                 href='https://github.com/yuthub'
-                className='text-slate-500 hover:text-blue-600 transition-colors touch-target min-w-[32px] min-h-[32px] flex items-center justify-center'
-                aria-label='GitHub'
+                className='text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 touch-target min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg border border-slate-200 hover:border-blue-300'
+                aria-label='View our GitHub'
               >
-                <Github className='h-3 w-3' />
+                <Github className='h-5 w-5' />
               </a>
             </div>
           </div>

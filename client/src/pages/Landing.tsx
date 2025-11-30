@@ -13,9 +13,11 @@ const Landing: React.FC = () => {
         <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-32 max-w-7xl mx-auto">
           <div className="text-center space-y-8">
             <div className="space-y-6">
-              <Badge variant="secondary" size="md" className="justify-center">
-                Early Partner Program - Limited Spots
-              </Badge>
+              <div className="inline-flex items-center justify-center">
+                <Badge variant="secondary" size="md" className="px-4 py-2 bg-gradient-to-r from-blue-500 to-teal-500 text-white font-600 text-sm rounded-full shadow-md hover:shadow-lg transition-all duration-300 animate-pulse">
+                  🎯 Early Partner Program - Limited Spots
+                </Badge>
+              </div>
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-800 text-black leading-[1.1] tracking-tight">
                 More time caring.
                 <br />
@@ -23,7 +25,7 @@ const Landing: React.FC = () => {
               </h1>
             </div>
 
-            <p className="text-xl sm:text-2xl font-400 text-gray-700 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl sm:text-2xl font-400 text-gray-700 max-w-2xl mx-auto leading-relaxed">
               The complete platform that helps UK youth housing providers deliver life-changing support while staying compliant—without the administrative burden.
             </p>
 
@@ -41,19 +43,22 @@ const Landing: React.FC = () => {
             </div>
 
             {/* Stats Bar */}
-            <div className="pt-12 border-t border-gray-200">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                {[
-                  { number: "500+", label: "Young people supported" },
-                  { number: "50+", label: "Properties managed" },
-                  { number: "98%", label: "Compliance rate" },
-                  { number: "10hrs", label: "Saved per week" },
-                ].map((stat) => (
-                  <div key={stat.label} className="text-center">
-                    <div className="text-3xl sm:text-4xl font-700 text-black mb-1">{stat.number}</div>
-                    <div className="text-sm font-500 text-gray-600">{stat.label}</div>
-                  </div>
-                ))}
+            <div className="pt-16 mt-8">
+              <div className="bg-gradient-to-r from-blue-50 via-white to-teal-50 rounded-2xl border border-gray-200 shadow-sm py-8 px-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                  {[
+                    { number: "500+", label: "Young people supported", icon: "👥" },
+                    { number: "50+", label: "Properties managed", icon: "🏠" },
+                    { number: "98%", label: "Compliance rate", icon: "✅" },
+                    { number: "10hrs", label: "Saved per week", icon: "⏰" },
+                  ].map((stat) => (
+                    <div key={stat.label} className="text-center">
+                      <div className="text-2xl mb-2">{stat.icon}</div>
+                      <div className="text-3xl sm:text-4xl font-700 text-black mb-1">{stat.number}</div>
+                      <div className="text-sm font-500 text-gray-600">{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

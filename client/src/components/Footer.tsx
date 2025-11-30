@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import BrandLogo from './design-system/BrandLogo';
 
 export const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -11,14 +12,16 @@ export const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-16 mb-16">
           {/* Brand */}
           <div className="space-y-4">
-            <Link to="/" className="flex items-center gap-2.5 inline-block hover:opacity-80 transition-opacity">
-              <div className="w-7 h-7 rounded-md bg-white text-black font-semibold flex items-center justify-center text-sm">
-                Y
-              </div>
-              <span className="text-base font-600 tracking-tight">YUTHUB</span>
+            <Link to="/" className="inline-block hover:opacity-90 transition-opacity">
+              <BrandLogo
+                size="sm"
+                variant="dark"
+                showText={true}
+                showSlogan={true}
+              />
             </Link>
-            <p className="text-sm font-400 text-gray-500 leading-relaxed">
-              Comprehensive platform for youth housing organizations.
+            <p className="text-sm font-400 text-gray-400 leading-relaxed max-w-xs">
+              Comprehensive platform for youth housing organizations to manage properties, residents, and support services.
             </p>
           </div>
 

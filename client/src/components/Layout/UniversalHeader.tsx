@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { Building2, Menu, X } from 'lucide-react';
+import BrandLogo from '@/components/design-system/BrandLogo';
+import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 
 export default function UniversalHeader() {
@@ -33,11 +34,10 @@ export default function UniversalHeader() {
           {/* Logo */}
           <div className='flex items-center'>
             <a
-              href='https://www.yuthub.com'
-              className='flex items-center space-x-2'
+              href='/'
+              className='flex items-center hover:opacity-90 transition-opacity'
             >
-              <Building2 className='h-8 w-8 text-primary' />
-              <span className='text-2xl font-bold text-slate-800'>YUTHUB</span>
+              <BrandLogo size='md' variant='default' showText={true} />
             </a>
           </div>
 

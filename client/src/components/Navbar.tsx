@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Button } from './Button';
+import BrandLogo from './design-system/BrandLogo';
 
 interface NavbarProps {
   variant?: 'light' | 'dark';
@@ -26,15 +27,12 @@ export const Navbar: React.FC<NavbarProps> = ({ variant = 'light', transparent =
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 flex-shrink-0 hover:opacity-80 transition-opacity">
-            <span
-              className={`
-                text-xl font-700 tracking-tight
-                ${variant === 'dark' || transparent ? 'text-black' : 'text-black'}
-              `}
-            >
-              YUTHUB
-            </span>
+          <Link to="/" className="flex items-center gap-2.5 flex-shrink-0 hover:opacity-90 transition-opacity">
+            <BrandLogo
+              size="md"
+              variant={variant === 'dark' ? 'dark' : 'default'}
+              showText={true}
+            />
           </Link>
 
           {/* Desktop Navigation */}

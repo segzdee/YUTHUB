@@ -42,9 +42,11 @@ export default function UniversalFooter() {
           <div className='space-y-2 col-span-1 min-[320px]:col-span-2 sm:col-span-1'>
             <BrandLogo
               size='sm'
-              variant='light'
+              variant='default'
+              showText={true}
+              showSlogan={true}
               className='mb-1'
-              aria-label='YUTHUB - Youth Housing Management System'
+              aria-label='YUTHUB - Empowering Youth. Building Futures.'
             />
             <div className='flex items-center space-x-1 text-xs text-slate-600'>
               <Mail className='h-3 w-3 text-blue-500' aria-hidden='true' />

@@ -196,35 +196,85 @@ const AuthLogin: React.FC<AuthLoginProps> = ({
       return;
     }
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
       if (authMode === 'signup') {
-        alert('Account created successfully! Welcome to YUTHUB.');
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+          }),
+        });
+
+        if (response.ok) {
+          window.location.href = '/dashboard';
+        } else {
+          const errorData = await response.json();
+          setError(errorData.message || 'Registration failed. Please try again.');
+          setIsLoading(false);
+        }
       } else {
-        alert('Login successful! Redirecting to dashboard...');
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+          }),
+        });
+
+        if (response.ok) {
+          window.location.href = '/dashboard';
+        } else {
+          const errorData = await response.json();
+          setError(errorData.message || 'Login failed. Please check your credentials.');
+          setIsLoading(false);
+        }
       }
-    }, 2000);
+    } catch (err) {
+      setError('Network error. Please check your connection and try again.');
+      setIsLoading(false);
+    }
   };
 
   const handleDemoLogin = async (): Promise<void> => {
     setIsLoading(true);
     setError(null);
 
-    // Set demo credentials
-    setFormData({
-      email: 'demo.admin@yuthub.com',
-      password: 'Demo2025!Admin',
-      confirmPassword: '',
-      firstName: '',
-      lastName: '',
-    });
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          email: 'demo.admin@yuthub.com',
+          password: 'Demo2025!Admin',
+        }),
+      });
 
-    // Simulate demo login
-    setTimeout(() => {
+      if (response.ok) {
+        const data = await response.json();
+        window.location.href = '/dashboard';
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || 'Demo login failed. Please try again.');
+        setIsLoading(false);
+      }
+    } catch (err) {
+      setError('Network error. Please check your connection and try again.');
       setIsLoading(false);
-      alert('Demo login successful! Redirecting to dashboard...');
-    }, 1500);
+    }
   };
 
   const handleSocialError = (error: string): void => {

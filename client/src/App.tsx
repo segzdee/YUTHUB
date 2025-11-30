@@ -10,7 +10,7 @@ import ProtectedRoute from './components/Auth/ProtectedRoute';
 import PublicRoute from './components/Auth/PublicRoute';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import PageLoader from './components/common/PageLoader';
-import { Layout } from './components/Layout';
+import { DashboardShell } from './components/dashboard-shell';
 import { AccessibilityProvider } from './components/providers/AccessibilityProvider';
 import { AuthProvider } from './contexts/AuthContext';
 import { LanguageProvider } from './components/providers/LanguageProvider';
@@ -148,7 +148,7 @@ function App() {
                             path='/app'
                             element={
                               <ProtectedRoute>
-                                <Layout />
+                                <DashboardShell />
                               </ProtectedRoute>
                             }
                           >

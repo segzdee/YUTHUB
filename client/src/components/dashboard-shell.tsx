@@ -1,6 +1,6 @@
 import * as React from "react"
-import { Outlet } from "react-router-dom"
-import { Menu, Search, Bell, User } from "lucide-react"
+import { Outlet, useLocation, Link } from "react-router-dom"
+import { Search, Bell, User } from "lucide-react"
 
 import { AppSidebar } from "@/components/app-sidebar"
 import { CommandMenu } from "@/components/command-menu"
@@ -34,8 +34,51 @@ interface DashboardShellProps {
   breadcrumbs?: { label: string; href?: string }[]
 }
 
-export function DashboardShell({ children, breadcrumbs }: DashboardShellProps) {
+const routeLabels: Record<string, string> = {
+  dashboard: "Dashboard",
+  housing: "Housing",
+  support: "Support",
+  independence: "Independence",
+  analytics: "Analytics",
+  safeguarding: "Safeguarding",
+  crisis: "Crisis",
+  financials: "Financials",
+  billing: "Billing",
+  forms: "Forms",
+  reports: "Reports",
+  settings: "Settings",
+  help: "Help",
+  "resident-intake": "Resident Intake",
+  "support-plan": "Support Plan",
+  "property-registration": "Property Registration",
+  "incident-report": "Incident Report",
+  "progress-tracking": "Progress Tracking",
+}
+
+export function DashboardShell({ children, breadcrumbs: customBreadcrumbs }: DashboardShellProps) {
   const { user, logout } = useAuth()
+  const location = useLocation()
+
+  const breadcrumbs = React.useMemo(() => {
+    if (customBreadcrumbs) return customBreadcrumbs
+
+    const paths = location.pathname.split('/').filter(Boolean)
+    if (paths[0] !== 'app') return []
+
+    const crumbs: { label: string; href?: string }[] = []
+    let currentPath = '/app'
+
+    for (let i = 1; i < paths.length; i++) {
+      currentPath += `/${paths[i]}`
+      const label = routeLabels[paths[i]] || paths[i].charAt(0).toUpperCase() + paths[i].slice(1)
+      crumbs.push({
+        label,
+        href: i < paths.length - 1 ? currentPath : undefined
+      })
+    }
+
+    return crumbs
+  }, [location.pathname, customBreadcrumbs])
 
   return (
     <SidebarProvider>
@@ -52,8 +95,8 @@ export function DashboardShell({ children, breadcrumbs }: DashboardShellProps) {
                     {index > 0 && <BreadcrumbSeparator />}
                     <BreadcrumbItem>
                       {crumb.href ? (
-                        <BreadcrumbLink href={crumb.href}>
-                          {crumb.label}
+                        <BreadcrumbLink asChild>
+                          <Link to={crumb.href}>{crumb.label}</Link>
                         </BreadcrumbLink>
                       ) : (
                         <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
@@ -97,11 +140,11 @@ export function DashboardShell({ children, breadcrumbs }: DashboardShellProps) {
                   {user?.email || "My Account"}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => (window.location.href = "/dashboard/settings")}>
-                  Settings
+                <DropdownMenuItem asChild>
+                  <Link to="/app/settings">Settings</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => (window.location.href = "/help")}>
-                  Support
+                <DropdownMenuItem asChild>
+                  <Link to="/app/help">Support</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logout}>Log out</DropdownMenuItem>

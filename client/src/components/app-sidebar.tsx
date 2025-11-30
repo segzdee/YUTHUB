@@ -46,7 +46,7 @@ import {
 const navItems = [
   {
     title: "Dashboard",
-    url: "/dashboard",
+    url: "/app/dashboard",
     icon: LayoutDashboard,
   },
   {
@@ -55,17 +55,17 @@ const navItems = [
     items: [
       {
         title: "All Residents",
-        url: "/dashboard/residents",
+        url: "/app/housing",
         icon: Users,
       },
       {
         title: "Resident Intake",
-        url: "/dashboard/forms/resident-intake",
+        url: "/app/forms/resident-intake",
         icon: UserPlus,
       },
       {
         title: "Support Plans",
-        url: "/dashboard/forms/support-plan",
+        url: "/app/forms/support-plan",
         icon: FileCheck,
       },
     ],
@@ -76,18 +76,13 @@ const navItems = [
     items: [
       {
         title: "All Properties",
-        url: "/dashboard/properties",
+        url: "/app/housing",
         icon: Building2,
       },
       {
         title: "Property Registration",
-        url: "/dashboard/forms/property-registration",
+        url: "/app/forms/property-registration",
         icon: Home,
-      },
-      {
-        title: "Room Allocation",
-        url: "/dashboard/forms/room-allocation",
-        icon: ClipboardList,
       },
     ],
   },
@@ -97,17 +92,17 @@ const navItems = [
     items: [
       {
         title: "Safeguarding",
-        url: "/dashboard/safeguarding",
+        url: "/app/safeguarding",
         icon: Shield,
       },
       {
         title: "Incident Reports",
-        url: "/dashboard/forms/incident-report",
+        url: "/app/forms/incident-report",
         icon: AlertTriangle,
       },
       {
         title: "Progress Tracking",
-        url: "/dashboard/forms/progress-tracking",
+        url: "/app/forms/progress-tracking",
         icon: TrendingUp,
       },
     ],
@@ -118,17 +113,17 @@ const navItems = [
     items: [
       {
         title: "All Reports",
-        url: "/dashboard/reports",
+        url: "/app/reports",
         icon: FileText,
       },
       {
         title: "Analytics",
-        url: "/dashboard/analytics",
+        url: "/app/analytics",
         icon: TrendingUp,
       },
       {
         title: "Financials",
-        url: "/dashboard/financials",
+        url: "/app/financials",
         icon: DollarSign,
       },
     ],
@@ -139,13 +134,13 @@ const navItems = [
     items: [
       {
         title: "Account Settings",
-        url: "/dashboard/settings",
+        url: "/app/settings",
         icon: Settings,
       },
       {
-        title: "Security",
-        url: "/dashboard/security",
-        icon: Shield,
+        title: "Billing",
+        url: "/app/billing",
+        icon: DollarSign,
       },
     ],
   },
@@ -161,7 +156,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link to="/dashboard">
+              <Link to="/app/dashboard">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   <Heart className="size-4" />
                 </div>
@@ -237,7 +232,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Link to="/help">
+              <Link to="/app/help">
                 <HelpCircle />
                 <span>Help & Support</span>
               </Link>

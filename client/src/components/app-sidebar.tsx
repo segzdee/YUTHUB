@@ -15,8 +15,10 @@ import {
   DollarSign,
   Heart,
   HelpCircle,
+  LogOut,
+  ChevronsUpDown,
 } from "lucide-react"
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 
 import {
   Sidebar,
@@ -40,6 +42,16 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useAuth } from "@/hooks/useAuth"
 
 const navItems = [
   {
@@ -146,7 +158,18 @@ const navItems = [
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const location = useLocation()
+  const navigate = useNavigate()
   const { state } = useSidebar()
+  const { user, logout } = useAuth()
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      navigate('/login')
+    } catch (error) {
+      console.error('Logout failed:', error)
+    }
+  }
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -226,15 +249,82 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="border-t">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link to="/app/help">
-                <HelpCircle />
-                <span>Help & Support</span>
-              </Link>
-            </SidebarMenuButton>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                >
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarImage src={user?.avatar || undefined} alt={user?.email || "User"} />
+                    <AvatarFallback className="rounded-lg">
+                      {user?.email ? user.email.substring(0, 2).toUpperCase() : "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">{user?.email || "User"}</span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {user?.organizationId ? "Organization Member" : "Free Account"}
+                    </span>
+                  </div>
+                  <ChevronsUpDown className="ml-auto size-4" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                side="bottom"
+                align="end"
+                sideOffset={4}
+              >
+                <DropdownMenuLabel className="p-0 font-normal">
+                  <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                    <Avatar className="h-8 w-8 rounded-lg">
+                      <AvatarImage src={user?.avatar || undefined} alt={user?.email || "User"} />
+                      <AvatarFallback className="rounded-lg">
+                        {user?.email ? user.email.substring(0, 2).toUpperCase() : "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="grid flex-1 text-left text-sm leading-tight">
+                      <span className="truncate font-semibold">{user?.email || "User"}</span>
+                      <span className="truncate text-xs text-muted-foreground">
+                        {user?.email || "user@example.com"}
+                      </span>
+                    </div>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/app/dashboard/settings/account" className="cursor-pointer">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Account Settings
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/app/dashboard/settings/billing" className="cursor-pointer">
+                    <DollarSign className="mr-2 h-4 w-4" />
+                    Billing
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/app/help" className="cursor-pointer">
+                    <HelpCircle className="mr-2 h-4 w-4" />
+                    Help & Support
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="cursor-pointer text-red-600 focus:text-red-600"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

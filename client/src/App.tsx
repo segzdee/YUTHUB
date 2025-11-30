@@ -42,6 +42,7 @@ const Properties = lazy(() => import('./pages/dashboard/Properties'));
 const ComplianceSafeguarding = lazy(() => import('./pages/dashboard/ComplianceSafeguarding'));
 const ReportsAnalytics = lazy(() => import('./pages/dashboard/ReportsAnalytics'));
 const SettingsAccount = lazy(() => import('./pages/dashboard/SettingsAccount'));
+const SettingsBilling = lazy(() => import('./pages/dashboard/SettingsBilling'));
 const Landing = lazy(() => import('./pages/Landing'));
 const Features = lazy(() => import('./pages/Features'));
 const HowItWorks = lazy(() => import('./pages/HowItWorks'));
@@ -176,7 +177,7 @@ function App() {
                             <Route path='dashboard/reports/analytics' element={<ReportsAnalytics />} />
                             <Route path='dashboard/reports/financials' element={<Financials />} />
                             <Route path='dashboard/settings/account' element={<SettingsAccount />} />
-                            <Route path='dashboard/settings/billing' element={<Billing />} />
+                            <Route path='dashboard/settings/billing' element={<SettingsBilling />} />
                           </Route>
 
                           {/* Platform admin routes */}

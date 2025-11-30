@@ -16,10 +16,12 @@ import { AuthProvider } from './contexts/AuthContext';
 import { LanguageProvider } from './components/providers/LanguageProvider';
 import { ThemeProvider } from './components/providers/ThemeProvider';
 import { Toaster } from './components/ui/toaster';
+import { Toaster as Sonner } from './components/ui/sonner';
 import { TooltipProvider } from './components/ui/tooltip';
 
 // Lazy load components for better performance
 const Dashboard = lazy(() => import('./pages/Dashboard'));
+const DashboardExample = lazy(() => import('./pages/DashboardExample'));
 const Housing = lazy(() => import('./pages/Housing'));
 const Support = lazy(() => import('./pages/Support'));
 const Independence = lazy(() => import('./pages/Independence'));
@@ -155,6 +157,7 @@ function App() {
                               element={<Navigate to='/app/dashboard' replace />}
                             />
                             <Route path='dashboard' element={<Dashboard />} />
+                            <Route path='dashboard-example' element={<DashboardExample />} />
                             <Route path='housing' element={<Housing />} />
                             <Route path='support' element={<Support />} />
                             <Route
@@ -192,6 +195,7 @@ function App() {
                     </div>
 
                     <Toaster />
+                    <Sonner />
                   </Router>
                 </TooltipProvider>
               </AuthProvider>

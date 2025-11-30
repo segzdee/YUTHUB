@@ -37,14 +37,14 @@ export const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
+                <Link to="/security" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
                   Security
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
+                <Link to="/status" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
                   Status
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -54,24 +54,24 @@ export const Footer: React.FC = () => {
             <h3 className="text-xs font-700 uppercase tracking-wider text-white mb-6">Company</h3>
             <ul className="space-y-3.5">
               <li>
-                <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
+                <Link to="/about" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
                   About
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
+                <Link to="/blog" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
                   Blog
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
+                <Link to="/careers" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
                   Careers
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
+                <Link to="/contact" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
                   Contact
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -96,9 +96,9 @@ export const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <a href="#" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
+                <Link to="/gdpr" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
                   GDPR
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

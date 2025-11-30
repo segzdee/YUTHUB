@@ -44,6 +44,13 @@ const Terms = lazy(() => import('./pages/Terms'));
 const Accessibility = lazy(() => import('./pages/Accessibility'));
 const Cookies = lazy(() => import('./pages/Cookies'));
 const Subscribe = lazy(() => import('./pages/Subscribe'));
+const Security = lazy(() => import('./pages/Security'));
+const Status = lazy(() => import('./pages/Status'));
+const About = lazy(() => import('./pages/About'));
+const Blog = lazy(() => import('./pages/Blog'));
+const Careers = lazy(() => import('./pages/Careers'));
+const Contact = lazy(() => import('./pages/Contact'));
+const GDPR = lazy(() => import('./pages/GDPR'));
 const AuthLogin = lazy(() => import('./pages/AuthLogin'));
 // NotFound page will be created if needed
 const NotFound = () => (
@@ -126,6 +133,13 @@ function App() {
                           <Route path='/accessibility' element={<Accessibility />} />
                           <Route path='/cookies' element={<Cookies />} />
                           <Route path='/subscribe' element={<Subscribe />} />
+                          <Route path='/security' element={<Security />} />
+                          <Route path='/status' element={<Status />} />
+                          <Route path='/about' element={<About />} />
+                          <Route path='/blog' element={<Blog />} />
+                          <Route path='/careers' element={<Careers />} />
+                          <Route path='/contact' element={<Contact />} />
+                          <Route path='/gdpr' element={<GDPR />} />
 
                           {/* Protected application routes */}
                           <Route

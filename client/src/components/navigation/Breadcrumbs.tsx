@@ -24,11 +24,11 @@ export function Breadcrumbs({
   showHome = true,
   separator = <ChevronRight className='h-4 w-4' />,
 }: BreadcrumbsProps) {
-  const [location] = useLocation();
+  const location = useLocation();
   const { t, direction } = useLanguage();
 
   // Auto-generate breadcrumbs from current location if not provided
-  const breadcrumbItems = items || generateBreadcrumbs(location, t);
+  const breadcrumbItems = items || generateBreadcrumbs(location.pathname, t);
 
   return (
     <nav

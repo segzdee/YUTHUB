@@ -1,6 +1,6 @@
 import * as React from "react"
 import { Outlet, useLocation, Link } from "react-router-dom"
-import { Search, Bell, User } from "lucide-react"
+import { Search, Bell } from "lucide-react"
 
 import { AppSidebar } from "@/components/app-sidebar"
 import { CommandMenu } from "@/components/command-menu"
@@ -27,6 +27,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuth } from "@/hooks/useAuth"
 
 interface DashboardShellProps {
@@ -36,23 +37,21 @@ interface DashboardShellProps {
 
 const routeLabels: Record<string, string> = {
   dashboard: "Dashboard",
-  housing: "Housing",
-  support: "Support",
-  independence: "Independence",
-  analytics: "Analytics",
+  residents: "Residents",
+  intake: "Resident Intake",
+  "support-plans": "Support Plans",
+  properties: "Properties",
+  register: "Property Registration",
+  compliance: "Compliance",
   safeguarding: "Safeguarding",
-  crisis: "Crisis",
-  financials: "Financials",
-  billing: "Billing",
-  forms: "Forms",
+  incidents: "Incident Reports",
+  progress: "Progress Tracking",
   reports: "Reports",
+  analytics: "Analytics",
+  financials: "Financials",
   settings: "Settings",
-  help: "Help",
-  "resident-intake": "Resident Intake",
-  "support-plan": "Support Plan",
-  "property-registration": "Property Registration",
-  "incident-report": "Incident Report",
-  "progress-tracking": "Progress Tracking",
+  account: "Account Settings",
+  billing: "Billing",
 }
 
 export function DashboardShell({ children, breadcrumbs: customBreadcrumbs }: DashboardShellProps) {
@@ -130,14 +129,23 @@ export function DashboardShell({ children, breadcrumbs: customBreadcrumbs }: Das
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon" className="h-8 w-8">
-                  <User className="h-4 w-4" />
-                  <span className="sr-only">User menu</span>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user?.avatar || undefined} alt={user?.email || "User"} />
+                    <AvatarFallback>
+                      {user?.email ? user.email.substring(0, 2).toUpperCase() : "U"}
+                    </AvatarFallback>
+                  </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>
-                  {user?.email || "My Account"}
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{user?.email || "User"}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user?.email || "user@example.com"}
+                    </p>
+                  </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>

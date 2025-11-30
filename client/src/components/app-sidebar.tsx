@@ -3,19 +3,17 @@ import {
   LayoutDashboard,
   Users,
   Building2,
-  Shield,
-  FileText,
+  ShieldCheck,
+  BarChart3,
   Settings,
   ChevronRight,
-  Home,
   UserPlus,
   FileCheck,
+  Home,
   AlertTriangle,
   TrendingUp,
   DollarSign,
-  ClipboardList,
   Heart,
-  Scale,
   HelpCircle,
 } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
@@ -55,17 +53,17 @@ const navItems = [
     items: [
       {
         title: "All Residents",
-        url: "/app/housing",
+        url: "/app/dashboard/residents",
         icon: Users,
       },
       {
         title: "Resident Intake",
-        url: "/app/forms/resident-intake",
+        url: "/app/dashboard/residents/intake",
         icon: UserPlus,
       },
       {
         title: "Support Plans",
-        url: "/app/forms/support-plan",
+        url: "/app/dashboard/residents/support-plans",
         icon: FileCheck,
       },
     ],
@@ -76,54 +74,54 @@ const navItems = [
     items: [
       {
         title: "All Properties",
-        url: "/app/housing",
+        url: "/app/dashboard/properties",
         icon: Building2,
       },
       {
         title: "Property Registration",
-        url: "/app/forms/property-registration",
+        url: "/app/dashboard/properties/register",
         icon: Home,
       },
     ],
   },
   {
     title: "Compliance",
-    icon: Shield,
+    icon: ShieldCheck,
     items: [
       {
         title: "Safeguarding",
-        url: "/app/safeguarding",
-        icon: Shield,
+        url: "/app/dashboard/compliance/safeguarding",
+        icon: ShieldCheck,
       },
       {
         title: "Incident Reports",
-        url: "/app/forms/incident-report",
+        url: "/app/dashboard/compliance/incidents",
         icon: AlertTriangle,
       },
       {
         title: "Progress Tracking",
-        url: "/app/forms/progress-tracking",
+        url: "/app/dashboard/compliance/progress",
         icon: TrendingUp,
       },
     ],
   },
   {
     title: "Reports",
-    icon: FileText,
+    icon: BarChart3,
     items: [
       {
         title: "All Reports",
-        url: "/app/reports",
-        icon: FileText,
+        url: "/app/dashboard/reports",
+        icon: BarChart3,
       },
       {
         title: "Analytics",
-        url: "/app/analytics",
+        url: "/app/dashboard/reports/analytics",
         icon: TrendingUp,
       },
       {
         title: "Financials",
-        url: "/app/financials",
+        url: "/app/dashboard/reports/financials",
         icon: DollarSign,
       },
     ],
@@ -134,12 +132,12 @@ const navItems = [
     items: [
       {
         title: "Account Settings",
-        url: "/app/settings",
+        url: "/app/dashboard/settings/account",
         icon: Settings,
       },
       {
         title: "Billing",
-        url: "/app/billing",
+        url: "/app/dashboard/settings/billing",
         icon: DollarSign,
       },
     ],

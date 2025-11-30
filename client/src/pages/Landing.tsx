@@ -17,14 +17,14 @@ const Landing: React.FC = () => {
                 Early Partner Program - Limited Spots
               </Badge>
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-800 text-black leading-[1.1] tracking-tight">
-                Stop juggling spreadsheets.
+                More time caring.
                 <br />
-                <span className="text-gray-700">Manage youth housing with one platform.</span>
+                <span className="text-gray-700">Less time on paperwork.</span>
               </h1>
             </div>
 
             <p className="text-xl sm:text-2xl font-400 text-gray-700 max-w-3xl mx-auto leading-relaxed">
-              Unite your team, streamline compliance, and deliver exceptional care—all from one purpose-built platform designed for UK youth housing providers.
+              The complete platform that helps UK youth housing providers deliver life-changing support while staying compliant—without the administrative burden.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">

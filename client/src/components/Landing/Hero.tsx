@@ -44,9 +44,9 @@ export default function Hero() {
             className='mb-6 max-w-4xl mx-auto'
             color='primary'
           >
-            Transform Young Lives Through
+            More Time Caring.
             <span className='block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent'>
-              Smarter Housing Support
+              Less Time on Paperwork.
             </span>
           </Typography>
 
@@ -56,10 +56,9 @@ export default function Hero() {
             className='text-lg sm:text-xl max-w-3xl mx-auto mb-8 leading-relaxed'
             color='muted'
           >
-            YUTHUB is the comprehensive platform for youth housing
-            organizations. Streamline support services, track independence
-            pathways, and ensure safeguarding compliance - all in one powerful
-            system.
+            The complete platform that helps UK youth housing providers deliver
+            life-changing support while staying compliant—without the
+            administrative burden.
           </Typography>
 
           {/* CTA buttons */}

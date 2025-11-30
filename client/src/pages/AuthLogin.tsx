@@ -248,8 +248,44 @@ const AuthLogin: React.FC<AuthLoginProps> = ({
       });
 
       if (signInError) {
-        setError(signInError.message || 'Demo login failed. Please try again.');
-        setIsLoading(false);
+        if (signInError.message.includes('Invalid') || signInError.message.includes('credentials')) {
+          setError('Creating demo account... Please wait.');
+
+          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+            email: 'demo.admin@yuthub.com',
+            password: 'Demo2025!Admin',
+            options: {
+              data: {
+                first_name: 'Admin',
+                last_name: 'Demo',
+                role: 'admin',
+                full_name: 'Admin Demo',
+              },
+            },
+          });
+
+          if (signUpError) {
+            setError(signUpError.message || 'Failed to create demo account.');
+            setIsLoading(false);
+            return;
+          }
+
+          const { data: retryData, error: retryError } = await supabase.auth.signInWithPassword({
+            email: 'demo.admin@yuthub.com',
+            password: 'Demo2025!Admin',
+          });
+
+          if (retryError) {
+            setError('Demo account created! Please click the button again to login.');
+            setIsLoading(false);
+            return;
+          }
+
+          navigate('/dashboard');
+        } else {
+          setError(signInError.message || 'Demo login failed. Please try again.');
+          setIsLoading(false);
+        }
       } else {
         navigate('/dashboard');
       }

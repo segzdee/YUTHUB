@@ -44,9 +44,9 @@ export default function UniversalFooter() {
               size='sm'
               variant='default'
               showText={true}
-              showSlogan={true}
+              showSlogan={false}
               className='mb-1'
-              aria-label='YUTHUB - Empowering Youth. Building Futures.'
+              aria-label='YUTHUB'
             />
             <div className='flex items-center space-x-1 text-xs text-slate-600'>
               <Mail className='h-3 w-3 text-blue-500' aria-hidden='true' />

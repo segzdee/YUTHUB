@@ -17,7 +17,7 @@ export const Footer: React.FC = () => {
                 size="sm"
                 variant="dark"
                 showText={true}
-                showSlogan={true}
+                showSlogan={false}
               />
             </Link>
             <p className="text-sm font-400 text-gray-400 leading-relaxed max-w-xs">

@@ -60,13 +60,14 @@ export default function BrandLogo({
   const variantStyles = variantConfig[variant];
 
   return (
-    <div className={cn('flex items-center gap-3', className)}>
+    <div className={cn('flex items-start gap-3', className)}>
       <div
         className={cn(
           'relative rounded-xl bg-gradient-to-br shadow-lg',
           variantStyles.gradient,
           sizeStyles.logo,
-          'flex items-center justify-center flex-shrink-0'
+          'flex items-center justify-center flex-shrink-0',
+          showSlogan ? 'mt-1' : ''
         )}
         aria-hidden='true'
       >
@@ -93,10 +94,10 @@ export default function BrandLogo({
         </svg>
       </div>
       {showText && (
-        <div className='flex flex-col'>
+        <div className='flex flex-col justify-start'>
           <span
             className={cn(
-              'font-bold tracking-tight leading-none',
+              'font-bold tracking-tight leading-tight',
               sizeStyles.text,
               variantStyles.text
             )}
@@ -106,7 +107,7 @@ export default function BrandLogo({
           {showSlogan && (
             <span
               className={cn(
-                'font-medium tracking-wide uppercase mt-0.5',
+                'font-medium tracking-wide uppercase mt-1',
                 sizeStyles.slogan,
                 variantStyles.slogan
               )}

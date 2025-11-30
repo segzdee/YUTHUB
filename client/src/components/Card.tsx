@@ -99,14 +99,14 @@ export const PricingCard: React.FC<PricingCardProps> = ({
     <Card
       hoverable={false}
       className={`relative flex flex-col ${
-        isPopular ? 'ring-2 ring-accent-500 scale-105' : ''
+        isPopular ? 'ring-4 ring-blue-600 shadow-xl scale-[1.05] bg-gradient-to-b from-blue-50 to-white' : ''
       }`}
       padded="lg"
     >
       {isPopular && (
         <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
-          <span className="bg-accent-500 text-white text-xs font-600 px-3 py-1 rounded-full">
-            Popular
+          <span className="bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-700 px-4 py-1.5 rounded-full shadow-lg">
+            Most Popular
           </span>
         </div>
       )}
@@ -118,17 +118,17 @@ export const PricingCard: React.FC<PricingCardProps> = ({
 
       {price && (
         <div className="mb-6">
-          <span className="text-5xl font-600 text-black">${price}</span>
+          <span className="text-5xl font-600 text-black">£{price}</span>
           <span className="text-base font-400 text-gray-600 ml-2">/mo</span>
         </div>
       )}
 
       <button
         onClick={onCtaClick}
-        className={`w-full py-3 rounded-lg font-500 transition-all duration-150 mb-6 ${
+        className={`w-full py-3 rounded-lg font-600 transition-all duration-150 mb-6 ${
           isPopular
-            ? 'bg-gradient-to-r from-accent-500 to-accent-600 text-white hover:opacity-95'
-            : 'bg-transparent border border-gray-200 text-black hover:bg-gray-50'
+            ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:shadow-lg hover:scale-105'
+            : 'bg-transparent border-2 border-gray-300 text-black hover:bg-gray-50 hover:border-gray-400'
         }`}
       >
         {cta}

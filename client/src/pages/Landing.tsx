@@ -4,6 +4,7 @@ import { PublicPageLayout } from '../components/PageLayout';
 import { Button } from '../components/Button';
 import { Card, FeatureCard, PricingCard } from '../components/Card';
 import { Badge } from '../components/Badge';
+import { Users, Home, CheckCircle, Clock } from 'lucide-react';
 
 const Landing: React.FC = () => {
   return (
@@ -14,8 +15,8 @@ const Landing: React.FC = () => {
           <div className="text-center space-y-8">
             <div className="space-y-6">
               <div className="inline-flex items-center justify-center">
-                <Badge variant="secondary" size="md" className="px-4 py-2 bg-gradient-to-r from-blue-500 to-teal-500 text-white font-600 text-sm rounded-full shadow-md hover:shadow-lg transition-all duration-300 animate-pulse">
-                  🎯 Early Partner Program - Limited Spots
+                <Badge variant="secondary" size="md" className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-600 text-sm rounded-full shadow-md hover:shadow-lg transition-all duration-300">
+                  ⚡ Early Partner Program - Limited Spots
                 </Badge>
               </div>
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-800 text-black leading-[1.1] tracking-tight">
@@ -44,16 +45,18 @@ const Landing: React.FC = () => {
 
             {/* Stats Bar */}
             <div className="pt-16 mt-8">
-              <div className="bg-gradient-to-r from-blue-50 via-white to-teal-50 rounded-2xl border border-gray-200 shadow-sm py-8 px-6">
+              <div className="bg-gradient-to-r from-blue-50 via-white to-blue-50 rounded-2xl border border-blue-200 shadow-sm py-8 px-6">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                   {[
-                    { number: "500+", label: "Young people supported", icon: "👥" },
-                    { number: "50+", label: "Properties managed", icon: "🏠" },
-                    { number: "98%", label: "Compliance rate", icon: "✅" },
-                    { number: "10hrs", label: "Saved per week", icon: "⏰" },
+                    { number: "500+", label: "Young people supported", Icon: Users },
+                    { number: "50+", label: "Properties managed", Icon: Home },
+                    { number: "98%", label: "Compliance rate", Icon: CheckCircle },
+                    { number: "10hrs", label: "Saved per week", Icon: Clock },
                   ].map((stat) => (
                     <div key={stat.label} className="text-center">
-                      <div className="text-2xl mb-2">{stat.icon}</div>
+                      <div className="flex justify-center mb-3">
+                        <stat.Icon className="w-8 h-8 text-blue-600" />
+                      </div>
                       <div className="text-3xl sm:text-4xl font-700 text-black mb-1">{stat.number}</div>
                       <div className="text-sm font-500 text-gray-600">{stat.label}</div>
                     </div>

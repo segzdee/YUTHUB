@@ -31,6 +31,7 @@
     "setup:oauth": "node scripts/configure-oauth.js",
     "populate:councils": "npx tsx scripts/populate-uk-councils.ts",
     "seed:admin": "npx tsx scripts/seed-platform-admin.ts",
+    "setup:stripe": "npx tsx scripts/setup-stripe-products-updated.ts",
     "deploy": "npm run build && npm start",
     "prepare": "husky install"
   },

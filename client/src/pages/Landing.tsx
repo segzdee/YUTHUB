@@ -4,7 +4,8 @@ import { PublicPageLayout } from '../components/PageLayout';
 import { Button } from '../components/Button';
 import { Card, FeatureCard, PricingCard } from '../components/Card';
 import { Badge } from '../components/Badge';
-import { Users, Home, CheckCircle, Clock } from 'lucide-react';
+import BrandLogo from '../components/design-system/BrandLogo';
+import { Users, Home, CheckCircle, Clock, Building2, UserCheck, Shield, TrendingUp, BarChart3, Network } from 'lucide-react';
 
 const Landing: React.FC = () => {
   return (
@@ -14,15 +15,20 @@ const Landing: React.FC = () => {
         <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-32 max-w-7xl mx-auto">
           <div className="text-center space-y-8">
             <div className="space-y-6">
+              {/* Brand Logo with Slogan */}
+              <div className="flex justify-center mb-8">
+                <BrandLogo size='xl' variant='default' showText={true} showSlogan={true} />
+              </div>
+
               <div className="inline-flex items-center justify-center">
-                <Badge variant="secondary" size="md" className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-600 text-sm rounded-full shadow-md hover:shadow-lg transition-all duration-300">
+                <Badge variant="secondary" size="md" className="px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-600 text-sm rounded-full shadow-md hover:shadow-lg transition-all duration-300">
                   ⚡ Early Partner Program - Limited Spots
                 </Badge>
               </div>
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-800 text-black leading-[1.1] tracking-tight">
-                More time caring.
+                More Time Caring.
                 <br />
-                <span className="text-gray-700">Less time on paperwork.</span>
+                <span className="text-gray-700">Less Time on Paperwork.</span>
               </h1>
             </div>
 
@@ -81,32 +87,32 @@ const Landing: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               <FeatureCard
-                icon="🏠"
+                icon={<Building2 className="w-10 h-10 text-blue-600" />}
                 title="Property Management"
                 description="See real-time occupancy across all locations. Schedule inspections, track maintenance, and ensure compliance—without the spreadsheet chaos."
               />
               <FeatureCard
-                icon="👥"
+                icon={<UserCheck className="w-10 h-10 text-blue-600" />}
                 title="Resident Profiles"
                 description="Complete resident records with support plans, progress notes, and risk assessments all in one place. Access critical information instantly."
               />
               <FeatureCard
-                icon="🛡️"
+                icon={<Shield className="w-10 h-10 text-blue-600" />}
                 title="Safeguarding"
                 description="Log incidents, track follow-ups, and maintain compliance audit trails. Never miss a safeguarding requirement with automated alerts."
               />
               <FeatureCard
-                icon="💰"
+                icon={<TrendingUp className="w-10 h-10 text-blue-600" />}
                 title="Financial Management"
                 description="Track rent payments, manage budgets, and generate financial reports with confidence. Full transparency for residents and auditors."
               />
               <FeatureCard
-                icon="📊"
+                icon={<BarChart3 className="w-10 h-10 text-blue-600" />}
                 title="Analytics & Insights"
                 description="Measure outcomes, track KPIs, and demonstrate impact. Real-time dashboards that help you make data-driven decisions."
               />
               <FeatureCard
-                icon="🔄"
+                icon={<Network className="w-10 h-10 text-blue-600" />}
                 title="Seamless Collaboration"
                 description="Connect housing managers, support workers, and external partners. Secure messaging, task assignments, and shared documentation."
               />
@@ -175,7 +181,11 @@ const Landing: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               <Card padded="lg" hoverable={false}>
                 <div className="text-center space-y-3">
-                  <div className="text-4xl mb-2">🔒</div>
+                  <div className="flex justify-center mb-2">
+                    <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center">
+                      <Shield className="w-7 h-7 text-blue-600" />
+                    </div>
+                  </div>
                   <h3 className="text-lg font-600 text-black">Bank-Level Encryption</h3>
                   <p className="text-sm font-400 text-gray-600 leading-relaxed">
                     AES-256 encryption at rest and in transit protects all data
@@ -185,7 +195,11 @@ const Landing: React.FC = () => {
 
               <Card padded="lg" hoverable={false}>
                 <div className="text-center space-y-3">
-                  <div className="text-4xl mb-2">✔️</div>
+                  <div className="flex justify-center mb-2">
+                    <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center">
+                      <CheckCircle className="w-7 h-7 text-green-600" />
+                    </div>
+                  </div>
                   <h3 className="text-lg font-600 text-black">GDPR Compliant</h3>
                   <p className="text-sm font-400 text-gray-600 leading-relaxed">
                     Full compliance with UK data protection laws and regulations
@@ -195,7 +209,11 @@ const Landing: React.FC = () => {
 
               <Card padded="lg" hoverable={false}>
                 <div className="text-center space-y-3">
-                  <div className="text-4xl mb-2">🛡️</div>
+                  <div className="flex justify-center mb-2">
+                    <div className="w-14 h-14 rounded-full bg-purple-100 flex items-center justify-center">
+                      <Shield className="w-7 h-7 text-purple-600" />
+                    </div>
+                  </div>
                   <h3 className="text-lg font-600 text-black">Regular Audits</h3>
                   <p className="text-sm font-400 text-gray-600 leading-relaxed">
                     Penetration tested quarterly by independent security experts
@@ -205,7 +223,11 @@ const Landing: React.FC = () => {
 
               <Card padded="lg" hoverable={false}>
                 <div className="text-center space-y-3">
-                  <div className="text-4xl mb-2">📋</div>
+                  <div className="flex justify-center mb-2">
+                    <div className="w-14 h-14 rounded-full bg-teal-100 flex items-center justify-center">
+                      <CheckCircle className="w-7 h-7 text-teal-600" />
+                    </div>
+                  </div>
                   <h3 className="text-lg font-600 text-black">Ofsted Aligned</h3>
                   <p className="text-sm font-400 text-gray-600 leading-relaxed">
                     Purpose-built to support regulatory compliance requirements
@@ -244,7 +266,7 @@ const Landing: React.FC = () => {
                   'Basic reporting dashboard',
                   'Email support (business hours)',
                   'Community forum access',
-                  '14-day free trial',
+                  '30-day free trial',
                 ]}
                 cta="Start free trial"
                 onCtaClick={() => console.log('Starter clicked')}
@@ -404,7 +426,7 @@ const Landing: React.FC = () => {
 
             <div className="pt-6 space-y-2">
               <p className="text-sm font-500 text-gray-700">
-                No credit card required · 14-day free trial · Setup in under 5 minutes
+                No credit card required · 30-day free trial · Setup in under 5 minutes
               </p>
               <p className="text-xs font-400 text-gray-500">
                 Cancel anytime. Your data stays yours.

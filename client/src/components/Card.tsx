@@ -55,7 +55,7 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
 }) => {
   const content = (
     <>
-      <div className="text-3xl mb-4">{icon}</div>
+      <div className="flex justify-center mb-4">{icon}</div>
       <h3 className="text-2xl font-600 text-black mb-2">{title}</h3>
       <p className="text-base font-400 text-gray-600">{description}</p>
     </>

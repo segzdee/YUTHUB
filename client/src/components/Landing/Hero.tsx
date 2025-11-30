@@ -1,7 +1,8 @@
 import { Typography } from '@/components/design-system/Typography';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Play, Shield, Star, Users } from 'lucide-react';
+import BrandLogo from '@/components/design-system/BrandLogo';
+import { ArrowRight, Play, Shield, Star, Building2 } from 'lucide-react';
 
 export default function Hero() {
   const handleGetStarted = () => {
@@ -22,15 +23,20 @@ export default function Hero() {
 
       <div className='relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='text-center'>
+          {/* Brand Logo with Slogan */}
+          <div className='flex justify-center mb-8'>
+            <BrandLogo size='xl' variant='default' showText={true} showSlogan={true} />
+          </div>
+
           {/* Trust indicators */}
-          <div className='flex justify-center items-center gap-6 mb-8'>
+          <div className='flex flex-wrap justify-center items-center gap-4 mb-8'>
             <Badge variant='secondary' className='flex items-center gap-2' aria-label='GDPR Compliant certification'>
               <Shield className='h-4 w-4' aria-hidden='true' />
               <span>GDPR Compliant</span>
             </Badge>
-            <Badge variant='secondary' className='flex items-center gap-2' aria-label='Trusted by over 500 organisations'>
-              <Users className='h-4 w-4' aria-hidden='true' />
-              <span>500+ Organisations</span>
+            <Badge variant='secondary' className='flex items-center gap-2' aria-label='Trusted by over 500 housing organisations'>
+              <Building2 className='h-4 w-4' aria-hidden='true' />
+              <span>500+ Properties</span>
             </Badge>
             <Badge variant='secondary' className='flex items-center gap-2' aria-label='Average rating 4.8 out of 5 stars'>
               <Star className='h-4 w-4' aria-hidden='true' />

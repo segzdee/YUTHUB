@@ -207,6 +207,26 @@ const AuthLogin: React.FC<AuthLoginProps> = ({
     }, 2000);
   };
 
+  const handleDemoLogin = async (): Promise<void> => {
+    setIsLoading(true);
+    setError(null);
+
+    // Set demo credentials
+    setFormData({
+      email: 'demo.admin@yuthub.com',
+      password: 'Demo2025!Admin',
+      confirmPassword: '',
+      firstName: '',
+      lastName: '',
+    });
+
+    // Simulate demo login
+    setTimeout(() => {
+      setIsLoading(false);
+      alert('Demo login successful! Redirecting to dashboard...');
+    }, 1500);
+  };
+
   const handleSocialError = (error: string): void => {
     setError(error);
   };
@@ -463,20 +483,66 @@ const AuthLogin: React.FC<AuthLoginProps> = ({
             </div>
 
             {!isSignUp && (
-              <div className='text-center'>
+              <>
+                <div className='text-center'>
+                  <Button
+                    variant='link'
+                    className='p-0 h-auto text-sm text-gray-600 hover:underline'
+                    onClick={() =>
+                      alert(
+                        'Password reset functionality will be available soon.'
+                      )
+                    }
+                    disabled={isLoading}
+                  >
+                    Forgot your password?
+                  </Button>
+                </div>
+
+                <div className='relative'>
+                  <div className='absolute inset-0 flex items-center'>
+                    <span className='w-full border-t border-gray-300' />
+                  </div>
+                  <div className='relative flex justify-center text-xs uppercase'>
+                    <span className='bg-white px-3 text-gray-500 font-medium'>
+                      Quick Demo
+                    </span>
+                  </div>
+                </div>
+
                 <Button
-                  variant='link'
-                  className='p-0 h-auto text-sm text-gray-600 hover:underline'
-                  onClick={() =>
-                    alert(
-                      'Password reset functionality will be available soon.'
-                    )
-                  }
+                  onClick={handleDemoLogin}
+                  className='w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-md'
                   disabled={isLoading}
                 >
-                  Forgot your password?
+                  {isLoading ? (
+                    <div className='flex items-center space-x-2'>
+                      <div className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin'></div>
+                      <span>Logging in...</span>
+                    </div>
+                  ) : (
+                    <div className='flex items-center justify-center space-x-2'>
+                      <Zap className='h-4 w-4' />
+                      <span>Try Demo Account</span>
+                    </div>
+                  )}
                 </Button>
-              </div>
+
+                <div className='bg-blue-50 border border-blue-200 rounded-lg p-3'>
+                  <div className='flex items-start space-x-2'>
+                    <Info className='h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0' />
+                    <div className='text-xs text-blue-800'>
+                      <p className='font-medium mb-1'>Demo Account Info</p>
+                      <p>Explore full admin access with pre-loaded sample data</p>
+                      <ul className='mt-1 space-y-0.5 list-disc list-inside'>
+                        <li>2 properties</li>
+                        <li>5 residents</li>
+                        <li>Professional tier features</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </>
             )}
 
             <div className='text-center text-xs text-gray-500'>

@@ -47,20 +47,20 @@ export default function Hero() {
           {/* Main headline */}
           <Typography
             variant='h1'
-            className='mb-6 max-w-4xl mx-auto'
-            color='primary'
+            className='mb-8 max-w-4xl mx-auto text-center'
+            weight='bold'
           >
             More Time Caring.
-            <span className='block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent'>
+            <span className='block bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent'>
               Less Time on Paperwork.
             </span>
           </Typography>
 
           {/* Subheadline */}
           <Typography
-            variant='body1'
-            className='text-lg sm:text-xl max-w-3xl mx-auto mb-8 leading-relaxed'
-            color='muted'
+            variant='lead'
+            className='text-lg sm:text-xl max-w-3xl mx-auto mb-10 text-center text-slate-600'
+            weight='normal'
           >
             The complete platform that helps UK youth housing providers deliver
             life-changing support while staying compliant—without the
@@ -92,36 +92,36 @@ export default function Hero() {
           </div>
 
           {/* Value propositions */}
-          <div className='grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-2xl mx-auto'>
-            <div className='flex items-center justify-center gap-3 p-4 rounded-lg bg-white/80 backdrop-blur-sm border border-blue-200'>
+          <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto'>
+            <div className='flex items-center justify-center gap-3 p-4 rounded-lg bg-white/80 backdrop-blur-sm border border-slate-200 shadow-sm'>
               <div className='flex-shrink-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center'>
                 <span className='text-white text-sm font-bold'>
                   ✓
                 </span>
               </div>
-              <Typography variant='body2' weight='medium'>
+              <Typography variant='body2' weight='medium' className='text-slate-700'>
                 30-day free trial
               </Typography>
             </div>
 
-            <div className='flex items-center justify-center gap-3 p-4 rounded-lg bg-white/80 backdrop-blur-sm border border-blue-200'>
+            <div className='flex items-center justify-center gap-3 p-4 rounded-lg bg-white/80 backdrop-blur-sm border border-slate-200 shadow-sm'>
               <div className='flex-shrink-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center'>
                 <span className='text-white text-sm font-bold'>
                   ✓
                 </span>
               </div>
-              <Typography variant='body2' weight='medium'>
+              <Typography variant='body2' weight='medium' className='text-slate-700'>
                 No setup fees
               </Typography>
             </div>
 
-            <div className='flex items-center justify-center gap-3 p-4 rounded-lg bg-white/80 backdrop-blur-sm border border-blue-200'>
+            <div className='flex items-center justify-center gap-3 p-4 rounded-lg bg-white/80 backdrop-blur-sm border border-slate-200 shadow-sm'>
               <div className='flex-shrink-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center'>
                 <span className='text-white text-sm font-bold'>
                   ✓
                 </span>
               </div>
-              <Typography variant='body2' weight='medium'>
+              <Typography variant='body2' weight='medium' className='text-slate-700'>
                 Cancel anytime
               </Typography>
             </div>

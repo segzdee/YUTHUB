@@ -48,21 +48,21 @@ interface TypographyProps {
 }
 
 const variantStyles = {
-  h1: 'scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl',
-  h2: 'scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0',
-  h3: 'scroll-m-20 text-2xl font-semibold tracking-tight',
-  h4: 'scroll-m-20 text-xl font-semibold tracking-tight',
-  h5: 'scroll-m-20 text-lg font-semibold tracking-tight',
-  h6: 'scroll-m-20 text-base font-semibold tracking-tight',
-  body1: 'leading-7',
-  body2: 'text-sm leading-6',
-  lead: 'text-xl text-muted-foreground',
-  large: 'text-lg font-semibold',
-  small: 'text-sm font-medium leading-none',
-  muted: 'text-sm text-muted-foreground',
-  caption: 'text-xs text-muted-foreground',
+  h1: 'scroll-m-20 text-5xl md:text-6xl font-bold tracking-[-0.02em] leading-[1.2] antialiased',
+  h2: 'scroll-m-20 text-3xl md:text-4xl font-semibold tracking-[-0.02em] leading-[1.2] antialiased',
+  h3: 'scroll-m-20 text-2xl md:text-3xl font-semibold tracking-[-0.01em] leading-snug antialiased',
+  h4: 'scroll-m-20 text-xl md:text-2xl font-semibold tracking-[-0.01em] leading-snug antialiased',
+  h5: 'scroll-m-20 text-lg md:text-xl font-semibold leading-snug antialiased',
+  h6: 'scroll-m-20 text-base md:text-lg font-semibold leading-snug antialiased',
+  body1: 'text-base leading-[1.5] antialiased',
+  body2: 'text-sm leading-[1.5] antialiased',
+  lead: 'text-lg md:text-xl leading-[1.5] text-muted-foreground antialiased',
+  large: 'text-lg font-medium leading-[1.5] antialiased',
+  small: 'text-sm font-normal leading-[1.5] antialiased',
+  muted: 'text-sm text-muted-foreground leading-[1.5] antialiased',
+  caption: 'text-sm text-muted-foreground leading-normal antialiased',
   overline:
-    'text-xs uppercase font-medium tracking-wider text-muted-foreground',
+    'text-xs uppercase font-medium tracking-wider text-muted-foreground antialiased',
 };
 
 const colorStyles = {

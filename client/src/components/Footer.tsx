@@ -20,32 +20,32 @@ export const Footer: React.FC = () => {
                 showSlogan={false}
               />
             </Link>
-            <p className="text-sm font-400 text-gray-400 leading-relaxed max-w-xs">
+            <p className="text-sm font-normal text-gray-400 leading-relaxed max-w-xs">
               Comprehensive platform for youth housing organizations to manage properties, residents, and support services.
             </p>
           </div>
 
           {/* Product Links */}
           <div>
-            <h3 className="text-xs font-700 uppercase tracking-wider text-white mb-6">Product</h3>
-            <ul className="space-y-3.5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-white mb-6">Product</h3>
+            <ul className="space-y-3">
               <li>
-                <Link to="/platform" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
+                <Link to="/platform" className="text-sm font-normal text-gray-400 hover:text-white transition-colors duration-200 block leading-relaxed">
                   Features
                 </Link>
               </li>
               <li>
-                <Link to="/pricing" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
+                <Link to="/pricing" className="text-sm font-normal text-gray-400 hover:text-white transition-colors duration-200 block leading-relaxed">
                   Pricing
                 </Link>
               </li>
               <li>
-                <Link to="/security" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
+                <Link to="/security" className="text-sm font-normal text-gray-400 hover:text-white transition-colors duration-200 block leading-relaxed">
                   Security
                 </Link>
               </li>
               <li>
-                <Link to="/status" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
+                <Link to="/status" className="text-sm font-normal text-gray-400 hover:text-white transition-colors duration-200 block leading-relaxed">
                   Status
                 </Link>
               </li>
@@ -54,25 +54,25 @@ export const Footer: React.FC = () => {
 
           {/* Company Links */}
           <div>
-            <h3 className="text-xs font-700 uppercase tracking-wider text-white mb-6">Company</h3>
-            <ul className="space-y-3.5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-white mb-6">Company</h3>
+            <ul className="space-y-3">
               <li>
-                <Link to="/about" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
+                <Link to="/about" className="text-sm font-normal text-gray-400 hover:text-white transition-colors duration-200 block leading-relaxed">
                   About
                 </Link>
               </li>
               <li>
-                <Link to="/blog" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
+                <Link to="/blog" className="text-sm font-normal text-gray-400 hover:text-white transition-colors duration-200 block leading-relaxed">
                   Blog
                 </Link>
               </li>
               <li>
-                <Link to="/careers" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
+                <Link to="/careers" className="text-sm font-normal text-gray-400 hover:text-white transition-colors duration-200 block leading-relaxed">
                   Careers
                 </Link>
               </li>
               <li>
-                <Link to="/contact" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
+                <Link to="/contact" className="text-sm font-normal text-gray-400 hover:text-white transition-colors duration-200 block leading-relaxed">
                   Contact
                 </Link>
               </li>
@@ -81,25 +81,25 @@ export const Footer: React.FC = () => {
 
           {/* Legal Links */}
           <div>
-            <h3 className="text-xs font-700 uppercase tracking-wider text-white mb-6">Legal</h3>
-            <ul className="space-y-3.5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-white mb-6">Legal</h3>
+            <ul className="space-y-3">
               <li>
-                <Link to="/privacy" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
+                <Link to="/privacy" className="text-sm font-normal text-gray-400 hover:text-white transition-colors duration-200 block leading-relaxed">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link to="/terms" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
+                <Link to="/terms" className="text-sm font-normal text-gray-400 hover:text-white transition-colors duration-200 block leading-relaxed">
                   Terms of Service
                 </Link>
               </li>
               <li>
-                <Link to="/cookies" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
+                <Link to="/cookies" className="text-sm font-normal text-gray-400 hover:text-white transition-colors duration-200 block leading-relaxed">
                   Cookie Policy
                 </Link>
               </li>
               <li>
-                <Link to="/gdpr" className="text-sm font-400 text-gray-400 hover:text-white transition-colors duration-200 block">
+                <Link to="/gdpr" className="text-sm font-normal text-gray-400 hover:text-white transition-colors duration-200 block leading-relaxed">
                   GDPR
                 </Link>
               </li>
@@ -112,7 +112,7 @@ export const Footer: React.FC = () => {
 
         {/* Bottom Footer */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-8">
-          <p className="text-xs font-400 text-gray-500">
+          <p className="text-sm font-normal text-gray-500">
             © {currentYear} YUTHUB. All rights reserved.
           </p>
 

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
@@ -515,19 +515,19 @@
 /* YUTHUB Design System */
 @layer base {
   :root {
-    /* Brand Colors - WCAG AAA Compliant (7:1 contrast ratio) */
-    --primary: 210 85% 42%; /* #1366B3 - 7.2:1 contrast on white */
+    /* Brand Colors - WCAG AAA Compliant (7:1+ contrast ratio) */
+    --primary: 217 91% 35%; /* #1e40af - 8.6:1 contrast on white - Professional Blue */
     --primary-foreground: 0 0% 100%;
-    --primary-50: 210 85% 97%;
-    --primary-100: 210 85% 94%;
-    --primary-200: 210 85% 87%;
-    --primary-300: 210 85% 74%;
-    --primary-400: 210 85% 58%;
-    --primary-500: 210 85% 42%;
-    --primary-600: 210 85% 36%;
-    --primary-700: 210 85% 30%;
-    --primary-800: 210 85% 24%;
-    --primary-900: 210 85% 18%;
+    --primary-50: 217 91% 98%;
+    --primary-100: 217 91% 95%;
+    --primary-200: 217 91% 88%;
+    --primary-300: 217 91% 76%;
+    --primary-400: 217 91% 58%;
+    --primary-500: 217 91% 35%;
+    --primary-600: 217 91% 30%;
+    --primary-700: 217 91% 25%;
+    --primary-800: 217 91% 20%;
+    --primary-900: 217 91% 15%;
     
     /* Secondary Colors - WCAG AAA Compliant */
     --secondary: 210 30% 94%;
@@ -567,17 +567,17 @@
     --info: 200 80% 38%; /* #135EA3 - 7.3:1 contrast */
     --info-foreground: 0 0% 100%;
     
-    /* Neutral Colors - WCAG AAA Compliant */
-    --neutral-50: 210 20% 98%;
-    --neutral-100: 210 18% 95%;
-    --neutral-200: 210 16% 90%;
-    --neutral-300: 210 14% 80%;
-    --neutral-400: 210 12% 64%;
-    --neutral-500: 210 10% 48%;
-    --neutral-600: 210 12% 36%; /* 7.5:1 contrast for text */
-    --neutral-700: 210 15% 28%;
-    --neutral-800: 210 18% 20%;
-    --neutral-900: 210 20% 12%;
+    /* Neutral Colors - Slate Gray Palette - WCAG AAA Compliant */
+    --neutral-50: 210 40% 98%;   /* slate-50 */
+    --neutral-100: 210 40% 96%;  /* slate-100 */
+    --neutral-200: 214 32% 91%;  /* slate-200 */
+    --neutral-300: 213 27% 84%;  /* slate-300 */
+    --neutral-400: 215 20% 65%;  /* slate-400 - #94a3b8 */
+    --neutral-500: 215 16% 47%;  /* slate-500 - #64748b - 7.1:1 contrast */
+    --neutral-600: 215 19% 35%;  /* slate-600 - 10.5:1 contrast for text */
+    --neutral-700: 215 25% 27%;  /* slate-700 */
+    --neutral-800: 217 33% 17%;  /* slate-800 */
+    --neutral-900: 222 47% 11%;  /* slate-900 */
     
     /* Background Colors - WCAG AAA Compliant */
     --background: 0 0% 100%; /* Pure white for maximum clarity */

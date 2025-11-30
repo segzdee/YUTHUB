@@ -86,14 +86,14 @@ export default function UniversalFooter() {
 
           {/* Platform Links */}
           <div>
-            <h4 className='font-medium mb-1 text-slate-900 text-xs'>Platform</h4>
+            <h4 className='font-semibold mb-2 text-slate-900 text-xs uppercase tracking-wider'>Platform</h4>
             <nav role='navigation' aria-label='Platform links'>
-              <ul className='space-y-1'>
+              <ul className='space-y-2'>
                 {footerLinks.platform.map(link => (
                   <li key={link.name}>
                     <a
                       href={link.href}
-                      className='text-slate-600 hover:text-blue-600 text-xs transition-colors hover:underline'
+                      className='text-slate-600 hover:text-blue-600 text-sm transition-colors hover:underline leading-relaxed'
                     >
                       {link.name}
                     </a>
@@ -105,14 +105,14 @@ export default function UniversalFooter() {
 
           {/* Company Links */}
           <div>
-            <h4 className='font-medium mb-1 text-slate-900 text-xs'>Company</h4>
+            <h4 className='font-semibold mb-2 text-slate-900 text-xs uppercase tracking-wider'>Company</h4>
             <nav role='navigation' aria-label='Company links'>
-              <ul className='space-y-1'>
+              <ul className='space-y-2'>
                 {footerLinks.company.map(link => (
                   <li key={link.name}>
                     <a
                       href={link.href}
-                      className='text-slate-600 hover:text-blue-600 text-xs transition-colors hover:underline'
+                      className='text-slate-600 hover:text-blue-600 text-sm transition-colors hover:underline leading-relaxed'
                     >
                       {link.name}
                     </a>
@@ -124,26 +124,26 @@ export default function UniversalFooter() {
 
           {/* Legal & Connect */}
           <div className='col-span-1 min-[320px]:col-span-2 sm:col-span-1'>
-            <h4 className='font-medium mb-1 text-slate-900 text-xs'>Legal</h4>
+            <h4 className='font-semibold mb-2 text-slate-900 text-xs uppercase tracking-wider'>Legal</h4>
             <nav role='navigation' aria-label='Legal links'>
-              <ul className='space-y-1'>
+              <ul className='space-y-2'>
                 {footerLinks.legal.map(link => (
                   <li key={link.name}>
                     <a
                       href={link.href}
-                      className='text-slate-600 hover:text-blue-600 text-xs transition-colors hover:underline'
+                      className='text-slate-600 hover:text-blue-600 text-sm transition-colors hover:underline leading-relaxed'
                     >
                       {link.name}
                     </a>
                   </li>
                 ))}
               </ul>
-              <ul className='flex space-x-2 mt-1'>
+              <ul className='flex gap-2 mt-2'>
                 {footerLinks.legalSecondary.map(link => (
                   <li key={link.name}>
                     <a
                       href={link.href}
-                      className='text-slate-600 hover:text-blue-600 text-xs transition-colors hover:underline'
+                      className='text-slate-600 hover:text-blue-600 text-sm transition-colors hover:underline leading-relaxed'
                     >
                       {link.name}
                     </a>

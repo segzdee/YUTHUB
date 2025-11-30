@@ -2,7 +2,7 @@ import React from 'react';
 
 interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   children: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'error';
+  variant?: 'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'error' | 'outline';
   size?: 'sm' | 'md' | 'lg';
   outline?: boolean;
 }
@@ -32,6 +32,10 @@ const variantStyles = {
     solid: 'bg-red-500 text-white',
     outline: 'bg-red-50 text-red-700 border border-red-300',
   },
+  outline: {
+    solid: 'bg-white text-gray-700 border border-gray-300',
+    outline: 'bg-white text-gray-700 border border-gray-300',
+  },
 };
 
 const sizeStyles = {
@@ -48,7 +52,10 @@ export const Badge: React.FC<BadgeProps> = ({
   className = '',
   ...props
 }) => {
-  const variantStyle = outline ? variantStyles[variant].outline : variantStyles[variant].solid;
+  const isOutlineVariant = variant === 'outline';
+  const safeVariant = variant && variantStyles[variant] ? variant : 'primary';
+  const shouldUseOutline = outline || isOutlineVariant;
+  const variantStyle = shouldUseOutline ? variantStyles[safeVariant].outline : variantStyles[safeVariant].solid;
 
   return (
     <span

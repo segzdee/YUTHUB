@@ -310,9 +310,11 @@ const AuthLogin: React.FC<AuthLoginProps> = ({
   };
 
   const toggleAuthMode = (): void => {
-    setAuthMode(authMode === 'signin' ? 'signup' : 'signin');
+    const newMode = authMode === 'signin' ? 'signup' : 'signin';
+    setAuthMode(newMode);
     setError(null);
     resetForm();
+    navigate(newMode === 'signin' ? '/login' : '/signup');
   };
 
   const isSignUp = authMode === 'signup';

@@ -37,6 +37,13 @@ const Landing = lazy(() => import('./pages/Landing'));
 const Features = lazy(() => import('./pages/Features'));
 const HowItWorks = lazy(() => import('./pages/HowItWorks'));
 const TestimonialsPage = lazy(() => import('./pages/Testimonials'));
+const PlatformOverview = lazy(() => import('./pages/PlatformOverview'));
+const Pricing = lazy(() => import('./pages/Pricing'));
+const Privacy = lazy(() => import('./pages/Privacy'));
+const Terms = lazy(() => import('./pages/Terms'));
+const Accessibility = lazy(() => import('./pages/Accessibility'));
+const Cookies = lazy(() => import('./pages/Cookies'));
+const Subscribe = lazy(() => import('./pages/Subscribe'));
 const AuthLogin = lazy(() => import('./pages/AuthLogin'));
 // NotFound page will be created if needed
 const NotFound = () => (
@@ -112,6 +119,13 @@ function App() {
                           <Route path='/features' element={<Features />} />
                           <Route path='/how-it-works' element={<HowItWorks />} />
                           <Route path='/testimonials' element={<TestimonialsPage />} />
+                          <Route path='/platform' element={<PlatformOverview />} />
+                          <Route path='/pricing' element={<Pricing />} />
+                          <Route path='/privacy' element={<Privacy />} />
+                          <Route path='/terms' element={<Terms />} />
+                          <Route path='/accessibility' element={<Accessibility />} />
+                          <Route path='/cookies' element={<Cookies />} />
+                          <Route path='/subscribe' element={<Subscribe />} />
 
                           {/* Protected application routes */}
                           <Route

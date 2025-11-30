@@ -15,9 +15,9 @@ const Landing: React.FC = () => {
         <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-32 max-w-7xl mx-auto">
           <div className="text-center space-y-8">
             <div className="space-y-6">
-              {/* Brand Logo with Slogan */}
-              <div className="flex justify-center mb-8">
-                <BrandLogo size='xl' variant='default' showText={true} showSlogan={true} />
+              {/* Brand Logo */}
+              <div className="flex justify-center mb-6">
+                <BrandLogo size='lg' variant='default' showText={true} showSlogan={false} />
               </div>
 
               <div className="inline-flex items-center justify-center">

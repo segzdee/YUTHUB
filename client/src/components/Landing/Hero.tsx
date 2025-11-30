@@ -23,9 +23,9 @@ export default function Hero() {
 
       <div className='relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='text-center'>
-          {/* Brand Logo with Slogan */}
-          <div className='flex justify-center mb-8'>
-            <BrandLogo size='xl' variant='default' showText={true} showSlogan={true} />
+          {/* Brand Logo */}
+          <div className='flex justify-center mb-6'>
+            <BrandLogo size='lg' variant='default' showText={true} showSlogan={false} />
           </div>
 
           {/* Trust indicators */}

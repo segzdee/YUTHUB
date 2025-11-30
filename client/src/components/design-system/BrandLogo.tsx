@@ -60,14 +60,13 @@ export default function BrandLogo({
   const variantStyles = variantConfig[variant];
 
   return (
-    <div className={cn('flex items-start gap-3', className)}>
+    <div className={cn('flex gap-3', showSlogan ? 'items-start' : 'items-center', className)}>
       <div
         className={cn(
           'relative rounded-xl bg-gradient-to-br shadow-lg',
           variantStyles.gradient,
           sizeStyles.logo,
-          'flex items-center justify-center flex-shrink-0',
-          showSlogan ? 'mt-1' : ''
+          'flex items-center justify-center flex-shrink-0'
         )}
         aria-hidden='true'
       >

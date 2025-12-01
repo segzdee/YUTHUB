@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useRealTimeUpdates } from '@/hooks/useRealTimeUpdates';
 import { useCrossModuleIntegration } from '@/lib/dataIntegration';
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import {
   Card,
   CardContent,
@@ -23,8 +23,11 @@ import {
   Plus,
   User,
   Calendar,
+  Eye,
+  ChevronRight,
 } from 'lucide-react';
 import type { Incident, Resident, Property } from '@shared/schema';
+import { cn } from '@/lib/utils';
 
 export default function Safeguarding() {  const [searchTerm, setSearchTerm] = useState('');
   const { triggerUpdate } = useRealTimeUpdates();
@@ -100,10 +103,37 @@ export default function Safeguarding() {  const [searchTerm, setSearchTerm] = us
     return resident ? `${resident.firstName} ${resident.lastName}` : 'Unknown';
   };
 
+  const getResidentInitials = (residentId: number | null) => {
+    if (!residentId) return 'N/A';
+    const resident = residents.find(r => r.id === residentId);
+    if (!resident) return '?';
+    return `${resident.firstName?.[0] || ''}${resident.lastName?.[0] || ''}`.toUpperCase();
+  };
+
   const getPropertyName = (propertyId: number | null) => {
     if (!propertyId) return 'N/A';
     const property = properties.find(p => p.id === propertyId);
     return property ? property.name : 'Unknown';
+  };
+
+  const getSeverityBorderColor = (severity: string) => {
+    switch (severity) {
+      case 'critical':
+        return 'border-l-red-500';
+      case 'high':
+        return 'border-l-orange-500';
+      case 'medium':
+        return 'border-l-yellow-500';
+      case 'low':
+        return 'border-l-green-500';
+      default:
+        return 'border-l-gray-300';
+    }
+  };
+
+  const truncateText = (text: string, maxLength: number = 100) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength).trim() + '...';
   };
 
   // Calculate metrics
@@ -324,10 +354,25 @@ export default function Safeguarding() {  const [searchTerm, setSearchTerm] = us
               <div className='space-y-4'>
                 {filteredIncidents.length === 0 ? (
                   <Card>
-                    <CardContent className='flex items-center justify-center py-8'>
-                      <div className='text-center'>
-                        <Shield className='h-12 w-12 text-gray-400 mx-auto mb-4' />
-                        <p className='text-gray-500'>No incidents found</p>
+                    <CardContent className='flex items-center justify-center py-16'>
+                      <div className='text-center space-y-4'>
+                        <div className='mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center'>
+                          <Shield className='h-8 w-8 text-green-600' />
+                        </div>
+                        <div>
+                          <h3 className='text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2'>
+                            No Active Safeguarding Concerns
+                          </h3>
+                          <p className='text-sm text-gray-500 dark:text-gray-400 max-w-md'>
+                            {searchTerm
+                              ? 'No concerns match your search criteria. Try adjusting your filters.'
+                              : 'All young people are safe. Create a new incident report if you need to document a concern.'}
+                          </p>
+                        </div>
+                        <Button className='mt-4'>
+                          <Plus className='h-4 w-4 mr-2' />
+                          Report New Concern
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -335,68 +380,96 @@ export default function Safeguarding() {  const [searchTerm, setSearchTerm] = us
                   filteredIncidents.map(incident => (
                     <Card
                       key={incident.id}
-                      className='hover:shadow-md transition-shadow'
+                      className={cn(
+                        'hover:shadow-lg transition-all duration-200 cursor-pointer border-l-4',
+                        getSeverityBorderColor(incident.severity)
+                      )}
+                      onClick={() => {
+                        // TODO: Navigate to incident detail page
+                        console.log('View incident:', incident.id);
+                      }}
                     >
                       <CardHeader>
-                        <div className='flex items-start justify-between'>
-                          <div className='flex items-center gap-3'>
-                            <div className='p-2 bg-primary/10 rounded-lg'>
-                              <AlertTriangle className='h-5 w-5 text-primary' />
+                        <div className='flex items-start justify-between gap-4'>
+                          <div className='flex items-start gap-3 flex-1'>
+                            {/* Resident Avatar/Initials */}
+                            <div className='flex-shrink-0'>
+                              <div className='w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm'>
+                                {getResidentInitials(incident.residentId)}
+                              </div>
                             </div>
-                            <div>
-                              <CardTitle className='text-lg'>
-                                {incident.title}
-                              </CardTitle>
-                              <CardDescription className='flex items-center gap-2'>
-                                <Calendar className='h-3 w-3' />
-                                Reported: {format(new Date(incident.createdAt), 'd MMM yyyy')}
+
+                            <div className='flex-1 min-w-0'>
+                              <div className='flex items-start gap-2 mb-1'>
+                                <CardTitle className='text-lg leading-tight'>
+                                  {incident.title}
+                                </CardTitle>
+                              </div>
+
+                              <CardDescription className='flex flex-wrap items-center gap-2 text-xs'>
+                                <span className='flex items-center gap-1'>
+                                  <User className='h-3 w-3' />
+                                  {getResidentName(incident.residentId)}
+                                </span>
                                 <span>•</span>
-                                <User className='h-3 w-3' />
-                                {getResidentName(incident.residentId)}
+                                <span className='flex items-center gap-1'>
+                                  <Calendar className='h-3 w-3' />
+                                  {format(new Date(incident.createdAt), 'd MMM yyyy')}
+                                </span>
+                                <span>•</span>
+                                <span className='flex items-center gap-1'>
+                                  <Clock className='h-3 w-3' />
+                                  Updated {formatDistanceToNow(new Date(incident.updatedAt || incident.createdAt), { addSuffix: true })}
+                                </span>
                               </CardDescription>
                             </div>
                           </div>
-                          <div className='flex gap-2'>
-                            <Badge
-                              className={getIncidentTypeColor(
-                                incident.incidentType
-                              )}
-                            >
-                              {incident.incidentType}
-                            </Badge>
-                            <Badge
-                              className={getSeverityColor(incident.severity)}
-                            >
-                              {incident.severity}
-                            </Badge>
-                            <Badge className={getStatusColor(incident.status)}>
-                              {incident.status}
-                            </Badge>
+
+                          <div className='flex flex-col gap-2 items-end flex-shrink-0'>
+                            <div className='flex gap-2 flex-wrap justify-end'>
+                              <Badge
+                                className={getIncidentTypeColor(
+                                  incident.incidentType
+                                )}
+                              >
+                                {incident.incidentType}
+                              </Badge>
+                              <Badge
+                                className={getSeverityColor(incident.severity)}
+                              >
+                                {incident.severity}
+                              </Badge>
+                              <Badge className={getStatusColor(incident.status)}>
+                                {incident.status}
+                              </Badge>
+                            </div>
                           </div>
                         </div>
                       </CardHeader>
                       <CardContent>
                         <div className='space-y-3'>
-                          <p className='text-sm text-gray-600 dark:text-gray-400'>
-                            {incident.description}
+                          <p className='text-sm text-gray-600 dark:text-gray-400 line-clamp-2'>
+                            {truncateText(incident.description)}
                           </p>
-                          <div className='grid grid-cols-2 gap-4'>
-                            <div>
-                              <span className='text-sm text-gray-600 dark:text-gray-400'>
-                                Property
+                          <div className='flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800'>
+                            <div className='flex items-center gap-4 text-xs text-gray-600 dark:text-gray-400'>
+                              <span>
+                                <strong>Property:</strong> {getPropertyName(incident.propertyId)}
                               </span>
-                              <div className='text-sm font-medium'>
-                                {getPropertyName(incident.propertyId)}
-                              </div>
                             </div>
-                            <div>
-                              <span className='text-sm text-gray-600 dark:text-gray-400'>
-                                Resident
-                              </span>
-                              <div className='text-sm font-medium'>
-                                {getResidentName(incident.residentId)}
-                              </div>
-                            </div>
+                            <Button
+                              variant='ghost'
+                              size='sm'
+                              className='text-primary hover:text-primary/80'
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                console.log('View details:', incident.id);
+                              }}
+                            >
+                              <Eye className='h-4 w-4 mr-1' />
+                              View Details
+                              <ChevronRight className='h-4 w-4 ml-1' />
+                            </Button>
                           </div>
                         </div>
                       </CardContent>

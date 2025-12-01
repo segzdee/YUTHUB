@@ -1,27 +1,14 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { apiRequest } from '@/lib/queryClient';
-import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, Building, Percent, Users } from 'lucide-react';
-
-interface DashboardMetrics {
-  totalProperties: number;
-  currentResidents: number;
-  occupancyRate: number;
-  activeIncidents: number;
-}
+import { useDashboardMetrics } from '@/hooks/useDashboardData';
 
 export default function MetricsCards() {
   const {
     data: metrics,
     isLoading,
     error,
-  } = useQuery<DashboardMetrics>({
-    queryKey: ['/api/dashboard/metrics'],
-    queryFn: () => apiRequest('/api/dashboard/metrics'),
-    retry: 3,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
+  } = useDashboardMetrics();
 
   if (isLoading) {
     return (

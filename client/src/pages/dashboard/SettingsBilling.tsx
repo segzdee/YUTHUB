@@ -16,16 +16,22 @@ import {
   Building2,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { supabase } from "@/lib/supabase";
 
 interface SubscriptionPlan {
   id: string;
   name: string;
+  display_name: string;
   tier: string;
   price: number;
   billingPeriod: string;
   maxResidents: number;
   maxProperties: number;
   features: string[];
+  price_monthly?: number;
+  price_annual?: number;
+  max_residents?: number;
+  max_properties?: number;
 }
 
 interface UsageMetrics {
@@ -59,12 +65,108 @@ export default function SettingsBilling() {
   const queryClient = useQueryClient();
 
   const { data: subscription, isLoading: loadingSubscription } = useQuery<SubscriptionPlan>({
-    queryKey: ["/api/subscription/current"],
+    queryKey: ["subscription", user?.id],
+    queryFn: async () => {
+      if (!user?.id) throw new Error("No user");
+
+      // Get user's organization
+      const { data: userOrg } = await supabase
+        .from("user_organizations")
+        .select("organization_id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (!userOrg) throw new Error("No organization found");
+
+      // Get organization's subscription
+      const { data: org } = await supabase
+        .from("organizations")
+        .select(`
+          subscription_tier,
+          subscription_plans!organizations_subscription_plan_id_fkey(
+            id,
+            name,
+            display_name,
+            price_monthly,
+            price_annual,
+            max_residents,
+            max_properties,
+            features
+          )
+        `)
+        .eq("id", userOrg.organization_id)
+        .single();
+
+      // If no subscription found, return starter plan
+      if (!org?.subscription_plans) {
+        return {
+          id: "starter",
+          name: "starter",
+          display_name: "Starter",
+          tier: "starter",
+          price: 0,
+          billingPeriod: "month",
+          maxResidents: 25,
+          maxProperties: 2,
+          features: ["Up to 25 residents", "2 properties", "Basic support"],
+          price_monthly: 0,
+          max_residents: 25,
+          max_properties: 2,
+        };
+      }
+
+      const plan = org.subscription_plans;
+      return {
+        id: plan.id,
+        name: plan.name,
+        display_name: plan.display_name,
+        tier: plan.name,
+        price: plan.price_monthly || 0,
+        billingPeriod: "month",
+        maxResidents: plan.max_residents || 25,
+        maxProperties: plan.max_properties || 2,
+        features: Array.isArray(plan.features) ? plan.features : [],
+        price_monthly: plan.price_monthly,
+        max_residents: plan.max_residents,
+        max_properties: plan.max_properties,
+      };
+    },
     enabled: !!user,
   });
 
   const { data: usage, isLoading: loadingUsage } = useQuery<UsageMetrics>({
-    queryKey: ["/api/subscription/usage"],
+    queryKey: ["usage", user?.id],
+    queryFn: async () => {
+      if (!user?.id) throw new Error("No user");
+
+      // Get user's organization
+      const { data: userOrg } = await supabase
+        .from("user_organizations")
+        .select("organization_id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (!userOrg) throw new Error("No organization found");
+
+      // Count residents
+      const { count: residentCount } = await supabase
+        .from("residents")
+        .select("*", { count: "exact", head: true })
+        .eq("organization_id", userOrg.organization_id);
+
+      // Count properties
+      const { count: propertyCount } = await supabase
+        .from("properties")
+        .select("*", { count: "exact", head: true })
+        .eq("organization_id", userOrg.organization_id);
+
+      return {
+        currentResidents: residentCount || 0,
+        currentProperties: propertyCount || 0,
+        storageUsed: 0,
+        storageLimit: 5,
+      };
+    },
     enabled: !!user,
   });
 

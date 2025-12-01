@@ -15,17 +15,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Building2, Home, Search, MapPin, Users, CheckCircle2, AlertCircle, Filter } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 interface Property {
   id: string;
-  name: string;
+  property_name: string;
   address: string;
-  type: string;
-  totalUnits: number;
-  occupiedUnits: number;
-  availableUnits: number;
-  complianceStatus: "compliant" | "warning" | "overdue";
-  lastInspection: string;
+  property_type: string;
+  total_capacity: number;
+  current_occupancy: number;
+  status: string;
+  last_inspection_date?: string;
+  manager_id?: string;
+  staff_members?: { first_name: string; last_name: string };
 }
 
 const mockProperties: Property[] = [
@@ -76,6 +78,9 @@ const mockProperties: Property[] = [
 ];
 
 const complianceColors = {
+  active: "bg-green-500/10 text-green-700 dark:text-green-400",
+  inactive: "bg-gray-500/10 text-gray-700 dark:text-gray-400",
+  under_maintenance: "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400",
   compliant: "bg-green-500/10 text-green-700 dark:text-green-400",
   warning: "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400",
   overdue: "bg-red-500/10 text-red-700 dark:text-red-400",
@@ -87,38 +92,55 @@ export default function Properties() {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [complianceFilter, setComplianceFilter] = useState<string>("all");
 
-  const { data: properties = mockProperties, isLoading } = useQuery({
-    queryKey: ["/api/properties"],
-    placeholderData: mockProperties,
+  const { data: properties = [], isLoading, error } = useQuery({
+    queryKey: ["properties"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("properties")
+        .select(`
+          *,
+          staff_members:manager_id(first_name, last_name)
+        `)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching properties:", error);
+        throw error;
+      }
+      return data || [];
+    },
   });
 
   const filteredProperties = useMemo(() => {
     return properties.filter((property) => {
       const matchesSearch =
-        property.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        property.address.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesType = typeFilter === "all" || property.type === typeFilter;
+        property.property_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (property.address?.toLowerCase() || "").includes(searchTerm.toLowerCase());
+      const matchesType = typeFilter === "all" || property.property_type === typeFilter;
       const matchesCompliance =
-        complianceFilter === "all" || property.complianceStatus === complianceFilter;
+        complianceFilter === "all" || property.status === complianceFilter;
       return matchesSearch && matchesType && matchesCompliance;
     });
   }, [properties, searchTerm, typeFilter, complianceFilter]);
 
   const propertyTypes = useMemo(() => {
-    return Array.from(new Set(properties.map((p) => p.type)));
+    return Array.from(new Set(properties.map((p) => p.property_type).filter(Boolean)));
   }, [properties]);
 
   const totalStats = useMemo(() => {
     const total = properties.reduce(
       (acc, p) => {
-        acc.totalUnits += p.totalUnits;
-        acc.occupiedUnits += p.occupiedUnits;
-        acc.availableUnits += p.availableUnits;
+        acc.totalUnits += p.total_capacity || 0;
+        acc.occupiedUnits += p.current_occupancy || 0;
+        acc.availableUnits += (p.total_capacity || 0) - (p.current_occupancy || 0);
         return acc;
       },
-      { totalUnits: 0, occupiedUnits: 0, availableUnits: 0 }
+      { totalUnits: 0, occupiedUnits: 0, availableUnits: 0, occupancyRate: 0 }
     );
-    total.occupancyRate = (total.occupiedUnits / total.totalUnits) * 100;
+    // Fix NaN issue: only calculate if totalUnits > 0
+    total.occupancyRate = total.totalUnits > 0
+      ? (total.occupiedUnits / total.totalUnits) * 100
+      : 0;
     return total;
   }, [properties]);
 
@@ -240,20 +262,23 @@ export default function Properties() {
           </Card>
         ) : (
           filteredProperties.map((property) => {
-            const occupancyPercent = (property.occupiedUnits / property.totalUnits) * 100;
+            const total = property.total_capacity || 0;
+            const occupied = property.current_occupancy || 0;
+            const occupancyPercent = total > 0 ? (occupied / total) * 100 : 0;
+
             return (
               <Card key={property.id} className="hover:shadow-md transition-shadow">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
-                      <CardTitle className="text-lg">{property.name}</CardTitle>
+                      <CardTitle className="text-lg">{property.property_name}</CardTitle>
                       <div className="flex items-center text-sm text-muted-foreground">
                         <MapPin className="mr-1 h-3 w-3" />
-                        {property.address}
+                        {property.address || "No address"}
                       </div>
                     </div>
                     <Badge variant="outline" className="text-xs">
-                      {property.type}
+                      {property.property_type}
                     </Badge>
                   </div>
                 </CardHeader>
@@ -262,7 +287,7 @@ export default function Properties() {
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Occupancy</span>
                       <span className="font-medium">
-                        {property.occupiedUnits} / {property.totalUnits} units
+                        {occupied} / {total} units
                       </span>
                     </div>
                     <Progress value={occupancyPercent} className="h-2" />
@@ -273,13 +298,13 @@ export default function Properties() {
 
                   <div className="flex items-center justify-between pt-2 border-t">
                     <div className="flex items-center gap-2">
-                      {property.complianceStatus === "compliant" ? (
+                      {property.status === "active" ? (
                         <CheckCircle2 className="h-4 w-4 text-green-600" />
                       ) : (
                         <AlertCircle className="h-4 w-4 text-yellow-600" />
                       )}
-                      <Badge className={complianceColors[property.complianceStatus]} variant="outline">
-                        {property.complianceStatus}
+                      <Badge className={complianceColors[property.status as keyof typeof complianceColors] || "bg-gray-500/10 text-gray-700"} variant="outline">
+                        {property.status}
                       </Badge>
                     </div>
                     <Button variant="ghost" size="sm">
@@ -288,7 +313,9 @@ export default function Properties() {
                   </div>
 
                   <div className="text-xs text-muted-foreground pt-2 border-t">
-                    Last inspection: {new Date(property.lastInspection).toLocaleDateString("en-GB")}
+                    Last inspection: {property.last_inspection_date
+                      ? new Date(property.last_inspection_date).toLocaleDateString("en-GB")
+                      : "No inspection recorded"}
                   </div>
                 </CardContent>
               </Card>

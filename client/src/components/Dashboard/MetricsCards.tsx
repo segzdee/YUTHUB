@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertTriangle, Building, Percent, Users, RefreshCw } from 'lucide-react';
 import { useDashboardMetrics } from '@/hooks/useDashboardData';
+import { formatPercentage } from '@/lib/dateUtils';
 
 export default function MetricsCards() {
   const {
@@ -79,13 +80,13 @@ export default function MetricsCards() {
     },
     {
       title: 'Occupancy Rate',
-      value: `${metrics?.occupancyRate || 0}%`,
+      value: formatPercentage(metrics?.occupancyRate),
       icon: Percent,
       color: 'text-success',
       bgColor: 'status-success bg-opacity-10',
       change: '+2.3%',
       changeColor: 'text-success',
-      ariaLabel: `Occupancy rate: ${metrics?.occupancyRate || 0}%, increased by 2.3%`,
+      ariaLabel: `Occupancy rate: ${formatPercentage(metrics?.occupancyRate)}, increased by 2.3%`,
     },
     {
       title: 'Active Incidents',

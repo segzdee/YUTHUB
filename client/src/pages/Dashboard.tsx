@@ -181,34 +181,9 @@ export default function Dashboard() {
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
             {/* Key Metrics - Full Width */}
             {visibleWidgets.includes('metrics') && (
-              <Card className='md:col-span-2 lg:col-span-3 xl:col-span-4'>
-                <CardHeader className='flex flex-row items-center justify-between pb-3'>
-                  <CardTitle className='text-sm font-medium'>
-                    Key Metrics
-                  </CardTitle>
-                  <div className='flex items-center gap-1'>
-                    <Button
-                      variant='ghost'
-                      size='sm'
-                      onClick={() => setExpandedWidget('metrics')}
-                      className='p-1 h-6 w-6'
-                    >
-                      <Maximize2 className='h-3 w-3' />
-                    </Button>
-                    <Button
-                      variant='ghost'
-                      size='sm'
-                      onClick={() => toggleWidget('metrics')}
-                      className='p-1 h-6 w-6'
-                    >
-                      ×
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <MetricsCards />
-                </CardContent>
-              </Card>
+              <div className='md:col-span-2 lg:col-span-3 xl:col-span-4'>
+                <MetricsCards />
+              </div>
             )}
 
             {/* System Overview */}

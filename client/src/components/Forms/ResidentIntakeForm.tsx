@@ -31,8 +31,9 @@ import {
 } from '@/components/ui/form';
 import { Checkbox } from '@/components/ui/checkbox';
 import FormWizard from './FormWizard';
-import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
 
 const personalInfoSchema = z.object({
   firstName: z.string().min(2, 'First name must be at least 2 characters'),
@@ -678,6 +679,7 @@ function SupportNeedsStep({ data, onDataChange }: any) {
 
 export default function ResidentIntakeForm() {
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const steps = [
     {
@@ -718,54 +720,89 @@ export default function ResidentIntakeForm() {
 
   const handleComplete = async (data: any) => {
     try {
-      // Process the combined data
+      // Get user's organization from user metadata
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (!currentUser) {
+        throw new Error('User not authenticated');
+      }
+
+      // Map form data to database schema (camelCase to snake_case)
       const residentData = {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        phone: data.phone,
-        dateOfBirth: data.dateOfBirth,
-        propertyId: data.propertyId,
-        independenceLevel: data.independenceLevel,
-        riskLevel:
-          data.riskFactors?.length > 2
-            ? 'high'
-            : data.riskFactors?.length > 0
-              ? 'medium'
-              : 'low',
+        organization_id: currentUser.user_metadata?.organization_id,
+        first_name: data.firstName,
+        last_name: data.lastName,
+        contact_email: data.email || null,
+        contact_phone: data.phone || null,
+        date_of_birth: data.dateOfBirth,
+        current_property_id: data.propertyId || null,
+        support_level: data.independenceLevel <= 2 ? 'intensive' : data.independenceLevel === 3 ? 'high' : 'medium',
+        risk_level: data.riskFactors?.length > 2 ? 'high' : data.riskFactors?.length > 0 ? 'medium' : 'low',
+        emergency_contacts: data.emergencyContact ? [
+          {
+            name: data.emergencyContact.name,
+            relationship: data.emergencyContact.relationship,
+            phone: data.emergencyContact.phone,
+            email: data.emergencyContact.email || null
+          }
+        ] : [],
+        support_needs: data.supportServices || [],
+        medical_conditions: data.healthConditions ? [{ description: data.healthConditions }] : [],
+        medications: data.medications ? [{ description: data.medications }] : [],
+        vulnerability_factors: data.riskFactors || [],
+        status: 'pending',
+        created_by: currentUser.id
       };
 
-      // Create the resident
-      const response = await apiRequest('POST', '/api/residents', residentData);
+      // Insert resident into database
+      const { data: resident, error: residentError } = await supabase
+        .from('residents')
+        .insert([residentData])
+        .select()
+        .single();
 
-      if (response.ok) {
-        const resident = await response.json();
-
-        // Create assessment form
-        const assessmentData = {
-          residentId: resident.id,
-          assessmentType: 'intake',
-          responses: data,
-          assessorId: 1, // This would be the current staff member
-        };
-
-        await apiRequest('POST', '/api/assessment-forms', assessmentData);
-
-        toast({
-          title: 'Intake Assessment Complete',
-          description:
-            'The resident has been successfully registered and assessed.',
-        });
-
-        // Redirect to resident details or dashboard
-        window.location.href = `/residents/${resident.id}`;
-      } else {
-        throw new Error('Failed to register resident');
+      if (residentError) {
+        console.error('Resident insert error:', residentError);
+        throw residentError;
       }
-    } catch (error) {
+
+      // Create initial assessment
+      const assessmentData = {
+        organization_id: currentUser.user_metadata?.organization_id,
+        resident_id: resident.id,
+        assessment_type: 'initial',
+        assessment_date: new Date().toISOString().split('T')[0],
+        status: 'completed',
+        assessor_id: currentUser.id,
+        questions_responses: data,
+        identified_needs: data.supportServices || [],
+        identified_risks: data.riskFactors || [],
+        created_by: currentUser.id
+      };
+
+      const { error: assessmentError } = await supabase
+        .from('assessments')
+        .insert([assessmentData]);
+
+      if (assessmentError) {
+        console.error('Assessment insert error:', assessmentError);
+        // Don't throw - resident is already created
+      }
+
+      toast({
+        title: 'Resident Registered Successfully',
+        description: `${data.firstName} ${data.lastName} has been added to the system.`,
+      });
+
+      // Redirect to residents list
+      setTimeout(() => {
+        window.location.href = '/app/dashboard/residents';
+      }, 1500);
+
+    } catch (error: any) {
+      console.error('Registration error:', error);
       toast({
         title: 'Registration Failed',
-        description: 'There was an error registering the resident.',
+        description: error.message || 'There was an error registering the resident.',
         variant: 'destructive',
       });
       throw error;

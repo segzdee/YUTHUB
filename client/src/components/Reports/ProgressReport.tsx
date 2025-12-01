@@ -302,7 +302,7 @@ export default function ProgressReport({
                   <div>
                     <p className='text-sm text-muted-foreground'>Property</p>
                     <p className='font-medium'>
-                      {resident.property?.name || 'N/A'}
+                      {resident.property?.name || 'Not assigned'}
                     </p>
                   </div>
                 </div>

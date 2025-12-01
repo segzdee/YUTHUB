@@ -52,7 +52,7 @@ export default function SubscriptionCard() {
   const TierIcon = tierIcons[subscriptionTier as keyof typeof tierIcons];
 
   const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return 'Not set';
     return new Date(dateString).toLocaleDateString('en-GB', {
       day: 'numeric',
       month: 'short',

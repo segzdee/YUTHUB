@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 interface CrossModuleWidgetProps {
-  title: string;
+  title?: string;
   type:
     | 'overview'
     | 'risk-assessment'

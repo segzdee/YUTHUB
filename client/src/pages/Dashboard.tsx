@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useRealTimeUpdates } from '@/hooks/useRealTimeUpdates';
 import { useWebSocketConnection } from '@/hooks/useOptimizedWebSocket';
-import { AppPageLayout } from '@/components/PageLayout';
+import { DashboardLayout } from '@/components/Layout/DashboardLayout';
 import MetricsCards from '@/components/Dashboard/MetricsCards';
 import OccupancyChart from '@/components/Dashboard/OccupancyChart';
 import ActivityFeed from '@/components/Dashboard/ActivityFeed';
@@ -14,7 +14,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Settings, RefreshCw, Maximize2, Lock, Unlock, RotateCcw, Eye, EyeOff } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useQueryClient } from '@tanstack/react-query';
-import SubscriptionCard from '@/components/Dashboard/SubscriptionCard';
 
 export default function Dashboard() {
   const { toast } = useToast();
@@ -64,8 +63,8 @@ export default function Dashboard() {
   }
 
   return (
-    <AppPageLayout>
-      <main className='space-y-6'>
+    <DashboardLayout>
+      <div className='space-y-6'>
           {/* Connection Status Indicator */}
           {isConnected && (
             <div className='mb-4 text-sm text-green-600 flex items-center gap-2'>
@@ -156,47 +155,17 @@ export default function Dashboard() {
                 </div>
                 <div className='p-4'>
                   {expandedWidget === 'metrics' && <MetricsCards />}
-                  {expandedWidget === 'overview' && (
-                    <CrossModuleWidget
-                      title='System Overview'
-                      type='overview'
-                    />
-                  )}
-                  {expandedWidget === 'risk-assessment' && (
-                    <CrossModuleWidget
-                      title='Risk Assessment'
-                      type='risk-assessment'
-                    />
-                  )}
-                  {expandedWidget === 'financial-summary' && (
-                    <CrossModuleWidget
-                      title='Financial Summary'
-                      type='financial-summary'
-                    />
-                  )}
+                  {expandedWidget === 'overview' && <CrossModuleWidget type='overview' />}
+                  {expandedWidget === 'risk-assessment' && <CrossModuleWidget type='risk-assessment' />}
+                  {expandedWidget === 'financial-summary' && <CrossModuleWidget type='financial-summary' />}
                   {expandedWidget === 'occupancy-chart' && <OccupancyChart />}
                   {expandedWidget === 'activity-feed' && <ActivityFeed />}
-                  {expandedWidget === 'occupancy-status' && (
-                    <CrossModuleWidget
-                      title='Occupancy Status'
-                      type='occupancy-status'
-                    />
-                  )}
-                  {expandedWidget === 'support-progress' && (
-                    <CrossModuleWidget
-                      title='Support Progress'
-                      type='support-progress'
-                    />
-                  )}
+                  {expandedWidget === 'occupancy-status' && <CrossModuleWidget type='occupancy-status' />}
+                  {expandedWidget === 'support-progress' && <CrossModuleWidget type='support-progress' />}
                 </div>
               </div>
             </div>
           )}
-
-          {/* Subscription Card */}
-          <div className='mb-6 sm:mb-8'>
-            <SubscriptionCard />
-          </div>
 
           {/* Enhanced Dashboard Grid */}
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
@@ -259,11 +228,8 @@ export default function Dashboard() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className='h-48 overflow-y-auto'>
-                    <CrossModuleWidget
-                      title='System Overview'
-                      type='overview'
-                    />
+                  <div className='h-48 overflow-hidden'>
+                    <CrossModuleWidget type='overview' />
                   </div>
                 </CardContent>
               </Card>
@@ -296,11 +262,8 @@ export default function Dashboard() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className='h-48 overflow-y-auto'>
-                    <CrossModuleWidget
-                      title='Risk Assessment'
-                      type='risk-assessment'
-                    />
+                  <div className='h-48 overflow-hidden'>
+                    <CrossModuleWidget type='risk-assessment' />
                   </div>
                 </CardContent>
               </Card>
@@ -333,11 +296,8 @@ export default function Dashboard() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className='h-48 overflow-y-auto'>
-                    <CrossModuleWidget
-                      title='Financial Summary'
-                      type='financial-summary'
-                    />
+                  <div className='h-48 overflow-hidden'>
+                    <CrossModuleWidget type='financial-summary' />
                   </div>
                 </CardContent>
               </Card>
@@ -370,7 +330,7 @@ export default function Dashboard() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className='h-48 overflow-y-auto'>
+                  <div className='h-64 overflow-hidden'>
                     <OccupancyChart />
                   </div>
                 </CardContent>
@@ -404,7 +364,7 @@ export default function Dashboard() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className='h-48 overflow-y-auto'>
+                  <div className='h-64 overflow-hidden'>
                     <ActivityFeed />
                   </div>
                 </CardContent>
@@ -438,11 +398,8 @@ export default function Dashboard() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className='h-48 overflow-y-auto'>
-                    <CrossModuleWidget
-                      title='Occupancy Status'
-                      type='occupancy-status'
-                    />
+                  <div className='h-48 overflow-hidden'>
+                    <CrossModuleWidget type='occupancy-status' />
                   </div>
                 </CardContent>
               </Card>
@@ -475,11 +432,8 @@ export default function Dashboard() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className='h-48 overflow-y-auto'>
-                    <CrossModuleWidget
-                      title='Support Progress'
-                      type='support-progress'
-                    />
+                  <div className='h-48 overflow-hidden'>
+                    <CrossModuleWidget type='support-progress' />
                   </div>
                 </CardContent>
               </Card>
@@ -548,7 +502,7 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
-      </main>
-    </AppPageLayout>
+      </div>
+    </DashboardLayout>
   );
 }

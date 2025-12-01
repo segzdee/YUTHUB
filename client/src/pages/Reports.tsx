@@ -63,12 +63,13 @@ export default function Reports() {  const [selectedDateRange, setSelectedDateRa
       propertyId?: string;
       filters?: any;
     }) => {
-      const response = await apiRequest(
+      // apiRequest already returns parsed JSON, no need to call .json()
+      const data = await apiRequest(
         'POST',
         '/api/reports/generate',
         reportData
       );
-      return response.json();
+      return data;
     },
     onSuccess: () => {
       toast({

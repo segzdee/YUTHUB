@@ -31,84 +31,36 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { UserPlus, Search, Filter, MoreHorizontal, Eye, Edit, Trash2, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
-type ResidentStatus = "active" | "pending" | "moved_out" | "suspended";
+type ResidentStatus = "active" | "pending" | "on_leave" | "moved_on" | "discharged" | "transferred";
 
 interface Resident {
   id: string;
-  name: string;
-  age: number;
-  property: string;
-  room: string;
-  keyWorker: string;
-  independenceScore: number;
+  first_name: string;
+  last_name: string;
+  date_of_birth: string;
+  contact_email?: string;
+  contact_phone?: string;
+  current_property_id?: string;
+  current_room_id?: string;
+  key_worker_id?: string;
+  support_level?: string;
+  risk_level?: string;
   status: ResidentStatus;
-  moveInDate: string;
+  admission_date?: string;
+  properties?: { property_name: string };
+  rooms?: { room_number: string };
+  staff_members?: { first_name: string; last_name: string };
 }
-
-const mockResidents: Resident[] = [
-  {
-    id: "1",
-    name: "Alice Johnson",
-    age: 19,
-    property: "Maple House",
-    room: "101",
-    keyWorker: "Sarah Smith",
-    independenceScore: 75,
-    status: "active",
-    moveInDate: "2024-01-15",
-  },
-  {
-    id: "2",
-    name: "Ben Williams",
-    age: 18,
-    property: "Oak Lodge",
-    room: "205",
-    keyWorker: "John Davis",
-    independenceScore: 62,
-    status: "active",
-    moveInDate: "2024-02-20",
-  },
-  {
-    id: "3",
-    name: "Charlie Brown",
-    age: 20,
-    property: "Pine Court",
-    room: "303",
-    keyWorker: "Emma Wilson",
-    independenceScore: 88,
-    status: "active",
-    moveInDate: "2023-11-10",
-  },
-  {
-    id: "4",
-    name: "Diana Martinez",
-    age: 19,
-    property: "Maple House",
-    room: "102",
-    keyWorker: "Sarah Smith",
-    independenceScore: 45,
-    status: "pending",
-    moveInDate: "2024-11-01",
-  },
-  {
-    id: "5",
-    name: "Ethan Taylor",
-    age: 21,
-    property: "Oak Lodge",
-    room: "201",
-    keyWorker: "John Davis",
-    independenceScore: 92,
-    status: "active",
-    moveInDate: "2023-09-05",
-  },
-];
 
 const statusColors: Record<ResidentStatus, string> = {
   active: "bg-green-500/10 text-green-700 dark:text-green-400",
   pending: "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400",
-  moved_out: "bg-gray-500/10 text-gray-700 dark:text-gray-400",
-  suspended: "bg-red-500/10 text-red-700 dark:text-red-400",
+  on_leave: "bg-blue-500/10 text-blue-700 dark:text-blue-400",
+  moved_on: "bg-gray-500/10 text-gray-700 dark:text-gray-400",
+  discharged: "bg-purple-500/10 text-purple-700 dark:text-purple-400",
+  transferred: "bg-orange-500/10 text-orange-700 dark:text-orange-400",
 };
 
 const getScoreColor = (score: number) => {
@@ -124,25 +76,47 @@ export default function Residents() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [propertyFilter, setPropertyFilter] = useState<string>("all");
 
-  const { data: residents = mockResidents, isLoading } = useQuery({
-    queryKey: ["/api/residents"],
-    placeholderData: mockResidents,
+  const { data: residents = [], isLoading, error } = useQuery({
+    queryKey: ["residents"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("residents")
+        .select(`
+          *,
+          properties:current_property_id(property_name),
+          rooms:current_room_id(room_number),
+          staff_members:key_worker_id(first_name, last_name)
+        `)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching residents:", error);
+        throw error;
+      }
+      return data || [];
+    },
   });
 
   const filteredResidents = useMemo(() => {
     return residents.filter((resident) => {
+      const fullName = `${resident.first_name} ${resident.last_name}`.toLowerCase();
+      const keyWorkerName = resident.staff_members
+        ? `${resident.staff_members.first_name} ${resident.staff_members.last_name}`.toLowerCase()
+        : "";
+      const roomNumber = resident.rooms?.room_number || "";
+
       const matchesSearch =
-        resident.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        resident.keyWorker.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        resident.room.includes(searchTerm);
+        fullName.includes(searchTerm.toLowerCase()) ||
+        keyWorkerName.includes(searchTerm.toLowerCase()) ||
+        roomNumber.includes(searchTerm);
       const matchesStatus = statusFilter === "all" || resident.status === statusFilter;
-      const matchesProperty = propertyFilter === "all" || resident.property === propertyFilter;
+      const matchesProperty = propertyFilter === "all" || resident.properties?.property_name === propertyFilter;
       return matchesSearch && matchesStatus && matchesProperty;
     });
   }, [residents, searchTerm, statusFilter, propertyFilter]);
 
   const uniqueProperties = useMemo(() => {
-    return Array.from(new Set(residents.map((r) => r.property)));
+    return Array.from(new Set(residents.map((r) => r.properties?.property_name).filter(Boolean)));
   }, [residents]);
 
   const handleView = (id: string) => {
@@ -279,16 +253,26 @@ export default function Residents() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredResidents.map((resident) => (
+                filteredResidents.map((resident) => {
+                  const age = resident.date_of_birth
+                    ? Math.floor((Date.now() - new Date(resident.date_of_birth).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+                    : 0;
+                  const supportScore = resident.support_level === 'low' ? 80 : resident.support_level === 'medium' ? 60 : resident.support_level === 'high' ? 40 : 20;
+
+                  return (
                   <TableRow key={resident.id}>
-                    <TableCell className="font-medium">{resident.name}</TableCell>
-                    <TableCell>{resident.age}</TableCell>
-                    <TableCell>{resident.property}</TableCell>
-                    <TableCell>{resident.room}</TableCell>
-                    <TableCell>{resident.keyWorker}</TableCell>
+                    <TableCell className="font-medium">{resident.first_name} {resident.last_name}</TableCell>
+                    <TableCell>{age}</TableCell>
+                    <TableCell>{resident.properties?.property_name || "Unassigned"}</TableCell>
+                    <TableCell>{resident.rooms?.room_number || "N/A"}</TableCell>
                     <TableCell>
-                      <span className={getScoreColor(resident.independenceScore)}>
-                        {resident.independenceScore}/100
+                      {resident.staff_members
+                        ? `${resident.staff_members.first_name} ${resident.staff_members.last_name}`
+                        : "Unassigned"}
+                    </TableCell>
+                    <TableCell>
+                      <span className={getScoreColor(supportScore)}>
+                        {supportScore}/100
                       </span>
                     </TableCell>
                     <TableCell>
@@ -297,7 +281,9 @@ export default function Residents() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {new Date(resident.moveInDate).toLocaleDateString("en-GB")}
+                      {resident.admission_date
+                        ? new Date(resident.admission_date).toLocaleDateString("en-GB")
+                        : "N/A"}
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
@@ -329,7 +315,8 @@ export default function Residents() {
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                ))
+                );
+              })
               )}
             </TableBody>
           </Table>

@@ -38,12 +38,12 @@ const personalInfoSchema = z.object({
   firstName: z.string().min(2, 'First name must be at least 2 characters'),
   lastName: z.string().min(2, 'Last name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email address').optional(),
-  phone: z.string().min(10, 'Please enter a valid phone number').optional(),
+  phone: z.string().regex(/^(\+44\s?7\d{3}|\(?07\d{3}\)?)\s?\d{3}\s?\d{3}$/, 'Please enter a valid UK phone number (e.g., +44 7XXX XXXXXX)').optional(),
   dateOfBirth: z.string().min(1, 'Date of birth is required'),
   emergencyContact: z.object({
     name: z.string().min(2, 'Emergency contact name is required'),
     relationship: z.string().min(1, 'Please specify relationship'),
-    phone: z.string().min(10, 'Emergency contact phone is required'),
+    phone: z.string().regex(/^(\+44\s?7\d{3}|\(?07\d{3}\)?)\s?\d{3}\s?\d{3}$/, 'Please enter a valid UK phone number'),
     email: z.string().email().optional(),
   }),
 });
@@ -86,7 +86,7 @@ function PersonalInfoStep({ data, onDataChange }: any) {
             name='firstName'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>First Name</FormLabel>
+                <FormLabel>First Name <span className='text-red-600'>*</span></FormLabel>
                 <FormControl>
                   <Input placeholder='Enter first name' {...field} />
                 </FormControl>
@@ -100,7 +100,7 @@ function PersonalInfoStep({ data, onDataChange }: any) {
             name='lastName'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Last Name</FormLabel>
+                <FormLabel>Last Name <span className='text-red-600'>*</span></FormLabel>
                 <FormControl>
                   <Input placeholder='Enter last name' {...field} />
                 </FormControl>
@@ -136,7 +136,7 @@ function PersonalInfoStep({ data, onDataChange }: any) {
               <FormItem>
                 <FormLabel>Phone Number</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter phone number' {...field} />
+                  <Input placeholder='+44 7XXX XXXXXX' {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -149,7 +149,7 @@ function PersonalInfoStep({ data, onDataChange }: any) {
           name='dateOfBirth'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Date of Birth</FormLabel>
+              <FormLabel>Date of Birth <span className='text-red-600'>*</span></FormLabel>
               <FormControl>
                 <Input type='date' {...field} />
               </FormControl>
@@ -172,7 +172,7 @@ function PersonalInfoStep({ data, onDataChange }: any) {
                 name='emergencyContact.name'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Full Name</FormLabel>
+                    <FormLabel>Full Name <span className='text-red-600'>*</span></FormLabel>
                     <FormControl>
                       <Input placeholder='Emergency contact name' {...field} />
                     </FormControl>
@@ -186,7 +186,7 @@ function PersonalInfoStep({ data, onDataChange }: any) {
                 name='emergencyContact.relationship'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Relationship</FormLabel>
+                    <FormLabel>Relationship <span className='text-red-600'>*</span></FormLabel>
                     <FormControl>
                       <Input
                         placeholder='e.g., Parent, Guardian, Friend'
@@ -205,9 +205,9 @@ function PersonalInfoStep({ data, onDataChange }: any) {
                 name='emergencyContact.phone'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
+                    <FormLabel>Phone Number <span className='text-red-600'>*</span></FormLabel>
                     <FormControl>
-                      <Input placeholder='Emergency contact phone' {...field} />
+                      <Input placeholder='+44 7XXX XXXXXX' {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

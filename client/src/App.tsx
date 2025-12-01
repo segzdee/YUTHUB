@@ -38,6 +38,8 @@ const ProgressTracking = lazy(() => import('./pages/dashboard/ProgressTracking')
 const ReportsAnalytics = lazy(() => import('./pages/dashboard/ReportsAnalytics'));
 const SettingsAccount = lazy(() => import('./pages/dashboard/SettingsAccount'));
 const SettingsBilling = lazy(() => import('./pages/dashboard/SettingsBilling'));
+const TeamManagement = lazy(() => import('./pages/Settings/TeamManagement'));
+const AccessDenied = lazy(() => import('./pages/AccessDenied'));
 const Landing = lazy(() => import('./pages/Landing'));
 const Features = lazy(() => import('./pages/Features'));
 const HowItWorks = lazy(() => import('./pages/HowItWorks'));
@@ -175,6 +177,10 @@ function App() {
                             {/* Settings Routes */}
                             <Route path='dashboard/settings/account' element={<SettingsAccount />} />
                             <Route path='dashboard/settings/billing' element={<SettingsBilling />} />
+                            <Route path='dashboard/settings/team' element={<TeamManagement />} />
+
+                            {/* Access Denied */}
+                            <Route path='access-denied' element={<AccessDenied />} />
 
                             {/* Help & Support */}
                             <Route path='help' element={<Help />} />

@@ -51,32 +51,58 @@ export default defineConfig({
     rollupOptions: {
       maxParallelFileOps: 1,
       output: {
+        // Optimize chunking strategy for better memory usage
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+            // Core React libraries
+            if (id.includes('react/') || id.includes('react-dom/')) {
               return 'vendor-react';
             }
+            if (id.includes('react-router')) {
+              return 'vendor-react';
+            }
+            // UI component libraries
             if (id.includes('@radix-ui')) {
               return 'vendor-radix';
             }
-            if (id.includes('recharts') || id.includes('chart')) {
+            // Charting libraries (keep separate - large)
+            if (id.includes('recharts') || id.includes('chart.js')) {
               return 'vendor-charts';
             }
-            if (id.includes('@tanstack')) {
+            // Data fetching
+            if (id.includes('@tanstack/react-query')) {
               return 'vendor-tanstack';
             }
+            if (id.includes('@tanstack/react-table')) {
+              return 'vendor-tanstack';
+            }
+            // Form handling
             if (id.includes('react-hook-form') || id.includes('@hookform') || id.includes('zod')) {
               return 'vendor-forms';
             }
-            if (id.includes('lucide-react') || id.includes('react-icons')) {
+            // Icons (can be large)
+            if (id.includes('lucide-react')) {
               return 'vendor-icons';
             }
+            if (id.includes('react-icons')) {
+              return 'vendor-icons';
+            }
+            // Animation
             if (id.includes('framer-motion')) {
               return 'vendor-animation';
             }
+            // Supabase
+            if (id.includes('@supabase')) {
+              return 'vendor-supabase';
+            }
+            // All other dependencies
             return 'vendor';
           }
         },
+        // Optimize chunk size
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
       },
     },
   },

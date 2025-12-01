@@ -16,7 +16,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { CheckCircle2, Circle, Building2, Users, Settings, UserPlus, X, Sparkles } from 'lucide-react';
 

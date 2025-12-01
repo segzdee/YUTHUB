@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { usePermissions, useCanManageUser } from '@/hooks/usePermissions';
 import { ProtectedAction } from '@/components/Auth/ProtectedAction';
 import { Button } from '@/components/ui/button';

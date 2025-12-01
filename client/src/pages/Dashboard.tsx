@@ -11,6 +11,7 @@ import { PersonalizedGreeting } from '@/components/Dashboard/PersonalizedGreetin
 import { OnboardingChecklist } from '@/components/Dashboard/OnboardingChecklist';
 import { WhatsNewNotification } from '@/components/Dashboard/WhatsNewNotification';
 import { CustomizeModal } from '@/components/Dashboard/CustomizeModal';
+import { PageErrorBoundary } from '@/components/common/PageErrorBoundary';
 import { useDashboardStore } from '@/store/dashboardStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,7 +19,7 @@ import { Settings, RefreshCw, Maximize2, Lock, Unlock, RotateCcw, Eye, EyeOff } 
 import { Badge } from '@/components/ui/badge';
 import { useQueryClient } from '@tanstack/react-query';
 
-export default function Dashboard() {
+function DashboardContent() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
   const [lastRefresh, setLastRefresh] = useState(Date.now());
@@ -497,5 +498,13 @@ export default function Dashboard() {
             </CardContent>
           </Card>
     </div>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <PageErrorBoundary pageName="Dashboard">
+      <DashboardContent />
+    </PageErrorBoundary>
   );
 }

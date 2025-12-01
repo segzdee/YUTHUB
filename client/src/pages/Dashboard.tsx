@@ -3,7 +3,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useRealTimeUpdates } from '@/hooks/useRealTimeUpdates';
 import { useWebSocketConnection } from '@/hooks/useOptimizedWebSocket';
-import { DashboardLayout } from '@/components/Layout/DashboardLayout';
 import MetricsCards from '@/components/Dashboard/MetricsCards';
 import OccupancyChart from '@/components/Dashboard/OccupancyChart';
 import ActivityFeed from '@/components/Dashboard/ActivityFeed';
@@ -63,8 +62,7 @@ export default function Dashboard() {
   }
 
   return (
-    <DashboardLayout>
-      <div className='space-y-6'>
+    <div className='space-y-6'>
           {/* Connection Status Indicator */}
           {isConnected && (
             <div className='mb-4 text-sm text-green-600 flex items-center gap-2'>
@@ -502,7 +500,6 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }

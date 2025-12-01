@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { DashboardLayout } from '@/components/Layout/DashboardLayout';
 import PageLoader from '@/components/common/PageLoader';
 import {
   Card,
@@ -58,7 +57,6 @@ export default function Financials() {  const [searchTerm, setSearchTerm] = useS
 
   if (isLoading) {
     return (
-    <DashboardLayout>
       <PageLoader
         title='Financial Management'
         description='Loading financial data...'
@@ -67,7 +65,6 @@ export default function Financials() {  const [searchTerm, setSearchTerm] = useS
         cardCount={6}
         showMetrics={true}
       />
-    </DashboardLayout>
   );
   }
 
@@ -209,7 +206,7 @@ export default function Financials() {  const [searchTerm, setSearchTerm] = useS
   };
 
   return (
-    <DashboardLayout>
+    <div className='space-y-6'>
       <div className='mb-6 sm:mb-8'>
         <h1 className='text-2xl font-bold text-gray-900 dark:text-white mb-2'>
           Financials
@@ -764,6 +761,6 @@ export default function Financials() {  const [searchTerm, setSearchTerm] = useS
               </div>
             </TabsContent>
           </Tabs>
-    </DashboardLayout>
+    </div>
   );
 }

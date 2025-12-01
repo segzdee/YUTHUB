@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useRealTimeUpdates } from '@/hooks/useRealTimeUpdates';
 import { useCrossModuleIntegration } from '@/lib/dataIntegration';
-import { DashboardLayout } from '@/components/Layout/DashboardLayout';
 import {
   Card,
   CardContent,
@@ -146,7 +145,7 @@ export default function Safeguarding() {  const [searchTerm, setSearchTerm] = us
   const mediumRiskResidents = residents.filter(r => r.riskLevel === 'medium');
 
   return (
-    <DashboardLayout>
+    <div className='space-y-6'>
       <main className='space-y-6'>
           <div className='mb-6 sm:mb-8'>
             <h1 className='text-2xl font-bold text-gray-900 dark:text-white mb-2'>
@@ -611,6 +610,6 @@ export default function Safeguarding() {  const [searchTerm, setSearchTerm] = us
             </TabsContent>
           </Tabs>
       </main>
-    </DashboardLayout>
+    </div>
   );
 }

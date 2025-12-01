@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { DashboardLayout } from '@/components/Layout/DashboardLayout';
 import {
   Card,
   CardContent,
@@ -117,7 +116,7 @@ export default function Billing() {  const [searchTerm, setSearchTerm] = useStat
   const overdueInvoices = billingAnalytics?.overdueInvoices || 0;
 
   return (
-    <DashboardLayout>
+    <div className='space-y-6'>
       <main className='space-y-6'>
           <div className='mb-6 sm:mb-8'>
             <h1 className='text-2xl font-bold text-gray-900 dark:text-white mb-2'>
@@ -669,6 +668,6 @@ export default function Billing() {  const [searchTerm, setSearchTerm] = useStat
             </TabsContent>
           </Tabs>
       </main>
-    </DashboardLayout>
+    </div>
   );
 }

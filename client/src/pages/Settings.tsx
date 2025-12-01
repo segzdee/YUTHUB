@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Sidebar from '@/components/Layout/Sidebar';
-import { DashboardLayout } from '@/components/Layout/DashboardLayout';
 import Header from '@/components/Layout/Header';
-import { DashboardLayout } from '@/components/Layout/DashboardLayout';
 import {
   Card,
   CardContent,
@@ -12,15 +10,10 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { DashboardLayout } from '@/components/Layout/DashboardLayout';
 import { Badge } from '@/components/ui/badge';
-import { DashboardLayout } from '@/components/Layout/DashboardLayout';
 import { Input } from '@/components/ui/input';
-import { DashboardLayout } from '@/components/Layout/DashboardLayout';
 import { Label } from '@/components/ui/label';
-import { DashboardLayout } from '@/components/Layout/DashboardLayout';
 import { Textarea } from '@/components/ui/textarea';
-import { DashboardLayout } from '@/components/Layout/DashboardLayout';
 import {
   Select,
   SelectContent,
@@ -29,11 +22,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { DashboardLayout } from '@/components/Layout/DashboardLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { DashboardLayout } from '@/components/Layout/DashboardLayout';
 import { Separator } from '@/components/ui/separator';
-import { DashboardLayout } from '@/components/Layout/DashboardLayout';
 import AuthenticationSettings from '@/pages/Settings/Authentication';
 import {
   Settings as SettingsIcon,
@@ -121,7 +111,7 @@ export default function Settings() {  const [showApiKey, setShowApiKey] = useSta
   };
 
   return (
-    <DashboardLayout>
+    <div className='space-y-6'>
       <main className='space-y-6'>
           <div className='mb-6 sm:mb-8'>
             <h1 className='text-2xl font-bold text-gray-900 dark:text-white mb-2'>
@@ -786,6 +776,6 @@ export default function Settings() {  const [showApiKey, setShowApiKey] = useSta
             </TabsContent>
           </Tabs>
       </main>
-    </DashboardLayout>
+    </div>
   );
 }

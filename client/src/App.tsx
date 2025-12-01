@@ -21,20 +21,10 @@ import { TooltipProvider } from './components/ui/tooltip';
 
 // Lazy load components for better performance
 const Dashboard = lazy(() => import('./pages/Dashboard'));
-const DashboardExample = lazy(() => import('./pages/DashboardExample'));
-const Housing = lazy(() => import('./pages/Housing'));
-const Support = lazy(() => import('./pages/Support'));
-const Independence = lazy(() => import('./pages/Independence'));
-const Analytics = lazy(() => import('./pages/Analytics'));
-const Safeguarding = lazy(() => import('./pages/Safeguarding'));
-const Crisis = lazy(() => import('./pages/Crisis'));
-const Financials = lazy(() => import('./pages/Financials'));
-const Billing = lazy(() => import('./pages/Billing'));
-const Forms = lazy(() => import('./pages/Forms'));
-const Reports = lazy(() => import('./pages/Reports'));
-const Settings = lazy(() => import('./pages/Settings'));
 const Help = lazy(() => import('./pages/Help'));
 const PlatformAdmin = lazy(() => import('./pages/PlatformAdmin'));
+const Reports = lazy(() => import('./pages/Reports'));
+const Financials = lazy(() => import('./pages/Financials'));
 
 // New dashboard subpages
 const Residents = lazy(() => import('./pages/dashboard/Residents'));
@@ -193,6 +183,9 @@ function App() {
                             {/* Settings Routes */}
                             <Route path='dashboard/settings/account' element={<SettingsAccount />} />
                             <Route path='dashboard/settings/billing' element={<SettingsBilling />} />
+
+                            {/* Help & Support */}
+                            <Route path='help' element={<Help />} />
                           </Route>
 
                           {/* Platform admin routes */}

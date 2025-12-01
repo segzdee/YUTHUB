@@ -168,12 +168,12 @@ export function useAuth(): AuthState {
 
   const logout = async () => {
     try {
-      // Sign out from Supabase
+      // Sign out from Supabase (this clears the session on the server)
       const { error } = await supabase.auth.signOut();
 
       if (error) {
         console.error('Logout error:', error);
-        throw error;
+        // Don't throw - continue with cleanup even if server logout fails
       }
 
       // Clear auth cache
@@ -186,14 +186,31 @@ export function useAuth(): AuthState {
       // Clear all TanStack Query caches
       queryClient.clear();
 
+      // Clear localStorage items
+      try {
+        Object.keys(localStorage).forEach(key => {
+          if (key.includes('supabase') || key.includes('auth')) {
+            localStorage.removeItem(key);
+          }
+        });
+      } catch (e) {
+        console.error('Error clearing localStorage:', e);
+      }
+
       // Update local state
       setAuthState({
         user: null,
         isLoading: false,
         isAuthenticated: false,
       });
+
+      // If there was an error, throw it after cleanup
+      if (error) {
+        throw error;
+      }
     } catch (error) {
       console.error('Logout failed:', error);
+      // Re-throw so calling code can handle it
       throw error;
     }
   };

@@ -17,6 +17,7 @@ import {
   HelpCircle,
   LogOut,
   ChevronsUpDown,
+  Loader2,
 } from "lucide-react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 
@@ -52,6 +53,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuth } from "@/hooks/useAuth"
+import { useToast } from "@/hooks/use-toast"
+import { useQueryClient } from "@tanstack/react-query"
 
 const navItems = [
   {
@@ -161,6 +164,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate()
   const { state } = useSidebar()
   const { user, logout } = useAuth()
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
+  const [isLoggingOut, setIsLoggingOut] = React.useState(false)
 
   // Helper function to check if a route is active
   const isRouteActive = (url: string) => {
@@ -172,12 +178,85 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     return items.some(item => isRouteActive(item.url))
   }
 
-  const handleLogout = async () => {
+  const clearAllAuthCookies = () => {
+    // Clear all possible auth cookies
+    const cookies = ['accessToken', 'refreshToken', 'session', 'sb-access-token', 'sb-refresh-token'];
+    cookies.forEach(cookieName => {
+      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`;
+    });
+  };
+
+  const clearAllStorage = () => {
+    // Clear localStorage
     try {
-      await logout()
-      navigate('/login')
+      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('auth-token');
+      localStorage.removeItem('user');
+      // Clear any other auth-related items
+      Object.keys(localStorage).forEach(key => {
+        if (key.includes('auth') || key.includes('supabase')) {
+          localStorage.removeItem(key);
+        }
+      });
+    } catch (e) {
+      console.error('Error clearing localStorage:', e);
+    }
+
+    // Clear sessionStorage
+    try {
+      sessionStorage.clear();
+    } catch (e) {
+      console.error('Error clearing sessionStorage:', e);
+    }
+  };
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+
+    setIsLoggingOut(true);
+
+    try {
+      // Call Supabase logout
+      await logout();
+
+      // Clear TanStack Query cache
+      queryClient.clear();
+
+      // Clear all cookies
+      clearAllAuthCookies();
+
+      // Clear all storage
+      clearAllStorage();
+
+      // Show success toast
+      toast({
+        title: 'Logged out successfully',
+        description: 'You have been logged out of your account.',
+      });
+
+      // Hard redirect to login page
+      window.location.href = '/login';
     } catch (error) {
-      console.error('Logout failed:', error)
+      console.error('Logout failed:', error);
+
+      setIsLoggingOut(false);
+
+      toast({
+        title: 'Logout failed',
+        description: 'Please try again. If the problem persists, clear your browser cache.',
+        variant: 'destructive',
+      });
+
+      // Even if logout fails, try to clear local state and redirect
+      queryClient.clear();
+      clearAllAuthCookies();
+      clearAllStorage();
+
+      // Force redirect anyway after a short delay
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 1500);
     }
   }
 
@@ -330,10 +409,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleLogout}
-                  className="cursor-pointer text-red-600 focus:text-red-600"
+                  disabled={isLoggingOut}
+                  className="cursor-pointer text-red-600 focus:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Log out
+                  {isLoggingOut ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <LogOut className="mr-2 h-4 w-4" />
+                  )}
+                  {isLoggingOut ? 'Logging out...' : 'Log out'}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

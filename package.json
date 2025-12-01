@@ -36,6 +36,7 @@
     "seed:admin": "npx tsx scripts/seed-platform-admin.ts",
     "setup:stripe": "npx tsx scripts/setup-stripe-products-updated.ts",
     "create:demo": "npx tsx scripts/create-demo-accounts.ts",
+    "populate:demo": "npx tsx scripts/populate-demo-data.ts",
     "deploy": "npm run build && npm start",
     "prepare": "husky install"
   },

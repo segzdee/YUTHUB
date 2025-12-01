@@ -6,6 +6,10 @@ interface DashboardMetrics {
   currentResidents: number;
   occupancyRate: number;
   activeIncidents: number;
+  openConcerns: number;
+  complianceScore: number;
+  monthlyRevenue: number;
+  pendingTasks: number;
 }
 
 export function useDashboardMetrics() {
@@ -82,17 +86,63 @@ export function useDashboardMetrics() {
           .from('incidents')
           .select('*', { count: 'exact', head: true })
           .eq('organization_id', orgId)
-          .in('status', ['open', 'investigating']);
+          .in('status', ['reported', 'under_investigation', 'action_taken']);
 
         if (incidentsError) {
           console.error('Incidents query error:', incidentsError);
         }
+
+        // Query 5: Open Concerns (high severity incidents)
+        const { count: concernsCount } = await supabase
+          .from('incidents')
+          .select('*', { count: 'exact', head: true })
+          .eq('organization_id', orgId)
+          .in('severity', ['high', 'critical'])
+          .neq('status', 'closed');
+
+        // Query 6: Calculate compliance score based on completed assessments
+        const { data: assessments } = await supabase
+          .from('assessments')
+          .select('status')
+          .eq('organization_id', orgId);
+
+        const totalAssessments = assessments?.length || 0;
+        const completedAssessments = assessments?.filter(a => a.status === 'completed').length || 0;
+        const complianceScore = totalAssessments > 0
+          ? Math.round((completedAssessments / totalAssessments) * 100)
+          : 100;
+
+        // Query 7: Calculate monthly revenue from financial records
+        const currentMonth = new Date();
+        const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+
+        const { data: financialRecords } = await supabase
+          .from('financial_records')
+          .select('amount, transaction_type')
+          .eq('organization_id', orgId)
+          .eq('transaction_type', 'rent_payment')
+          .gte('transaction_date', firstDayOfMonth.toISOString().split('T')[0]);
+
+        const monthlyRevenue = financialRecords?.reduce((sum, record) => sum + Number(record.amount || 0), 0) || 0;
+
+        // Query 8: Count pending tasks (maintenance requests + incident actions)
+        const { count: maintenanceCount } = await supabase
+          .from('maintenance_requests')
+          .select('*', { count: 'exact', head: true })
+          .eq('organization_id', orgId)
+          .in('status', ['pending', 'approved']);
+
+        const pendingTasks = (maintenanceCount || 0) + (incidentsCount || 0);
 
         return {
           totalProperties: propertiesCount || 0,
           currentResidents: residentsCount || 0,
           occupancyRate,
           activeIncidents: incidentsCount || 0,
+          openConcerns: concernsCount || 0,
+          complianceScore,
+          monthlyRevenue: Math.round(monthlyRevenue),
+          pendingTasks,
         };
       } catch (error) {
         console.error('Dashboard metrics error:', error);

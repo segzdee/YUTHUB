@@ -5,6 +5,7 @@ interface DashboardStore {
   visibleWidgets: string[];
   isGridLocked: boolean;
   toggleWidget: (widgetId: string) => void;
+  setVisibleWidgets: (widgets: string[]) => void;
   toggleGridLock: () => void;
   resetWidgets: () => void;
 }
@@ -31,6 +32,7 @@ export const useDashboardStore = create<DashboardStore>(
             ? state.visibleWidgets.filter((id) => id !== widgetId)
             : [...state.visibleWidgets, widgetId],
         })),
+      setVisibleWidgets: (widgets: string[]) => set({ visibleWidgets: widgets }),
       toggleGridLock: () => set((state) => ({ isGridLocked: !state.isGridLocked })),
       resetWidgets: () => set({ visibleWidgets: defaultWidgets, isGridLocked: false }),
     }),

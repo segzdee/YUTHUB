@@ -10,6 +10,7 @@ import CrossModuleWidget from '@/components/CrossModule/CrossModuleWidget';
 import { PersonalizedGreeting } from '@/components/Dashboard/PersonalizedGreeting';
 import { OnboardingChecklist } from '@/components/Dashboard/OnboardingChecklist';
 import { WhatsNewNotification } from '@/components/Dashboard/WhatsNewNotification';
+import { CustomizeModal } from '@/components/Dashboard/CustomizeModal';
 import { useDashboardStore } from '@/store/dashboardStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,6 +23,7 @@ export default function Dashboard() {
   const { isAuthenticated, isLoading } = useAuth();
   const [lastRefresh, setLastRefresh] = useState(Date.now());
   const [expandedWidget, setExpandedWidget] = useState<string | null>(null);
+  const [showCustomizeModal, setShowCustomizeModal] = useState(false);
   const queryClient = useQueryClient();
   const { visibleWidgets, toggleWidget, isGridLocked, toggleGridLock, resetWidgets } =
     useDashboardStore();
@@ -123,6 +125,7 @@ export default function Dashboard() {
               <Button
                 variant='outline'
                 size='sm'
+                onClick={() => setShowCustomizeModal(true)}
                 className='flex items-center gap-2'
               >
                 <Settings className='h-4 w-4' />
@@ -130,6 +133,12 @@ export default function Dashboard() {
               </Button>
             </div>
           </div>
+
+          {/* Customize Modal */}
+          <CustomizeModal
+            open={showCustomizeModal}
+            onOpenChange={setShowCustomizeModal}
+          />
 
           {/* Expanded Widget Modal */}
           {expandedWidget && (
@@ -193,20 +202,20 @@ export default function Dashboard() {
                   <CardTitle className='text-sm font-medium'>
                     System Overview
                   </CardTitle>
-                  <div className='flex items-center gap-1'>
+                  <div className='flex items-center gap-2'>
                     <Button
                       variant='ghost'
                       size='sm'
                       onClick={() => setExpandedWidget('overview')}
-                      className='p-1 h-6 w-6'
+                      className='p-1.5 h-8 w-8'
                     >
-                      <Maximize2 className='h-3 w-3' />
+                      <Maximize2 className='h-4 w-4' />
                     </Button>
                     <Button
                       variant='ghost'
                       size='sm'
                       onClick={() => toggleWidget('overview')}
-                      className='p-1 h-6 w-6'
+                      className='p-1.5 h-8 w-8'
                     >
                       ×
                     </Button>
@@ -227,20 +236,20 @@ export default function Dashboard() {
                   <CardTitle className='text-sm font-medium'>
                     Risk Assessment
                   </CardTitle>
-                  <div className='flex items-center gap-1'>
+                  <div className='flex items-center gap-2'>
                     <Button
                       variant='ghost'
                       size='sm'
                       onClick={() => setExpandedWidget('risk-assessment')}
-                      className='p-1 h-6 w-6'
+                      className='p-1.5 h-8 w-8'
                     >
-                      <Maximize2 className='h-3 w-3' />
+                      <Maximize2 className='h-4 w-4' />
                     </Button>
                     <Button
                       variant='ghost'
                       size='sm'
                       onClick={() => toggleWidget('risk-assessment')}
-                      className='p-1 h-6 w-6'
+                      className='p-1.5 h-8 w-8'
                     >
                       ×
                     </Button>
@@ -261,20 +270,20 @@ export default function Dashboard() {
                   <CardTitle className='text-sm font-medium'>
                     Financial Summary
                   </CardTitle>
-                  <div className='flex items-center gap-1'>
+                  <div className='flex items-center gap-2'>
                     <Button
                       variant='ghost'
                       size='sm'
                       onClick={() => setExpandedWidget('financial-summary')}
-                      className='p-1 h-6 w-6'
+                      className='p-1.5 h-8 w-8'
                     >
-                      <Maximize2 className='h-3 w-3' />
+                      <Maximize2 className='h-4 w-4' />
                     </Button>
                     <Button
                       variant='ghost'
                       size='sm'
                       onClick={() => toggleWidget('financial-summary')}
-                      className='p-1 h-6 w-6'
+                      className='p-1.5 h-8 w-8'
                     >
                       ×
                     </Button>
@@ -295,20 +304,20 @@ export default function Dashboard() {
                   <CardTitle className='text-sm font-medium'>
                     Occupancy Trends
                   </CardTitle>
-                  <div className='flex items-center gap-1'>
+                  <div className='flex items-center gap-2'>
                     <Button
                       variant='ghost'
                       size='sm'
                       onClick={() => setExpandedWidget('occupancy-chart')}
-                      className='p-1 h-6 w-6'
+                      className='p-1.5 h-8 w-8'
                     >
-                      <Maximize2 className='h-3 w-3' />
+                      <Maximize2 className='h-4 w-4' />
                     </Button>
                     <Button
                       variant='ghost'
                       size='sm'
                       onClick={() => toggleWidget('occupancy-chart')}
-                      className='p-1 h-6 w-6'
+                      className='p-1.5 h-8 w-8'
                     >
                       ×
                     </Button>
@@ -329,20 +338,20 @@ export default function Dashboard() {
                   <CardTitle className='text-sm font-medium'>
                     Recent Activity
                   </CardTitle>
-                  <div className='flex items-center gap-1'>
+                  <div className='flex items-center gap-2'>
                     <Button
                       variant='ghost'
                       size='sm'
                       onClick={() => setExpandedWidget('activity-feed')}
-                      className='p-1 h-6 w-6'
+                      className='p-1.5 h-8 w-8'
                     >
-                      <Maximize2 className='h-3 w-3' />
+                      <Maximize2 className='h-4 w-4' />
                     </Button>
                     <Button
                       variant='ghost'
                       size='sm'
                       onClick={() => toggleWidget('activity-feed')}
-                      className='p-1 h-6 w-6'
+                      className='p-1.5 h-8 w-8'
                     >
                       ×
                     </Button>
@@ -363,20 +372,20 @@ export default function Dashboard() {
                   <CardTitle className='text-sm font-medium'>
                     Occupancy Status
                   </CardTitle>
-                  <div className='flex items-center gap-1'>
+                  <div className='flex items-center gap-2'>
                     <Button
                       variant='ghost'
                       size='sm'
                       onClick={() => setExpandedWidget('occupancy-status')}
-                      className='p-1 h-6 w-6'
+                      className='p-1.5 h-8 w-8'
                     >
-                      <Maximize2 className='h-3 w-3' />
+                      <Maximize2 className='h-4 w-4' />
                     </Button>
                     <Button
                       variant='ghost'
                       size='sm'
                       onClick={() => toggleWidget('occupancy-status')}
-                      className='p-1 h-6 w-6'
+                      className='p-1.5 h-8 w-8'
                     >
                       ×
                     </Button>
@@ -397,20 +406,20 @@ export default function Dashboard() {
                   <CardTitle className='text-sm font-medium'>
                     Support Progress
                   </CardTitle>
-                  <div className='flex items-center gap-1'>
+                  <div className='flex items-center gap-2'>
                     <Button
                       variant='ghost'
                       size='sm'
                       onClick={() => setExpandedWidget('support-progress')}
-                      className='p-1 h-6 w-6'
+                      className='p-1.5 h-8 w-8'
                     >
-                      <Maximize2 className='h-3 w-3' />
+                      <Maximize2 className='h-4 w-4' />
                     </Button>
                     <Button
                       variant='ghost'
                       size='sm'
                       onClick={() => toggleWidget('support-progress')}
-                      className='p-1 h-6 w-6'
+                      className='p-1.5 h-8 w-8'
                     >
                       ×
                     </Button>

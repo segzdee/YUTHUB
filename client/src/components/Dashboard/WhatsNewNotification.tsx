@@ -42,10 +42,16 @@ const CHANGELOG: ChangelogItem[] = [
   },
 ];
 
-export function WhatsNewNotification() {
+interface WhatsNewNotificationProps {
+  isOnboardingOpen?: boolean;
+}
+
+export function WhatsNewNotification({ isOnboardingOpen }: WhatsNewNotificationProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissed, setDismissed] = useState(() => {
+    return localStorage.getItem('whatsNewV1Dismissed') === 'true';
+  });
 
   const { data: lastSeenVersion } = useQuery({
     queryKey: ['user-last-seen-version', user?.id],
@@ -84,10 +90,12 @@ export function WhatsNewNotification() {
   });
 
   const handleDismiss = () => {
+    localStorage.setItem('whatsNewV1Dismissed', 'true');
+    setDismissed(true);
     updateLastSeenVersionMutation.mutate(CURRENT_VERSION);
   };
 
-  if (!user || dismissed || lastSeenVersion === CURRENT_VERSION) {
+  if (!user || dismissed || lastSeenVersion === CURRENT_VERSION || isOnboardingOpen) {
     return null;
   }
 

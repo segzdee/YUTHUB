@@ -29,12 +29,18 @@ interface OnboardingTask {
   action: () => void;
 }
 
-export function OnboardingChecklist() {
+interface OnboardingChecklistProps {
+  onModalChange?: (isOpen: boolean) => void;
+}
+
+export function OnboardingChecklist({ onModalChange }: OnboardingChecklistProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [showModal, setShowModal] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissed, setDismissed] = useState(() => {
+    return localStorage.getItem('onboardingDismissed') === 'true';
+  });
 
   const { data: onboardingStatus, isLoading } = useQuery({
     queryKey: ['onboarding-status', user?.id],
@@ -124,6 +130,22 @@ export function OnboardingChecklist() {
     }
   }, [onboardingStatus, dismissed]);
 
+  useEffect(() => {
+    onModalChange?.(showModal);
+  }, [showModal, onModalChange]);
+
+  const handleDismiss = () => {
+    setShowModal(false);
+    setDismissed(true);
+    localStorage.setItem('onboardingDismissed', 'true');
+  };
+
+  const handleViewChecklist = () => {
+    setShowModal(true);
+    localStorage.removeItem('onboardingDismissed');
+    setDismissed(false);
+  };
+
   if (isLoading || !onboardingStatus) return null;
 
   const tasks: OnboardingTask[] = [
@@ -197,7 +219,7 @@ export function OnboardingChecklist() {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => setShowModal(true)}
+                onClick={handleViewChecklist}
                 className="ml-4"
               >
                 View Checklist
@@ -219,10 +241,7 @@ export function OnboardingChecklist() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => {
-                  setShowModal(false);
-                  setDismissed(true);
-                }}
+                onClick={handleDismiss}
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -253,7 +272,7 @@ export function OnboardingChecklist() {
                   className={`flex items-start gap-4 p-4 rounded-lg border transition-colors ${
                     task.completed
                       ? 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-900'
-                      : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                      : 'bg-card hover:bg-accent/50'
                   }`}
                 >
                   <div className="mt-0.5">
@@ -266,15 +285,25 @@ export function OnboardingChecklist() {
 
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2">
-                      {task.icon}
-                      <h3 className="font-medium">{task.title}</h3>
+                      <div className={task.completed ? 'text-green-600' : 'text-muted-foreground'}>
+                        {task.icon}
+                      </div>
+                      <h3 className={`font-medium ${
+                        task.completed ? 'text-muted-foreground line-through' : ''
+                      }`}>
+                        {task.title}
+                      </h3>
                       {task.completed && (
-                        <Badge variant="secondary" className="ml-auto">
+                        <Badge variant="secondary" className="ml-auto bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
                           Completed
                         </Badge>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground">{task.description}</p>
+                    <p className={`text-sm ${
+                      task.completed ? 'text-muted-foreground/70' : 'text-muted-foreground'
+                    }`}>
+                      {task.description}
+                    </p>
                   </div>
 
                   {!task.completed && (
@@ -304,10 +333,7 @@ export function OnboardingChecklist() {
             <div className="flex items-center justify-between pt-4 border-t">
               <Button
                 variant="ghost"
-                onClick={() => {
-                  setShowModal(false);
-                  setDismissed(true);
-                }}
+                onClick={handleDismiss}
               >
                 I'll do this later
               </Button>

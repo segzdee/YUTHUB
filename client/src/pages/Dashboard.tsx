@@ -25,6 +25,7 @@ function DashboardContent() {
   const [lastRefresh, setLastRefresh] = useState(Date.now());
   const [expandedWidget, setExpandedWidget] = useState<string | null>(null);
   const [showCustomizeModal, setShowCustomizeModal] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const queryClient = useQueryClient();
   const { visibleWidgets, toggleWidget, isGridLocked, toggleGridLock, resetWidgets } =
     useDashboardStore();
@@ -73,10 +74,10 @@ function DashboardContent() {
           <PersonalizedGreeting />
 
           {/* Onboarding Checklist */}
-          <OnboardingChecklist />
+          <OnboardingChecklist onModalChange={setIsOnboardingOpen} />
 
           {/* What's New Notification */}
-          <WhatsNewNotification />
+          <WhatsNewNotification isOnboardingOpen={isOnboardingOpen} />
 
           {/* Connection Status Indicator */}
           {isConnected && (

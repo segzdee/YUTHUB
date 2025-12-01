@@ -7,6 +7,9 @@ import MetricsCards from '@/components/Dashboard/MetricsCards';
 import OccupancyChart from '@/components/Dashboard/OccupancyChart';
 import ActivityFeed from '@/components/Dashboard/ActivityFeed';
 import CrossModuleWidget from '@/components/CrossModule/CrossModuleWidget';
+import { PersonalizedGreeting } from '@/components/Dashboard/PersonalizedGreeting';
+import { OnboardingChecklist } from '@/components/Dashboard/OnboardingChecklist';
+import { WhatsNewNotification } from '@/components/Dashboard/WhatsNewNotification';
 import { useDashboardStore } from '@/store/dashboardStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -63,6 +66,15 @@ export default function Dashboard() {
 
   return (
     <div className='space-y-6'>
+          {/* Personalized Greeting */}
+          <PersonalizedGreeting />
+
+          {/* Onboarding Checklist */}
+          <OnboardingChecklist />
+
+          {/* What's New Notification */}
+          <WhatsNewNotification />
+
           {/* Connection Status Indicator */}
           {isConnected && (
             <div className='mb-4 text-sm text-green-600 flex items-center gap-2'>

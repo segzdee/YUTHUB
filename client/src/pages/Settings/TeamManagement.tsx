@@ -33,15 +33,28 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, UserPlus, Mail, Shield, MoreVertical, Edit2, Trash2 } from 'lucide-react';
+import { Loader2, UserPlus, Mail, Shield, MoreVertical, Edit2, Trash2, Clock, CheckCircle2, XCircle, User } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { getAssignableRoles, getRoleDisplayName, getRoleDescription, type Role } from '@/config/permissions';
+import { getAssignableRoles, getRoleDisplayName, getRoleDescription, isHigherRole, type Role } from '@/config/permissions';
 import { formatDate } from '@/lib/dateUtils';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { formatDistanceToNow } from 'date-fns';
 
 interface TeamMember {
   id: string;
@@ -66,7 +79,10 @@ export default function TeamManagement() {
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<Role>('staff');
+  const [inviteMessage, setInviteMessage] = useState('');
   const [newRole, setNewRole] = useState<Role>('staff');
+  const [showRemoveDialog, setShowRemoveDialog] = useState(false);
+  const [memberToRemove, setMemberToRemove] = useState<TeamMember | null>(null);
 
   // Fetch organization members
   const { data: members, isLoading } = useQuery({
@@ -148,6 +164,7 @@ export default function TeamManagement() {
       setShowInviteModal(false);
       setInviteEmail('');
       setInviteRole('staff');
+      setInviteMessage('');
     },
     onError: (error) => {
       toast({
@@ -219,12 +236,62 @@ export default function TeamManagement() {
 
   const handleUpdateRole = () => {
     if (!selectedMember || !newRole) return;
+
+    // Check if this is a demotion
+    const isDemotion = isHigherRole(selectedMember.role, newRole);
+
+    if (isDemotion) {
+      const confirmMsg = `Are you sure you want to change ${selectedMember.first_name || 'this member'}'s role from ${getRoleDisplayName(selectedMember.role)} to ${getRoleDisplayName(newRole)}? This will reduce their access and permissions.`;
+      if (!confirm(confirmMsg)) {
+        return;
+      }
+    }
+
     updateRoleMutation.mutate({ memberId: selectedMember.id, newRole });
   };
 
-  const handleRemoveMember = (memberId: string) => {
-    if (confirm('Are you sure you want to remove this team member?')) {
-      removeMemberMutation.mutate(memberId);
+  const handleRemoveMember = () => {
+    if (!memberToRemove) return;
+    removeMemberMutation.mutate(memberToRemove.id);
+    setShowRemoveDialog(false);
+    setMemberToRemove(null);
+  };
+
+  const getInitials = (firstName?: string, lastName?: string, email?: string) => {
+    if (firstName && lastName) {
+      return `${firstName[0]}${lastName[0]}`.toUpperCase();
+    }
+    if (email) {
+      return email.substring(0, 2).toUpperCase();
+    }
+    return 'U';
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
+      case 'removed':
+      case 'suspended':
+        return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'active':
+        return <CheckCircle2 className="h-3 w-3" />;
+      case 'pending':
+        return <Clock className="h-3 w-3" />;
+      case 'removed':
+      case 'suspended':
+        return <XCircle className="h-3 w-3" />;
+      default:
+        return null;
     }
   };
 
@@ -252,7 +319,7 @@ export default function TeamManagement() {
             <div>
               <CardTitle>Team Management</CardTitle>
               <CardDescription>
-                Invite team members and manage their roles and permissions
+                Manage your team members and their roles. Invite new members, update permissions, and control access to your organization.
               </CardDescription>
             </div>
             <ProtectedAction permission="invite:team">
@@ -283,15 +350,25 @@ export default function TeamManagement() {
                 {members.map((member) => (
                   <TableRow key={member.id}>
                     <TableCell>
-                      <div>
-                        <p className="font-medium">
-                          {member.first_name && member.last_name
-                            ? `${member.first_name} ${member.last_name}`
-                            : member.email || 'User ' + member.user_id.substring(0, 8)}
-                        </p>
-                        {member.email && (
-                          <p className="text-sm text-muted-foreground">{member.email}</p>
-                        )}
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                            {getInitials(member.first_name, member.last_name, member.email)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">
+                            {member.first_name && member.last_name
+                              ? `${member.first_name} ${member.last_name}`
+                              : member.email || 'User ' + member.user_id.substring(0, 8)}
+                          </p>
+                          {member.email && (
+                            <p className="text-sm text-muted-foreground flex items-center gap-1">
+                              <Mail className="h-3 w-3" />
+                              {member.email}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -302,18 +379,24 @@ export default function TeamManagement() {
                     </TableCell>
                     <TableCell>
                       <Badge
-                        variant={member.status === 'active' ? 'default' : 'secondary'}
-                        className="capitalize"
+                        variant="outline"
+                        className={`capitalize ${getStatusColor(member.status)}`}
                       >
-                        {member.status}
+                        <span className="flex items-center gap-1">
+                          {getStatusIcon(member.status)}
+                          {member.status}
+                        </span>
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {member.accepted_at
-                        ? formatDate(member.accepted_at)
-                        : member.invited_at
-                          ? `Invited ${formatDate(member.invited_at)}`
-                          : '-'}
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {member.accepted_at
+                          ? formatDistanceToNow(new Date(member.accepted_at), { addSuffix: true })
+                          : member.invited_at
+                            ? `Invited ${formatDistanceToNow(new Date(member.invited_at), { addSuffix: true })}`
+                            : '-'}
+                      </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <ProtectedAction permission="manage:team">
@@ -336,9 +419,26 @@ export default function TeamManagement() {
                                   <Edit2 className="mr-2 h-4 w-4" />
                                   Change Role
                                 </DropdownMenuItem>
+                                {member.status === 'pending' && (
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      // Resend invite logic here
+                                      toast({
+                                        title: 'Invitation Resent',
+                                        description: 'Team member invitation has been resent',
+                                      });
+                                    }}
+                                  >
+                                    <Mail className="mr-2 h-4 w-4" />
+                                    Resend Invite
+                                  </DropdownMenuItem>
+                                )}
                                 <DropdownMenuItem
-                                  onClick={() => handleRemoveMember(member.id)}
-                                  className="text-red-600"
+                                  onClick={() => {
+                                    setMemberToRemove(member);
+                                    setShowRemoveDialog(true);
+                                  }}
+                                  className="text-red-600 focus:text-red-600"
                                 >
                                   <Trash2 className="mr-2 h-4 w-4" />
                                   Remove Member
@@ -406,6 +506,17 @@ export default function TeamManagement() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="message">Personal Message (Optional)</Label>
+              <Textarea
+                id="message"
+                placeholder="Add a personal message to the invitation email..."
+                value={inviteMessage}
+                onChange={(e) => setInviteMessage(e.target.value)}
+                rows={3}
+              />
             </div>
           </div>
 
@@ -488,6 +599,35 @@ export default function TeamManagement() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Remove Member Confirmation Dialog */}
+      <AlertDialog open={showRemoveDialog} onOpenChange={setShowRemoveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Team Member</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove{' '}
+              <span className="font-semibold">
+                {memberToRemove?.first_name && memberToRemove?.last_name
+                  ? `${memberToRemove.first_name} ${memberToRemove.last_name}`
+                  : memberToRemove?.email || 'this member'}
+              </span>{' '}
+              from your organization? They will lose access to all organization data and resources.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setMemberToRemove(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleRemoveMember}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              Remove Member
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

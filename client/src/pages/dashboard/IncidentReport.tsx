@@ -1,12 +1,14 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertTriangle, Clock, CheckCircle, XCircle, Eye, FileText } from "lucide-react";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import IncidentReportForm from '@/components/Forms/IncidentReportForm';
+import { useIncidents } from "@/hooks/useDataHooks";
+import { format } from "date-fns";
 
 interface Incident {
   id: string;
@@ -78,10 +80,22 @@ export default function IncidentReport() {
   const [showForm, setShowForm] = useState(false);
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
 
-  const { data: incidents = mockIncidents, isLoading } = useQuery({
-    queryKey: ["/api/incidents"],
-    placeholderData: mockIncidents,
-  });
+  const { data: incidentsData = [], isLoading } = useIncidents();
+
+  const incidents: Incident[] = incidentsData.map(inc => ({
+    id: `INC-${inc.id.toString().padStart(3, '0')}`,
+    title: inc.title || 'Untitled Incident',
+    severity: inc.severity as "low" | "medium" | "high" | "critical",
+    status: inc.status as "open" | "investigating" | "resolved" | "closed",
+    reportedBy: inc.reported_by || 'Unknown',
+    reportedDate: inc.created_at ? format(new Date(inc.created_at), 'yyyy-MM-dd') : '',
+    residentName: inc.residents
+      ? `${inc.residents.first_name} ${inc.residents.last_name}`
+      : 'Unknown',
+    property: inc.properties?.name || 'Unknown Property',
+    description: inc.description || '',
+    actionsTaken: inc.actions_taken || '',
+  }));
 
   const filterByStatus = (status: string) => {
     if (status === "all") return incidents;
@@ -145,7 +159,17 @@ export default function IncidentReport() {
   };
 
   if (isLoading) {
-    return <div className="space-y-6">Loading...</div>;
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-64" />
+        <div className="grid gap-4 md:grid-cols-4">
+          {[1, 2, 3, 4].map(i => (
+            <Skeleton key={i} className="h-32" />
+          ))}
+        </div>
+        <Skeleton className="h-96" />
+      </div>
+    );
   }
 
   return (

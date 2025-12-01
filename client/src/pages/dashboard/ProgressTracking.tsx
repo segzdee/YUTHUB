@@ -2,71 +2,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrendingUp, Target, Award, Calendar, Plus, Eye } from "lucide-react";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import ProgressTrackingForm from '@/components/Forms/ProgressTrackingForm';
-
-interface ProgressEntry {
-  id: string;
-  residentName: string;
-  goalArea: string;
-  milestone: string;
-  progress: number;
-  lastUpdated: string;
-  keyWorker: string;
-  status: "on_track" | "attention_needed" | "achieved";
-  notes: string;
-}
-
-const mockProgressEntries: ProgressEntry[] = [
-  {
-    id: "1",
-    residentName: "Alice Johnson",
-    goalArea: "Independent Living Skills",
-    milestone: "Meal preparation without supervision",
-    progress: 75,
-    lastUpdated: "2024-11-28",
-    keyWorker: "Sarah Smith",
-    status: "on_track",
-    notes: "Alice successfully prepared 3 meals independently this week",
-  },
-  {
-    id: "2",
-    residentName: "Ben Williams",
-    goalArea: "Education & Employment",
-    milestone: "Complete college enrollment",
-    progress: 45,
-    lastUpdated: "2024-11-25",
-    keyWorker: "John Davis",
-    status: "attention_needed",
-    notes: "Application submitted, awaiting interview date",
-  },
-  {
-    id: "3",
-    residentName: "Charlie Brown",
-    goalArea: "Financial Management",
-    milestone: "Maintain budget for 3 months",
-    progress: 100,
-    lastUpdated: "2024-11-20",
-    keyWorker: "Emma Wilson",
-    status: "achieved",
-    notes: "Successfully managed personal budget, ready for next milestone",
-  },
-  {
-    id: "4",
-    residentName: "Diana Martinez",
-    goalArea: "Social Relationships",
-    milestone: "Attend 2 community activities per week",
-    progress: 60,
-    lastUpdated: "2024-11-27",
-    keyWorker: "Sarah Smith",
-    status: "on_track",
-    notes: "Attending youth club and sports group regularly",
-  },
-];
+import { useProgressTracking } from "@/hooks/useDataHooks";
+import { format } from "date-fns";
 
 const statusColors = {
   on_track: "bg-green-500/10 text-green-700 dark:text-green-400",
@@ -82,15 +25,38 @@ const goalAreas = [
   "Health & Wellbeing",
 ];
 
+interface ProgressEntry {
+  id: string;
+  residentName: string;
+  goalArea: string;
+  milestone: string;
+  progress: number;
+  lastUpdated: string;
+  keyWorker: string;
+  status: "on_track" | "attention_needed" | "achieved";
+  notes: string;
+}
+
 export default function ProgressTracking() {
   const [showForm, setShowForm] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<ProgressEntry | null>(null);
   const [filterArea, setFilterArea] = useState<string>("all");
 
-  const { data: entries = mockProgressEntries, isLoading } = useQuery({
-    queryKey: ["/api/progress-tracking"],
-    placeholderData: mockProgressEntries,
-  });
+  const { data: progressData = [], isLoading } = useProgressTracking();
+
+  const entries: ProgressEntry[] = progressData.map(item => ({
+    id: item.id.toString(),
+    residentName: item.residents
+      ? `${item.residents.first_name} ${item.residents.last_name}`
+      : 'Unknown',
+    goalArea: item.category || 'General',
+    milestone: item.milestone || item.description || 'No milestone set',
+    progress: item.progress_percentage || 0,
+    lastUpdated: item.updated_at ? format(new Date(item.updated_at), 'yyyy-MM-dd') : '',
+    keyWorker: item.recorded_by || 'Unassigned',
+    status: item.status === 'completed' ? 'achieved' : (item.status === 'in_progress' ? 'on_track' : 'attention_needed'),
+    notes: item.notes || '',
+  }));
 
   const filteredEntries = filterArea === "all"
     ? entries
@@ -103,7 +69,17 @@ export default function ProgressTracking() {
   };
 
   if (isLoading) {
-    return <div className="space-y-6">Loading...</div>;
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-64" />
+        <div className="grid gap-4 md:grid-cols-3">
+          {[1, 2, 3].map(i => (
+            <Skeleton key={i} className="h-32" />
+          ))}
+        </div>
+        <Skeleton className="h-96" />
+      </div>
+    );
   }
 
   return (

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { useRealTimeUpdates } from '@/hooks/useRealTimeUpdates';
 import { useCrossModuleIntegration } from '@/lib/dataIntegration';
 import { format, formatDistanceToNow } from 'date-fns';
@@ -14,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Shield,
   AlertTriangle,
@@ -26,24 +26,19 @@ import {
   Eye,
   ChevronRight,
 } from 'lucide-react';
-import type { Incident, Resident, Property } from '@shared/schema';
 import { cn } from '@/lib/utils';
+import { useIncidents, useResidents, useProperties } from '@/hooks/useDataHooks';
 
-export default function Safeguarding() {  const [searchTerm, setSearchTerm] = useState('');
+export default function Safeguarding() {
+  const [searchTerm, setSearchTerm] = useState('');
   const { triggerUpdate } = useRealTimeUpdates();
   const { invalidateRelated } = useCrossModuleIntegration();
 
-  const { data: incidents = [] } = useQuery<Incident[]>({
-    queryKey: ['/api/incidents'],
-  });
+  const { data: incidents = [], isLoading: incidentsLoading } = useIncidents();
+  const { data: residents = [], isLoading: residentsLoading } = useResidents();
+  const { data: properties = [], isLoading: propertiesLoading } = useProperties();
 
-  const { data: residents = [] } = useQuery<Resident[]>({
-    queryKey: ['/api/residents'],
-  });
-
-  const { data: properties = [] } = useQuery<Property[]>({
-    queryKey: ['/api/properties'],
-  });
+  const isLoading = incidentsLoading || residentsLoading || propertiesLoading;
 
   // Filter incidents based on search term
   const filteredIncidents = incidents.filter(
@@ -174,6 +169,23 @@ export default function Safeguarding() {  const [searchTerm, setSearchTerm] = us
 
   const highRiskResidents = residents.filter(r => r.riskLevel === 'high');
   const mediumRiskResidents = residents.filter(r => r.riskLevel === 'medium');
+
+  if (isLoading) {
+    return (
+      <div className='space-y-6'>
+        <div className='mb-6'>
+          <Skeleton className='h-8 w-64 mb-2' />
+          <Skeleton className='h-4 w-96' />
+        </div>
+        <div className='grid grid-cols-1 md:grid-cols-4 gap-6'>
+          {[1, 2, 3, 4].map(i => (
+            <Skeleton key={i} className='h-32' />
+          ))}
+        </div>
+        <Skeleton className='h-96' />
+      </div>
+    );
+  }
 
   return (
     <div className='space-y-6'>

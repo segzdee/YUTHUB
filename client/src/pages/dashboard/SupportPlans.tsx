@@ -2,53 +2,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Eye, Edit, Target, Calendar } from "lucide-react";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-
-interface SupportPlan {
-  id: string;
-  residentName: string;
-  createdDate: string;
-  reviewDate: string;
-  status: "active" | "review_due" | "completed";
-  goalsTotal: number;
-  goalsCompleted: number;
-  keyWorker: string;
-}
-
-const mockPlans: SupportPlan[] = [
-  {
-    id: "1",
-    residentName: "Alice Johnson",
-    createdDate: "2024-01-15",
-    reviewDate: "2024-04-15",
-    status: "active",
-    goalsTotal: 8,
-    goalsCompleted: 6,
-    keyWorker: "Sarah Smith",
-  },
-  {
-    id: "2",
-    residentName: "Ben Williams",
-    createdDate: "2024-02-20",
-    reviewDate: "2024-05-20",
-    status: "active",
-    goalsTotal: 10,
-    goalsCompleted: 4,
-    keyWorker: "John Davis",
-  },
-  {
-    id: "3",
-    residentName: "Charlie Brown",
-    createdDate: "2023-11-10",
-    reviewDate: "2024-02-10",
-    status: "review_due",
-    goalsTotal: 6,
-    goalsCompleted: 5,
-    keyWorker: "Emma Wilson",
-  },
-];
+import { useSupportPlans } from "@/hooks/useDataHooks";
+import { format } from "date-fns";
 
 const statusColors = {
   active: "bg-green-500/10 text-green-700 dark:text-green-400",
@@ -58,14 +16,37 @@ const statusColors = {
 
 export default function SupportPlans() {
   const [showForm, setShowForm] = useState(false);
+  const { data: plansData = [], isLoading } = useSupportPlans();
 
-  const { data: plans = mockPlans, isLoading } = useQuery({
-    queryKey: ["/api/support-plans"],
-    placeholderData: mockPlans,
-  });
+  const plans = plansData.map(plan => ({
+    id: plan.id.toString(),
+    residentName: plan.residents
+      ? `${plan.residents.first_name} ${plan.residents.last_name}`
+      : 'Unknown Resident',
+    createdDate: plan.created_at ? format(new Date(plan.created_at), 'yyyy-MM-dd') : '',
+    reviewDate: plan.review_date ? format(new Date(plan.review_date), 'yyyy-MM-dd') : '',
+    status: plan.status as "active" | "review_due" | "completed",
+    goalsTotal: plan.goals ? (Array.isArray(plan.goals) ? plan.goals.length : 0) : 0,
+    goalsCompleted: plan.goals
+      ? (Array.isArray(plan.goals) ? plan.goals.filter((g: any) => g.completed).length : 0)
+      : 0,
+    keyWorker: plan.key_worker || 'Unassigned',
+  }));
 
   if (isLoading) {
-    return <div className="space-y-6">Loading...</div>;
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map(i => (
+            <Skeleton key={i} className="h-64" />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (

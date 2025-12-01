@@ -162,6 +162,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { state } = useSidebar()
   const { user, logout } = useAuth()
 
+  // Helper function to check if a route is active
+  const isRouteActive = (url: string) => {
+    return location.pathname === url || location.pathname.startsWith(url + '/')
+  }
+
+  // Helper function to check if any submenu item is active
+  const isParentActive = (items: any[]) => {
+    return items.some(item => isRouteActive(item.url))
+  }
+
   const handleLogout = async () => {
     try {
       await logout()
@@ -200,13 +210,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Collapsible
                     key={item.title}
                     asChild
-                    defaultOpen={item.items.some((subItem) =>
-                      location.pathname.startsWith(subItem.url)
-                    )}
+                    defaultOpen={isParentActive(item.items)}
                   >
                     <SidebarMenuItem>
                       <CollapsibleTrigger asChild>
-                        <SidebarMenuButton>
+                        <SidebarMenuButton
+                          tooltip={item.title}
+                          isActive={isParentActive(item.items)}
+                        >
                           <item.icon />
                           <span>{item.title}</span>
                           <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -218,10 +229,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             <SidebarMenuSubItem key={subItem.title}>
                               <SidebarMenuSubButton
                                 asChild
-                                isActive={location.pathname === subItem.url}
+                                isActive={isRouteActive(subItem.url)}
                               >
                                 <Link to={subItem.url}>
-                                  <subItem.icon />
+                                  <subItem.icon className="h-4 w-4" />
                                   <span>{subItem.title}</span>
                                 </Link>
                               </SidebarMenuSubButton>
@@ -235,9 +246,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       asChild
-                      isActive={location.pathname === item.url}
+                      isActive={isRouteActive(item.url!)}
+                      tooltip={item.title}
                     >
-                      <Link to={item.url}>
+                      <Link to={item.url!}>
                         <item.icon />
                         <span>{item.title}</span>
                       </Link>

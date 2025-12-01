@@ -1,6 +1,6 @@
 import * as React from "react"
 import { Outlet, useLocation, Link } from "react-router-dom"
-import { Search, Bell } from "lucide-react"
+import { Search, Bell, LogOut, Settings, User } from "lucide-react"
 
 import { AppSidebar } from "@/components/app-sidebar"
 import { CommandMenu } from "@/components/command-menu"
@@ -28,6 +28,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/hooks/useAuth"
 
 interface DashboardShellProps {
@@ -57,6 +58,18 @@ const routeLabels: Record<string, string> = {
 export function DashboardShell({ children, breadcrumbs: customBreadcrumbs }: DashboardShellProps) {
   const { user, logout } = useAuth()
   const location = useLocation()
+  const [unreadNotifications] = React.useState(3)
+
+  // Get initial sidebar state from cookie
+  const getDefaultOpen = () => {
+    if (typeof document !== 'undefined') {
+      const cookie = document.cookie.split('; ').find(row => row.startsWith('sidebar_state='))
+      return cookie ? cookie.split('=')[1] === 'true' : true
+    }
+    return true
+  }
+
+  const [sidebarOpen, setSidebarOpen] = React.useState(getDefaultOpen)
 
   const breadcrumbs = React.useMemo(() => {
     if (customBreadcrumbs) return customBreadcrumbs
@@ -80,12 +93,17 @@ export function DashboardShell({ children, breadcrumbs: customBreadcrumbs }: Das
   }, [location.pathname, customBreadcrumbs])
 
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
+    <SidebarProvider
+      defaultOpen={sidebarOpen}
+      open={sidebarOpen}
+      onOpenChange={setSidebarOpen}
+    >
+      <div className="flex min-h-screen w-full">
+        <AppSidebar />
+        <SidebarInset className="flex-1">
+          <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mr-2 h-4" />
           {breadcrumbs && breadcrumbs.length > 0 && (
             <Breadcrumb>
               <BreadcrumbList>
@@ -121,11 +139,19 @@ export function DashboardShell({ children, breadcrumbs: customBreadcrumbs }: Das
               }}
             >
               <Search className="h-4 w-4" />
-              <span className="sr-only">Search</span>
+              <span className="sr-only">Search (⌘K)</span>
             </Button>
-            <Button variant="outline" size="icon" className="h-8 w-8">
+            <Button variant="outline" size="icon" className="h-8 w-8 relative">
               <Bell className="h-4 w-4" />
-              <span className="sr-only">Notifications</span>
+              {unreadNotifications > 0 && (
+                <Badge
+                  variant="destructive"
+                  className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                >
+                  {unreadNotifications}
+                </Badge>
+              )}
+              <span className="sr-only">Notifications ({unreadNotifications} unread)</span>
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -143,27 +169,39 @@ export function DashboardShell({ children, breadcrumbs: customBreadcrumbs }: Das
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">{user?.email || "User"}</p>
                     <p className="text-xs leading-none text-muted-foreground">
-                      {user?.email || "user@example.com"}
+                      {user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : "Member"}
                     </p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link to="/app/settings">Settings</Link>
+                  <Link to="/app/dashboard/settings/account" className="cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    Profile
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/app/help">Support</Link>
+                  <Link to="/app/dashboard/settings/billing" className="cursor-pointer">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout}>Log out</DropdownMenuItem>
+                <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600 focus:text-red-600">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Log out
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4">
-          {children || <Outlet />}
-        </div>
+        <main className="flex-1 overflow-y-auto">
+          <div className="container mx-auto p-4 md:p-6 space-y-6">
+            {children || <Outlet />}
+          </div>
+        </main>
       </SidebarInset>
+      </div>
       <CommandMenu />
     </SidebarProvider>
   )

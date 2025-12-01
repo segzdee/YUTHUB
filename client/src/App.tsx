@@ -38,8 +38,13 @@ const PlatformAdmin = lazy(() => import('./pages/PlatformAdmin'));
 
 // New dashboard subpages
 const Residents = lazy(() => import('./pages/dashboard/Residents'));
+const ResidentIntake = lazy(() => import('./pages/dashboard/ResidentIntake'));
+const SupportPlans = lazy(() => import('./pages/dashboard/SupportPlans'));
 const Properties = lazy(() => import('./pages/dashboard/Properties'));
+const PropertyRegistration = lazy(() => import('./pages/dashboard/PropertyRegistration'));
 const ComplianceSafeguarding = lazy(() => import('./pages/dashboard/ComplianceSafeguarding'));
+const IncidentReport = lazy(() => import('./pages/dashboard/IncidentReport'));
+const ProgressTracking = lazy(() => import('./pages/dashboard/ProgressTracking'));
 const ReportsAnalytics = lazy(() => import('./pages/dashboard/ReportsAnalytics'));
 const SettingsAccount = lazy(() => import('./pages/dashboard/SettingsAccount'));
 const SettingsBilling = lazy(() => import('./pages/dashboard/SettingsBilling'));
@@ -165,17 +170,27 @@ function App() {
                               element={<Navigate to='/app/dashboard' replace />}
                             />
                             <Route path='dashboard' element={<Dashboard />} />
+
+                            {/* Residents Routes */}
                             <Route path='dashboard/residents' element={<Residents />} />
-                            <Route path='dashboard/residents/intake' element={<Forms />} />
-                            <Route path='dashboard/residents/support-plans' element={<Forms />} />
+                            <Route path='dashboard/residents/intake' element={<ResidentIntake />} />
+                            <Route path='dashboard/residents/support-plans' element={<SupportPlans />} />
+
+                            {/* Properties Routes */}
                             <Route path='dashboard/properties' element={<Properties />} />
-                            <Route path='dashboard/properties/register' element={<Forms />} />
+                            <Route path='dashboard/properties/register' element={<PropertyRegistration />} />
+
+                            {/* Compliance Routes */}
                             <Route path='dashboard/compliance/safeguarding' element={<ComplianceSafeguarding />} />
-                            <Route path='dashboard/compliance/incidents' element={<Forms />} />
-                            <Route path='dashboard/compliance/progress' element={<Forms />} />
+                            <Route path='dashboard/compliance/incidents' element={<IncidentReport />} />
+                            <Route path='dashboard/compliance/progress' element={<ProgressTracking />} />
+
+                            {/* Reports Routes */}
                             <Route path='dashboard/reports' element={<Reports />} />
                             <Route path='dashboard/reports/analytics' element={<ReportsAnalytics />} />
                             <Route path='dashboard/reports/financials' element={<Financials />} />
+
+                            {/* Settings Routes */}
                             <Route path='dashboard/settings/account' element={<SettingsAccount />} />
                             <Route path='dashboard/settings/billing' element={<SettingsBilling />} />
                           </Route>

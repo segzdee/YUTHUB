@@ -56,89 +56,94 @@ export function CommandMenu() {
         <CommandInput placeholder="Type a command or search..." />
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
-          <CommandGroup heading="Suggestions">
+          <CommandGroup heading="Navigation">
             <CommandItem
-              onSelect={() => runCommand(() => navigate("/dashboard"))}
+              onSelect={() => runCommand(() => navigate("/app/dashboard"))}
             >
               <Home className="mr-2 h-4 w-4" />
               <span>Dashboard</span>
             </CommandItem>
             <CommandItem
-              onSelect={() => runCommand(() => navigate("/dashboard/residents"))}
+              onSelect={() => runCommand(() => navigate("/app/dashboard/residents"))}
             >
               <Users className="mr-2 h-4 w-4" />
-              <span>Residents</span>
+              <span>All Residents</span>
             </CommandItem>
             <CommandItem
-              onSelect={() => runCommand(() => navigate("/dashboard/properties"))}
+              onSelect={() => runCommand(() => navigate("/app/dashboard/properties"))}
             >
               <Building2 className="mr-2 h-4 w-4" />
-              <span>Properties</span>
-            </CommandItem>
-          </CommandGroup>
-          <CommandSeparator />
-          <CommandGroup heading="Forms">
-            <CommandItem
-              onSelect={() =>
-                runCommand(() => navigate("/dashboard/forms/resident-intake"))
-              }
-            >
-              <User className="mr-2 h-4 w-4" />
-              <span>Resident Intake</span>
+              <span>All Properties</span>
             </CommandItem>
             <CommandItem
-              onSelect={() =>
-                runCommand(() =>
-                  navigate("/dashboard/forms/property-registration")
-                )
-              }
-            >
-              <Building2 className="mr-2 h-4 w-4" />
-              <span>Property Registration</span>
-            </CommandItem>
-            <CommandItem
-              onSelect={() =>
-                runCommand(() => navigate("/dashboard/forms/incident-report"))
-              }
-            >
-              <AlertTriangle className="mr-2 h-4 w-4" />
-              <span>Incident Report</span>
-            </CommandItem>
-            <CommandItem
-              onSelect={() =>
-                runCommand(() => navigate("/dashboard/forms/support-plan"))
-              }
-            >
-              <ClipboardList className="mr-2 h-4 w-4" />
-              <span>Support Plan</span>
-            </CommandItem>
-          </CommandGroup>
-          <CommandSeparator />
-          <CommandGroup heading="Reports & Analytics">
-            <CommandItem
-              onSelect={() => runCommand(() => navigate("/dashboard/reports"))}
+              onSelect={() => runCommand(() => navigate("/app/dashboard/reports"))}
             >
               <FileText className="mr-2 h-4 w-4" />
               <span>Reports</span>
             </CommandItem>
+          </CommandGroup>
+          <CommandSeparator />
+          <CommandGroup heading="Quick Actions">
             <CommandItem
-              onSelect={() => runCommand(() => navigate("/dashboard/analytics"))}
+              onSelect={() =>
+                runCommand(() => navigate("/app/dashboard/residents/intake"))
+              }
             >
-              <TrendingUp className="mr-2 h-4 w-4" />
-              <span>Analytics</span>
+              <User className="mr-2 h-4 w-4" />
+              <span>New Resident Intake</span>
             </CommandItem>
             <CommandItem
-              onSelect={() => runCommand(() => navigate("/dashboard/financials"))}
+              onSelect={() =>
+                runCommand(() =>
+                  navigate("/app/dashboard/properties/register")
+                )
+              }
             >
-              <DollarSign className="mr-2 h-4 w-4" />
-              <span>Financials</span>
+              <Building2 className="mr-2 h-4 w-4" />
+              <span>Register Property</span>
+            </CommandItem>
+            <CommandItem
+              onSelect={() =>
+                runCommand(() => navigate("/app/dashboard/compliance/incidents"))
+              }
+            >
+              <AlertTriangle className="mr-2 h-4 w-4" />
+              <span>Report Incident</span>
+            </CommandItem>
+            <CommandItem
+              onSelect={() =>
+                runCommand(() => navigate("/app/dashboard/residents/support-plans"))
+              }
+            >
+              <ClipboardList className="mr-2 h-4 w-4" />
+              <span>Create Support Plan</span>
+            </CommandItem>
+            <CommandItem
+              onSelect={() =>
+                runCommand(() => navigate("/app/dashboard/compliance/progress"))
+              }
+            >
+              <TrendingUp className="mr-2 h-4 w-4" />
+              <span>Log Progress</span>
             </CommandItem>
           </CommandGroup>
           <CommandSeparator />
-          <CommandGroup heading="Compliance">
+          <CommandGroup heading="Reports & Compliance">
+            <CommandItem
+              onSelect={() => runCommand(() => navigate("/app/dashboard/reports/analytics"))}
+            >
+              <TrendingUp className="mr-2 h-4 w-4" />
+              <span>Analytics Dashboard</span>
+            </CommandItem>
+            <CommandItem
+              onSelect={() => runCommand(() => navigate("/app/dashboard/reports/financials"))}
+            >
+              <DollarSign className="mr-2 h-4 w-4" />
+              <span>Financial Reports</span>
+            </CommandItem>
             <CommandItem
               onSelect={() =>
-                runCommand(() => navigate("/dashboard/safeguarding"))
+                runCommand(() => navigate("/app/dashboard/compliance/safeguarding"))
               }
             >
               <Shield className="mr-2 h-4 w-4" />
@@ -148,19 +153,19 @@ export function CommandMenu() {
           <CommandSeparator />
           <CommandGroup heading="Settings">
             <CommandItem
-              onSelect={() => runCommand(() => navigate("/dashboard/settings"))}
+              onSelect={() => runCommand(() => navigate("/app/dashboard/settings/account"))}
             >
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Settings</span>
+              <User className="mr-2 h-4 w-4" />
+              <span>Account Settings</span>
             </CommandItem>
             <CommandItem
-              onSelect={() => runCommand(() => navigate("/dashboard/security"))}
+              onSelect={() => runCommand(() => navigate("/app/dashboard/settings/billing"))}
             >
-              <Shield className="mr-2 h-4 w-4" />
-              <span>Security</span>
+              <CreditCard className="mr-2 h-4 w-4" />
+              <span>Billing & Subscription</span>
             </CommandItem>
             <CommandItem
-              onSelect={() => runCommand(() => navigate("/help"))}
+              onSelect={() => runCommand(() => navigate("/app/help"))}
             >
               <HelpCircle className="mr-2 h-4 w-4" />
               <span>Help & Support</span>

@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/lib/supabase";
+import { format } from "date-fns";
 
 interface SubscriptionPlan {
   id: string;
@@ -275,23 +276,31 @@ export default function SettingsBilling() {
           <CardContent className="space-y-4">
             <div>
               <div className="flex items-baseline justify-between mb-2">
-                <span className="text-3xl font-bold">£{subscription?.price}</span>
+                <span className="text-3xl font-bold">
+                  {subscription?.price !== undefined ? `£${subscription.price}` : '£0'}
+                </span>
                 <span className="text-sm text-muted-foreground">
-                  /{subscription?.billingPeriod}
+                  /{subscription?.billingPeriod || 'month'}
                 </span>
               </div>
-              <p className="text-sm text-muted-foreground">{subscription?.name}</p>
+              <p className="text-sm text-muted-foreground">
+                {subscription?.display_name || subscription?.name || 'Starter Plan'}
+              </p>
             </div>
 
             <div className="space-y-2">
               <p className="text-sm font-medium">Features included:</p>
               <ul className="space-y-1">
-                {subscription?.features.map((feature, index) => (
-                  <li key={index} className="flex items-start text-sm">
-                    <CheckCircle2 className="mr-2 h-4 w-4 text-green-600 mt-0.5" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
+                {subscription?.features && subscription.features.length > 0 ? (
+                  subscription.features.map((feature, index) => (
+                    <li key={index} className="flex items-start text-sm">
+                      <CheckCircle2 className="mr-2 h-4 w-4 text-green-600 mt-0.5" />
+                      <span>{feature}</span>
+                    </li>
+                  ))
+                ) : (
+                  <li className="text-sm text-muted-foreground">Loading features...</li>
+                )}
               </ul>
             </div>
 
@@ -341,7 +350,7 @@ export default function SettingsBilling() {
                     <span className="text-muted-foreground">Next invoice date</span>
                     <span className="font-medium">
                       <Calendar className="inline h-3 w-3 mr-1" />
-                      {new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}
+                      {format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), 'd MMM yyyy')}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
@@ -388,7 +397,7 @@ export default function SettingsBilling() {
                 Residents
               </span>
               <span className="font-medium">
-                {usage?.currentResidents} / {subscription?.maxResidents}
+                {usage?.currentResidents ?? 0} / {subscription?.maxResidents ?? 25}
               </span>
             </div>
             <Progress value={residentUsage} className="h-2" />
@@ -401,7 +410,7 @@ export default function SettingsBilling() {
                 Properties
               </span>
               <span className="font-medium">
-                {usage?.currentProperties} / {subscription?.maxProperties}
+                {usage?.currentProperties ?? 0} / {subscription?.maxProperties ?? 2}
               </span>
             </div>
             <Progress value={propertyUsage} className="h-2" />
@@ -414,7 +423,7 @@ export default function SettingsBilling() {
                 Storage
               </span>
               <span className="font-medium">
-                {usage?.storageUsed}GB / {usage?.storageLimit}GB
+                {usage?.storageUsed ?? 0} GB / {usage?.storageLimit ?? 5} GB
               </span>
             </div>
             <Progress value={storageUsage} className="h-2" />
@@ -450,7 +459,7 @@ export default function SettingsBilling() {
                     <div>
                       <p className="font-medium">{invoice.invoiceNumber}</p>
                       <p className="text-sm text-muted-foreground">
-                        {new Date(invoice.date).toLocaleDateString()}
+                        {format(new Date(invoice.date), 'd MMM yyyy')}
                       </p>
                     </div>
                   </div>

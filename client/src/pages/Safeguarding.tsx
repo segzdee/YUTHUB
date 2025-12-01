@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useRealTimeUpdates } from '@/hooks/useRealTimeUpdates';
 import { useCrossModuleIntegration } from '@/lib/dataIntegration';
+import { format } from 'date-fns';
 import {
   Card,
   CardContent,
@@ -348,9 +349,7 @@ export default function Safeguarding() {  const [searchTerm, setSearchTerm] = us
                               </CardTitle>
                               <CardDescription className='flex items-center gap-2'>
                                 <Calendar className='h-3 w-3' />
-                                {new Date(
-                                  incident.createdAt
-                                ).toLocaleDateString()}
+                                Reported: {format(new Date(incident.createdAt), 'd MMM yyyy')}
                                 <span>•</span>
                                 <User className='h-3 w-3' />
                                 {getResidentName(incident.residentId)}

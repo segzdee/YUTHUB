@@ -80,6 +80,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     'read:incidents',
     'read:assessments',
     'read:team',
+    'invite:team', // Staff can invite team members
   ],
 
   // Coordinator - Can manage residents and create support plans
@@ -93,6 +94,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     'read:incidents',
     'read:assessments',
     'read:team',
+    'invite:team',
     // Additional coordinator permissions
     'create:residents',
     'update:residents',
@@ -101,6 +103,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     'create:assessments',
     'update:assessments',
     'update:notes',
+    'manage:team', // Coordinators can manage team
   ],
 
   // Manager - Can access reports and manage incidents
@@ -245,8 +248,8 @@ export function getRoleDisplayName(role: Role): string {
  */
 export function getRoleDescription(role: Role): string {
   const descriptions: Record<Role, string> = {
-    staff: 'Basic access to view residents and create notes',
-    coordinator: 'Manage residents, create support plans and assessments',
+    staff: 'View residents, create notes, and invite team members',
+    coordinator: 'Manage residents, support plans, and team members',
     manager: 'Access reports, manage team, handle incidents and finances',
     admin: 'Full organization access including settings and billing',
     platform_admin: 'Complete system administration across all organizations',

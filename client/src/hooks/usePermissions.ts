@@ -127,5 +127,15 @@ export function useCanManageUser(targetRole: Role | null): boolean {
     return true;
   }
 
+  // Coordinator can manage staff only
+  if (role === 'coordinator' && targetRole === 'staff') {
+    return true;
+  }
+
+  // Staff cannot manage anyone (but can invite)
+  if (role === 'staff') {
+    return false;
+  }
+
   return false;
 }

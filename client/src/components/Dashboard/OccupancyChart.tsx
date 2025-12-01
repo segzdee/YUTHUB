@@ -11,13 +11,15 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AlertTriangle, Building } from 'lucide-react';
 import { useOccupancyTrend } from '@/hooks/useDashboardData';
 
 export default function OccupancyChart() {
   const [selectedPeriod, setSelectedPeriod] = useState('3M');
-  const { data: occupancyData = [], isLoading } = useOccupancyTrend();
+  const { data: occupancyData = [], isLoading, error } = useOccupancyTrend();
 
   const periods = ['3M', '6M', '1Y'];
+  const hasData = occupancyData && occupancyData.length > 0;
 
   return (
     <Card className='lg:col-span-2'>
@@ -46,6 +48,25 @@ export default function OccupancyChart() {
           <div className='h-64 flex items-center justify-center'>
             <Skeleton className='h-full w-full' />
           </div>
+        ) : error ? (
+          <div className='h-64 flex flex-col items-center justify-center text-center px-4'>
+            <AlertTriangle className='h-12 w-12 text-amber-500 mb-3' />
+            <p className='text-sm text-gray-600 dark:text-gray-400'>
+              Unable to load occupancy trends
+            </p>
+          </div>
+        ) : !hasData ? (
+          <div className='h-64 flex flex-col items-center justify-center text-center px-4'>
+            <div className='rounded-full bg-gray-100 dark:bg-gray-800 p-4 mb-3'>
+              <Building className='h-12 w-12 text-gray-400' />
+            </div>
+            <p className='text-lg font-medium text-gray-900 dark:text-gray-100 mb-1'>
+              No Data Available
+            </p>
+            <p className='text-sm text-gray-600 dark:text-gray-400'>
+              Add properties and residents to see occupancy trends
+            </p>
+          </div>
         ) : (
           <div className='h-64'>
             <ResponsiveContainer width='100%' height='100%'>
@@ -67,18 +88,16 @@ export default function OccupancyChart() {
               />
               <Tooltip
                 formatter={(value: number, name: string) => [
-                  name === 'rate' ? `${value}%` : value,
-                  name === 'rate'
+                  name === 'occupancy' ? `${value}%` : value,
+                  name === 'occupancy'
                     ? 'Occupancy Rate'
-                    : name === 'occupancy'
-                      ? 'Occupied Units'
-                      : 'Total Capacity',
+                    : 'Total Capacity',
                 ]}
                 labelFormatter={label => `Month: ${label}`}
               />
               <Area
                 type='monotone'
-                dataKey='rate'
+                dataKey='occupancy'
                 stroke='#2563eb'
                 fill='#3b82f6'
                 fillOpacity={0.6}

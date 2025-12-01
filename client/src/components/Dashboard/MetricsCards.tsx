@@ -1,6 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertTriangle, Building, Percent, Users } from 'lucide-react';
+import { AlertTriangle, Building, Percent, Users, RefreshCw } from 'lucide-react';
 import { useDashboardMetrics } from '@/hooks/useDashboardData';
 
 export default function MetricsCards() {
@@ -8,6 +9,7 @@ export default function MetricsCards() {
     data: metrics,
     isLoading,
     error,
+    refetch,
   } = useDashboardMetrics();
 
   if (isLoading) {
@@ -27,13 +29,29 @@ export default function MetricsCards() {
   if (error) {
     return (
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
-        {[...Array(4)].map((_, i) => (
-          <Card key={i}>
-            <CardContent className='p-6 text-center'>
-              <p className='text-sm text-red-600'>Failed to load metrics</p>
-            </CardContent>
-          </Card>
-        ))}
+        <Card className='md:col-span-2 lg:col-span-4'>
+          <CardContent className='p-6 text-center space-y-4'>
+            <div className='flex flex-col items-center gap-3'>
+              <AlertTriangle className='h-12 w-12 text-amber-500' />
+              <div>
+                <p className='text-lg font-semibold text-gray-900 dark:text-gray-100'>
+                  Unable to Load Metrics
+                </p>
+                <p className='text-sm text-gray-600 dark:text-gray-400 mt-1'>
+                  {error instanceof Error ? error.message : 'An error occurred while fetching dashboard metrics. Please try again.'}
+                </p>
+              </div>
+              <Button
+                onClick={() => refetch()}
+                variant='outline'
+                className='mt-2'
+              >
+                <RefreshCw className='mr-2 h-4 w-4' />
+                Retry
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }

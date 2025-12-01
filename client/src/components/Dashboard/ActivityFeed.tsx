@@ -57,7 +57,7 @@ const getActivityColor = (type: string) => {
 };
 
 export default function ActivityFeed() {
-  const { data: activities = [], isLoading } = useRecentActivity();
+  const { data: activities = [], isLoading, error } = useRecentActivity();
 
   if (isLoading) {
     return (
@@ -89,7 +89,14 @@ export default function ActivityFeed() {
       </CardHeader>
       <CardContent>
         <div className='space-y-4'>
-          {activities?.length ? (
+          {error ? (
+            <div className='text-center py-8'>
+              <AlertTriangle className='h-10 w-10 text-amber-500 mx-auto mb-2' />
+              <p className='text-sm text-gray-600 dark:text-gray-400'>
+                Unable to load activities
+              </p>
+            </div>
+          ) : activities?.length ? (
             activities.map(activity => {
               const Icon = getActivityIcon(activity.type);
               const colorClass = getActivityColor(activity.type);

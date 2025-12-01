@@ -29,30 +29,42 @@ export default function CrossModuleWidget({
   type,
   className = '',
 }: CrossModuleWidgetProps) {
-  // Fetch data from all relevant modules
+  // Fetch data from all relevant modules with error handling
   const { data: residents = [] } = useQuery({
     queryKey: ['/api/residents'],
     queryFn: () => apiRequest('/api/residents'),
+    retry: 1,
+    staleTime: 5 * 60 * 1000,
   });
   const { data: properties = [] } = useQuery({
     queryKey: ['/api/properties'],
     queryFn: () => apiRequest('/api/properties'),
+    retry: 1,
+    staleTime: 5 * 60 * 1000,
   });
   const { data: incidents = [] } = useQuery({
     queryKey: ['/api/incidents'],
     queryFn: () => apiRequest('/api/incidents'),
+    retry: 1,
+    staleTime: 5 * 60 * 1000,
   });
   const { data: supportPlans = [] } = useQuery({
     queryKey: ['/api/support-plans'],
     queryFn: () => apiRequest('/api/support-plans'),
+    retry: 1,
+    staleTime: 5 * 60 * 1000,
   });
   const { data: financialRecords = [] } = useQuery({
     queryKey: ['/api/financial-records'],
     queryFn: () => apiRequest('/api/financial-records'),
+    retry: 1,
+    staleTime: 5 * 60 * 1000,
   });
   const { data: invoices = [] } = useQuery({
     queryKey: ['/api/invoices'],
     queryFn: () => apiRequest('/api/invoices'),
+    retry: 1,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Calculate cross-module metrics
@@ -144,10 +156,6 @@ export default function CrossModuleWidget({
 
         return (
           <div className='space-y-4'>
-            <div className='flex items-center gap-2'>
-              <AlertTriangle className='h-5 w-5 text-red-500' />
-              <span className='font-medium'>Risk Assessment</span>
-            </div>
             <div className='space-y-3'>
               <div className='flex justify-between items-center'>
                 <span className='text-sm'>High Risk Residents</span>
@@ -190,10 +198,6 @@ export default function CrossModuleWidget({
 
         return (
           <div className='space-y-4'>
-            <div className='flex items-center gap-2'>
-              <DollarSign className='h-5 w-5 text-green-500' />
-              <span className='font-medium'>Financial Summary</span>
-            </div>
             <div className='space-y-3'>
               <div className='flex justify-between items-center'>
                 <span className='text-sm'>Monthly Revenue</span>
@@ -249,10 +253,6 @@ export default function CrossModuleWidget({
 
         return (
           <div className='space-y-4'>
-            <div className='flex items-center gap-2'>
-              <Building className='h-5 w-5 text-blue-500' />
-              <span className='font-medium'>Occupancy Status</span>
-            </div>
             <div className='space-y-3'>
               <div className='text-center'>
                 <div className='text-3xl font-bold text-blue-600'>
@@ -303,10 +303,6 @@ export default function CrossModuleWidget({
 
         return (
           <div className='space-y-4'>
-            <div className='flex items-center gap-2'>
-              <Shield className='h-5 w-5 text-red-500' />
-              <span className='font-medium'>Incident Alerts</span>
-            </div>
             <div className='space-y-3'>
               <div className='flex justify-between items-center'>
                 <span className='text-sm'>Open Incidents</span>
@@ -349,10 +345,6 @@ export default function CrossModuleWidget({
 
         return (
           <div className='space-y-4'>
-            <div className='flex items-center gap-2'>
-              <Target className='h-5 w-5 text-green-500' />
-              <span className='font-medium'>Support Progress</span>
-            </div>
             <div className='space-y-3'>
               <div className='flex justify-between items-center'>
                 <span className='text-sm'>Active Plans</span>

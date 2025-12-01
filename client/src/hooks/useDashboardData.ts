@@ -12,66 +12,96 @@ export function useDashboardMetrics() {
   return useQuery<DashboardMetrics>({
     queryKey: ['dashboard-metrics'],
     queryFn: async () => {
-      // Get current user's session to extract organization_id
-      const { data: { session } } = await supabase.auth.getSession();
+      try {
+        // Get current user's session to extract organization_id
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-      if (!session?.user) {
-        throw new Error('Not authenticated');
+        if (sessionError) {
+          throw new Error('Authentication failed. Please log in again.');
+        }
+
+        if (!session?.user) {
+          throw new Error('Not authenticated. Please log in.');
+        }
+
+        // Get user's organization
+        const { data: userOrg, error: orgError } = await supabase
+          .from('user_organizations')
+          .select('organization_id')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+
+        if (orgError) {
+          throw new Error('Failed to fetch organization data.');
+        }
+
+        if (!userOrg) {
+          throw new Error('No organization found. Please contact support.');
+        }
+
+        const orgId = userOrg.organization_id;
+
+        // Query 1: Total Properties
+        const { count: propertiesCount, error: propertiesError } = await supabase
+          .from('properties')
+          .select('*', { count: 'exact', head: true })
+          .eq('organization_id', orgId);
+
+        if (propertiesError) {
+          console.error('Properties query error:', propertiesError);
+        }
+
+        // Query 2: Current Residents
+        const { count: residentsCount, error: residentsError } = await supabase
+          .from('residents')
+          .select('*', { count: 'exact', head: true })
+          .eq('organization_id', orgId)
+          .eq('status', 'active');
+
+        if (residentsError) {
+          console.error('Residents query error:', residentsError);
+        }
+
+        // Query 3: Properties with capacity data for occupancy calculation
+        const { data: properties, error: capacityError } = await supabase
+          .from('properties')
+          .select('total_capacity, current_occupancy')
+          .eq('organization_id', orgId);
+
+        if (capacityError) {
+          console.error('Capacity query error:', capacityError);
+        }
+
+        // Calculate occupancy rate with null safety
+        const totalCapacity = properties?.reduce((sum, p) => sum + (p.total_capacity || 0), 0) || 0;
+        const totalOccupied = properties?.reduce((sum, p) => sum + (p.current_occupancy || 0), 0) || 0;
+        const occupancyRate = totalCapacity > 0 ? Math.round((totalOccupied / totalCapacity) * 100) : 0;
+
+        // Query 4: Active Incidents
+        const { count: incidentsCount, error: incidentsError } = await supabase
+          .from('incidents')
+          .select('*', { count: 'exact', head: true })
+          .eq('organization_id', orgId)
+          .in('status', ['open', 'investigating']);
+
+        if (incidentsError) {
+          console.error('Incidents query error:', incidentsError);
+        }
+
+        return {
+          totalProperties: propertiesCount || 0,
+          currentResidents: residentsCount || 0,
+          occupancyRate,
+          activeIncidents: incidentsCount || 0,
+        };
+      } catch (error) {
+        console.error('Dashboard metrics error:', error);
+        throw error;
       }
-
-      // Get user's organization
-      const { data: userOrg } = await supabase
-        .from('user_organizations')
-        .select('organization_id')
-        .eq('user_id', session.user.id)
-        .single();
-
-      if (!userOrg) {
-        throw new Error('No organization found');
-      }
-
-      const orgId = userOrg.organization_id;
-
-      // Query 1: Total Properties
-      const { count: propertiesCount } = await supabase
-        .from('properties')
-        .select('*', { count: 'exact', head: true })
-        .eq('organization_id', orgId);
-
-      // Query 2: Current Residents
-      const { count: residentsCount } = await supabase
-        .from('residents')
-        .select('*', { count: 'exact', head: true })
-        .eq('organization_id', orgId)
-        .eq('status', 'active');
-
-      // Query 3: Properties with capacity data for occupancy calculation
-      const { data: properties } = await supabase
-        .from('properties')
-        .select('total_capacity, current_occupancy')
-        .eq('organization_id', orgId);
-
-      // Calculate occupancy rate
-      const totalCapacity = properties?.reduce((sum, p) => sum + (p.total_capacity || 0), 0) || 0;
-      const totalOccupied = properties?.reduce((sum, p) => sum + (p.current_occupancy || 0), 0) || 0;
-      const occupancyRate = totalCapacity > 0 ? Math.round((totalOccupied / totalCapacity) * 100) : 0;
-
-      // Query 4: Active Incidents
-      const { count: incidentsCount } = await supabase
-        .from('incidents')
-        .select('*', { count: 'exact', head: true })
-        .eq('organization_id', orgId)
-        .in('status', ['open', 'investigating']);
-
-      return {
-        totalProperties: propertiesCount || 0,
-        currentResidents: residentsCount || 0,
-        occupancyRate,
-        activeIncidents: incidentsCount || 0,
-      };
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
   });
 }
 

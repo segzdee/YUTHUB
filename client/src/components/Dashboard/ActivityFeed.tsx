@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDistanceToNow } from 'date-fns';
 import {
@@ -61,33 +60,22 @@ export default function ActivityFeed() {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Activities</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className='space-y-4'>
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className='flex items-start space-x-3'>
-                <Skeleton className='w-8 h-8 rounded-full' />
-                <div className='flex-1'>
-                  <Skeleton className='h-4 w-3/4 mb-2' />
-                  <Skeleton className='h-3 w-1/2' />
-                </div>
-              </div>
-            ))}
+      <div className='space-y-4'>
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className='flex items-start space-x-3'>
+            <Skeleton className='w-8 h-8 rounded-full' />
+            <div className='flex-1'>
+              <Skeleton className='h-4 w-3/4 mb-2' />
+              <Skeleton className='h-3 w-1/2' />
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        ))}
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Recent Activities</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <div>
         <div className='space-y-4'>
           {error ? (
             <div className='text-center py-8'>
@@ -137,7 +125,6 @@ export default function ActivityFeed() {
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+    </div>
   );
 }

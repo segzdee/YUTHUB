@@ -38,15 +38,19 @@ export function PersonalizedGreeting() {
     queryFn: async () => {
       if (!user?.id) return null;
 
-      const { data } = await supabase
-        .from('users')
-        .select('raw_user_meta_data')
-        .eq('id', user.id)
-        .single();
+      // Get user metadata from Supabase Auth
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+
+      if (!authUser) return null;
 
       return {
-        firstName: data?.raw_user_meta_data?.first_name || null,
-        lastName: data?.raw_user_meta_data?.last_name || null,
+        firstName: authUser.user_metadata?.first_name ||
+                   authUser.user_metadata?.firstName ||
+                   authUser.email?.split('@')[0] ||
+                   null,
+        lastName: authUser.user_metadata?.last_name ||
+                  authUser.user_metadata?.lastName ||
+                  null,
       };
     },
     enabled: !!user?.id,

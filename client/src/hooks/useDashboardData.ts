@@ -36,11 +36,33 @@ export function useDashboardMetrics() {
           .maybeSingle();
 
         if (orgError) {
-          throw new Error('Failed to fetch organization data.');
+          console.error('Organization fetch error:', orgError);
+          // Return zeros for new users without organization
+          return {
+            totalProperties: 0,
+            currentResidents: 0,
+            occupancyRate: 0,
+            activeIncidents: 0,
+            openConcerns: 0,
+            complianceScore: 100,
+            monthlyRevenue: 0,
+            pendingTasks: 0,
+          };
         }
 
-        if (!userOrg) {
-          throw new Error('No organization found. Please contact support.');
+        if (!userOrg || !userOrg.organization_id) {
+          console.warn('No organization found for user:', session.user.id);
+          // Return zeros for users without organization
+          return {
+            totalProperties: 0,
+            currentResidents: 0,
+            occupancyRate: 0,
+            activeIncidents: 0,
+            openConcerns: 0,
+            complianceScore: 100,
+            monthlyRevenue: 0,
+            pendingTasks: 0,
+          };
         }
 
         const orgId = userOrg.organization_id;

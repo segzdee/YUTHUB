@@ -8,7 +8,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertTriangle, Building } from 'lucide-react';
@@ -22,28 +21,26 @@ export default function OccupancyChart() {
   const hasData = occupancyData && occupancyData.length > 0;
 
   return (
-    <Card className='lg:col-span-2'>
-      <CardHeader>
-        <div className='flex items-center justify-between'>
-          <CardTitle>Occupancy Trends</CardTitle>
-          <div className='flex space-x-2'>
-            {periods.map(period => (
-              <Button
-                key={period}
-                variant={selectedPeriod === period ? 'default' : 'ghost'}
-                size='sm'
-                onClick={() => setSelectedPeriod(period)}
-                className={
-                  selectedPeriod === period ? 'bg-primary text-white' : ''
-                }
-              >
-                {period}
-              </Button>
-            ))}
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
+    <div className="space-y-4">
+      {/* Period selector */}
+      <div className='flex space-x-2 justify-end'>
+        {periods.map(period => (
+          <Button
+            key={period}
+            variant={selectedPeriod === period ? 'default' : 'ghost'}
+            size='sm'
+            onClick={() => setSelectedPeriod(period)}
+            className={
+              selectedPeriod === period ? 'bg-primary text-white' : ''
+            }
+          >
+            {period}
+          </Button>
+        ))}
+      </div>
+
+      {/* Chart content */}
+      <div>
         {isLoading ? (
           <div className='h-64 flex items-center justify-center'>
             <Skeleton className='h-full w-full' />
@@ -105,9 +102,9 @@ export default function OccupancyChart() {
               />
             </AreaChart>
           </ResponsiveContainer>
-          </div>
+        </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

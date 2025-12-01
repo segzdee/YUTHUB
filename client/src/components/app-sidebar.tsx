@@ -18,6 +18,7 @@ import {
   LogOut,
   ChevronsUpDown,
   Loader2,
+  UsersRound,
 } from "lucide-react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 
@@ -149,6 +150,11 @@ const navItems = [
         title: "Account Settings",
         url: "/app/dashboard/settings/account",
         icon: Settings,
+      },
+      {
+        title: "Team Management",
+        url: "/app/dashboard/settings/team",
+        icon: UsersRound,
       },
       {
         title: "Billing",

@@ -28,16 +28,54 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, 'dist/public'),
     emptyOutDir: true,
+    target: 'esnext',
     sourcemap: false,
     minify: 'esbuild',
     chunkSizeWarningLimit: 1000,
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
+    reportCompressedSize: false,
+    cssCodeSplit: true,
+    assetsInlineLimit: 4096,
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
+    esbuild: {
+      logOverride: { 'this-is-undefined-in-esm': 'silent' },
+      legalComments: 'none',
+    },
     rollupOptions: {
+      maxParallelFileOps: 1,
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tabs'],
-          'vendor-charts': ['recharts'],
-          'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
+        manualChunks: (id) => {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+              return 'vendor-react';
+            }
+            if (id.includes('@radix-ui')) {
+              return 'vendor-radix';
+            }
+            if (id.includes('recharts') || id.includes('chart')) {
+              return 'vendor-charts';
+            }
+            if (id.includes('@tanstack')) {
+              return 'vendor-tanstack';
+            }
+            if (id.includes('react-hook-form') || id.includes('@hookform') || id.includes('zod')) {
+              return 'vendor-forms';
+            }
+            if (id.includes('lucide-react') || id.includes('react-icons')) {
+              return 'vendor-icons';
+            }
+            if (id.includes('framer-motion')) {
+              return 'vendor-animation';
+            }
+            return 'vendor';
+          }
         },
       },
     },

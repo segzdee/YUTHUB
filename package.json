@@ -4,7 +4,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "NODE_OPTIONS='--max-old-space-size=4096' vite build",
+    "build:low-mem": "NODE_OPTIONS='--max-old-space-size=2048' vite build",
+    "build:minimal": "NODE_OPTIONS='--max-old-space-size=1536' vite build --mode production",
+    "build:no-minify": "NODE_OPTIONS='--max-old-space-size=1536' vite build --minify false",
     "start": "node server.js",
     "preview": "vite preview",
     "check": "tsc --noEmit",

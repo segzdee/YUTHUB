@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { AppPageLayout } from '@/components/PageLayout';
+import { DashboardLayout } from '@/components/Layout/DashboardLayout';
 import PageLoader from '@/components/common/PageLoader';
 import {
   Card,
@@ -71,7 +71,7 @@ export default function Analytics() {
 
   if (isLoading) {
     return (
-    <AppPageLayout>
+    <DashboardLayout>
       <main className='space-y-6'>
         <PageLoader
           title='[PAGE] Dashboard'
@@ -82,7 +82,7 @@ export default function Analytics() {
           showMetrics={true}
         />
       </main>
-    </AppPageLayout>
+    </DashboardLayout>
   );
   }
 
@@ -140,7 +140,7 @@ export default function Analytics() {
   ).length;
 
   return (
-    <AppPageLayout>
+    <DashboardLayout>
       <main className='space-y-6'>
           <div className='mb-6 sm:mb-8'>
             <h1 className='text-2xl font-bold text-gray-900 dark:text-white mb-2'>
@@ -674,6 +674,6 @@ export default function Analytics() {
             </TabsContent>
           </Tabs>
       </main>
-    </AppPageLayout>
+    </DashboardLayout>
   );
 }

@@ -1,4 +1,4 @@
-import { AppPageLayout } from '@/components/PageLayout';
+import { DashboardLayout } from '@/components/Layout/DashboardLayout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -248,7 +248,7 @@ export default function Reports() {  const [selectedDateRange, setSelectedDateRa
   );
 
   return (
-    <AppPageLayout>
+    <DashboardLayout>
       <main className='space-y-6'>
           <div className='mb-6 sm:mb-8'>
             <h1 className='text-2xl font-bold text-gray-900 dark:text-white mb-2'>
@@ -430,6 +430,6 @@ export default function Reports() {  const [selectedDateRange, setSelectedDateRa
             })}
           </div>
       </main>
-    </AppPageLayout>
+    </DashboardLayout>
   );
 }

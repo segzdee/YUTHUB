@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { AppPageLayout } from '@/components/PageLayout';
+import { DashboardLayout } from '@/components/Layout/DashboardLayout';
 import {
   Card,
   CardContent,
@@ -153,7 +153,7 @@ export default function Forms() {
   ];
 
   return (
-    <AppPageLayout>
+    <DashboardLayout>
       <main className='space-y-6'>
           <div className='mb-6 sm:mb-8'>
             <h1 className='text-2xl font-bold text-gray-900 dark:text-white mb-2'>
@@ -400,6 +400,6 @@ export default function Forms() {
             </TabsContent>
           </Tabs>
       </main>
-    </AppPageLayout>
+    </DashboardLayout>
   );
 }

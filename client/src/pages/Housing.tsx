@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRealTimeUpdates } from '@/hooks/useRealTimeUpdates';
 import { useCrossModuleIntegration } from '@/lib/dataIntegration';
-import { AppPageLayout } from '@/components/PageLayout';
+import { DashboardLayout } from '@/components/Layout/DashboardLayout';
 import {
   Card,
   CardContent,
@@ -89,7 +89,7 @@ export default function Housing() {
   };
 
   return (
-    <AppPageLayout>
+    <DashboardLayout>
       <main className='space-y-6'>
           <div className='mb-6 sm:mb-8'>
             <h1 className='text-2xl font-bold text-gray-900 dark:text-white mb-2'>
@@ -349,6 +349,6 @@ export default function Housing() {
             </TabsContent>
           </Tabs>
       </main>
-    </AppPageLayout>
+    </DashboardLayout>
   );
 }

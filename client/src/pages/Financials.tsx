@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { AppPageLayout } from '@/components/PageLayout';
+import { DashboardLayout } from '@/components/Layout/DashboardLayout';
 import PageLoader from '@/components/common/PageLoader';
 import {
   Card,
@@ -58,18 +58,16 @@ export default function Financials() {  const [searchTerm, setSearchTerm] = useS
 
   if (isLoading) {
     return (
-    <AppPageLayout>
-      <main className='space-y-6'>
-        <PageLoader
-          title='[PAGE] Dashboard'
-          description='Loading data...'
-          showTabs={true}
-          tabCount={4}
-          cardCount={6}
-          showMetrics={true}
-        />
-      </main>
-    </AppPageLayout>
+    <DashboardLayout>
+      <PageLoader
+        title='Financial Management'
+        description='Loading financial data...'
+        showTabs={true}
+        tabCount={4}
+        cardCount={6}
+        showMetrics={true}
+      />
+    </DashboardLayout>
   );
   }
 
@@ -211,16 +209,15 @@ export default function Financials() {  const [searchTerm, setSearchTerm] = useS
   };
 
   return (
-    <AppPageLayout>
-      <main className='space-y-6'>
-          <div className='mb-6 sm:mb-8'>
-            <h1 className='text-2xl font-bold text-gray-900 dark:text-white mb-2'>
-              Financials
-            </h1>
-            <p className='text-gray-600 dark:text-gray-400'>
-              Track revenue, expenses, budgets, and financial performance
-            </p>
-          </div>
+    <DashboardLayout>
+      <div className='mb-6 sm:mb-8'>
+        <h1 className='text-2xl font-bold text-gray-900 dark:text-white mb-2'>
+          Financials
+        </h1>
+        <p className='text-gray-600 dark:text-gray-400'>
+          Track revenue, expenses, budgets, and financial performance
+        </p>
+      </div>
 
           {/* Summary Cards */}
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6 sm:mb-8'>
@@ -767,7 +764,6 @@ export default function Financials() {  const [searchTerm, setSearchTerm] = useS
               </div>
             </TabsContent>
           </Tabs>
-      </main>
-    </AppPageLayout>
+    </DashboardLayout>
   );
 }

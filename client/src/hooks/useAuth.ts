@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { useEffect, useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 // Global auth state cache to prevent multiple simultaneous requests
 let authCache: {
@@ -31,10 +32,16 @@ interface AuthState {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  logout: () => Promise<void>;
 }
 
 export function useAuth(): AuthState {
-  const [authState, setAuthState] = useState<AuthState>({
+  const queryClient = useQueryClient();
+
+  // Placeholder logout function for initial state
+  const logoutPlaceholder = async () => {};
+
+  const [authState, setAuthState] = useState<Omit<AuthState, 'logout'>>({
     user: null,
     isLoading: true,
     isAuthenticated: false,
@@ -159,5 +166,40 @@ export function useAuth(): AuthState {
     };
   }, []);
 
-  return authState;
+  const logout = async () => {
+    try {
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+
+      if (error) {
+        console.error('Logout error:', error);
+        throw error;
+      }
+
+      // Clear auth cache
+      authCache = {
+        user: null,
+        status: 'unauthenticated',
+        timestamp: Date.now(),
+      };
+
+      // Clear all TanStack Query caches
+      queryClient.clear();
+
+      // Update local state
+      setAuthState({
+        user: null,
+        isLoading: false,
+        isAuthenticated: false,
+      });
+    } catch (error) {
+      console.error('Logout failed:', error);
+      throw error;
+    }
+  };
+
+  return {
+    ...authState,
+    logout,
+  };
 }

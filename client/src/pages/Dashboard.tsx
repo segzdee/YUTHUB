@@ -11,7 +11,7 @@ import CrossModuleWidget from '@/components/CrossModule/CrossModuleWidget';
 import { useDashboardStore } from '@/store/dashboardStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Settings, RefreshCw, Maximize2, Lock, Unlock } from 'lucide-react';
+import { Settings, RefreshCw, Maximize2, Lock, Unlock, RotateCcw, Eye, EyeOff } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useQueryClient } from '@tanstack/react-query';
 import SubscriptionCard from '@/components/Dashboard/SubscriptionCard';
@@ -22,7 +22,7 @@ export default function Dashboard() {
   const [lastRefresh, setLastRefresh] = useState(Date.now());
   const [expandedWidget, setExpandedWidget] = useState<string | null>(null);
   const queryClient = useQueryClient();
-  const { visibleWidgets, toggleWidget, isGridLocked, toggleGridLock } =
+  const { visibleWidgets, toggleWidget, isGridLocked, toggleGridLock, resetWidgets } =
     useDashboardStore();
 
   // Initialize real-time updates for cross-module data integration
@@ -489,32 +489,62 @@ export default function Dashboard() {
           {/* Widget Customization Panel */}
           <Card className='mt-6'>
             <CardHeader>
-              <CardTitle>Widget Customization</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className='flex flex-wrap gap-2'>
-                {[
-                  { id: 'metrics', title: 'Key Metrics' },
-                  { id: 'overview', title: 'System Overview' },
-                  { id: 'risk-assessment', title: 'Risk Assessment' },
-                  { id: 'financial-summary', title: 'Financial Summary' },
-                  { id: 'occupancy-chart', title: 'Occupancy Trends' },
-                  { id: 'activity-feed', title: 'Recent Activity' },
-                  { id: 'occupancy-status', title: 'Occupancy Status' },
-                  { id: 'support-progress', title: 'Support Progress' },
-                ].map(widget => (
+              <div className='flex items-center justify-between'>
+                <div>
+                  <CardTitle>Widget Customization</CardTitle>
+                  <p className='text-sm text-muted-foreground mt-1'>
+                    Show or hide widgets to personalize your dashboard
+                  </p>
+                </div>
+                <div className='flex items-center gap-2'>
+                  <Badge variant='outline'>
+                    {visibleWidgets.length} / 8 visible
+                  </Badge>
                   <Button
-                    key={widget.id}
-                    variant={
-                      visibleWidgets.includes(widget.id) ? 'default' : 'outline'
-                    }
+                    variant='ghost'
                     size='sm'
-                    onClick={() => toggleWidget(widget.id)}
+                    onClick={resetWidgets}
                     className='text-xs'
                   >
-                    {widget.title}
+                    <RotateCcw className='mr-2 h-3 w-3' />
+                    Reset
                   </Button>
-                ))}
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2'>
+                {[
+                  { id: 'metrics', title: 'Key Metrics', icon: '📊' },
+                  { id: 'overview', title: 'System Overview', icon: '📈' },
+                  { id: 'risk-assessment', title: 'Risk Assessment', icon: '⚠️' },
+                  { id: 'financial-summary', title: 'Financial Summary', icon: '💰' },
+                  { id: 'occupancy-chart', title: 'Occupancy Trends', icon: '📉' },
+                  { id: 'activity-feed', title: 'Recent Activity', icon: '🔔' },
+                  { id: 'occupancy-status', title: 'Occupancy Status', icon: '🏠' },
+                  { id: 'support-progress', title: 'Support Progress', icon: '🎯' },
+                ].map(widget => {
+                  const isVisible = visibleWidgets.includes(widget.id);
+                  return (
+                    <Button
+                      key={widget.id}
+                      variant={isVisible ? 'default' : 'outline'}
+                      size='sm'
+                      onClick={() => toggleWidget(widget.id)}
+                      className='justify-start text-left h-auto py-2 px-3'
+                    >
+                      <span className='mr-2 text-base'>{widget.icon}</span>
+                      <span className='flex-1 text-xs'>
+                        {widget.title}
+                      </span>
+                      {isVisible ? (
+                        <Eye className='h-3 w-3 ml-2 flex-shrink-0' />
+                      ) : (
+                        <EyeOff className='h-3 w-3 ml-2 flex-shrink-0 opacity-50' />
+                      )}
+                    </Button>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>

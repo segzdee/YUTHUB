@@ -57,15 +57,7 @@ const Careers = lazy(() => import('./pages/Careers'));
 const Contact = lazy(() => import('./pages/Contact'));
 const GDPR = lazy(() => import('./pages/GDPR'));
 const AuthLogin = lazy(() => import('./pages/AuthLogin'));
-// NotFound page will be created if needed
-const NotFound = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <div className="text-center">
-      <h1 className="text-4xl font-bold text-gray-900">404</h1>
-      <p className="mt-2 text-gray-600">Page not found</p>
-    </div>
-  </div>
-);
+const NotFound = lazy(() => import('./pages/not-found'));
 
 const queryClient = new QueryClient({
   defaultOptions: {

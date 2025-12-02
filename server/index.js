@@ -5,8 +5,10 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import compression from 'compression';
 import morgan from 'morgan';
-import { setupSecurity, errorHandler } from './middleware/security.js';
+import { setupSecurity, errorHandler as securityErrorHandler } from './middleware/security.js';
+import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import apiRoutes from './routes/index.js';
+import healthRoutes from './routes/health.js';
 import { setupWebSocket } from './websocket.js';
 import { initializeScheduledJobs } from './jobs/scheduler.js';
 
@@ -28,6 +30,9 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Setup security middleware
 setupSecurity(app);
 
+// Health check routes (before auth)
+app.use('/api/health', healthRoutes);
+
 // API routes
 app.use('/api', apiRoutes);
 
@@ -44,12 +49,12 @@ app.use(express.static(staticPath));
 app.get('*', (req, res) => {
   // Don't serve index.html for API routes
   if (req.path.startsWith('/api')) {
-    return res.status(404).json({ error: 'API endpoint not found' });
+    return notFoundHandler(req, res);
   }
   res.sendFile(path.join(staticPath, 'index.html'));
 });
 
-// Error handler (must be last)
+// Global error handler (must be last)
 app.use(errorHandler);
 
 // Setup WebSocket server with Socket.IO

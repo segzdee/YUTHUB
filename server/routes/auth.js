@@ -4,16 +4,18 @@ import { authenticateUser } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Sign up
-router.post('/signup', async (req, res) => {
+// POST /api/auth/register - Create organization + admin user
+router.post('/register', async (req, res) => {
   try {
-    const { email, password, firstName, lastName, organizationName } = req.body;
+    const { email, password, firstName, lastName, organizationName, organizationType } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
+    if (!email || !password || !firstName || !lastName || !organizationName) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        required: ['email', 'password', 'firstName', 'lastName', 'organizationName']
+      });
     }
 
-    // Create user in Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -34,45 +36,50 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ error: 'Failed to create user' });
     }
 
-    // If organization name provided, create organization
-    if (organizationName) {
-      const { data: org, error: orgError } = await supabase
-        .from('organizations')
-        .insert({
-          name: organizationName,
-          display_name: organizationName,
-          slug: organizationName.toLowerCase().replace(/\s+/g, '-'),
-          organization_type: 'housing_association',
-          status: 'active',
-          subscription_tier: 'trial',
-          subscription_status: 'active',
-        })
-        .select()
-        .single();
+    const { data: org, error: orgError } = await supabase
+      .from('organizations')
+      .insert({
+        name: organizationName,
+        display_name: organizationName,
+        slug: organizationName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        organization_type: organizationType || 'housing_association',
+        status: 'active',
+        subscription_tier: 'trial',
+        subscription_status: 'trialing',
+        trial_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      })
+      .select()
+      .single();
 
-      if (!orgError && org) {
-        // Link user to organization
-        await supabase.from('user_organizations').insert({
-          user_id: authData.user.id,
-          organization_id: org.id,
-          role: 'owner',
-          status: 'active',
-        });
-      }
+    if (orgError) {
+      console.error('Organization creation error:', orgError);
+      return res.status(500).json({ error: 'Failed to create organization' });
+    }
+
+    const { error: linkError } = await supabase.from('user_organizations').insert({
+      user_id: authData.user.id,
+      organization_id: org.id,
+      role: 'owner',
+      status: 'active',
+    });
+
+    if (linkError) {
+      console.error('User-organization link error:', linkError);
     }
 
     res.status(201).json({
       user: authData.user,
       session: authData.session,
+      organization: org,
     });
   } catch (error) {
-    console.error('Signup error:', error);
+    console.error('Registration error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// Sign in
-router.post('/signin', async (req, res) => {
+// POST /api/auth/login - Email/password authentication
+router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -89,81 +96,51 @@ router.post('/signin', async (req, res) => {
       return res.status(401).json({ error: error.message });
     }
 
-    res.json({
-      user: data.user,
-      session: data.session,
-    });
-  } catch (error) {
-    console.error('Signin error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Sign out
-router.post('/signout', authenticateUser, async (req, res) => {
-  try {
-    const { error } = await supabase.auth.signOut();
-
-    if (error) {
-      return res.status(400).json({ error: error.message });
-    }
-
-    res.json({ message: 'Signed out successfully' });
-  } catch (error) {
-    console.error('Signout error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Get current user
-router.get('/user', authenticateUser, async (req, res) => {
-  try {
-    // Get user organization info
     const { data: userOrg } = await supabase
       .from('user_organizations')
-      .select(`
-        organization_id,
-        role,
-        status,
-        organizations (
-          name,
-          display_name,
-          subscription_tier,
-          subscription_status,
-          max_residents,
-          max_properties
-        )
-      `)
-      .eq('user_id', req.userId)
+      .select('organization_id, role, organizations(*)')
+      .eq('user_id', data.user.id)
       .eq('status', 'active')
       .single();
 
     res.json({
-      id: req.user.id,
-      email: req.user.email,
-      firstName: req.user.user_metadata?.first_name,
-      lastName: req.user.user_metadata?.last_name,
-      name: req.user.user_metadata?.name,
-      role: userOrg?.role || 'user',
-      organizationId: userOrg?.organization_id,
-      subscriptionTier: userOrg?.organizations?.subscription_tier,
-      subscriptionStatus: userOrg?.organizations?.subscription_status,
-      maxResidents: userOrg?.organizations?.max_residents,
-      maxProperties: userOrg?.organizations?.max_properties,
+      user: data.user,
+      session: data.session,
+      organization: userOrg?.organizations || null,
+      role: userOrg?.role || null,
     });
   } catch (error) {
-    console.error('Get user error:', error);
+    console.error('Login error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// Refresh session
+// POST /api/auth/logout - Invalidate session
+router.post('/logout', authenticateUser, async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader.substring(7);
+
+    const { error } = await supabase.auth.admin.signOut(token);
+
+    if (error) {
+      console.error('Logout error:', error);
+    }
+
+    res.json({ message: 'Logged out successfully' });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST /api/auth/refresh - Refresh access token
 router.post('/refresh', async (req, res) => {
   try {
     const { refresh_token } = req.body;
 
     if (!refresh_token) {
-      return res.status(400).json({ error: 'Refresh token is required' });
+      return res.status(400).json({ error: 'Refresh token required' });
     }
 
     const { data, error } = await supabase.auth.refreshSession({
@@ -176,15 +153,16 @@ router.post('/refresh', async (req, res) => {
 
     res.json({
       session: data.session,
+      user: data.user,
     });
   } catch (error) {
-    console.error('Refresh error:', error);
+    console.error('Token refresh error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// Password reset request
-router.post('/reset-password', async (req, res) => {
+// POST /api/auth/forgot-password - Send password reset email
+router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -193,7 +171,7 @@ router.post('/reset-password', async (req, res) => {
     }
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.APP_URL || 'http://localhost:5173'}/reset-password`,
+      redirectTo: `${process.env.VITE_APP_URL}/reset-password`,
     });
 
     if (error) {
@@ -202,7 +180,52 @@ router.post('/reset-password', async (req, res) => {
 
     res.json({ message: 'Password reset email sent' });
   } catch (error) {
-    console.error('Password reset error:', error);
+    console.error('Forgot password error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST /api/auth/reset-password - Reset password with token
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { password, token } = req.body;
+
+    if (!password || !token) {
+      return res.status(400).json({ error: 'Password and token are required' });
+    }
+
+    const { data, error } = await supabase.auth.updateUser({
+      password,
+    });
+
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    res.json({ message: 'Password reset successfully', user: data.user });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /api/auth/me - Get current user profile
+router.get('/me', authenticateUser, async (req, res) => {
+  try {
+    const { data: userOrg } = await supabase
+      .from('user_organizations')
+      .select('organization_id, role, status, organizations(*)')
+      .eq('user_id', req.userId)
+      .eq('status', 'active')
+      .single();
+
+    res.json({
+      user: req.user,
+      organization: userOrg?.organizations || null,
+      role: userOrg?.role || null,
+    });
+  } catch (error) {
+    console.error('Get user error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

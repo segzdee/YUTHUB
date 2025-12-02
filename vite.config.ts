@@ -31,7 +31,7 @@ export default defineConfig({
     target: 'esnext',
     sourcemap: false,
     minify: 'esbuild',
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 500,
     terserOptions: {
       compress: {
         drop_console: true,
@@ -51,58 +51,106 @@ export default defineConfig({
     rollupOptions: {
       maxParallelFileOps: 1,
       output: {
-        // Optimize chunking strategy for better memory usage
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
-            // Core React libraries
-            if (id.includes('react/') || id.includes('react-dom/')) {
+            // Group by package size and usage patterns for optimal memory usage
+
+            // Core React (always needed - small bundle)
+            if (id.includes('react/') || id.includes('react-dom/') || id.includes('scheduler')) {
               return 'vendor-react';
             }
+
+            // Router (loaded early)
             if (id.includes('react-router')) {
-              return 'vendor-react';
+              return 'vendor-router';
             }
-            // UI component libraries
+
+            // UI Framework - Split Radix into smaller chunks by component type
+            if (id.includes('@radix-ui/react-dialog') ||
+                id.includes('@radix-ui/react-alert-dialog') ||
+                id.includes('@radix-ui/react-popover') ||
+                id.includes('@radix-ui/react-dropdown-menu')) {
+              return 'vendor-radix-overlay';
+            }
+            if (id.includes('@radix-ui/react-select') ||
+                id.includes('@radix-ui/react-tabs') ||
+                id.includes('@radix-ui/react-accordion') ||
+                id.includes('@radix-ui/react-collapsible')) {
+              return 'vendor-radix-interactive';
+            }
             if (id.includes('@radix-ui')) {
-              return 'vendor-radix';
+              return 'vendor-radix-core';
             }
-            // Charting libraries (keep separate - large)
-            if (id.includes('recharts') || id.includes('chart.js')) {
-              return 'vendor-charts';
+
+            // Charts - Heavy, load on demand
+            if (id.includes('recharts')) {
+              return 'vendor-recharts';
             }
-            // Data fetching
+            if (id.includes('d3-') || id.includes('victory')) {
+              return 'vendor-d3';
+            }
+
+            // Data fetching and state
             if (id.includes('@tanstack/react-query')) {
-              return 'vendor-tanstack';
+              return 'vendor-query';
             }
             if (id.includes('@tanstack/react-table')) {
-              return 'vendor-tanstack';
+              return 'vendor-table';
             }
-            // Form handling
-            if (id.includes('react-hook-form') || id.includes('@hookform') || id.includes('zod')) {
-              return 'vendor-forms';
+            if (id.includes('zustand')) {
+              return 'vendor-state';
             }
-            // Icons (can be large)
+
+            // Form libraries (loaded on form pages)
+            if (id.includes('react-hook-form')) {
+              return 'vendor-forms-rhf';
+            }
+            if (id.includes('@hookform') || id.includes('zod')) {
+              return 'vendor-forms-validation';
+            }
+
+            // Icons - Split by library
             if (id.includes('lucide-react')) {
-              return 'vendor-icons';
+              return 'vendor-icons-lucide';
             }
             if (id.includes('react-icons')) {
-              return 'vendor-icons';
+              return 'vendor-icons-react';
             }
-            // Animation
+            if (id.includes('@radix-ui/react-icons')) {
+              return 'vendor-icons-radix';
+            }
+
+            // Animation (loaded on pages with animations)
             if (id.includes('framer-motion')) {
               return 'vendor-animation';
             }
-            // Supabase
-            if (id.includes('@supabase')) {
+
+            // Backend integration
+            if (id.includes('@supabase/supabase-js')) {
               return 'vendor-supabase';
             }
-            // All other dependencies
-            return 'vendor';
+            if (id.includes('@supabase')) {
+              return 'vendor-supabase-ui';
+            }
+
+            // Date utilities
+            if (id.includes('date-fns')) {
+              return 'vendor-date';
+            }
+
+            // Utility libraries
+            if (id.includes('lodash') || id.includes('clsx') || id.includes('tailwind-merge')) {
+              return 'vendor-utils';
+            }
+
+            // All other small dependencies
+            return 'vendor-misc';
           }
         },
-        // Optimize chunk size
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
+        experimentalMinChunkSize: 20000,
       },
     },
   },

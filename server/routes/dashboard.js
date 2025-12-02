@@ -1,68 +1,149 @@
 import express from 'express';
 import { supabase } from '../config/supabase.js';
 import { authenticateUser, getUserOrganization } from '../middleware/auth.js';
+import { success, error as apiError } from '../utils/apiResponse.js';
 
 const router = express.Router();
 
 router.use(authenticateUser);
 router.use(getUserOrganization);
 
-// GET /api/dashboard/metrics - Dashboard KPIs
+// GET /api/dashboard/metrics - Dashboard KPIs with trends
 router.get('/metrics', async (req, res) => {
   try {
     const { organizationId } = req;
 
-    const [residentsResult, propertiesResult, incidentsResult] = await Promise.all([
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+
+    // Parallel database queries for current period
+    const [
+      currentResidentsResult,
+      previousResidentsResult,
+      currentPropertiesResult,
+      currentIncidentsResult,
+      previousIncidentsResult,
+      currentRevenueResult,
+      previousRevenueResult,
+      roomsResult
+    ] = await Promise.all([
+      // Current active residents
       supabase
         .from('residents')
-        .select('id, status', { count: 'exact' })
+        .select('id', { count: 'exact', head: true })
         .eq('organization_id', organizationId)
+        .eq('status', 'active')
         .eq('is_deleted', false),
 
+      // Previous period active residents (30 days ago)
+      supabase
+        .from('residents')
+        .select('id', { count: 'exact', head: true })
+        .eq('organization_id', organizationId)
+        .eq('status', 'active')
+        .eq('is_deleted', false)
+        .lte('created_at', thirtyDaysAgo.toISOString()),
+
+      // Current active properties
       supabase
         .from('properties')
-        .select('id, total_beds, occupied_beds', { count: 'exact' })
+        .select('id', { count: 'exact', head: true })
         .eq('organization_id', organizationId)
+        .eq('status', 'active')
         .eq('is_deleted', false),
 
+      // Current period incidents (last 30 days, open)
       supabase
         .from('incidents')
-        .select('id, severity, status', { count: 'exact' })
+        .select('id', { count: 'exact', head: true })
         .eq('organization_id', organizationId)
-        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+        .eq('status', 'open')
+        .gte('created_at', thirtyDaysAgo.toISOString()),
+
+      // Previous period incidents (30-60 days ago, open)
+      supabase
+        .from('incidents')
+        .select('id', { count: 'exact', head: true })
+        .eq('organization_id', organizationId)
+        .eq('status', 'open')
+        .gte('created_at', sixtyDaysAgo.toISOString())
+        .lt('created_at', thirtyDaysAgo.toISOString()),
+
+      // Current month revenue
+      supabase
+        .from('financial_records')
+        .select('amount')
+        .eq('organization_id', organizationId)
+        .eq('transaction_type', 'income')
+        .gte('transaction_date', startOfMonth.toISOString().split('T')[0]),
+
+      // Previous month revenue
+      supabase
+        .from('financial_records')
+        .select('amount')
+        .eq('organization_id', organizationId)
+        .eq('transaction_type', 'income')
+        .gte('transaction_date', startOfLastMonth.toISOString().split('T')[0])
+        .lte('transaction_date', endOfLastMonth.toISOString().split('T')[0]),
+
+      // Rooms for occupancy calculation
+      supabase
+        .from('room_allocations')
+        .select('id, status')
+        .eq('organization_id', organizationId)
+        .in('status', ['occupied', 'vacant'])
     ]);
 
-    const activeResidents = residentsResult.data?.filter(r => r.status === 'active').length || 0;
-    const totalResidents = residentsResult.count || 0;
+    // Calculate metrics
+    const totalResidents = currentResidentsResult.count || 0;
+    const previousResidents = previousResidentsResult.count || 0;
 
-    const totalBeds = propertiesResult.data?.reduce((sum, p) => sum + (p.total_beds || 0), 0) || 0;
-    const occupiedBeds = propertiesResult.data?.reduce((sum, p) => sum + (p.occupied_beds || 0), 0) || 0;
-    const occupancyRate = totalBeds > 0 ? Math.round((occupiedBeds / totalBeds) * 100) : 0;
+    const totalProperties = currentPropertiesResult.count || 0;
 
-    const totalIncidents = incidentsResult.count || 0;
-    const criticalIncidents = incidentsResult.data?.filter(
-      i => i.severity === 'critical' && i.status !== 'resolved'
-    ).length || 0;
+    const activeIncidents = currentIncidentsResult.count || 0;
+    const previousIncidents = previousIncidentsResult.count || 0;
 
-    res.json({
-      residents: {
-        active: activeResidents,
-        total: totalResidents,
-      },
-      properties: {
-        total: propertiesResult.count || 0,
-        totalBeds,
-        occupiedBeds,
-        occupancyRate,
-      },
-      incidents: {
-        total: totalIncidents,
-        critical: criticalIncidents,
-      },
+    const monthlyRevenue = currentRevenueResult.data?.reduce((sum, record) =>
+      sum + (parseFloat(record.amount) || 0), 0) || 0;
+    const previousRevenue = previousRevenueResult.data?.reduce((sum, record) =>
+      sum + (parseFloat(record.amount) || 0), 0) || 0;
+
+    // Calculate occupancy rate
+    const totalRooms = roomsResult.data?.length || 0;
+    const occupiedRooms = roomsResult.data?.filter(r => r.status === 'occupied').length || 0;
+    const occupancyRate = totalRooms > 0
+      ? parseFloat((occupiedRooms / totalRooms * 100).toFixed(1))
+      : 0;
+
+    // Calculate trend percentages
+    const calculateTrend = (current, previous) => {
+      if (previous === 0) return current > 0 ? '+100.0%' : '0.0%';
+      const change = ((current - previous) / previous * 100).toFixed(1);
+      return change >= 0 ? `+${change}%` : `${change}%`;
+    };
+
+    const trends = {
+      residents: calculateTrend(totalResidents, previousResidents),
+      incidents: calculateTrend(activeIncidents, previousIncidents),
+      revenue: calculateTrend(monthlyRevenue, previousRevenue),
+      occupancy: occupancyRate > 0 ? `${occupancyRate}%` : '0.0%'
+    };
+
+    return success(res, {
+      totalResidents,
+      totalProperties,
+      occupancyRate,
+      activeIncidents,
+      monthlyRevenue: parseFloat(monthlyRevenue.toFixed(2)),
+      trends
     });
   } catch (error) {
     console.error('Dashboard metrics error:', error);
-    res.status(500).json({ error: 'Failed to fetch dashboard metrics' });
+    return apiError(res, 'Failed to fetch dashboard metrics', 500, error.message);
   }
 });
 

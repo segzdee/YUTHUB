@@ -17,10 +17,24 @@ class ApiClient {
   private baseURL: string;
   private offlineQueue: QueuedRequest[] = [];
   private isOnline: boolean = navigator.onLine;
+  private csrfToken: string | null = null;
 
   constructor() {
     this.baseURL = import.meta.env.VITE_APP_URL || 'http://localhost:5000';
     this.setupOnlineListener();
+    this.fetchCsrfToken();
+  }
+
+  private async fetchCsrfToken() {
+    try {
+      const response = await fetch(`${this.baseURL}/api/csrf-token`, {
+        credentials: 'include',
+      });
+      const data = await response.json();
+      this.csrfToken = data.csrfToken;
+    } catch (error) {
+      console.warn('Failed to fetch CSRF token:', error);
+    }
   }
 
   private setupOnlineListener() {
@@ -137,6 +151,11 @@ class ApiClient {
 
     if (session?.access_token) {
       headers['Authorization'] = `Bearer ${session.access_token}`;
+    }
+
+    // Add CSRF token for state-changing requests
+    if (this.csrfToken) {
+      headers['x-csrf-token'] = this.csrfToken;
     }
 
     return headers;

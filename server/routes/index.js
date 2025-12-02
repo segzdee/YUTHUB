@@ -11,6 +11,7 @@ import usersRoutes from './users.js';
 import organizationsRoutes from './organizations.js';
 import stripeRoutes from './stripe.js';
 import webhooksRoutes from './webhooks.js';
+import filesRoutes from './files.js';
 
 const router = express.Router();
 
@@ -27,6 +28,7 @@ router.use('/users', usersRoutes);
 router.use('/organizations', organizationsRoutes);
 router.use('/stripe', stripeRoutes);
 router.use('/webhooks', webhooksRoutes);
+router.use('/files', filesRoutes);
 
 // Health check endpoint
 router.get('/health', (req, res) => {
@@ -60,6 +62,7 @@ router.get('/', (req, res) => {
       users: '/api/users',
       organizations: '/api/organizations',
       stripe: '/api/stripe',
+      files: '/api/files',
       health: '/api/health',
     },
     documentation: 'All endpoints require authentication except /auth/login and /auth/register',

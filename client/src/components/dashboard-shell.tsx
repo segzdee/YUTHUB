@@ -53,6 +53,7 @@ const routeLabels: Record<string, string> = {
   settings: "Settings",
   account: "Account Settings",
   billing: "Billing",
+  team: "Team Management",
 }
 
 export function DashboardShell({ children, breadcrumbs: customBreadcrumbs }: DashboardShellProps) {

@@ -1,7 +1,7 @@
 import React from 'react';
-import { Button } from '../components/Button';
-import { Card } from '../components/Card';
-import { Badge } from '../components/Badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { PublicPageLayout } from '../components/PageLayout';
 import { MODULE_DESCRIPTIONS } from '../config/pricing';
 

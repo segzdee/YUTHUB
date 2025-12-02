@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { PublicPageLayout } from '../components/PageLayout';
-import { Button } from '../components/Button';
-import { Card, FeatureCard, PricingCard } from '../components/Card';
-import { Badge } from '../components/Badge';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { FeatureCard, PricingCard } from '../components/LandingComponents';
 import BrandLogo from '../components/design-system/BrandLogo';
 import { Users, Home, CheckCircle, Clock, Building2, UserCheck, Shield, TrendingUp, BarChart3, Network } from 'lucide-react';
 

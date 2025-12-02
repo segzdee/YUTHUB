@@ -24,8 +24,56 @@ export const resetPasswordSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
-// Resident schemas
+// Resident schemas - Multi-step form structure
+const personalInfoSchema = z.object({
+  first_name: z.string().min(1, 'First name is required'),
+  last_name: z.string().min(1, 'Last name is required'),
+  date_of_birth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)'),
+  gender: z.enum(['male', 'female', 'non_binary', 'prefer_not_to_say', 'other']).optional().nullable(),
+  email: z.string().email('Invalid email address').optional().nullable(),
+  phone: z.string().optional().nullable(),
+  national_insurance: z.string().optional().nullable(),
+});
+
+const housingDetailsSchema = z.object({
+  property_id: z.string().uuid('Invalid property ID').optional().nullable(),
+  room_id: z.string().uuid('Invalid room ID').optional().nullable(),
+  admission_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
+  expected_move_on_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
+  key_worker_id: z.string().uuid('Invalid key worker ID').optional().nullable(),
+  referral_source: z.string().optional().nullable(),
+});
+
+const supportNeedsSchema = z.object({
+  support_level: z.enum(['low', 'medium', 'high', 'intensive']).optional().nullable(),
+  support_hours_per_week: z.number().min(0).optional().nullable(),
+  medical_info: z.string().optional().nullable(),
+  allergies: z.string().optional().nullable(),
+  dietary_requirements: z.string().optional().nullable(),
+  mental_health_needs: z.string().optional().nullable(),
+  substance_misuse: z.string().optional().nullable(),
+  risk_assessment: z.string().optional().nullable(),
+  create_support_plan: z.boolean().optional(),
+  support_plan_name: z.string().optional().nullable(),
+});
+
+const emergencyContactsSchema = z.object({
+  emergency_contact_name: z.string().optional().nullable(),
+  emergency_contact_phone: z.string().optional().nullable(),
+  emergency_contact_relationship: z.string().optional().nullable(),
+  emergency_contact_address: z.string().optional().nullable(),
+  next_of_kin_name: z.string().optional().nullable(),
+  next_of_kin_phone: z.string().optional().nullable(),
+  next_of_kin_relationship: z.string().optional().nullable(),
+});
+
 export const createResidentSchema = z.object({
+  personalInfo: personalInfoSchema.optional(),
+  housingDetails: housingDetailsSchema.optional(),
+  supportNeeds: supportNeedsSchema.optional(),
+  emergencyContacts: emergencyContactsSchema.optional(),
+
+  // Flattened fields for backward compatibility
   first_name: z.string().min(1, 'First name is required'),
   last_name: z.string().min(1, 'Last name is required'),
   date_of_birth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)'),
@@ -43,9 +91,24 @@ export const createResidentSchema = z.object({
   dietary_requirements: z.string().optional().nullable(),
   admission_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
   expected_move_on_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
-});
+  key_worker_id: z.string().uuid().optional().nullable(),
+  support_level: z.enum(['low', 'medium', 'high', 'intensive']).optional().nullable(),
+  mental_health_needs: z.string().optional().nullable(),
+  substance_misuse: z.string().optional().nullable(),
+}).passthrough();
 
 export const updateResidentSchema = createResidentSchema.partial();
+
+export const listResidentsQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  search: z.string().optional(),
+  status: z.enum(['active', 'inactive', 'moved_on', 'archived']).optional(),
+  propertyId: z.string().uuid().optional(),
+  keyWorkerId: z.string().uuid().optional(),
+  sortBy: z.string().default('created_at'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc'),
+});
 
 // Property schemas
 export const createPropertySchema = z.object({

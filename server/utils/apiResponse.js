@@ -6,17 +6,25 @@
 /**
  * Send success response
  */
-export function success(res, data, meta = null, statusCode = 200) {
+export function success(res, data, message = null, statusCode = 200, additionalFields = {}) {
   const response = {
     success: true,
     data,
+    ...additionalFields,
   };
 
-  if (meta) {
-    response.meta = meta;
+  if (message) {
+    response.message = message;
   }
 
   return res.status(statusCode).json(response);
+}
+
+/**
+ * Send created response (201)
+ */
+export function created(res, data, message = 'Resource created successfully') {
+  return success(res, data, message, 201);
 }
 
 /**

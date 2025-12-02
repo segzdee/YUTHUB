@@ -34,6 +34,7 @@ import FormWizard from './FormWizard';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCreateResident } from '@/hooks/useResidents';
 
 const personalInfoSchema = z.object({
   firstName: z.string().min(2, 'First name must be at least 2 characters'),

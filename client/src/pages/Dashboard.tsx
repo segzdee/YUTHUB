@@ -15,14 +15,16 @@ import { PageErrorBoundary } from '@/components/common/PageErrorBoundary';
 import { useDashboardStore } from '@/store/dashboardStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Settings, RefreshCw, Maximize2, Lock, Unlock, RotateCcw, Eye, EyeOff } from 'lucide-react';
+import { Settings, RefreshCw, Maximize2, Lock, Unlock, RotateCcw, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useQueryClient } from '@tanstack/react-query';
+import { formatRelativeTime } from '@/lib/dateUtils';
 
 function DashboardContent() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
   const [lastRefresh, setLastRefresh] = useState(Date.now());
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [expandedWidget, setExpandedWidget] = useState<string | null>(null);
   const [showCustomizeModal, setShowCustomizeModal] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
@@ -77,7 +79,10 @@ function DashboardContent() {
           <OnboardingChecklist onModalChange={setIsOnboardingOpen} />
 
           {/* What's New Notification */}
-          <WhatsNewNotification isOnboardingOpen={isOnboardingOpen} />
+          <WhatsNewNotification
+            isOnboardingOpen={isOnboardingOpen}
+            onViewChecklist={() => setIsOnboardingOpen(true)}
+          />
 
           {/* Connection Status Indicator */}
           {isConnected && (
@@ -92,7 +97,7 @@ function DashboardContent() {
             <div className='flex items-center gap-2'>
               <h2 className='text-2xl font-bold'>Dashboard</h2>
               <Badge variant='outline'>
-                Last updated: {new Date(lastRefresh).toLocaleTimeString()}
+                Last updated: {formatRelativeTime(lastRefresh)}
               </Badge>
             </div>
 
@@ -100,13 +105,20 @@ function DashboardContent() {
               <Button
                 variant='outline'
                 size='sm'
-                onClick={() => {
-                  queryClient.invalidateQueries();
+                onClick={async () => {
+                  setIsRefreshing(true);
+                  await queryClient.invalidateQueries({ queryKey: ['dashboard'] });
                   setLastRefresh(Date.now());
+                  setTimeout(() => setIsRefreshing(false), 500);
                 }}
+                disabled={isRefreshing}
                 className='flex items-center gap-2'
               >
-                <RefreshCw className='h-4 w-4' />
+                {isRefreshing ? (
+                  <Loader2 className='h-4 w-4 animate-spin' />
+                ) : (
+                  <RefreshCw className='h-4 w-4' />
+                )}
                 Refresh
               </Button>
 

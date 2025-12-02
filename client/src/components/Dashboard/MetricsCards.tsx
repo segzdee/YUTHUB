@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertTriangle, Building, Percent, Users, RefreshCw } from 'lucide-react';
+import { AlertTriangle, Building2, PieChart, Users, RefreshCw } from 'lucide-react';
 import { useDashboardMetrics } from '@/hooks/useDashboardData';
 import { formatPercentage } from '@/lib/dateUtils';
 
@@ -61,41 +61,41 @@ export default function MetricsCards() {
     {
       title: 'Total Properties',
       value: metrics?.totalProperties || 0,
-      icon: Building,
-      color: 'text-primary',
-      bgColor: 'bg-primary bg-opacity-10',
+      icon: Building2,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50 dark:bg-blue-950/20',
       change: '+8.2%',
-      changeColor: 'text-success',
+      changeColor: 'text-green-600',
       ariaLabel: `Total properties: ${metrics?.totalProperties || 0}, increased by 8.2%`,
     },
     {
       title: 'Current Residents',
       value: metrics?.currentResidents || 0,
       icon: Users,
-      color: 'text-secondary',
-      bgColor: 'bg-secondary bg-opacity-10',
+      color: 'text-indigo-600',
+      bgColor: 'bg-indigo-50 dark:bg-indigo-950/20',
       change: '+12.1%',
-      changeColor: 'text-success',
+      changeColor: 'text-green-600',
       ariaLabel: `Current residents: ${metrics?.currentResidents || 0}, increased by 12.1%`,
     },
     {
       title: 'Occupancy Rate',
       value: formatPercentage(metrics?.occupancyRate),
-      icon: Percent,
-      color: 'text-success',
-      bgColor: 'status-success bg-opacity-10',
+      icon: PieChart,
+      color: 'text-emerald-600',
+      bgColor: 'bg-emerald-50 dark:bg-emerald-950/20',
       change: '+2.3%',
-      changeColor: 'text-success',
+      changeColor: 'text-green-600',
       ariaLabel: `Occupancy rate: ${formatPercentage(metrics?.occupancyRate)}, increased by 2.3%`,
     },
     {
       title: 'Active Incidents',
       value: metrics?.activeIncidents || 0,
       icon: AlertTriangle,
-      color: 'text-accent',
-      bgColor: 'status-error bg-opacity-10',
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-50 dark:bg-orange-950/20',
       change: '-15.2%',
-      changeColor: 'text-success',
+      changeColor: 'text-green-600',
       ariaLabel: `Active incidents: ${metrics?.activeIncidents || 0}, decreased by 15.2%`,
     },
   ];

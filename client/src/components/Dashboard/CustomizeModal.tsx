@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -96,17 +96,17 @@ export function CustomizeModal({ open, onOpenChange }: CustomizeModalProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
             Customize Dashboard
-          </DialogTitle>
-          <DialogDescription>
+          </SheetTitle>
+          <SheetDescription>
             Choose which widgets to display on your dashboard. Changes are saved automatically.
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
 
         <div className="space-y-4 py-4">
           <div className="flex items-center justify-between pb-3 border-b">
@@ -163,7 +163,7 @@ export function CustomizeModal({ open, onOpenChange }: CustomizeModalProps) {
           </div>
         </div>
 
-        <DialogFooter className="gap-2">
+        <SheetFooter className="gap-2 mt-6">
           <Button
             variant="outline"
             onClick={() => {
@@ -182,8 +182,8 @@ export function CustomizeModal({ open, onOpenChange }: CustomizeModalProps) {
             )}
             Save Changes
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }

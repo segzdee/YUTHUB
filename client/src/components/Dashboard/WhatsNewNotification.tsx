@@ -44,13 +44,14 @@ const CHANGELOG: ChangelogItem[] = [
 
 interface WhatsNewNotificationProps {
   isOnboardingOpen?: boolean;
+  onViewChecklist?: () => void;
 }
 
-export function WhatsNewNotification({ isOnboardingOpen }: WhatsNewNotificationProps) {
+export function WhatsNewNotification({ isOnboardingOpen, onViewChecklist }: WhatsNewNotificationProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [dismissed, setDismissed] = useState(() => {
-    return localStorage.getItem('whatsNewV1Dismissed') === 'true';
+    return localStorage.getItem('whatsNewV100Dismissed') === 'true';
   });
 
   const { data: lastSeenVersion } = useQuery({
@@ -90,7 +91,7 @@ export function WhatsNewNotification({ isOnboardingOpen }: WhatsNewNotificationP
   });
 
   const handleDismiss = () => {
-    localStorage.setItem('whatsNewV1Dismissed', 'true');
+    localStorage.setItem('whatsNewV100Dismissed', 'true');
     setDismissed(true);
     updateLastSeenVersionMutation.mutate(CURRENT_VERSION);
   };
@@ -140,6 +141,16 @@ export function WhatsNewNotification({ isOnboardingOpen }: WhatsNewNotificationP
           </div>
 
           <div className="flex items-center gap-2 pt-2">
+            {onViewChecklist && (
+              <Button
+                size="sm"
+                variant="default"
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+                onClick={onViewChecklist}
+              >
+                View Checklist
+              </Button>
+            )}
             {latestChangelog.link && (
               <Button
                 size="sm"

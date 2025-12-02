@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { PublicPageLayout } from '../components/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { FeatureCard, PricingCard } from '../components/LandingComponents';
 import BrandLogo from '../components/design-system/BrandLogo';
 import { Users, Home, CheckCircle, Clock, Building2, UserCheck, Shield, TrendingUp, BarChart3, Network } from 'lucide-react';
@@ -179,60 +180,60 @@ const Landing: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <Card padded="lg" hoverable={false}>
-                <div className="text-center space-y-3">
+              <Card>
+                <CardContent className="text-center space-y-3 p-8">
                   <div className="flex justify-center mb-2">
                     <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center">
                       <Shield className="w-7 h-7 text-blue-600" />
                     </div>
                   </div>
-                  <h3 className="text-lg font-600 text-black">Bank-Level Encryption</h3>
-                  <p className="text-sm font-400 text-gray-600 leading-relaxed">
+                  <h3 className="text-lg font-600 text-foreground">Bank-Level Encryption</h3>
+                  <p className="text-sm font-400 text-muted-foreground leading-relaxed">
                     AES-256 encryption at rest and in transit protects all data
                   </p>
-                </div>
+                </CardContent>
               </Card>
 
-              <Card padded="lg" hoverable={false}>
-                <div className="text-center space-y-3">
+              <Card>
+                <CardContent className="text-center space-y-3 p-8">
                   <div className="flex justify-center mb-2">
                     <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center">
                       <CheckCircle className="w-7 h-7 text-green-600" />
                     </div>
                   </div>
-                  <h3 className="text-lg font-600 text-black">GDPR Compliant</h3>
-                  <p className="text-sm font-400 text-gray-600 leading-relaxed">
+                  <h3 className="text-lg font-600 text-foreground">GDPR Compliant</h3>
+                  <p className="text-sm font-400 text-muted-foreground leading-relaxed">
                     Full compliance with UK data protection laws and regulations
                   </p>
-                </div>
+                </CardContent>
               </Card>
 
-              <Card padded="lg" hoverable={false}>
-                <div className="text-center space-y-3">
+              <Card>
+                <CardContent className="text-center space-y-3 p-8">
                   <div className="flex justify-center mb-2">
                     <div className="w-14 h-14 rounded-full bg-purple-100 flex items-center justify-center">
                       <Shield className="w-7 h-7 text-purple-600" />
                     </div>
                   </div>
-                  <h3 className="text-lg font-600 text-black">Regular Audits</h3>
-                  <p className="text-sm font-400 text-gray-600 leading-relaxed">
+                  <h3 className="text-lg font-600 text-foreground">Regular Audits</h3>
+                  <p className="text-sm font-400 text-muted-foreground leading-relaxed">
                     Penetration tested quarterly by independent security experts
                   </p>
-                </div>
+                </CardContent>
               </Card>
 
-              <Card padded="lg" hoverable={false}>
-                <div className="text-center space-y-3">
+              <Card>
+                <CardContent className="text-center space-y-3 p-8">
                   <div className="flex justify-center mb-2">
                     <div className="w-14 h-14 rounded-full bg-teal-100 flex items-center justify-center">
                       <CheckCircle className="w-7 h-7 text-teal-600" />
                     </div>
                   </div>
-                  <h3 className="text-lg font-600 text-black">Ofsted Aligned</h3>
-                  <p className="text-sm font-400 text-gray-600 leading-relaxed">
+                  <h3 className="text-lg font-600 text-foreground">Ofsted Aligned</h3>
+                  <p className="text-sm font-400 text-muted-foreground leading-relaxed">
                     Purpose-built to support regulatory compliance requirements
                   </p>
-                </div>
+                </CardContent>
               </Card>
             </div>
           </div>

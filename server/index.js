@@ -8,6 +8,7 @@ import morgan from 'morgan';
 import { setupSecurity, errorHandler } from './middleware/security.js';
 import apiRoutes from './routes/index.js';
 import { setupWebSocket } from './websocket.js';
+import { initializeScheduledJobs } from './jobs/scheduler.js';
 
 dotenv.config();
 
@@ -51,11 +52,11 @@ app.get('*', (req, res) => {
 // Error handler (must be last)
 app.use(errorHandler);
 
-// Setup WebSocket server
-const { broadcast } = setupWebSocket(server);
+// Setup WebSocket server with Socket.IO
+setupWebSocket(server);
 
-// Make broadcast available to routes
-app.set('wsBroadcast', broadcast);
+// Initialize scheduled background jobs
+initializeScheduledJobs();
 
 // Start server
 server.listen(PORT, '0.0.0.0', () => {
@@ -65,16 +66,17 @@ server.listen(PORT, '0.0.0.0', () => {
 ║   🏠 YUTHUB Housing Platform API Server                  ║
 ║                                                           ║
 ║   Server running on: http://0.0.0.0:${PORT}                 ║
-║   WebSocket: ws://0.0.0.0:${PORT}/ws                        ║
+║   WebSocket: Socket.IO on port ${PORT}                       ║
 ║   Environment: ${process.env.NODE_ENV || 'development'}                        ║
 ║                                                           ║
-║   API Endpoints:                                          ║
-║   - POST   /api/auth/signup                               ║
-║   - POST   /api/auth/signin                               ║
-║   - GET    /api/auth/user                                 ║
-║   - GET    /api/residents                                 ║
-║   - GET    /api/properties                                ║
-║   - GET    /api/health                                    ║
+║   Features:                                               ║
+║   ✅ JWT Authentication                                   ║
+║   ✅ Role-Based Access Control                           ║
+║   ✅ Organization Isolation                              ║
+║   ✅ Real-time WebSocket Updates                         ║
+║   ✅ Stripe Webhooks                                     ║
+║   ✅ Scheduled Background Jobs                           ║
+║   ✅ Audit Logging                                       ║
 ║                                                           ║
 ╚═══════════════════════════════════════════════════════════╝
   `);

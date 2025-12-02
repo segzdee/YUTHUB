@@ -10,6 +10,7 @@ import billingRoutes from './billing.js';
 import usersRoutes from './users.js';
 import organizationsRoutes from './organizations.js';
 import stripeRoutes from './stripe.js';
+import webhooksRoutes from './webhooks.js';
 
 const router = express.Router();
 
@@ -25,6 +26,7 @@ router.use('/billing', billingRoutes);
 router.use('/users', usersRoutes);
 router.use('/organizations', organizationsRoutes);
 router.use('/stripe', stripeRoutes);
+router.use('/webhooks', webhooksRoutes);
 
 // Health check endpoint
 router.get('/health', (req, res) => {

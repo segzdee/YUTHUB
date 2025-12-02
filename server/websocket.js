@@ -1,140 +1,160 @@
-import { WebSocketServer } from 'ws';
+import { Server } from 'socket.io';
 import { supabase } from './config/supabase.js';
 
-export function setupWebSocket(server) {
-  const wss = new WebSocketServer({
-    server,
-    path: '/ws',
+let io = null;
+
+/**
+ * Initialize Socket.IO server with JWT authentication
+ */
+export function setupWebSocket(httpServer) {
+  io = new Server(httpServer, {
+    cors: {
+      origin: process.env.VITE_APP_URL || 'http://localhost:5000',
+      credentials: true,
+    },
+    transports: ['websocket', 'polling'],
   });
 
-  const clients = new Map();
+  // Authentication middleware
+  io.use(async (socket, next) => {
+    try {
+      const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.replace('Bearer ', '');
 
-  wss.on('connection', async (ws, req) => {
-    console.log('New WebSocket connection');
-
-    let clientId = null;
-    let userId = null;
-    let organizationId = null;
-
-    ws.on('message', async (message) => {
-      try {
-        const data = JSON.parse(message.toString());
-
-        // Handle authentication
-        if (data.type === 'auth') {
-          const token = data.token;
-
-          if (!token) {
-            ws.send(JSON.stringify({ type: 'error', message: 'No token provided' }));
-            return;
-          }
-
-          // Verify token with Supabase
-          const { data: { user }, error } = await supabase.auth.getUser(token);
-
-          if (error || !user) {
-            ws.send(JSON.stringify({ type: 'error', message: 'Invalid token' }));
-            ws.close();
-            return;
-          }
-
-          userId = user.id;
-
-          // Get user's organization
-          const { data: userOrg } = await supabase
-            .from('user_organizations')
-            .select('organization_id')
-            .eq('user_id', userId)
-            .eq('status', 'active')
-            .single();
-
-          if (userOrg) {
-            organizationId = userOrg.organization_id;
-            clientId = `${userId}-${Date.now()}`;
-
-            clients.set(clientId, {
-              ws,
-              userId,
-              organizationId,
-              connectedAt: new Date(),
-            });
-
-            ws.send(JSON.stringify({
-              type: 'authenticated',
-              clientId,
-              message: 'WebSocket authenticated successfully',
-            }));
-
-            console.log(`Client authenticated: ${clientId}`);
-          }
-        }
-
-        // Handle ping
-        if (data.type === 'ping') {
-          ws.send(JSON.stringify({ type: 'pong', timestamp: Date.now() }));
-        }
-
-        // Handle subscribe to updates
-        if (data.type === 'subscribe') {
-          if (!userId || !organizationId) {
-            ws.send(JSON.stringify({ type: 'error', message: 'Not authenticated' }));
-            return;
-          }
-
-          ws.send(JSON.stringify({
-            type: 'subscribed',
-            channel: data.channel || 'default',
-          }));
-        }
-      } catch (error) {
-        console.error('WebSocket message error:', error);
-        ws.send(JSON.stringify({ type: 'error', message: 'Invalid message format' }));
+      if (!token) {
+        return next(new Error('Authentication token required'));
       }
-    });
 
-    ws.on('close', () => {
-      if (clientId) {
-        clients.delete(clientId);
-        console.log(`Client disconnected: ${clientId}`);
+      // Verify JWT token with Supabase
+      const { data: { user }, error } = await supabase.auth.getUser(token);
+
+      if (error || !user) {
+        return next(new Error('Invalid authentication token'));
       }
-    });
 
-    ws.on('error', (error) => {
-      console.error('WebSocket error:', error);
-    });
+      // Get user's organization
+      const { data: userOrg, error: orgError } = await supabase
+        .from('user_organizations')
+        .select('organization_id, role')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+
+      if (orgError || !userOrg) {
+        return next(new Error('No active organization found'));
+      }
+
+      // Attach user info to socket
+      socket.userId = user.id;
+      socket.organizationId = userOrg.organization_id;
+      socket.userRole = userOrg.role;
+      socket.userEmail = user.email;
+
+      next();
+    } catch (error) {
+      console.error('WebSocket authentication error:', error);
+      next(new Error('Authentication failed'));
+    }
+  });
+
+  // Connection handler
+  io.on('connection', (socket) => {
+    const orgRoom = `org:${socket.organizationId}`;
+
+    console.log(`User ${socket.userId} connected to ${orgRoom}`);
+
+    // Join organization-specific room
+    socket.join(orgRoom);
 
     // Send welcome message
-    ws.send(JSON.stringify({
-      type: 'welcome',
+    socket.emit('connected', {
       message: 'Connected to YUTHUB WebSocket server',
-    }));
-  });
-
-  // Broadcast function for sending updates
-  const broadcast = (organizationId, message) => {
-    clients.forEach((client) => {
-      if (client.organizationId === organizationId && client.ws.readyState === 1) {
-        client.ws.send(JSON.stringify(message));
-      }
+      organizationId: socket.organizationId,
+      userId: socket.userId,
     });
-  };
 
-  // Heartbeat to keep connections alive
-  const heartbeat = setInterval(() => {
-    clients.forEach((client, clientId) => {
-      if (client.ws.readyState === 1) {
-        client.ws.send(JSON.stringify({ type: 'heartbeat', timestamp: Date.now() }));
-      } else {
-        clients.delete(clientId);
-      }
+    // Handle disconnect
+    socket.on('disconnect', () => {
+      console.log(`User ${socket.userId} disconnected from ${orgRoom}`);
     });
-  }, 30000); // Every 30 seconds
 
-  wss.on('close', () => {
-    clearInterval(heartbeat);
+    // Ping/pong for connection health
+    socket.on('ping', () => {
+      socket.emit('pong', { timestamp: Date.now() });
+    });
+
+    // Error handler
+    socket.on('error', (error) => {
+      console.error('Socket error:', error);
+    });
   });
 
   console.log('WebSocket server initialized');
+  return io;
+}
 
-  return { wss, broadcast };
+/**
+ * Get Socket.IO instance
+ */
+export function getIO() {
+  if (!io) {
+    console.warn('Socket.IO not initialized');
+    return null;
+  }
+  return io;
+}
+
+/**
+ * Emit event to organization room
+ */
+export function emitToOrganization(organizationId, event, data) {
+  if (!io) {
+    console.warn('Socket.IO not initialized');
+    return;
+  }
+
+  const room = `org:${organizationId}`;
+  io.to(room).emit(event, data);
+}
+
+/**
+ * Real-time event emitters
+ */
+export function emitResidentCreated(organizationId, resident) {
+  emitToOrganization(organizationId, 'resident:created', { action: 'created', resident, timestamp: new Date().toISOString() });
+}
+
+export function emitResidentUpdated(organizationId, resident) {
+  emitToOrganization(organizationId, 'resident:updated', { action: 'updated', resident, timestamp: new Date().toISOString() });
+}
+
+export function emitIncidentReported(organizationId, incident) {
+  emitToOrganization(organizationId, 'incident:reported', { action: 'reported', incident, timestamp: new Date().toISOString() });
+}
+
+export function emitIncidentEscalated(organizationId, incident) {
+  emitToOrganization(organizationId, 'incident:escalated', { action: 'escalated', incident, severity: 'critical', timestamp: new Date().toISOString() });
+}
+
+export function emitSafeguardingAlert(organizationId, concern) {
+  emitToOrganization(organizationId, 'safeguarding:alert', { action: 'alert', concern, severity: 'critical', timestamp: new Date().toISOString() });
+}
+
+export function emitOccupancyUpdated(organizationId, property) {
+  emitToOrganization(organizationId, 'occupancy:updated', { action: 'updated', property, timestamp: new Date().toISOString() });
+}
+
+export function emitGoalCompleted(organizationId, goal) {
+  emitToOrganization(organizationId, 'goal:completed', { action: 'completed', goal, timestamp: new Date().toISOString() });
+}
+
+export function emitMetricsRefresh(organizationId) {
+  emitToOrganization(organizationId, 'metrics:refresh', { action: 'refresh', timestamp: new Date().toISOString() });
+}
+
+export function emitSupportPlanReviewDue(organizationId, plan) {
+  emitToOrganization(organizationId, 'support_plan:review_due', { action: 'review_due', plan, timestamp: new Date().toISOString() });
+}
+
+export function emitDocumentExpiring(organizationId, document) {
+  emitToOrganization(organizationId, 'document:expiring', { action: 'expiring', document, timestamp: new Date().toISOString() });
 }

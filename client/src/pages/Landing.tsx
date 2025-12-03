@@ -22,18 +22,18 @@ const Landing: React.FC = () => {
               </div>
 
               <div className="inline-flex items-center justify-center">
-                <Badge variant="secondary" size="md" className="px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-600 text-sm rounded-full shadow-md hover:shadow-lg transition-all duration-300">
+                <Badge variant="secondary" size="md" className="px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold text-sm rounded-full shadow-md hover:shadow-lg transition-all duration-300">
                   ⚡ Early Partner Program - Limited Spots
                 </Badge>
               </div>
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-800 text-black leading-[1.1] tracking-tight">
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-black leading-[1.1] tracking-tight">
                 More Time Caring.
                 <br />
                 <span className="text-gray-700">Less Time on Paperwork.</span>
               </h1>
             </div>
 
-            <p className="text-xl sm:text-2xl font-400 text-gray-700 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xl sm:text-2xl font-normal text-gray-700 max-w-2xl mx-auto leading-relaxed">
               The complete platform that helps UK youth housing providers deliver life-changing support while staying compliant—without the administrative burden.
             </p>
 
@@ -64,8 +64,8 @@ const Landing: React.FC = () => {
                       <div className="flex justify-center mb-3">
                         <stat.Icon className="w-8 h-8 text-blue-600" />
                       </div>
-                      <div className="text-3xl sm:text-4xl font-700 text-black mb-1">{stat.number}</div>
-                      <div className="text-sm font-500 text-gray-600">{stat.label}</div>
+                      <div className="text-3xl sm:text-4xl font-bold text-black mb-1">{stat.number}</div>
+                      <div className="text-sm font-medium text-gray-600">{stat.label}</div>
                     </div>
                   ))}
                 </div>
@@ -78,10 +78,10 @@ const Landing: React.FC = () => {
         <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-32 bg-gradient-to-b from-white via-gray-50 to-gray-50">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-4xl sm:text-5xl font-600 text-black mb-4">
+              <h2 className="text-4xl sm:text-5xl font-semibold text-black mb-4">
                 Everything you need
               </h2>
-              <p className="text-xl font-400 text-gray-600">
+              <p className="text-xl font-normal text-gray-600">
                 Comprehensive tools designed for modern youth housing organizations
               </p>
             </div>
@@ -125,41 +125,41 @@ const Landing: React.FC = () => {
         <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-32 bg-white">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-4xl sm:text-5xl font-600 text-black mb-4">
+              <h2 className="text-4xl sm:text-5xl font-semibold text-black mb-4">
                 How YUTHUB works
               </h2>
-              <p className="text-xl font-400 text-gray-600">
+              <p className="text-xl font-normal text-gray-600">
                 From setup to impact in under 24 hours
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
               <div className="text-center">
-                <div className="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center text-2xl font-700 mx-auto mb-6">
+                <div className="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6">
                   1
                 </div>
-                <h3 className="text-xl font-600 text-black mb-3">Onboard</h3>
-                <p className="text-base font-400 text-gray-600 leading-relaxed">
+                <h3 className="text-xl font-semibold text-black mb-3">Onboard</h3>
+                <p className="text-base font-normal text-gray-600 leading-relaxed">
                   Import your existing data or start fresh. Our team helps you set up properties, residents, and team members in minutes.
                 </p>
               </div>
 
               <div className="text-center">
-                <div className="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center text-2xl font-700 mx-auto mb-6">
+                <div className="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6">
                   2
                 </div>
-                <h3 className="text-xl font-600 text-black mb-3">Centralize</h3>
-                <p className="text-base font-400 text-gray-600 leading-relaxed">
+                <h3 className="text-xl font-semibold text-black mb-3">Centralize</h3>
+                <p className="text-base font-normal text-gray-600 leading-relaxed">
                   Replace spreadsheets and paper files with one secure platform. Everything your team needs, accessible anywhere.
                 </p>
               </div>
 
               <div className="text-center">
-                <div className="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center text-2xl font-700 mx-auto mb-6">
+                <div className="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6">
                   3
                 </div>
-                <h3 className="text-xl font-600 text-black mb-3">Optimize</h3>
-                <p className="text-base font-400 text-gray-600 leading-relaxed">
+                <h3 className="text-xl font-semibold text-black mb-3">Optimize</h3>
+                <p className="text-base font-normal text-gray-600 leading-relaxed">
                   Track outcomes, measure impact, and continuously improve your service delivery with real-time insights.
                 </p>
               </div>
@@ -171,10 +171,10 @@ const Landing: React.FC = () => {
         <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-32 bg-gray-50">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-4xl sm:text-5xl font-600 text-black mb-4">
+              <h2 className="text-4xl sm:text-5xl font-semibold text-black mb-4">
                 Built for sensitive youth data
               </h2>
-              <p className="text-xl font-400 text-gray-600">
+              <p className="text-xl font-normal text-gray-600">
                 Enterprise-grade security you can trust
               </p>
             </div>
@@ -187,8 +187,8 @@ const Landing: React.FC = () => {
                       <Shield className="w-7 h-7 text-blue-600" />
                     </div>
                   </div>
-                  <h3 className="text-lg font-600 text-foreground">Bank-Level Encryption</h3>
-                  <p className="text-sm font-400 text-muted-foreground leading-relaxed">
+                  <h3 className="text-lg font-semibold text-foreground">Bank-Level Encryption</h3>
+                  <p className="text-sm font-normal text-muted-foreground leading-relaxed">
                     AES-256 encryption at rest and in transit protects all data
                   </p>
                 </CardContent>
@@ -201,8 +201,8 @@ const Landing: React.FC = () => {
                       <CheckCircle className="w-7 h-7 text-green-600" />
                     </div>
                   </div>
-                  <h3 className="text-lg font-600 text-foreground">GDPR Compliant</h3>
-                  <p className="text-sm font-400 text-muted-foreground leading-relaxed">
+                  <h3 className="text-lg font-semibold text-foreground">GDPR Compliant</h3>
+                  <p className="text-sm font-normal text-muted-foreground leading-relaxed">
                     Full compliance with UK data protection laws and regulations
                   </p>
                 </CardContent>
@@ -215,8 +215,8 @@ const Landing: React.FC = () => {
                       <Shield className="w-7 h-7 text-purple-600" />
                     </div>
                   </div>
-                  <h3 className="text-lg font-600 text-foreground">Regular Audits</h3>
-                  <p className="text-sm font-400 text-muted-foreground leading-relaxed">
+                  <h3 className="text-lg font-semibold text-foreground">Regular Audits</h3>
+                  <p className="text-sm font-normal text-muted-foreground leading-relaxed">
                     Penetration tested quarterly by independent security experts
                   </p>
                 </CardContent>
@@ -229,8 +229,8 @@ const Landing: React.FC = () => {
                       <CheckCircle className="w-7 h-7 text-teal-600" />
                     </div>
                   </div>
-                  <h3 className="text-lg font-600 text-foreground">Ofsted Aligned</h3>
-                  <p className="text-sm font-400 text-muted-foreground leading-relaxed">
+                  <h3 className="text-lg font-semibold text-foreground">Ofsted Aligned</h3>
+                  <p className="text-sm font-normal text-muted-foreground leading-relaxed">
                     Purpose-built to support regulatory compliance requirements
                   </p>
                 </CardContent>
@@ -243,10 +243,10 @@ const Landing: React.FC = () => {
         <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-32 bg-white">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-4xl sm:text-5xl font-600 text-black mb-4">
+              <h2 className="text-4xl sm:text-5xl font-semibold text-black mb-4">
                 Simple, transparent pricing
               </h2>
-              <p className="text-xl font-400 text-gray-600">
+              <p className="text-xl font-normal text-gray-600">
                 Choose the plan that fits your organization
               </p>
             </div>
@@ -336,10 +336,10 @@ const Landing: React.FC = () => {
         <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-32 bg-gray-50">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-4xl sm:text-5xl font-600 text-black mb-4">
+              <h2 className="text-4xl sm:text-5xl font-semibold text-black mb-4">
                 Loved by the community
               </h2>
-              <p className="text-xl font-400 text-gray-600">
+              <p className="text-xl font-normal text-gray-600">
                 Hear from housing managers transforming their organizations
               </p>
             </div>
@@ -380,18 +380,18 @@ const Landing: React.FC = () => {
                         </svg>
                       ))}
                     </div>
-                    <p className="text-base font-400 text-gray-700 leading-relaxed">
+                    <p className="text-base font-normal text-gray-700 leading-relaxed">
                       "{testimonial.quote}"
                     </p>
                     {testimonial.metrics && (
-                      <div className="inline-block px-3 py-1 bg-green-50 text-green-700 text-xs font-600 rounded-full">
+                      <div className="inline-block px-3 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-full">
                         {testimonial.metrics}
                       </div>
                     )}
                     <div className="border-t border-gray-200 pt-4">
-                      <p className="text-sm font-600 text-black">{testimonial.author}</p>
-                      <p className="text-sm font-400 text-gray-600">{testimonial.role}</p>
-                      <p className="text-xs font-400 text-gray-500 mt-1">{testimonial.org}</p>
+                      <p className="text-sm font-semibold text-black">{testimonial.author}</p>
+                      <p className="text-sm font-normal text-gray-600">{testimonial.role}</p>
+                      <p className="text-xs font-normal text-gray-500 mt-1">{testimonial.org}</p>
                     </div>
                   </div>
                 </Card>
@@ -404,10 +404,10 @@ const Landing: React.FC = () => {
         <section className="px-4 sm:px-6 lg:px-8 py-20 sm:py-32 bg-white border-t border-gray-100">
           <div className="max-w-4xl mx-auto text-center space-y-8">
             <div className="space-y-4">
-              <h2 className="text-4xl sm:text-5xl font-700 text-black">
+              <h2 className="text-4xl sm:text-5xl font-bold text-black">
                 Ready to transform youth housing?
               </h2>
-              <p className="text-xl font-400 text-gray-700">
+              <p className="text-xl font-normal text-gray-700">
                 Join housing managers who are delivering better outcomes for young people.
               </p>
             </div>
@@ -426,10 +426,10 @@ const Landing: React.FC = () => {
             </div>
 
             <div className="pt-6 space-y-2">
-              <p className="text-sm font-500 text-gray-700">
+              <p className="text-sm font-medium text-gray-700">
                 No credit card required · 30-day free trial · Setup in under 5 minutes
               </p>
-              <p className="text-xs font-400 text-gray-500">
+              <p className="text-xs font-normal text-gray-500">
                 Cancel anytime. Your data stays yours.
               </p>
             </div>

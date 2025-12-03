@@ -101,34 +101,34 @@ export default function MetricsCards() {
   ];
 
   return (
-    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6'>
+    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'>
       {metricCards.map(card => {
         const Icon = card.icon;
         return (
           <Card key={card.title} className='border border-gray-200'>
-            <CardContent className='p-4 sm:p-6'>
+            <CardContent className='p-6'>
               <div className='flex items-center justify-between'>
                 <div className='flex-1 min-w-0'>
-                  <p className='text-xs sm:text-sm text-gray-600 truncate'>
+                  <p className='text-sm text-gray-600 truncate'>
                     {card.title}
                   </p>
-                  <p className='text-2xl sm:text-3xl font-semibold text-slate mt-1'>
+                  <p className='text-3xl font-semibold text-foreground mt-2'>
                     {card.value}
                   </p>
                 </div>
                 <div
-                  className={`${card.bgColor} rounded-full p-2 sm:p-3 flex-shrink-0`}
+                  className={`${card.bgColor} rounded-full p-3 flex-shrink-0`}
                 >
-                  <Icon className={`${card.color} h-5 w-5 sm:h-6 sm:w-6`} />
+                  <Icon className={`${card.color} h-6 w-6`} />
                 </div>
               </div>
-              <div className='mt-3 sm:mt-4 flex items-center'>
+              <div className='mt-4 flex items-center'>
                 <span
-                  className={`text-xs sm:text-sm font-medium ${card.changeColor}`}
+                  className={`text-sm font-medium ${card.changeColor}`}
                 >
                   {card.change}
                 </span>
-                <span className='text-gray-500 text-xs sm:text-sm ml-2'>
+                <span className='text-muted-foreground text-sm ml-2'>
                   vs last month
                 </span>
               </div>

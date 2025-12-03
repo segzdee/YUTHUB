@@ -81,7 +81,7 @@ function App() {
             <QueryClientProvider client={queryClient}>
               <AuthProvider>
                 <TooltipProvider>
-                  <Router>
+                  <Router future={{ v7_relativeSplatPath: true }}>
                     {/* Skip link for accessibility */}
                     <a
                       href='#main-content'

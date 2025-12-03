@@ -371,7 +371,7 @@ const Landing: React.FC = () => {
                   metrics: '85% faster onboarding',
                 },
               ].map((testimonial, idx) => (
-                <Card key={idx} padded="lg" hoverable={false}>
+                <Card key={idx} className="p-6">
                   <div className="space-y-4">
                     <div className="flex items-center gap-1 mb-3">
                       {[1, 2, 3, 4, 5].map((star) => (

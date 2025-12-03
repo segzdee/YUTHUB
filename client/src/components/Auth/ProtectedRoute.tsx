@@ -5,7 +5,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: string;
+  requiredRole?: string | string[];
   requiredPermissions?: string[];
 }
 
@@ -25,8 +25,15 @@ export default function ProtectedRoute({
     return <Navigate to='/login' state={{ from: location }} replace />;
   }
 
-  if (requiredRole && user?.role !== requiredRole) {
-    return <Navigate to='/app/dashboard' replace />;
+  if (requiredRole) {
+    // Convert to array if single role provided
+    const rolesArray = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+    // Owner role has all permissions
+    const effectiveRoles = rolesArray.includes('owner') ? rolesArray : ['owner', ...rolesArray];
+
+    if (!effectiveRoles.includes(user?.role || '')) {
+      return <Navigate to='/app/dashboard' replace />;
+    }
   }
 
   if (

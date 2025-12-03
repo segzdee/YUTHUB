@@ -10,7 +10,7 @@ let authCache: {
   promise?: Promise<any>;
 } | null = null;
 
-const CACHE_DURATION = 30000; // 30 seconds cache
+const CACHE_DURATION = 5000; // 5 seconds cache - more responsive
 
 interface User {
   id: string;
@@ -33,6 +33,7 @@ interface AuthState {
   isLoading: boolean;
   isAuthenticated: boolean;
   logout: () => Promise<void>;
+  clearAuthCache: () => void;
 }
 
 export function useAuth(): AuthState {
@@ -51,6 +52,7 @@ export function useAuth(): AuthState {
   useEffect(() => {
     mounted.current = true;
     let timeoutId: NodeJS.Timeout;
+    let authSubscription: any;
 
     const checkAuth = async () => {
       try {
@@ -160,9 +162,21 @@ export function useAuth(): AuthState {
 
     checkAuth();
 
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') {
+        // Clear cache on these events
+        authCache = null;
+        checkAuth();
+      }
+    });
+
+    authSubscription = subscription;
+
     return () => {
       mounted.current = false;
       clearTimeout(timeoutId);
+      authSubscription?.unsubscribe();
     };
   }, []);
 
@@ -215,8 +229,13 @@ export function useAuth(): AuthState {
     }
   };
 
+  const clearAuthCache = () => {
+    authCache = null;
+  };
+
   return {
     ...authState,
     logout,
+    clearAuthCache,
   };
 }

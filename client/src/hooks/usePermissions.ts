@@ -75,7 +75,7 @@ export function usePermissions(): UsePermissionsReturn {
     [role]
   );
 
-  const isAdmin = role === 'admin' || role === 'platform_admin';
+  const isAdmin = role === 'admin' || role === 'owner' || role === 'platform_admin';
   const isManager = role === 'manager' || isAdmin;
   const isPlatformAdmin = role === 'platform_admin';
 
@@ -119,8 +119,8 @@ export function useCanManageUser(targetRole: Role | null): boolean {
   // Can't manage platform admins unless you are one
   if (targetRole === 'platform_admin') return false;
 
-  // Admin can manage all org users
-  if (role === 'admin') return true;
+  // Owner and Admin can manage all org users
+  if (role === 'owner' || role === 'admin') return true;
 
   // Manager can manage staff and coordinators
   if (role === 'manager' && (targetRole === 'staff' || targetRole === 'coordinator')) {

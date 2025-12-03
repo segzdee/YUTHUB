@@ -354,7 +354,8 @@ const AuthLogin: React.FC<AuthLoginProps> = ({
               </Alert>
             )}
 
-            {/* Social Login Buttons */}
+            {/* Social Login Buttons - Coming Soon */}
+            {/*
             <SocialLoginButtons
               mode={authMode}
               isLoading={isLoading}
@@ -371,6 +372,7 @@ const AuthLogin: React.FC<AuthLoginProps> = ({
                 </span>
               </div>
             </div>
+            */}
 
             {/* Email/Password Form */}
             <div className='space-y-4'>

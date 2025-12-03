@@ -57,10 +57,16 @@ export function requireRole(allowedRoles) {
       return res.status(403).json({ error: 'Forbidden', message: 'Role not found' });
     }
 
-    if (!allowedRoles.includes(req.userRole)) {
+    // Convert to array if single role provided
+    const rolesArray = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
+
+    // Owner role has all permissions - always include it
+    const effectiveRoles = rolesArray.includes('owner') ? rolesArray : ['owner', ...rolesArray];
+
+    if (!effectiveRoles.includes(req.userRole)) {
       return res.status(403).json({
         error: 'Forbidden',
-        message: `Insufficient permissions. Required roles: ${allowedRoles.join(', ')}`
+        message: `Insufficient permissions. Required roles: ${rolesArray.join(', ')}`
       });
     }
 

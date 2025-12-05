@@ -103,6 +103,7 @@ export default function Help() {
       icon: Phone,
       availability: 'Mon-Fri 9AM-5PM',
       contact: '+44 20 7123 4567',
+      contactLink: 'tel:+442071234567',
       responseTime: 'Immediate',
     },
     {
@@ -112,6 +113,7 @@ export default function Help() {
       icon: Mail,
       availability: '24/7',
       contact: 'support@yuthub.com',
+      contactLink: 'mailto:support@yuthub.com',
       responseTime: 'Within 24 hours',
     },
     {
@@ -121,6 +123,7 @@ export default function Help() {
       icon: MessageCircle,
       availability: 'Mon-Fri 9AM-5PM',
       contact: 'Available in app',
+      contactLink: null,
       responseTime: 'Within 5 minutes',
     },
   ];
@@ -167,7 +170,8 @@ export default function Help() {
   const filteredFAQ = faqItems.filter(
     item =>
       item.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.answer.toLowerCase().includes(searchTerm.toLowerCase())
+      item.answer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getCategoryIcon = (category: string) => {
@@ -192,19 +196,19 @@ export default function Help() {
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'residents':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
       case 'safeguarding':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
       case 'reports':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
       case 'housing':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
       case 'support':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
       case 'crisis':
-        return 'bg-orange-100 text-orange-800';
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 font-semibold';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
     }
   };
 
@@ -269,11 +273,10 @@ export default function Help() {
                     <Users className='h-8 w-8 text-blue-600 mx-auto mb-2' />
                     <h3 className='font-medium'>Resident Management</h3>
                     <p className='text-sm text-gray-600 dark:text-gray-400'>
-                      {
-                        faqItems.filter(item => item.category === 'residents')
-                          .length
-                      }{' '}
-                      articles
+                      {(() => {
+                        const count = faqItems.filter(item => item.category === 'residents').length;
+                        return `${count} ${count === 1 ? 'article' : 'articles'}`;
+                      })()}
                     </p>
                   </CardContent>
                 </Card>
@@ -283,12 +286,10 @@ export default function Help() {
                     <Shield className='h-8 w-8 text-red-600 mx-auto mb-2' />
                     <h3 className='font-medium'>Safeguarding</h3>
                     <p className='text-sm text-gray-600 dark:text-gray-400'>
-                      {
-                        faqItems.filter(
-                          item => item.category === 'safeguarding'
-                        ).length
-                      }{' '}
-                      articles
+                      {(() => {
+                        const count = faqItems.filter(item => item.category === 'safeguarding').length;
+                        return `${count} ${count === 1 ? 'article' : 'articles'}`;
+                      })()}
                     </p>
                   </CardContent>
                 </Card>
@@ -298,11 +299,10 @@ export default function Help() {
                     <BarChart3 className='h-8 w-8 text-green-600 mx-auto mb-2' />
                     <h3 className='font-medium'>Reports</h3>
                     <p className='text-sm text-gray-600 dark:text-gray-400'>
-                      {
-                        faqItems.filter(item => item.category === 'reports')
-                          .length
-                      }{' '}
-                      articles
+                      {(() => {
+                        const count = faqItems.filter(item => item.category === 'reports').length;
+                        return `${count} ${count === 1 ? 'article' : 'articles'}`;
+                      })()}
                     </p>
                   </CardContent>
                 </Card>
@@ -316,11 +316,19 @@ export default function Help() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Accordion type='single' collapsible className='w-full'>
-                    {filteredFAQ.map(item => {
-                      const IconComponent = getCategoryIcon(item.category);
-                      return (
-                        <AccordionItem key={item.id} value={item.id}>
+                  {filteredFAQ.length === 0 ? (
+                    <div className='text-center py-8'>
+                      <Search className='h-12 w-12 text-gray-400 mx-auto mb-4' />
+                      <p className='text-gray-500'>
+                        No results found for "{searchTerm}"
+                      </p>
+                    </div>
+                  ) : (
+                    <Accordion type='single' collapsible className='w-full'>
+                      {filteredFAQ.map(item => {
+                        const IconComponent = getCategoryIcon(item.category);
+                        return (
+                          <AccordionItem key={item.id} value={item.id}>
                           <AccordionTrigger className='hover:no-underline'>
                             <div className='flex items-center gap-3 text-left'>
                               <IconComponent className='h-5 w-5 text-primary' />
@@ -362,6 +370,7 @@ export default function Help() {
                       );
                     })}
                   </Accordion>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -405,9 +414,17 @@ export default function Help() {
                             </span>
                           </div>
                           <div className='pt-2'>
-                            <Button className='w-full'>
-                              Contact {channel.title.split(' ')[0]}
-                            </Button>
+                            {channel.contactLink ? (
+                              <Button asChild className='w-full'>
+                                <a href={channel.contactLink}>
+                                  Contact {channel.title.split(' ')[0]}
+                                </a>
+                              </Button>
+                            ) : (
+                              <Button className='w-full'>
+                                Contact {channel.title.split(' ')[0]}
+                              </Button>
+                            )}
                           </div>
                         </div>
                       </CardContent>
@@ -543,18 +560,24 @@ export default function Help() {
                       <Phone className='h-5 w-5 text-primary' />
                       <div>
                         <div className='font-medium'>Phone Support</div>
-                        <div className='text-sm text-gray-600'>
+                        <a
+                          href='tel:+442071234567'
+                          className='text-sm text-gray-600 hover:text-primary hover:underline'
+                        >
                           +44 20 7123 4567
-                        </div>
+                        </a>
                       </div>
                     </div>
                     <div className='flex items-center gap-3'>
                       <Mail className='h-5 w-5 text-primary' />
                       <div>
                         <div className='font-medium'>Email Support</div>
-                        <div className='text-sm text-gray-600'>
+                        <a
+                          href='mailto:support@yuthub.com'
+                          className='text-sm text-gray-600 hover:text-primary hover:underline'
+                        >
                           support@yuthub.com
-                        </div>
+                        </a>
                       </div>
                     </div>
                     <div className='flex items-center gap-3'>
@@ -612,11 +635,13 @@ export default function Help() {
                   <div className='text-center py-8'>
                     <MessageCircle className='h-12 w-12 text-gray-400 mx-auto mb-4' />
                     <p className='text-gray-500 mb-4'>
-                      Contact form would be implemented here
+                      Contact form coming soon
                     </p>
-                    <Button>
-                      <Mail className='h-4 w-4 mr-2' />
-                      Send Message
+                    <Button asChild>
+                      <a href='mailto:support@yuthub.com'>
+                        <Mail className='h-4 w-4 mr-2' />
+                        Send Email
+                      </a>
                     </Button>
                   </div>
                 </CardContent>

@@ -16,40 +16,51 @@ router.get('/', validateQuery(listResidentsQuerySchema), async (req, res) => {
   try {
     const { organizationId } = req;
     const {
-      page,
-      limit,
+      page = 1,
+      limit = 20,
       status,
       search,
       propertyId,
       keyWorkerId,
-      sortBy,
-      sortOrder
+      sortBy = 'created_at',
+      sortOrder = 'desc'
     } = req.query;
 
     const offset = (page - 1) * limit;
 
     let query = supabase
       .from('residents')
-      .select('*, properties(id, property_name), room_allocations(id, room_number, status)', { count: 'exact' })
-      .eq('organization_id', organizationId)
-      .eq('is_deleted', false);
+      .select(`
+        *,
+        properties:current_property_id(id, property_name, postcode),
+        rooms:current_room_id(id, room_number),
+        staff_members:key_worker_id(id, first_name, last_name)
+      `, { count: 'exact' })
+      .eq('organization_id', organizationId);
 
+    // Filter by status (default to active)
     if (status) {
       query = query.eq('status', status);
+    } else {
+      query = query.in('status', ['pending', 'active', 'on_leave']);
     }
 
+    // Filter by property
     if (propertyId) {
-      query = query.eq('property_id', propertyId);
+      query = query.eq('current_property_id', propertyId);
     }
 
+    // Filter by key worker
     if (keyWorkerId) {
       query = query.eq('key_worker_id', keyWorkerId);
     }
 
+    // Full-text search on name and email
     if (search) {
-      query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%,email.ilike.%${search}%`);
+      query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%,contact_email.ilike.%${search}%,reference_number.ilike.%${search}%`);
     }
 
+    // Sorting and pagination
     query = query
       .order(sortBy, { ascending: sortOrder === 'asc' })
       .range(offset, offset + parseInt(limit) - 1);
@@ -84,24 +95,25 @@ router.get('/:id', async (req, res) => {
       .from('residents')
       .select(`
         *,
-        properties(id, property_name, address_line1, city, postcode),
-        rooms(id, room_number, floor),
-        support_plans(id, plan_name, status, start_date, review_date),
+        properties:current_property_id(id, property_name, address_line1, city, postcode),
+        rooms:current_room_id(id, room_number, floor_number),
+        key_worker:key_worker_id(id, first_name, last_name, email, phone),
+        support_plans(id, plan_type, status, start_date, review_date, overall_progress),
         incidents(id, title, severity, status, incident_date)
       `)
       .eq('id', id)
       .eq('organization_id', organizationId)
-      .eq('is_deleted', false)
-      .single();
+      .maybeSingle();
 
-    if (error || !resident) {
-      return res.status(404).json({ error: 'Resident not found' });
+    if (error) throw error;
+    if (!resident) {
+      return notFound(res, 'Resident not found');
     }
 
-    res.json({ resident });
+    return success(res, resident, 'Resident retrieved successfully');
   } catch (error) {
     console.error('Get resident error:', error);
-    res.status(500).json({ error: 'Failed to fetch resident' });
+    return apiError(res, 'Failed to fetch resident', 500, error.message);
   }
 });
 
@@ -109,51 +121,111 @@ router.get('/:id', async (req, res) => {
 router.post('/', requireRole(['owner', 'admin', 'manager']), validateBody(createResidentSchema), async (req, res) => {
   try {
     const { organizationId, userId } = req;
-    const validatedData = req.body;
+    const { personalInfo, housingDetails, supportNeeds, emergencyContacts } = req.body;
 
-    // Flatten multi-step form data if provided
+    // Generate unique reference number (format: RES-YYYYMMDD-XXXX)
+    const datePart = new Date().toISOString().split('T')[0].replace(/-/g, '');
+    const randomPart = Math.floor(1000 + Math.random() * 9000);
+    const reference_number = `RES-${datePart}-${randomPart}`;
+
+    // Prepare resident data according to schema
     const residentData = {
-      ...validatedData.personalInfo,
-      ...validatedData.housingDetails,
-      ...validatedData.supportNeeds,
-      ...validatedData.emergencyContacts,
-      ...validatedData,
       organization_id: organizationId,
+      reference_number,
+
+      // Personal info
+      first_name: personalInfo.firstName,
+      last_name: personalInfo.lastName,
+      preferred_name: personalInfo.preferredName,
+      date_of_birth: personalInfo.dateOfBirth, // Expected in YYYY-MM-DD format from backend
+      gender: personalInfo.gender,
+      nationality: personalInfo.nationality,
+      ethnicity: personalInfo.ethnicity,
+      primary_language: personalInfo.primaryLanguage || 'English',
+      contact_phone: personalInfo.phone,
+      contact_email: personalInfo.email,
+
+      // Housing details
+      current_property_id: housingDetails.propertyId || null,
+      current_room_id: housingDetails.roomId || null,
+      admission_date: housingDetails.moveInDate || null,
+
+      // Support needs
+      key_worker_id: supportNeeds.keyWorkerId || null,
+      risk_level: supportNeeds.riskLevel,
+      support_level: supportNeeds.supportLevel,
+      support_needs: supportNeeds.categories || [],
+
+      // Emergency contacts
+      emergency_contacts: emergencyContacts || [],
+
+      // Status
+      status: 'active',
       created_by: userId,
-      status: validatedData.status || 'active',
     };
 
-    // Remove nested objects
-    delete residentData.personalInfo;
-    delete residentData.housingDetails;
-    delete residentData.supportNeeds;
-    delete residentData.emergencyContacts;
-    delete residentData.create_support_plan;
-    delete residentData.support_plan_name;
-
+    // Insert resident
     const { data: resident, error: residentError } = await supabase
       .from('residents')
       .insert(residentData)
-      .select()
+      .select(`
+        *,
+        properties:current_property_id(id, property_name),
+        rooms:current_room_id(id, room_number),
+        key_worker:key_worker_id(id, first_name, last_name)
+      `)
       .single();
 
     if (residentError) throw residentError;
 
     // Create initial support plan if requested
-    if (validatedData.supportNeeds?.create_support_plan && resident.id) {
+    if (supportNeeds.createSupportPlan && resident.id) {
+      const reviewDate = new Date();
+      reviewDate.setDate(reviewDate.getDate() + 28); // 4 weeks default review
+
       const supportPlanData = {
         organization_id: organizationId,
         resident_id: resident.id,
-        plan_name: validatedData.supportNeeds.support_plan_name || `Initial Support Plan - ${resident.first_name} ${resident.last_name}`,
-        start_date: resident.admission_date || new Date().toISOString().split('T')[0],
-        review_date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        plan_type: 'initial',
+        start_date: housingDetails.moveInDate || new Date().toISOString().split('T')[0],
+        review_date: reviewDate.toISOString().split('T')[0],
+        next_review_date: reviewDate.toISOString().split('T')[0],
         status: 'active',
-        key_worker_id: resident.key_worker_id,
-        support_hours_per_week: validatedData.supportNeeds.support_hours_per_week,
+        goals: [], // Empty initially, to be filled via support plans module
         created_by: userId,
+        created_by_id: supportNeeds.keyWorkerId || null,
       };
 
       await supabase.from('support_plans').insert(supportPlanData);
+    }
+
+    // Update room occupancy if room assigned
+    if (housingDetails.roomId) {
+      await supabase
+        .from('rooms')
+        .update({
+          is_occupied: true,
+          current_resident_id: resident.id,
+        })
+        .eq('id', housingDetails.roomId);
+
+      // Update property occupancy count
+      if (housingDetails.propertyId) {
+        const { data: property } = await supabase
+          .from('properties')
+          .select('current_occupancy')
+          .eq('id', housingDetails.propertyId)
+          .single();
+
+        if (property) {
+          await supabase
+            .from('properties')
+            .update({
+              current_occupancy: (property.current_occupancy || 0) + 1,
+            })
+            .eq('id', housingDetails.propertyId);
+        }
+      }
     }
 
     // Log activity
@@ -164,10 +236,15 @@ router.post('/', requireRole(['owner', 'admin', 'manager']), validateBody(create
       entity_type: 'resident',
       entity_id: resident.id,
       description: `Created resident: ${resident.first_name} ${resident.last_name}`,
-    });
+    }).catch(() => {}); // Silently fail if team_activity_log doesn't exist
 
     // Emit WebSocket event
-    emitResidentCreated(organizationId, resident);
+    try {
+      emitResidentCreated(organizationId, resident);
+    } catch (wsError) {
+      // WebSocket errors shouldn't fail the request
+      console.warn('WebSocket emission failed:', wsError);
+    }
 
     return created(res, resident, 'Resident created successfully');
   } catch (error) {
@@ -189,7 +266,6 @@ router.patch('/:id', requireRole(['owner', 'admin', 'manager', 'staff']), valida
       .select('id, first_name, last_name')
       .eq('id', id)
       .eq('organization_id', organizationId)
-      .eq('is_deleted', false)
       .maybeSingle();
 
     if (fetchError) throw fetchError;
@@ -200,6 +276,7 @@ router.patch('/:id', requireRole(['owner', 'admin', 'manager', 'staff']), valida
     // Remove protected fields
     delete updates.id;
     delete updates.organization_id;
+    delete updates.reference_number;
     delete updates.created_at;
     delete updates.created_by;
 
@@ -225,10 +302,14 @@ router.patch('/:id', requireRole(['owner', 'admin', 'manager', 'staff']), valida
       entity_id: resident.id,
       description: `Updated resident: ${resident.first_name} ${resident.last_name}`,
       metadata: { updated_fields: Object.keys(updates) },
-    });
+    }).catch(() => {});
 
     // Emit WebSocket event
-    emitResidentUpdated(organizationId, resident);
+    try {
+      emitResidentUpdated(organizationId, resident);
+    } catch (wsError) {
+      console.warn('WebSocket emission failed:', wsError);
+    }
 
     return success(res, resident, 'Resident updated successfully');
   } catch (error) {
@@ -237,43 +318,44 @@ router.patch('/:id', requireRole(['owner', 'admin', 'manager', 'staff']), valida
   }
 });
 
-// DELETE /api/residents/:id - Soft delete resident
-router.delete('/:id', requireRole(['owner', 'admin', 'manager']), async (req, res) => {
+// PATCH /api/residents/:id/archive - Archive resident (soft delete)
+router.patch('/:id/archive', requireRole(['owner', 'admin', 'manager']), async (req, res) => {
   try {
     const { organizationId, userId } = req;
     const { id } = req.params;
+    const { reason } = req.body;
 
     const { data: resident, error } = await supabase
       .from('residents')
       .update({
-        is_deleted: true,
-        deleted_at: new Date().toISOString(),
-        deleted_by: userId,
+        status: 'discharged',
+        discharge_date: new Date().toISOString().split('T')[0],
+        discharge_reason: reason || 'Archived',
       })
       .eq('id', id)
       .eq('organization_id', organizationId)
-      .select()
+      .select('id, first_name, last_name')
       .single();
 
     if (error) throw error;
 
     if (!resident) {
-      return res.status(404).json({ error: 'Resident not found' });
+      return notFound(res, 'Resident not found');
     }
 
     await supabase.from('team_activity_log').insert({
       organization_id: organizationId,
       user_id: userId,
-      action: 'delete',
+      action: 'archive',
       entity_type: 'resident',
       entity_id: resident.id,
-      description: `Deleted resident: ${resident.first_name} ${resident.last_name}`,
-    });
+      description: `Archived resident: ${resident.first_name} ${resident.last_name}`,
+    }).catch(() => {});
 
-    res.json({ message: 'Resident deleted successfully' });
+    return success(res, resident, 'Resident archived successfully');
   } catch (error) {
-    console.error('Delete resident error:', error);
-    res.status(500).json({ error: 'Failed to delete resident' });
+    console.error('Archive resident error:', error);
+    return apiError(res, 'Failed to archive resident', 500, error.message);
   }
 });
 

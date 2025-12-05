@@ -1,4 +1,4 @@
-import { format, parseISO, isValid } from 'date-fns';
+import { format, parseISO, isValid, parse } from 'date-fns';
 import { enGB } from 'date-fns/locale';
 
 /**
@@ -155,3 +155,71 @@ export function formatRelativeTime(timestamp: number): string {
   const months = Math.floor(days / 30);
   return `${months} month${months !== 1 ? 's' : ''} ago`;
 }
+
+/**
+ * Parse UK format date (dd/MM/yyyy) to Date object
+ */
+export function parseUKDate(dateString: string): Date | null {
+  if (!dateString) return null;
+
+  try {
+    const parsed = parse(dateString, 'dd/MM/yyyy', new Date());
+    return isValid(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Convert UK format date (dd/MM/yyyy) to ISO format (yyyy-MM-dd) for backend
+ */
+export function ukDateToISO(ukDate: string): string {
+  if (!ukDate) return '';
+
+  const parsed = parseUKDate(ukDate);
+  if (!parsed) return '';
+
+  return format(parsed, 'yyyy-MM-dd');
+}
+
+/**
+ * Convert ISO date (yyyy-MM-dd) to UK format (dd/MM/yyyy)
+ */
+export function isoToUKDate(isoDate: string): string {
+  if (!isoDate) return '';
+
+  try {
+    const date = parseISO(isoDate);
+    return isValid(date) ? format(date, 'dd/MM/yyyy') : '';
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Format date for input[type="date"] value (yyyy-MM-dd)
+ */
+export function formatDateForInput(date: string | Date | null | undefined): string {
+  if (!date) return '';
+
+  try {
+    const dateObj = typeof date === 'string' ? parseISO(date) : date;
+    return isValid(dateObj) ? format(dateObj, 'yyyy-MM-dd') : '';
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Get UK locale for date pickers
+ */
+export const getUKLocale = () => enGB;
+
+/**
+ * Date picker configuration for UK format
+ */
+export const ukDatePickerConfig = {
+  dateFormat: 'dd/MM/yyyy',
+  locale: enGB,
+  firstDayOfWeek: 1, // Monday
+};

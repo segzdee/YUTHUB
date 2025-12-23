@@ -241,10 +241,19 @@ const AuthLogin: React.FC<AuthLoginProps> = ({
     setIsLoading(true);
     setError(null);
 
+    const demoEmail = import.meta.env.VITE_DEMO_EMAIL;
+    const demoPassword = import.meta.env.VITE_DEMO_PASSWORD;
+
+    if (!demoEmail || !demoPassword) {
+      setError('Demo account is not configured. Please contact support.');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email: 'demo.admin@yuthub.com',
-        password: 'Demo2025!Admin',
+        email: demoEmail,
+        password: demoPassword,
       });
 
       if (signInError) {
@@ -252,8 +261,8 @@ const AuthLogin: React.FC<AuthLoginProps> = ({
           setError('Creating demo account... Please wait.');
 
           const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-            email: 'demo.admin@yuthub.com',
-            password: 'Demo2025!Admin',
+            email: demoEmail,
+            password: demoPassword,
             options: {
               data: {
                 first_name: 'Admin',
@@ -271,8 +280,8 @@ const AuthLogin: React.FC<AuthLoginProps> = ({
           }
 
           const { data: retryData, error: retryError } = await supabase.auth.signInWithPassword({
-            email: 'demo.admin@yuthub.com',
-            password: 'Demo2025!Admin',
+            email: demoEmail,
+            password: demoPassword,
           });
 
           if (retryError) {

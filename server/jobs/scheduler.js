@@ -6,6 +6,7 @@ import {
   emitDocumentExpiring,
   emitMetricsRefresh,
 } from '../websocket.js';
+import { cleanupExpiredSessions } from '../utils/sessionManager.js';
 
 /**
  * Initialize all scheduled background jobs
@@ -34,6 +35,14 @@ export function initializeScheduledJobs() {
 
   // Cleanup old audit logs monthly
   cron.schedule('0 0 1 * *', cleanupOldAuditLogs, {
+    timezone: 'Europe/London',
+  });
+
+  // Cleanup expired sessions every hour
+  cron.schedule('15 * * * *', cleanupExpiredAuthSessions);
+
+  // Cleanup old auth logs daily at 2:00 AM
+  cron.schedule('0 2 * * *', cleanupOldAuthLogs, {
     timezone: 'Europe/London',
   });
 
@@ -264,5 +273,36 @@ async function cleanupOldAuditLogs() {
     console.log('[CRON] Old audit logs cleaned up');
   } catch (error) {
     console.error('[CRON] Error cleaning up audit logs:', error);
+  }
+}
+
+/**
+ * HOURLY: Cleanup expired auth sessions
+ */
+async function cleanupExpiredAuthSessions() {
+  console.log('[CRON] Cleaning up expired auth sessions...');
+
+  try {
+    await cleanupExpiredSessions();
+    console.log('[CRON] Expired sessions cleaned up');
+  } catch (error) {
+    console.error('[CRON] Error cleaning up expired sessions:', error);
+  }
+}
+
+/**
+ * DAILY: Cleanup old auth logs (keep last 90 days)
+ */
+async function cleanupOldAuthLogs() {
+  console.log('[CRON] Cleaning up old auth logs...');
+
+  try {
+    const { error } = await supabase.rpc('cleanup_old_auth_logs', { retention_days: 90 });
+
+    if (error) throw error;
+
+    console.log('[CRON] Old auth logs cleaned up');
+  } catch (error) {
+    console.error('[CRON] Error cleaning up auth logs:', error);
   }
 }

@@ -3,9 +3,52 @@ import helmet from 'helmet';
 import cors from 'cors';
 
 export function setupSecurity(app) {
+  const isDevelopment = process.env.NODE_ENV === 'development';
+
   // Helmet for security headers
   app.use(helmet({
-    contentSecurityPolicy: false, // Allow inline scripts for development
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: [
+          "'self'",
+          isDevelopment ? "'unsafe-inline'" : "",
+          isDevelopment ? "'unsafe-eval'" : "",
+          "https://js.stripe.com",
+          "https://*.supabase.co"
+        ].filter(Boolean),
+        styleSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "https://fonts.googleapis.com"
+        ],
+        fontSrc: [
+          "'self'",
+          "https://fonts.gstatic.com",
+          "data:"
+        ],
+        imgSrc: [
+          "'self'",
+          "data:",
+          "https:",
+          "blob:"
+        ],
+        connectSrc: [
+          "'self'",
+          "https://*.supabase.co",
+          "wss://*.supabase.co",
+          "https://api.stripe.com",
+          process.env.VITE_SUPABASE_URL || ""
+        ].filter(Boolean),
+        frameSrc: [
+          "'self'",
+          "https://js.stripe.com",
+          "https://*.stripe.com"
+        ],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null,
+      },
+    },
     crossOriginEmbedderPolicy: false,
   }));
 

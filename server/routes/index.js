@@ -1,5 +1,5 @@
 import express from 'express';
-import authRoutes from './auth.js';
+import authRoutes from './authSecure.js';
 import dashboardRoutes from './dashboard.js';
 import residentsRoutes from './residents.js';
 import supportPlansRoutes from './support-plans.js';
@@ -12,11 +12,13 @@ import organizationsRoutes from './organizations.js';
 import stripeRoutes from './stripe.js';
 import webhooksRoutes from './webhooks.js';
 import filesRoutes from './files.js';
+import securityRoutes from './security.js';
 
 const router = express.Router();
 
 // Mount routes
 router.use('/auth', authRoutes);
+router.use('/security', securityRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/residents', residentsRoutes);
 router.use('/support-plans', supportPlansRoutes);
@@ -63,6 +65,7 @@ router.get('/', (req, res) => {
       organizations: '/api/organizations',
       stripe: '/api/stripe',
       files: '/api/files',
+      security: '/api/security',
       health: '/api/health',
     },
     documentation: 'All endpoints require authentication except /auth/login and /auth/register',

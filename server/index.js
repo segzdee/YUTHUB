@@ -21,6 +21,7 @@ import {
   sentryErrorHandler,
   shutdown as shutdownMonitoring,
 } from './utils/monitoring.js';
+import { authLoggingMiddleware } from './middleware/authLogger.js';
 
 dotenv.config();
 
@@ -47,6 +48,9 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Setup security middleware
 setupSecurity(app);
+
+// Auth logging middleware (logs auth attempts)
+app.use('/api/auth', authLoggingMiddleware);
 
 // CSRF Protection
 app.use(csrfTokenGenerator);
